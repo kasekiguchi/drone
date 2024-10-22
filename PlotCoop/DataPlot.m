@@ -17,7 +17,7 @@ fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
 endTime = 1e2;%1E3;
-fnowdata = 10;
+fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -76,6 +76,10 @@ lgnd.drone="drone" + droneID;
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
+if fnowdata==1
+    fMul = 1;
+    nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
+end
 multiFigure.layout = cell(1,length(nM));
 
 %tile layoutの行列数を作成

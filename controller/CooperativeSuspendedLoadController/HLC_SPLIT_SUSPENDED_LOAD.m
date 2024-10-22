@@ -44,12 +44,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 P(15) = obj.self.estimator.result.state.mL;
             end
             %牽引物システムの質量推定
-            mui = obj.self.reference.result.state.mui;
-            mLi = P(15);
-            elm = obj.estimate_load_mass.estimate(varargin{1},mLi,mui');
-            obj.result.xh_pre = elm.xh_pre;
-            obj.result.mL = elm.mL;
-            P(15) = elm.mL;
+            % mui = obj.self.reference.result.state.mui;
+            % mLi = P(15);
+            % elm = obj.estimate_load_mass.estimate(varargin{1},mLi,mui');
+            % obj.result.xh_pre = elm.xh_pre;
+            % obj.result.mL = elm.mL;
+            % P(15) = elm.mL;
 
             obj.result.mLi = P(15);%質量はコントローラに格納
 

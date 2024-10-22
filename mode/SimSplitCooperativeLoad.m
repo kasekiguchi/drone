@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100;
+te = 40;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -104,7 +104,7 @@ for i = 2:N+1
     jz = agent(1).parameter.Ji(3,i-1);
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"loadmass",0,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
-    agent(i).sensor = DIRECT_SENSOR(agent(i),0.01); % sensor to capture plant position : second arg is noise
+    agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),1)), ["p", "q", "pL", "pT"]));%expの流用
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
@@ -136,11 +136,11 @@ for j = 1:tn
                 sp = sensor1.p;
                 sR = RodriguesQuaternion(sensor1.Q);%回転行列
                 %分割後ペイロード
-                spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
-                spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
+                spL = sp + sR * rho(:,i-1)+normrnd(0,0.005,[3,1]);%分割後の質量重心位置
+                spT = sensor1.qi(3*i-5:3*i-3,1)+normrnd(0,0.001,[3,1]);%分割後の紐の方向ベクトル
                 %ドローン
                 spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
+                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+normrnd(0,0.005,[3,1]);
 
                 % 単機牽引のモデルで推定する
                 % agent(i).sensor.do(time, 'f');
@@ -229,12 +229,11 @@ run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
-N=4;
 % agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-5 5;-5 5;0 5],"ntimes",10);
-% mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
+% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-5 5;-5 5;0 5],"ntimes",10);
+mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
