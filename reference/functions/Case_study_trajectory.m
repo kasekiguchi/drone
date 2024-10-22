@@ -78,5 +78,6 @@ z = 1;
 %%
 % ref=@(t)[x;y;z;yaw];
 ref=@(t)[x;y;z;0];
+% ref=@(t)[x;y;z;-sin(2*pi*t/T)];
 end
 
