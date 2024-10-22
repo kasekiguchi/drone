@@ -12,7 +12,7 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     %% MPC
     Controller.dt = 0.1; % MPCステップ幅
     Controller.H = 5;
-    Controller.Maxparticle_num = 2500; % 100000
+    Controller.Maxparticle_num = 2000; % 100000
     Controller.particle_num = Controller.Maxparticle_num;
     Controller.Minparticle_num = Controller.Maxparticle_num; % 2000でも動く　怪しい
 
@@ -20,9 +20,12 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     Controller.input.Initsigma = 1*[2,1,1,1];
     Controller.input.Constsigma = 100 * [0.01, 1,1,1];
     Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
-    Controller.input.Minsigma = 0.5 * [0.1,1,1,1];
+    Controller.input.Minsigma = 0.1 * [0.1,1,1,1]; %0.5
     Controller.input.Maxinput = 1.5;
     Controller.input.Constinput = 10;
+    Controller.input.range = [[10;30;30;10], [0.1;0.1;0.1;0.1]]; % max min
+
+    disp(['parameter', ' H:', num2str(Controller.H), ', N:', num2str(Controller.Maxparticle_num)])
 
     %% polynomial#############################
     z0 = agent.estimator.result.state.p(3); % z初期値
@@ -48,9 +51,10 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     Controller.reference.polynomial.Y = curve_interpolation_9order(t',delayTime,y0,v0,ye,ve);
     %#########################################
 
-    Controller.input.range = 50; % 50
+    
     % Controller.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
     % Controller.input.Minsigma = 0.1 * [0.001,1,1,1];
+
 
     Controller.ConstEval = 1e8; % / Controller.H;
      
@@ -68,6 +72,9 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     Controller.total_size = 16;
     Controller.state_size = 12;
     Controller.input_size = 4;
+
+    Controller.input.lb = [0; -1; -1; -1];
+    Controller.input.ub = [10; 1;  1;  1];
 
     %% sekiguchi-komatsu new
     % Controller.Z = 1 * diag([100; 10]);% * 1e3; %2
@@ -91,12 +98,12 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     % Controller.PHIf = Controller.PHI;
 
     %% 
-    Controller.Z = 1e2 * diag([1000; 10]);% * 1e3; %2
-    Controller.X = 1e5 * diag([1000;10;1;1]);% 1e2でも結構いい感じ
+    Controller.Z = 1e2 * diag([100; 10]);% * 1e3; %2 %1e3 10
+    Controller.X = 1e5 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
     Controller.Y = Controller.X;% * 1e3;
     Controller.PHI = 1* diag([100; 1]);
 
-    Controller.Zf = 1e3 * diag([1000; 100]);
+    Controller.Zf = 1e3 * diag([1000; 10]);
     Controller.Xf = Controller.X; % 制約時のみ * 1000
     Controller.Yf = Controller.X;
     Controller.PHIf = Controller.PHI;

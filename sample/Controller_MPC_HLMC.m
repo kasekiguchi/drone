@@ -2,8 +2,8 @@ function Controller = Controller_MPC_HLMC(agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
-    Controller_param.H = 5;
-    Controller_param.Maxparticle_num = 500; % 100000
+    Controller_param.H = 10;
+    Controller_param.Maxparticle_num = 100; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
 
@@ -14,6 +14,7 @@ function Controller = Controller_MPC_HLMC(agent)
     Controller_param.input.Minsigma = 0.5 * [0.1,1,1,1];
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
+    Controller_param.input.range = [[10;50;50;10], [0.1;1;1;0.1]]; % max min
 
     %% polynomial#############################
     z0 = agent.estimator.result.state.p(3); % z初期値
@@ -39,9 +40,10 @@ function Controller = Controller_MPC_HLMC(agent)
     Controller_param.reference.polynomial.Y = curve_interpolation_9order(t',delayTime,y0,v0,ye,ve);
     %#########################################
 
-    Controller_param.input.range = 50; % 50
+    
     % Controller_param.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
     % Controller_param.input.Minsigma = 0.1 * [0.001,1,1,1];
+
 
     Controller_param.ConstEval = 1e8; % / Controller_param.H;
      
@@ -85,12 +87,12 @@ function Controller = Controller_MPC_HLMC(agent)
     % Controller_param.PHIf = Controller_param.PHI;
 
     %% 
-    Controller_param.Z = 1e2 * diag([1000; 10]);% * 1e3; %2
-    Controller_param.X = 1e5 * diag([1000;10;1;1]);% 1e2でも結構いい感じ
+    Controller_param.Z = 1e2 * diag([100; 10]);% * 1e3; %2 %1e3 10
+    Controller_param.X = 1e5 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
     Controller_param.Y = Controller_param.X;% * 1e3;
     Controller_param.PHI = 1* diag([100; 1]);
 
-    Controller_param.Zf = 1e3 * diag([1000; 100]);
+    Controller_param.Zf = 1e3 * diag([1000; 10]);
     Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
     Controller_param.Yf = Controller_param.X;
     Controller_param.PHIf = Controller_param.PHI;
