@@ -200,8 +200,17 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         end
 
         function [c, ceq] = constraints(obj, U)
-            % 不等式制約 c < 0
-            c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
+            uhl = obj.input.u_HL; % HLの入力
+            % umin = obj.input.lb; 
+            umax = obj.input.ub; % 最大最小
+            % 最適化可能な入力の範囲を計算する
+            able = umax - uhl; % 4x1
+            % U < able
+            c = [U-able];
+
+            %defalut
+            % % 不等式制約 c < 0
+            % c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
             % 等式制約  ceq = 0
             ceq = [];
         end
@@ -224,7 +233,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             % 誤差モデルのまま評価
             X = x;
-            U = [max(0,min(10,u(1,:))); max(-1,min(1,u(2:4,:)))];
+            % U = [max(0,min(10,u(1,:))); max(-1,min(1,u(2:4,:)))];
+            U = u;
             ref(1:12,:) = obj.reference.xr(1:12,:) - obj.state.HL';
             ref(13:16,:) = obj.reference.xr(13:16,:);
 

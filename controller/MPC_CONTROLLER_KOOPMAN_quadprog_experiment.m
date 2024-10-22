@@ -30,6 +30,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         qpparam
     end
 
+    properties
+        parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
+    end
+
     methods
         function obj = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(self, param)
             %-- 変数定義
@@ -70,6 +74,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             obj.result.setting.A = obj.param.A;
             obj.result.setting.B = obj.param.B;
             obj.result.setting.C = obj.param.C;
+
+            obj.param.P = [0.5 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
+            % obj.param.P = self.parameter.get(obj.parameter_name);
+
+            classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
+            classname = class(obj.self.reference);
+            obj.reference.classnum = find(strcmp(classname, classlist));
         end
 
         %-- main()的な
