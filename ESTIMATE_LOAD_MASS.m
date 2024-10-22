@@ -36,11 +36,11 @@ classdef ESTIMATE_LOAD_MASS < handle
             end
             obj.JacobianH = eye(7);
             obj.n = model.dim(1);
-            obj.Q = blkdiag(eye(3)*1E1, eye(3)*1E1, 0*1e0);                     % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
-            obj.B = blkdiag(0.5*obj.dt^2*eye(3), obj.dt*eye(3), 0*0.5*obj.dt^2);% システムノイズ（Modelクラス由来）
-            % obj.R = blkdiag(eye(3)*1e-4, eye(3)*1e-4, 1e-4);                   %観測ノイズ
-            obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-4);                   %観測ノイズ
-            % obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-8);                   %観測ノイズ
+            obj.Q = blkdiag(eye(3)*1E2, eye(3)*1E2, 0);                     % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
+            obj.B = blkdiag(0.5*obj.dt^2*eye(3), obj.dt*eye(3), 0);% システムノイズ（Modelクラス由来）
+            % obj.R = blkdiag(eye(3)*1e-3, eye(3)*1e-3, 1e1);                   %観測ノイズ
+            % obj.R = blkdiag(eye(3)*1e-2, eye(3)*1e-2, 1e-2);                   %観測ノイズ
+            obj.R = blkdiag(eye(3)*1e-2, eye(3)*1e-2, 1e-2);                   %観測ノイズ
             obj.result.P        = eye(obj.n);
             obj.result.G        = zeros(obj.n, size(obj.R,2));
             obj.result.xh_pre   = [];

@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 40;
+te = 5;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -125,6 +125,10 @@ polyin = polyshape(x1,y1);
 [x,y] = centroid(polyin);
 G = [x;y;0.5];
 rhos = p-G;
+
+noize_sp = normrnd(0,0.01,[3,tn]);
+noize_spT = 1*normrnd(0,0.001,[3,tn]);
+noize_sqDrone = 1*normrnd(0,0.0017,[3,tn]);%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn
@@ -136,11 +140,11 @@ for j = 1:tn
                 sp = sensor1.p;
                 sR = RodriguesQuaternion(sensor1.Q);%回転行列
                 %分割後ペイロード
-                spL = sp + sR * rho(:,i-1)+normrnd(0,0.005,[3,1]);%分割後の質量重心位置
-                spT = sensor1.qi(3*i-5:3*i-3,1)+normrnd(0,0.001,[3,1]);%分割後の紐の方向ベクトル
+                spL = sp + sR * rho(:,i-1)+noize_sp(:,j);%分割後の質量重心位置
+                spT = sensor1.qi(3*i-5:3*i-3,1)+noize_spT(:,j);%分割後の紐の方向ベクトル
                 %ドローン
                 spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+normrnd(0,0.005,[3,1]);
+                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+noize_sqDrone(:,j);
 
                 % 単機牽引のモデルで推定する
                 % agent(i).sensor.do(time, 'f');
@@ -232,8 +236,8 @@ run("DataPlot.m")
 % agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-5 5;-5 5;0 5],"ntimes",10);
-mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
+% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
+mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 

@@ -41,6 +41,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             
             %拡張質量システムのekfで牽引物の質量を求める場合
             if isprop(model.state,"mL")
+                % P(15) = max(obj.self.estimator.result.state.mL,0);
                 P(15) = obj.self.estimator.result.state.mL;
             end
             %牽引物システムの質量推定

@@ -16,7 +16,7 @@ fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
-endTime = 1e2;%1E3;
+endTime = 1e2/2;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
@@ -63,9 +63,9 @@ lgnd.drone="drone" + droneID;
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
-     % n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
+     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      % n = ["mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
-     n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
+     % n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
 % multiFigure
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
@@ -77,7 +77,7 @@ lgnd.drone="drone" + droneID;
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
 if fnowdata==1
-    fMul = 1;
+    n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
     nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
@@ -166,11 +166,13 @@ if isSaved
         date2=string(datetime('now','Format','yyyy_MMdd'));%日付
         
     %変更========================================================
-       date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
+       % date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
     subfolder='sim';%sim or exp
-    ExpSimName='coop4drone';%実験,シミュレーション名
+    ExpSimName='coop4droneNoise';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内
+     contents='expandSysEKF';%実験,シミュレーション内容64文字以内
+    % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
+    % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     %==========================================================
     FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath

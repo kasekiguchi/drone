@@ -5,6 +5,7 @@
 clc
 %=========================================
 %もとのloggerの場合
+% clear simple_log
 if ~exist("simple_log","var")
     simple_log =simplifyLoggerForSingle(log);
 end
@@ -44,6 +45,7 @@ input = simple_log.controller.input(:,kf:ke);
 offlineLogger.reference.p = simple_log.reference.p(:,kf:ke);
 offlineLogger.controller.input=simple_log.controller.input(:,kf:ke);
 
+initial_state=[];
 initial_state.p  = p(:,1);
 initial_state.q  = q(:,1);
 initial_state.v  = v(:,1);
@@ -83,7 +85,7 @@ for i = 2:tn
     offlineLogger.estimator.wL(:,i)=agent.estimator.result.state.wL;
     offlineLogger.estimator.mL(:,i)=agent.estimator.result.state.mL;
 
-    %最小二乗解で求める
+    % %最小二乗解で求める
     Ri      = eul2rotm(qs(:,i)');
     vdro    = agent.estimator.result.state.v;
     vL      = agent.estimator.result.state.vL;

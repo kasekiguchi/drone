@@ -17,8 +17,10 @@ fnowData = 0;%現在の結果を描画する
 fMul =0;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 38;
-endTime = 65;%1E3;
+startTime = 40;
+endTime = 62;%1E3;
+% startTime = 32;
+% endTime = 95;%1E3;
 %どの時間の範囲を描画するか指定   
 
 % startTime = [10,10,10,80];%モデル誤差用
@@ -313,9 +315,9 @@ if isSaved
         
     %変更========================================================
         subfolder='sim';%sim or exp
-    ExpSimName='estimateLoadMass';%実験,シミュレーション名
+    ExpSimName='offlineEstimationLoadMass';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='noEstimate';%実験,シミュレーション内容
+    contents='hun_seki035';%実験,シミュレーション内容
     %==========================================================
     FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
@@ -349,8 +351,8 @@ if isSaved
     for i=1:nf
     %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
         SaveTitle(i)=strcat(contents,'_',nn(i));
-        % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
-        %見切れないようにする
+        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
+        % 見切れないようにする
         f(i).Units = 'centimeters';
         f(i).PaperUnits = f(i).Units;
         f(i).PaperPosition = [0, 0, f(i).Position(3:4)];
