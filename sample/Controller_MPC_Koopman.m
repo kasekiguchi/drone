@@ -106,7 +106,10 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     fprintf("Koopman MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
+
+    %% 誤差モデル
     Controller_param.ref_input = [0; 0; 0; 0]; % 誤差モデル
+    % Controller_param.weight.R = diag([0.1; 0.1; 0.1; 0.1]);     % 入力
 
     Controller.name = "mpc";
     Controller.type = "MPC_CONTROLLER_KOOPMAN_quadprog_simulation";
