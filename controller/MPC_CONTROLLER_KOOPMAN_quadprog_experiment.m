@@ -172,6 +172,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             obj.result.mpc.exitflag = exitflag;
             obj.result.mpc.fval = fval;
             obj.result.mpc.xr = obj.reference.xr;
+            obj.result.mpc.hlu = obj.input.u_HL;
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存

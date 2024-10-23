@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = 'sim_KMPC_test_1014';
+filename = '1023_KMPC_HL_error_model_good';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
@@ -223,10 +223,20 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',2,'filename',filename));
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',2,'filename',filename,'time_idx',[],'yrange',[]));
 plotrange = [-0.1 0.1; 0 1.1; 0 1.1];
-[x, xr] = fig.main_mpc('Koopman', plotrange);
+% [x, xr] = fig.main_mpc('Koopman', plotrange);
 % app = app.logger, app.fExp の構造体を作ればよい
+
+%% 誤差入力の描画
+eu = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.var(1:4),start_idx:finish_idx,'UniformOutput',false));
+hlu = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.hlu(1:4),start_idx:finish_idx,'UniformOutput',false));
+
+figure(100);plot(start_idx:finish_idx, eu); legend('z', 'x', 'y', 'yaw');
+figure(101);plot(start_idx:finish_idx, hlu); legend('z', 'x', 'y', 'yaw');
+
+
+
 
 %% function
 function background_color(phase, yoffset, gca, logt, logphase)
