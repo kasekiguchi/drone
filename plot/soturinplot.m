@@ -393,7 +393,7 @@ plot(t_1_post_convergence,x_ref_sel(convergence_time_index:end), '--','LineWidth
 plot(t_1_post_convergence,y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,z_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 legend('x.est','y.est','z.est', ...
-    'x.ref','y.ref','z-ref','Location', ...
+    'x.ref','y.ref','z.ref','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -410,7 +410,7 @@ ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,er_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_z_1_fig(1:end), '-','LineWidth',2);
-legend('x.error','y.error','Z.error','Location', ...
+legend('x.error','y.error','z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -816,21 +816,21 @@ max_error_pitch_1 = max(abs(pitch_est_sel(convergence_time_index:end) - pitch_re
 max_error_yaw_1 = max(abs(yaw_est_sel(convergence_time_index:end) - yaw_ref_sel(convergence_time_index:end)));
 
 % 結果を表示
-fprintf('姿勢roll_1の収束後の速度誤差: %f\n', er_roll_1);
-fprintf('姿勢pitch_1の収束後の速度誤差: %f\n', er_pitch_1);
-fprintf('姿勢yaw_1の収束後の速度誤差: %f\n', er_yaw_1);
-fprintf('姿勢roll_1の収束後の速度MSE: %f\n', mse_roll_1);
-fprintf('姿勢pitch_1の収束後の速度MSE: %f\n', mse_pitch_1);
-fprintf('姿勢yaw_1の収束後の速度MSE: %f\n', mse_yaw_1);
-fprintf('姿勢roll_1の収束後の速度RMSE: %f\n', rmse_roll_1);
-fprintf('姿勢pitch_1の収束後の速度RMSE: %f\n', rmse_pitch_1);
-fprintf('姿勢yaw_1の収束後の速度RMSE: %f\n', rmse_yaw_1);
-fprintf('姿勢rollの収束後の速度MAE: %f\n', mae_roll_1);
-fprintf('姿勢pitch_1の収束後の速度MAE: %f\n', mae_pitch_1);
-fprintf('姿勢yaw_1の収束後の速度MAE: %f\n', mae_yaw_1);
-fprintf('姿勢rollの収束後の速度最大誤差: %f\n', max_error_roll_1);
-fprintf('姿勢pitch_1の収束後の速度最大誤差: %f\n', max_error_pitch_1);
-fprintf('姿勢yaw_1の収束後の速度最大誤差: %f\n', max_error_yaw_1);
+fprintf('姿勢roll_1の収束後の姿勢誤差: %f\n', er_roll_1);
+fprintf('姿勢pitch_1の収束後の姿勢誤差: %f\n', er_pitch_1);
+fprintf('姿勢yaw_1の収束後の姿勢誤差: %f\n', er_yaw_1);
+fprintf('姿勢roll_1の収束後の姿勢MSE: %f\n', mse_roll_1);
+fprintf('姿勢pitch_1の収束後の姿勢MSE: %f\n', mse_pitch_1);
+fprintf('姿勢yaw_1の収束後の姿勢MSE: %f\n', mse_yaw_1);
+fprintf('姿勢roll_1の収束後の姿勢RMSE: %f\n', rmse_roll_1);
+fprintf('姿勢pitch_1の収束後の姿勢RMSE: %f\n', rmse_pitch_1);
+fprintf('姿勢yaw_1の収束後の姿勢RMSE: %f\n', rmse_yaw_1);
+fprintf('姿勢rollの収束後の姿勢MAE: %f\n', mae_roll_1);
+fprintf('姿勢pitch_1の収束後の姿勢MAE: %f\n', mae_pitch_1);
+fprintf('姿勢yaw_1の収束後の姿勢MAE: %f\n', mae_yaw_1);
+fprintf('姿勢rollの収束後の姿勢最大誤差: %f\n', max_error_roll_1);
+fprintf('姿勢pitch_1の収束後の姿勢最大誤差: %f\n', max_error_pitch_1);
+fprintf('姿勢yaw_1の収束後の姿勢最大誤差: %f\n', max_error_yaw_1);
 
 %推定値と目標値
 figure;
@@ -848,8 +848,8 @@ plot(t_1_post_convergence,yaw_est_sel(convergence_time_index:end), '-','LineWidt
 plot(t_1_post_convergence,roll_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,pitch_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,yaw_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('Roll-estimator','Pitch-estimator','Yaw-estimator', ...
-    'Roll-reference','Pitch-reference','Yaw-reference','Location', ...
+legend('\Phi.est','\theta.est','\Psi.estr', ...
+    '\Phi.ref','\theta.ref','\Psi.ref','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -866,7 +866,7 @@ ylim([-5 5])
 hold on
 plot(t_1_post_convergence,er_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('Roll-error','Pitch-error','Yaw-error','Location', ...
+legend('\Phi.error','\theta.error','\Psi.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -883,7 +883,7 @@ ylim([-5 5])
 hold on
 plot(t_1_post_convergence,mse_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mse_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('Roll-error','Pitch-error','Yaw-error','Location', ...
+legend('\Phi.error','\theta.error','\Psi.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -896,11 +896,11 @@ ylabel('Attitude[rad]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-5 5])
 hold on
 plot(t_1_post_convergence,rmse_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('Roll-error','Pitch-error','Yaw-error','Location', ...
+legend('\Phi.error','\theta.error','\Psi.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -913,11 +913,11 @@ ylabel('Attitude[rad]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-5 5])
 hold on
 plot(t_1_post_convergence,mae_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mae_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('Roll-error','Pitch-error','Yaw-error','Location', ...
+legend('\Phi.error','\theta.error','\Psi.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
