@@ -1,16 +1,16 @@
 %%
 %% Initialize
-tmp = matlab.desktop.editor.getActive;
-dir = fileparts(tmp.Filename);
-if ~contains(path,dir)
-    cd(erase(dir,'\mode'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-close all hidden; clear ; clc;
-userpath('clear');
-end
-
-clear gui
+% tmp = matlab.desktop.editor.getActive;
+% dir = fileparts(tmp.Filename);
+% if ~contains(path,dir)
+%     cd(erase(dir,'\mode'));
+% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+% close all hidden; clear ; clc;
+% userpath('clear');
+% end
+% 
+% clear gui
 %%
 clc
 ts = 0; % initial timefghj
@@ -21,7 +21,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 機数，1, z (初期位置)
 initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -30,8 +30,8 @@ initial_state.w = [0; 0; 0];
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-% model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
+model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
+% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
 load(model_file,'est') %vzから算出したzで学習、総推力
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -67,8 +67,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
-agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
+% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
@@ -92,35 +92,41 @@ conmode = 2;
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-for i = 1:te/dt
-    % if i < 20 || rem(i, 10) == 0 end
-    tic
-    pre_est = agent.estimator.result;
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
-    else; agent(1).controller.do(time, 'f', agent);
-    end
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    %pause(1)
-    all = toc;
-end
+% for i = 1:te/dt
+%     % if i < 20 || rem(i, 10) == 0 end
+%     tic
+%     pre_est = agent.estimator.result;
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
+%     else; agent(1).controller.do(time, 'f', agent);
+%     end
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+%     all = toc;
+% end
 %%
 % logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
-% logger.save("sim_KMPC_test_1014");
+% logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
+% logger.save("10_hokukai");
 % log = logger;
 % save(strcat('Data\KMPC_sim_test_1008_sigmoid', '.mat'), 'log');
 %%
+% clear
+% logger = LOGGER("10_hokukai.mat");
 % app.logger = logger;
 % result_plot(app);
 
+%%
+% i1 = find(logger.Data.phase == 102, 1, "first");
+% i2 = find(logger.Data.phase == 102, 1, "last");
+
 %% function 2コンとき
 function result = controller_do(varargin)
-    controller = varargin{3}.controller;
+    controller = varargin{5}.controller;
     result.mpc = controller.mpc.do(varargin);
     result.hlc = controller.hlc.do(varargin);
     result = result.mpc;
@@ -147,7 +153,7 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2 3]));
 fig.main_figure();
 % app = app.logger, app.fExp の構造体を作ればよい
 end
@@ -159,8 +165,8 @@ function result_plot(app)
     flg.animation_save = 0;
     flg.animation = 0;
     flg.timerange = 0;
-    flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+    flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');
-    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
+    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2 3]));
     fig.main_figure();
 end

@@ -231,10 +231,27 @@ plotrange = [-0.1 0.1; 0 1.1; 0 1.1];
 %% 誤差入力の描画
 eu = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.var(1:4),start_idx:finish_idx,'UniformOutput',false));
 hlu = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.hlu(1:4),start_idx:finish_idx,'UniformOutput',false));
+val = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.fval, start_idx:finish_idx,'UniformOutput',false));
+exitflag = cell2mat(arrayfun(@(N) log.Data.agent.controller.result{N}.mpc.exitflag, start_idx:finish_idx,'UniformOutput',false));
 
-figure(100);plot(start_idx:finish_idx, eu); legend('z', 'x', 'y', 'yaw');
-figure(101);plot(start_idx:finish_idx, hlu); legend('z', 'x', 'y', 'yaw');
+close all
+figure(100);
+t = log.Data.t(start_idx:finish_idx)';
+plot(t, eu(2:4,:)); hold on;
+plot(t, hlu(2:4,:), '--'); legend('error.x', 'error.y', 'error.yaw','hl.x', 'hl.y', 'hl.yaw'); hold off;
+gca.ColorOrder = ["#0072BD"; "#D95319"; "#EDB120";"#0072BD"; "#D95319"; "#EDB120"];
+xlabel('Time [s]'); ylabel('Virtual Input'); ylim([-1 1]);
 
+u = eu + hlu;
+figure(102);plot(t, u(2:4,:)); legend('x', 'y', 'yaw');  ylim([-1 1]);
+xlabel('Time [s]'); ylabel('Virtual input')
+
+%
+figure(103);plot(t, -val);
+xlabel('Time [s]'); ylabel('Cost');
+
+figure(104);plot(t, exitflag);
+xlabel('Time [s]'); ylabel('Exitflag');
 
 
 

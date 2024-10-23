@@ -53,15 +53,17 @@ classdef FIGURE_EXP
             plot_title = '';
             xrange_max = 10;
             % xrange_max = obj.data.logt(end);
+            set(0,'defaultAxesFontSize', 20)
+            set(0, 'DefaultLineLineWidth', 1.5);
             
             disp('Plotting start...');
-            m = 3; n = 3;
+            m = 2; n = 3;
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,1); sgtitle(plot_title);end
             plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
             grid on; xlim([obj.data.logt(1), xrange_max]); %obj.data.logt(end)
-            ylim([-2 1.5])
+            ylim([-inf inf])
             obj.data.fignum = obj.data.fignum+1;
 
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,2); end
@@ -69,7 +71,7 @@ classdef FIGURE_EXP
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), xrange_max]);
-            ylim([-0.3 0.22])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end 
+            ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end 
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,3); end
@@ -77,7 +79,7 @@ classdef FIGURE_EXP
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), xrange_max]); 
-            ylim([-0.5 0.25])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,4); end
@@ -85,7 +87,7 @@ classdef FIGURE_EXP
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
             grid on; xlim([obj.data.logt(1), xrange_max]);
-            ylim([5.75 5.8])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             ytickformat('%.3f');
             obj.data.fignum = obj.data.fignum+1;
             
@@ -94,7 +96,7 @@ classdef FIGURE_EXP
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
             grid on; xlim([obj.data.logt(1), xrange_max]);
-            ylim([-0.15 0.15])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             ytickformat('%.3f');
             obj.data.fignum = obj.data.fignum+1;
             
@@ -327,7 +329,7 @@ classdef FIGURE_EXP
             xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 obj.data.logt(end-1)])
         end
 
-        function [obj] = store_data(obj)
+        function obj = store_data(obj)
             disp('Storing data...');
             obj.data.logt = obj.log.data(0,"t",[],"ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)]); 
             if obj.flg.timerange; obj.data.logt = obj.data.logt - obj.data.logt(1); end
@@ -344,6 +346,11 @@ classdef FIGURE_EXP
                 zeros(size(obj.data.Est(1:3,:)));
                 obj.log.data(1,"v","r","ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)])'];
             % store_result = obj.data;
+
+            %% Input が空の時の対応 2コンMPCだとlogger.dataには保存されない問題の解決
+            if isempty(find(obj.data.Input ~= 0, 1))
+                obj.data.Input = cell2mat(arrayfun(@(N) obj.log.Data.agent.controller.result{N}.input,obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            end
 
             %% var, exitflag
             if obj.phase == 1 && isfield(obj.agent.controller.result{obj.data.start_idx}, 'mpc')

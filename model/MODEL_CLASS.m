@@ -104,7 +104,7 @@ classdef MODEL_CLASS < dynamicprops & handle
         return
       end
       % 
-      if strcmp(class(obj.self.controller), 'struct') 
+      if strcmp(class(obj.self.controller), 'struct') %
           u = obj.self.controller.mpc.result.input; %2controllerのとき
       else
           u = obj.self.controller.result.input;

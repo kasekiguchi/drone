@@ -58,6 +58,13 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.weightF = blkdiag(obj.param.weight.Pf, obj.param.weight.Qf, obj.param.weight.Vf, obj.param.weight.Wf);
             obj.weightR = obj.param.weight.R;
 
+            %% A行列にxyzの位置を加えた拡張係数行列とする
+            A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
+            A_2 = [zeros(size(obj.A,2), 3), obj.A];
+            obj.param.A = [A_1; A_2];
+            obj.param.B = [zeros(3, 4); obj.B];
+            obj.param.C = blkdiag(eye(3), obj.C);
+
             %% QP change_equationの共通項をあらかじめ計算
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
@@ -116,25 +123,27 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             end
 
             % 次時刻状態の計算
-            x = obj.current_state;
-            u = obj.input.u_HL;
-            P = obj.param.P;
-            tspan = [0 0.025];
-            x0 = x;
-            [~,tmpx]=ode15s(@(t,x) obj.self.plant.method(x,u,P),tspan, x0); % 非線形モデル
-            obj.state.HL = tmpx(end, :);
+            % x = obj.current_state;
+            % u = obj.input.u_HL;
+            % P = obj.param.P;
+            % tspan = [0 0.025];
+            % x0 = x;
+            % [~,tmpx]=ode15s(@(t,x) obj.self.plant.method(x,u,P),tspan, x0); % 非線形モデル
+            % obj.state.HL = tmpx(end, :);
 
             %% reference
-            obj.previous_state = obj.current_state - obj.state.HL'; % 誤差モデル
-            obj.reference.qp = [obj.reference.xr(1:12,:) - repmat(obj.state.HL',1,obj.H); obj.reference.xr(13:16,:)]; % 誤差モデル ref:Controller_MPC_Koopanのref_inputもいじってる
-            % obj.previous_state = repmat(obj.current_state, 1, obj.H);
+            % obj.previous_state = obj.current_state - obj.state.HL'; % 誤差モデル
+            % obj.reference.qp = [obj.reference.xr(1:12,:) - repmat(obj.state.HL',1,obj.H); obj.reference.xr(13:16,:)]; % 誤差モデル ref:Controller_MPC_Koopanのref_inputもいじってる
+           
+            obj.previous_state = repmat(obj.current_state, 1, obj.H);
+            obj.reference.qp = obj.reference.xr;
 
             %% 最適化部分の関数化とmex化
             Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
             [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
             % [var, fval, exitflag] = quad_drone(Param);
-            % u = var(1:4,1);
-            u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+            u = var(1:4,1);
+            % u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
 
             %% HLとの状態比較を初期値としたクープマンMPCの計算
             % obj.previous_state = repmat(obj.current_state, 1, obj.H);
