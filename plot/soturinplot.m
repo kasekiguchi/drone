@@ -392,8 +392,8 @@ plot(t_1_post_convergence,z_est_sel(convergence_time_index:end), '-','LineWidth'
 plot(t_1_post_convergence,x_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,z_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('X-estimator','Y-estimator','Z-estimator', ...
-    'X-reference','Y-reference','Z-reference','Location', ...
+legend('x.est','y.est','z.est', ...
+    'x.ref','y.ref','z-ref','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -410,7 +410,7 @@ ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,er_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_z_1_fig(1:end), '-','LineWidth',2);
-legend('X-error','Y-error','Z-error','Location', ...
+legend('x.error','y.error','Z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -427,7 +427,7 @@ ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,mse_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mse_z_1_fig(1:end), '-','LineWidth',2);
-legend('X-error','Y-error','Z-error','Location', ...
+legend('x.error','y.error','z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -444,7 +444,7 @@ ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,rmse_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_z_1_fig(1:end), '-','LineWidth',2);
-legend('X-error','Y-error','Z-error','Location', ...
+legend('x.error','y.error','z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -461,7 +461,7 @@ ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,mae_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mae_z_1_fig(1:end), '-','LineWidth',2);
-legend('X-error','Y-error','Z-error','Location', ...
+legend('x.error','y.error','z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -472,18 +472,69 @@ error_x_1 = abs(x_est_sel - x_ref_sel);
 error_y_1 = abs(y_est_sel - y_ref_sel);
 error_z_1 = abs(z_est_sel - z_ref_sel);
 
-% 収束閾値を設定（例：0.01）
-threshold = 0.1;
+% % 収束閾値を設定（例：0.01）
+% threshold = 0.1;
+% 
+% % 各軌道が収束する最初の時刻を見つける
+% convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
+% convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
+% convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
+% convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+% 
+% % どれか遅い方の収束時刻を選ぶ
+% convergence_time_index = max(convergence_time_xyz);
+% convergence_time = t_sel(1:convergence_time_index); % 収束時刻
 
-% 各軌道が収束する最初の時刻を見つける
-convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
-convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
-convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
-convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+threshold = 0.15;  % 収束閾値
+T_continuous = 3;  % 連続収束の閾値（秒）
 
-% どれか遅い方の収束時刻を選ぶ
-convergence_time_index = max(convergence_time_xyz);
-convergence_time = t_sel(1:convergence_time_index); % 収束時刻
+% 収束時間を計算するための変数
+convergence_start_time = NaN;  % 収束開始時刻
+convergence_duration = 0;      % 収束時間の初期化
+convergence_row = NaN;         % 収束開始行の初期化
+found_convergence = false;     % 収束が確認されたかどうかのフラグ
+
+for i = 1:length(error_z_1)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if abs(error_x_1(i)) < threshold && abs(error_y_1(i)) < threshold && abs(error_z_1(i)) < threshold
+        if isnan(convergence_start_time)  % 収束開始時刻が未設定の場合
+            convergence_start_time = t_sel(i);  % 収束開始時刻を設定
+            convergence_row = i;                % 収束開始行を記録
+        end
+    else
+        % 収束条件が満たされない場合
+        if ~isnan(convergence_start_time)  % 収束開始時刻が設定されている場合
+            end_time = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
+            duration = end_time - convergence_start_time;  % 収束が続いた時間を計算
+
+            % T_continuous（連続収束の閾値）を満たしているか確認
+            if duration >= T_continuous
+                fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+                found_convergence = true;
+                break;  % 最初の収束が確認されたらループを終了
+            else
+                % 時間が足りなかった場合、再度リセットして次の期間を確認
+                convergence_start_time = NaN;
+                convergence_row = NaN;
+            end
+        end
+    end
+end
+
+% 最後のデータ点で収束しているか確認
+if ~found_convergence && ~isnan(convergence_start_time)
+    end_time = t_sel(end);  % 最後の時刻を取得
+    duration = end_time - convergence_start_time;
+
+    if duration >= T_continuous
+        fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+    else
+        fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
+    end
+end
+
+% 収束開始行を結果として返す
+convergence_time_index = convergence_row;
 
 % 収束時刻以降のデータ
 trajectory_vx_1_post_convergence = vx_est_sel(convergence_time_index:end);
@@ -569,8 +620,8 @@ plot(t_1_post_convergence,vz_est_sel(convergence_time_index:end), '-','LineWidth
 plot(t_1_post_convergence,vx_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,vy_ref_sel(convergence_time_index:end), '--','LineWidth',2);
 plot(t_1_post_convergence,vz_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('VX-estimator','VY-estimator','VZ-estimator', ...
-    'VX-reference','VY-reference','VZ-reference','Location', ...
+legend('v_x.est','v_y.est','v_z.est', ...
+    'v_x.ref','v_y.ref','v_z.ref','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -583,11 +634,11 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,er_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_vz_1_fig(1:end), '-','LineWidth',2);
-legend('VX-error','VY-error','VZ-error','Location', ...
+legend('v_x.error','v_y.error','v_z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -600,11 +651,11 @@ ylabel('Velocity[(m/s)^2]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,mse_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mse_vz_1_fig(1:end), '-','LineWidth',2);
-legend('VX-error','VY-error','VZ-error','Location', ...
+legend('v_x.error','v_y.error','v_z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -617,11 +668,11 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,rmse_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_vz_1_fig(1:end), '-','LineWidth',2);
-legend('VX-error','VY-error','VZ-error','Location', ...
+legend('v_x.error','v_y.error','v_z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -634,11 +685,11 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-0.4 0.4])
 hold on
 plot(t_1_post_convergence,mae_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mae_vz_1_fig(1:end), '-','LineWidth',2);
-legend('VX-error','VY-error','VZ-error','Location', ...
+legend('v_x.error','v_y.error','v_z.error','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -649,18 +700,69 @@ error_x_1 = abs(x_est_sel - x_ref_sel);
 error_y_1 = abs(y_est_sel - y_ref_sel);
 error_z_1 = abs(z_est_sel - z_ref_sel);
 
-% 収束閾値を設定（例：0.01）
-threshold = 0.1;
+% % 収束閾値を設定（例：0.01）
+% threshold = 0.1;
+% 
+% % 各軌道が収束する最初の時刻を見つける
+% convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
+% convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
+% convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
+% convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+% 
+% % どれか遅い方の収束時刻を選ぶ
+% convergence_time_index = max(convergence_time_xyz);
+% convergence_time = t_sel(1:convergence_time_index); % 収束時刻
 
-% 各軌道が収束する最初の時刻を見つける
-convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
-convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
-convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
-convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+threshold = 0.15;  % 収束閾値
+T_continuous = 3;  % 連続収束の閾値（秒）
 
-% どれか遅い方の収束時刻を選ぶ
-convergence_time_index = max(convergence_time_xyz);
-convergence_time = t_sel(1:convergence_time_index); % 収束時刻
+% 収束時間を計算するための変数
+convergence_start_time = NaN;  % 収束開始時刻
+convergence_duration = 0;      % 収束時間の初期化
+convergence_row = NaN;         % 収束開始行の初期化
+found_convergence = false;     % 収束が確認されたかどうかのフラグ
+
+for i = 1:length(error_z_1)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if abs(error_x_1(i)) < threshold && abs(error_y_1(i)) < threshold && abs(error_z_1(i)) < threshold
+        if isnan(convergence_start_time)  % 収束開始時刻が未設定の場合
+            convergence_start_time = t_sel(i);  % 収束開始時刻を設定
+            convergence_row = i;                % 収束開始行を記録
+        end
+    else
+        % 収束条件が満たされない場合
+        if ~isnan(convergence_start_time)  % 収束開始時刻が設定されている場合
+            end_time = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
+            duration = end_time - convergence_start_time;  % 収束が続いた時間を計算
+
+            % T_continuous（連続収束の閾値）を満たしているか確認
+            if duration >= T_continuous
+                fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+                found_convergence = true;
+                break;  % 最初の収束が確認されたらループを終了
+            else
+                % 時間が足りなかった場合、再度リセットして次の期間を確認
+                convergence_start_time = NaN;
+                convergence_row = NaN;
+            end
+        end
+    end
+end
+
+% 最後のデータ点で収束しているか確認
+if ~found_convergence && ~isnan(convergence_start_time)
+    end_time = t_sel(end);  % 最後の時刻を取得
+    duration = end_time - convergence_start_time;
+
+    if duration >= T_continuous
+        fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+    else
+        fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
+    end
+end
+
+% 収束開始行を結果として返す
+convergence_time_index = convergence_row;
 
 % 収束時刻以降のデータ
 trajectory_roll_1_post_convergence = roll_est_sel(convergence_time_index:end);
@@ -739,7 +841,7 @@ ylabel('Attitude[rad]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
+ylim([-5 5])
 hold on
 plot(t_1_post_convergence,pitch_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,yaw_est_sel(convergence_time_index:end), '-','LineWidth',2);
@@ -760,7 +862,7 @@ ylabel('Attitude[rad]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-5 5])
 hold on
 plot(t_1_post_convergence,er_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_yaw_1_fig(1:end), '-','LineWidth',2);
@@ -777,7 +879,7 @@ ylabel('Attitude[rad^2]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1 1])
+ylim([-5 5])
 hold on
 plot(t_1_post_convergence,mse_pitch_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,mse_yaw_1_fig(1:end), '-','LineWidth',2);
