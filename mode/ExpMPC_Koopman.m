@@ -38,8 +38,8 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
 
 %% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
@@ -54,12 +54,12 @@ tic
     if varargin{2} == 'a'
         result = controller.mpc.do(varargin); % arming: KMPC
     elseif varargin{2} == 't'
-        result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
+        result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
     elseif varargin{2} == 'f'
-        result.hlc = controller.hlc.do(varargin);
         result.mpc = controller.mpc.do(varargin); % flight: KMPC
+        result.hlc = controller.hlc.do(varargin);
         result = result.mpc;
     elseif varargin{2} == 'l'
         result = controller.hlc.do(varargin); % landing: HL

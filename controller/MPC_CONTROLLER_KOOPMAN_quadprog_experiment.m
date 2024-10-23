@@ -111,16 +111,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
                 % fprintf('flight\n')
             end
 
-            %% ------------------------------------------------------------  
-            % obj.previous_state = repmat(obj.current_state, 1, obj.H);
-            % 
-            % % 最適化部分の関数化とmex化
-            % Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            % [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
-            % % [var, fval, exitflag] = quad_drone(Param);
-            % u = var(1:4,1);
-
-            %% 誤差モデル
+            %% HLの次時刻状態計算
             % 次時刻状態の計算
             obj.input.u_HL = obj.self.controller.hlc.result.input; % 2コン
             x = obj.current_state;
@@ -129,31 +120,41 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             tspan = [0 0.025];
             x0 = x;
             [~,tmpx]=ode15s(@(t,x) obj.param.plant(x,u,P),tspan, x0); % 非線形モデル
-            obj.state.HL = tmpx(end, :);
+            obj.state.HL = tmpx(end, :)';
 
-            % HLとの状態比較を初期値としたクープマンMPCの計算
-            obj.previous_state = repmat(obj.current_state, 1, obj.H);
-            %-- fmincon 設定
-            options = optimoptions('fmincon');
-            options = optimoptions(options,'MaxIterations',      1.e+12); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-4);  % 制約違反に対する許容誤差
+            %% ------------------------------------------------------------  
+            obj.previous_state = obj.current_state - obj.state.HL; % 誤差モデル
+            obj.reference.r = [obj.reference.xr(1:12,:) - repmat(obj.state.HL,1,obj.H); obj.reference.xr(13:16,:)]; % 誤差モデル ref:Controller_MPC_Koopanのref_inputもいじってる
+            % obj.previous_state = repmat(obj.current_state, 1, obj.H);
 
-            %-- fmincon設定
-            options.Algorithm = 'sqp';  % 逐次二次計画法
-            options.Display = 'none';   % 計算結果の表示
-            problem.solver = 'fmincon'; % solver
-            problem.options = options;  %
-            % problem.x0		  = [obj.previous_state; obj.previous_input];
-            problem.x0        = [obj.previous_input];
-
-            %-- fmincon
-            problem.objective = @(x) obj.objective(x); 
-            problem.nonlcon   = @(x) obj.constraints(x);
-            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(problem);
-
-            %
-            obj.previous_input = var;
+            % 最適化部分の関数化とmex化
+            Param = struct('current_state',obj.current_state,'ref',obj.reference.r,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            % [var, fval, exitflag] = quad_drone(Param);
+            % u = var(1:4,1);
             u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+
+            %% 誤差モデル fmincon
+            % obj.previous_state = repmat(obj.current_state, 1, obj.H);
+            % %-- fmincon 設定
+            % options = optimoptions('fmincon');
+            % options = optimoptions(options,'MaxIterations',      1.e+12); % 最大反復回数
+            % options = optimoptions(options,'ConstraintTolerance',1.e-4);  % 制約違反に対する許容誤差
+            % 
+            % %-- fmincon設定
+            % options.Algorithm = 'sqp';  % 逐次二次計画法
+            % options.Display = 'none';   % 計算結果の表示
+            % problem.solver = 'fmincon'; % solver
+            % problem.options = options;  %
+            % % problem.x0		  = [obj.previous_state; obj.previous_input];
+            % problem.x0        = [obj.previous_input];
+            % 
+            % %-- fmincon
+            % problem.objective = @(x) obj.objective(x); 
+            % problem.nonlcon   = @(x) obj.constraints(x);
+            % [var, fval, exitflag, ~, ~, ~, ~] = fmincon(problem);
+            % obj.previous_input = var;
+            % u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
       
             %%
             obj.previous_input = var;

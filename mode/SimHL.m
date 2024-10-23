@@ -152,8 +152,8 @@ end
 
 %%
 set(0,'defaultAxesFontSize', 10)
-set(0, 'DefaultLineLineWidth', 1);
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+set(0, 'DefaultLineLineWidth', 1.5);
+logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
 % logger.save('HL_sim_test_1008_sigmoid');
 
 % 仮想入力の描画
