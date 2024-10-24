@@ -4,8 +4,13 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
 
     %% transmitter system
     % u_trans_param.gain_tl =[600;600;600;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+<<<<<<< Updated upstream
      % u_trans_param.gain_tl =[150;150;150;20];%　　粉砕
       u_trans_param.gain_tl =[400;400;400;20];%　　なぶ
+=======
+     % u_trans_param.gain_tl =[150;150;150;20];%good100.100.100.20
+        u_trans_param.gain_tl =[700;700;700;20];%for_nabu
+>>>>>>> Stashed changes
     % u_trans_param.th_offset_tl = 245;         % offset 3s[1021] 4s[900]　発掘[926]
      u_trans_param.th_offset_tl = 346;%252  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
     % u_trans_param.gain_f =[600;600;600;20];  
