@@ -84,168 +84,21 @@ classdef MPC_CONTROLLER_HL <handle
             obj.param.t = time.t;
             %% phaseによるcontrollerの選択
             % result: controllerで算出された入力
-            if phase == 'a'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
-                result = obj.controller_HLMPC(varargin);
-                disp('controller: MPC  phase: a');
-            elseif phase == 't' || phase == 'l'
-                result = obj.controller_HL(varargin);
-                disp('controller: HL   phase: t or l');
-            elseif phase == 'f'
-                obj.state.ref = obj.generate_reference();
-                result = obj.controller_HLMPC(varargin);
-                disp('controller: MPC  phase: f');
-            end 
+            obj.state.ref = obj.generate_reference();
+            result = obj.controller_HLMPC(varargin);
+            % if phase == 'a'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
+            %     result = obj.controller_HLMPC(varargin);
+            %     disp('controller: MPC  phase: a');
+            % elseif phase == 't' || phase == 'l'
+            %     result = obj.controller_HL(varargin);
+            %     disp('controller: HL   phase: t or l');
+            % elseif phase == 'f'
+            %     obj.state.ref = obj.generate_reference();
+            %     result = obj.controller_HLMPC(varargin);
+            %     disp('controller: MPC  phase: f');
+            % end 
             toc
-
-
-            % profile on
-            % varargin 
-            % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-
-            % obj.param.t = varargin{1}.t; % for sim
-            % 
-            % vara = varargin{1}; % Experiment
-            % obj.param.t = vara{1}.t; % Experiment
-            % 
-            % ref = obj.self.reference.result;
-            % xd = ref.state.get();
-            % if isprop(ref.state,'xd')
-            %     if ~isempty(ref.state.xd)
-            %         xd = ref.state.xd; % 20次元の目標値に対応するよう
-            %     end
-            % end
-            % %
-            % %% Reference function
-            % xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
-            % model_HL = obj.self.estimator.result;
-            % Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-            % xn = [R2q(Rb0'*model_HL.state.getq("rotmat"));Rb0'*model_HL.state.p;Rb0'*model_HL.state.v;model_HL.state.w]; % [q, p, v, w]に並べ替え
-            % xd(1:3)=Rb0'*xd(1:3);
-            % xd(4) = 0;
-            % xd(5:7)=Rb0'*xd(5:7);
-            % xd(9:11)=Rb0'*xd(9:11);
-            % xd(13:15)=Rb0'*xd(13:15);
-            % xd(17:19)=Rb0'*xd(17:19);
-            % P = obj.self.parameter.get();
-            % vfn = Vf(xn,xd',P,obj.F1); %v1
-            % z1n = Z1(xn,xd',P);
-            % z2n = Z2(xn,xd',vfn,P);
-            % z3n = Z3(xn,xd',vfn,P);
-            % z4n = Z4(xn,xd',vfn,P);
-            % 
-            % %% Referenceの取得、ホライズンごと  For Simulation
-            % % 実状態の目標値
-            % % xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
-            % % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-            % 
-            % %% 各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
-            % % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
-            % if vara{2} == 'a'
-            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
-            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            % elseif vara{2} == 't'
-            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
-            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            %     fprintf('take off')
-            % elseif vara{2} == 'f'
-            %     % 実状態の目標値
-            %     xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
-            %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-            %     fprintf('flight')
-            % end
-            % %---------------------------------------------------------------------------------------
-            % 
-            % % 実状態の目標値を仮想状態的に並び替え
-            % xr_imag = [xr_real(3,:);xr_real(7,:);
-            %             xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);
-            %             xr_real(2,:);xr_real(6,:);xr_real(10,:);xr_real(14,:);
-            %             xr_real(4,:);xr_real(8,:)];
-            % obj.reference.xr = [xr_imag(:,1) - xr_imag; xr_real(13:end,:)]; % 仮想状態に合わせて現在状態からの目標値に変換する
-            % 
-            % %% OPTIMIZATION
-            % %% fmincon 逐次二次計画法 非線形制約も行けるが遅い
-            % % options = optimoptions('fmincon');
-            % % options = optimoptions(options,'MaxIterations',         1.e+12); % 最大反復回数
-            % % options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-            % % options.Algorithm = 'sqp';  % 逐次二次計画法
-            % % options.Display = 'none';   % 計算結果の表示
-            % % %% conditions
-            % % fun = @obj.objective;
-            % % x0 = obj.previous_input;
-            % % A = []; b = []; Aeq = []; beq = []; 
-            % % lb = repmat(obj.param.input_min, 1,obj.H); % min
-            % % ub = repmat(obj.param.input_max, 1,obj.H); % max
-            % % nonlcon = [];
-            % % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
-            % 
-            % %% quadprog 二次計画法 線形制約しか扱えないが高速
-            % % MPC設定(problem)
-            % % options = optimoptions('quadprog');
-            % % options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
-            % % options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
-            % % options.Display = 'none';   % 計算結果の表示
-            % % problem.solver = 'quadprog'; % solver
-            % % % [H, f] = obj.change_equation(obj);
-            % % Param = struct('A',obj.A,'B',obj.B,'C',obj.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            % % [H, f] = obj.param.change_equation_func(Param);
-            % % A = [];
-            % % b = [];
-            % % Aeq = [];
-            % % beq = [];
-            % % lb = [];
-            % % ub = [];
-            % % x0 = [obj.previous_input(:)];   
-            % % [var, ~, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
-            % %% ------------------------------------------------------------
-            % % 最適化部分の関数化とmex化
-            % Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            % % [var, fval, exitflag] = quad_drone_mex(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
-            % [var, fval, exitflag] = quad_drone(Param);
-            % %%--
-            % 
-            % obj.previous_input = var; % 最適化の初期値
-            % 
-            % vf = var(1, 1);     % 最適な入力の取得
-            % vs = var(2:4, 1);     % 最適な入力の取得
-            % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);  % 入力変換
-            % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
-            % % obj.result.input =
-            % % [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-            % % % HL同様の入力制限
-            % obj.input.u = obj.result.input; % 入力をcontroller内に保存
-            % obj.result.mpc.var = var;
-            % obj.result.mpc.exitflag = exitflag;
-            % obj.result.mpc.fval = fval;
-            % obj.result.mpc.xr = obj.reference.xr;
-            % obj.result.mpc.current = obj.current_state;
-            % obj.result.mpc.xr_real = xr_real;
-            % obj.result.mpc.xr_img = xr_imag;
-            % 
-            % obj.result.input_v = [vf; vs]; % 仮想入力の保存
-            % % obj.result.xr = xr_real;
-
-            %% 情報表示 Exp時はコメントアウト
-            % if exist("exitflag") ~= 1
-            %     exitflag = NaN;
-            % end
-            % est_print = obj.self.estimator.result.state;
-            % fprintf("==================================================================\n")
-            % fprintf("==================================================================\n")
-            % fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
-            %         est_print.p(1), est_print.p(2), est_print.p(3),...
-            %         est_print.v(1), est_print.v(2), est_print.v(3),...
-            %         est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
-            % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-            %         xr_real(1,1), xr_real(2,1), xr_real(3,1),...
-            %         xr_real(7,1), xr_real(8,1), xr_real(9,1),...
-            %         xr_real(4,1)*180/pi, xr_real(5,1)*180/pi, xr_real(6,1)*180/pi)                             % r:reference 目標状態
-            % fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-            %     obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
-            % fprintf("\n");
-            
-            % 結果の保存
-            result = obj.result;
             % profile viewer
         end
         function show(obj)

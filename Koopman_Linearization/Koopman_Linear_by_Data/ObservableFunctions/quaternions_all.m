@@ -166,7 +166,7 @@ partial_param_z_3 = [comat_1; comat_2; comat_12_1; comat_12_2;
 partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 
 %% まとめ
-z = [common_z; isobe_z]; % 00
+% z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
@@ -175,7 +175,7 @@ z = [common_z; isobe_z]; % 00
 % z = [isobe_z; common_z]; % 07
 % z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
 % z = [common_except_pos_z; isobe_z; partial_param_z]; % 09  11の位置を含まない版
-% z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
+z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
 % z = [common_z; isobe_z; partial_param_z]; % 11
 
 end

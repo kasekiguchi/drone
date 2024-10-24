@@ -48,8 +48,8 @@ logAgent = log.Data.agent;
 phase = 1; % 1:flight, 2:all
 switch phase
     case 1
-        start_idx = find(log.Data.phase==102,1,'first');
-        finish_idx = find(log.Data.phase==102,1,'last')-1;
+        start_idx = find(log.Data.phase==116,1,'first');
+        finish_idx = find(log.Data.phase==116,1,'last')-1;
     case 2
         start_idx = 1;
         finish_idx = find(log.Data.phase==0,1,'first')-1;

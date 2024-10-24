@@ -81,7 +81,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1);
+initial_state.p = arranged_position([0, 0], 1, 1, 0.6);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -155,6 +155,8 @@ set(0,'defaultAxesFontSize', 10)
 set(0, 'DefaultLineLineWidth', 1.5);
 logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
 % logger.save('HL_sim_test_1008_sigmoid');
+app.logger = logger;
+result_plot(app)
 
 % 仮想入力の描画
 imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
@@ -174,3 +176,16 @@ figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 % % animation
 % % app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
 % end
+
+function result_plot(app)
+    app.fExp = 1;
+    flg.figtype = 0; % 0:subplot
+    flg.savefig = 0;
+    flg.animation_save = 0;
+    flg.animation = 0;
+    flg.timerange = 0;
+    flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+    filename = string(datetime('now'), 'yyyy-MM-dd');
+    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
+    fig.main_figure();
+end
