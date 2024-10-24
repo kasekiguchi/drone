@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20241016_Exp_HL_circleT=12x=1_[300,500,300,20],350_[400,500,100,1],0.002_good_y+35.mat");
+load("20241024_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_good.mat");
 
 %%
 figtype = 2;
