@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1021nabu_seki015_ekf6797_Log(21-Oct-2024_16_41_47).mat");
+load("sl1023dame3syudou_Log(23-Oct-2024_16_32_26).mat");
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 % load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");

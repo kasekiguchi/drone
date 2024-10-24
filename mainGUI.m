@@ -24,4 +24,4 @@ fDebug = 0; % 1: active : for debug function
 PInterval = 3;%3; % sec : poling interval for emergency stop
 gui = SimExp(fExp, fDebug, PInterval);
 
-%パラメータで紐の長さを短くする。→慣性モーメントが大きくなるので振動を修正したがるはず。
+%パラメータで紐の長さを短くする。→慣性モーメントが大きくなるので振動を修正したがるはず。s 
