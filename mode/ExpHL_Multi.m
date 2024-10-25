@@ -10,10 +10,11 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
-COMs = string([10,3]);%割り当てる順番に設定
+COMs = string([3,11]);%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
-            {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
+            {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
+            % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめている？
 
@@ -41,8 +42,8 @@ end
 run("ExpBase");
 
 function post(app)
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({2, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "p", "ers"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "p", "ers"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);

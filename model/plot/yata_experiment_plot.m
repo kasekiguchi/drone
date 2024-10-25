@@ -1,1 +1,0 @@
-C = struct2cell(log.Data.t)
