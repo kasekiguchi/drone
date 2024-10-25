@@ -14,7 +14,7 @@ methods
 
         arguments
             self
-            noise = 0;
+            noise = 0;%標準偏差
         end
 
         obj.self = self;

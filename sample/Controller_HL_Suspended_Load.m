@@ -25,6 +25,7 @@ sysc = ss(At,Bt,eye(6),0);
 sysd = c2d(sysc,tt);
 [Ad,Bd, ~,~] = ssdata(sysd);
 Controller.F2 = place(Ad,Bd,pd);%[ 101.6973  254.1684  237.2560  126.4411   43.0970    9.1920];
+Contorller.F2= [ 3162.3  3189.1  1608.1  514.1   109.6    14.8];%関口ベタ打ち
 Controller.F3 = Controller.F2;
 %↑関口
  % Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);%位置z、速度z
