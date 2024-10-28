@@ -12,10 +12,14 @@ motive.getData([], []); % get data from Motive モーションキャプチャか
 N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
 COMs = string([3,5]);%割り当てる順番に設定
 refName = {
-            {"My_Case_study_trajectory",{[1,1,0.5]},"HL"},...
-            {"My_Case_study_trajectory",{[-1,-1,0.5]},"HL"}
+            {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
+            {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
+refPointName= {
+                 {struct("f",[1;1;1],"g",[0;1;1],"h",[-1;1;1],"j",[-1;0;1],"k",[-1;-1;1]),8},...
+                 {struct("f",[-1;-1;1],"g",[0;-1;1],"h",[1;-1;1],"j",[1;0;1],"k",[1;1;1]),8}
+                 };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめている？
 
 for i = 1:N
@@ -34,9 +38,9 @@ agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,eul(3), motive));
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
-% agent(i).reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;1],"g",[0.8;0.7;1],"h",[0.2;0.2;1],"j",[-0.5;0;1],"k",[0.1;-0.2;1],"m",[0.3;-0.4;1]),6});%縦ベクトルで書く,
 % agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
-agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
+agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
+% agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
 agent(i).controller = HLC(agent(i),Controller_HL(dt));
 end
 run("ExpBase");
