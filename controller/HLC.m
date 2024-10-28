@@ -4,7 +4,7 @@ classdef HLC < handle
     self
     result
     param
-    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
+    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass"];
   end
 
   methods
@@ -21,6 +21,7 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
+      P(1)=P(1)+P(18);
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;

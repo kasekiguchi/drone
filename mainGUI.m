@@ -19,8 +19,8 @@ userpath('clear');
 clc
 SimBaseMode = ["SimHL","SimPointMass", "SimVehicle", "SimSuspendedLoad", "SimVoronoi", "SimFHL", "SimFHL_Servo", "SimLiDAR", "SimFT", "SimEL", "SimMPC_Koopman"];
 ExpBaseMode = ["ExpSuspendedLoad","ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", "ExpFT", "ExpEL", "ExpMPC_Koopman"];
-fExp = 0;
-fDebug = 0; % 1: active : for debug function
+fExp = 1;
+fDebug = 1; % 1: active : for debug function（fExp=0のときは1にする。これでCOMポートの接続とかしてるっぽい。
 PInterval = 3;%3; % sec : poling interval for emergency stop
 gui = SimExp(fExp, fDebug, PInterval);
 
