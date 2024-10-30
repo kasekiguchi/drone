@@ -6,6 +6,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         param
         Q
         IT
+        flag_anti_spike=0
     end
     
     methods
@@ -105,7 +106,12 @@ classdef HLC_SUSPENDED_LOAD < handle
            tmpHL = obj.self.controller.hlc.result.input;
            obj.result.input = tmpHL;
            if strcmp(cha,'f')
+               if obj.flag_anti_spike < 5
+                   obj.result.input =[uf(1);0;0;0];
+                   obj.flag_anti_spike=obj.flag_anti_spike+1;
+               else
                 obj.result.input = uf +[0;us(2:4)];
+               end
             end
             
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
