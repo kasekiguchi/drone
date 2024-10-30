@@ -80,5 +80,5 @@ z=0.5;
 % y = (r*cos(pi*t/T)+a)*sin(2*pi*t/T);
 % z = r*sin(pi*t/T);
 
-ref=@(t)[x;y;z;0];
+ref=@(t)[x;y;z;0]; %最後yaw
 end
