@@ -126,25 +126,25 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %%
 clear; clc;
 flg.bilinear = 0;
-flg.normalize = 0;
-flg.without_pos = 0;
+flg.normalize = 1;
+flg.without_pos = 1;
 F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
-% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_KiyamaY20_Zdecreased20k';
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 % exp_data = 'Exp_Kiyama_XY_20data';
-exp_data = 'Exp_Kiyama_Error_correct';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
+% exp_data = 'Exp_Kiyama_Error_correct';
+FileName = strcat(FileName_common, exp_data, '_', 'code10_normalize_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat'); % 以前+xyz速度から
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_45k_Zdecreased.mat'); % z方向45000データ減少
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
@@ -154,7 +154,7 @@ targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20_Zdecreased30k.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Add_X_Y_20data.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
