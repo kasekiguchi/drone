@@ -19,7 +19,7 @@ load("sl1031nabu_en_movie2_Log(31-Oct-2024_18_22_46).mat");
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
@@ -35,6 +35,7 @@ flight_finish_idx = find(log.Data.phase==102, 1, 'last');%)の後に-1000すれ�
 % initialize data
 Est = zeros(12, flight_finish_idx-arming_start_idx+1);
 Road_est = zeros(9, flight_finish_idx-arming_start_idx+1);
+Road_sensor = zeros(3, flight_finish_idx-arming_start_idx+1);
 Ref = zeros(3,  flight_finish_idx-arming_start_idx+1);
 Input = zeros(4,flight_finish_idx-arming_start_idx+1);
 InnerInput = zeros(8, flight_finish_idx-arming_start_idx+1);
@@ -53,6 +54,10 @@ for i = arming_start_idx:flight_finish_idx
      Road_est(:,i-arming_start_idx+1) = [Agent.estimator.result{i}.state.pL;
                  Agent.estimator.result{i}.state.vL;
                  Agent.estimator.result{i}.state.wL];
+     Load_sensor(:,i-arming_start_idx+1) = [Agent.sensor.result{i}.state.pL;%センサーの真値が必要な場合はこれを使う．
+                % Agent.sensor.result{i}.state.vL;
+                 %Agent.sensor.result{i}.state.wL
+                 ];
     Ref(:,i-arming_start_idx+1) = [Agent.reference.result{i}.state.p];
 
     Input(:,i-arming_start_idx+1) = Agent.input{i};
@@ -92,15 +97,27 @@ RMSE_x_flight_only = 0;
 RMSE_y_flight_only = 0;
 RMSE_z_flight_only = 0;
 
+RMSE_x_flight_only_Load = 0;
+RMSE_y_flight_only_Load = 0;
+RMSE_z_flight_only_Load = 0;
+
 for i = flight_start_idx:flight_finish_idx
     RMSE_x_flight_only = RMSE_x_flight_only + (Est(1, i-arming_start_idx+1) - Ref(1, i-arming_start_idx+1))^2;
     RMSE_y_flight_only = RMSE_y_flight_only + (Est(2, i-arming_start_idx+1) - Ref(2, i-arming_start_idx+1))^2;
     RMSE_z_flight_only = RMSE_z_flight_only + (Est(3, i-arming_start_idx+1) - Ref(3, i-arming_start_idx+1))^2;
+
+    RMSE_x_flight_only_Load = RMSE_x_flight_only_Load + (Road_est(1, i-arming_start_idx+1) - Ref(1, i-arming_start_idx+1))^2;
+    RMSE_y_flight_only_Load = RMSE_y_flight_only_Load + (Road_est(2, i-arming_start_idx+1) - Ref(2, i-arming_start_idx+1))^2;
+    RMSE_z_flight_only_Load = RMSE_z_flight_only_Load + (Road_est(3, i-arming_start_idx+1) - Ref(3, i-arming_start_idx+1))^2;
 end
 num_samples_flight_only = flight_finish_idx - flight_start_idx + 1;
 RMSE_x_flight_only = sqrt(RMSE_x_flight_only / num_samples_flight_only);
 RMSE_y_flight_only = sqrt(RMSE_y_flight_only / num_samples_flight_only);
 RMSE_z_flight_only = sqrt(RMSE_z_flight_only / num_samples_flight_only);
+
+RMSE_x_flight_only_Load = sqrt(RMSE_x_flight_only_Load / num_samples_flight_only);
+RMSE_y_flight_only_Load = sqrt(RMSE_y_flight_only_Load / num_samples_flight_only);
+RMSE_z_flight_only_Load = sqrt(RMSE_z_flight_only_Load / num_samples_flight_only);
 
 % Calculate RMSE for flight start + A seconds, B seconds period
 idx_A_seconds = find(flight_times >= A, 1, 'first');
@@ -156,6 +173,10 @@ RMSE_z_after_C_D = sqrt(RMSE_z_after_C_D / num_samples_after_C_D);
 fprintf('Flight-only RMSE for x direction: %.4f [m]\n', RMSE_x_flight_only);
 fprintf('Flight-only RMSE for y direction: %.4f [m]\n', RMSE_y_flight_only);
 fprintf('Flight-only RMSE for z direction: %.4f [m]\n', RMSE_z_flight_only);
+
+fprintf('Flight-only_Load RMSE for x direction: %.4f [m]\n', RMSE_x_flight_only_Load);
+fprintf('Flight-only_Load RMSE for y direction: %.4f [m]\n', RMSE_y_flight_only_Load);
+fprintf('Flight-only_Load RMSE for z direction: %.4f [m]\n', RMSE_z_flight_only_Load);
 
 fprintf('RMSE for x direction after %d seconds from flight start for %d seconds: %.4f [m]\n', A, B, RMSE_x_after_A_B);
 fprintf('RMSE for y direction after %d seconds from flight start for %d seconds: %.4f [m]\n', A, B, RMSE_y_after_A_B);
