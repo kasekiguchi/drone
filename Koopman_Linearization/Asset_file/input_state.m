@@ -15,7 +15,9 @@ function state = input_state(param,mode)
     % Z = quaternions_all(X);
 
     % Z = quaternions_all(param{7}); % ある区間の始めの状態
-    if mode == 1
+    if mode == 0
+        Z = quaternions_all(param{7});
+    elseif mode == 1
         Z = obs1(param{7});
     elseif mode == 2
         Z = obs2(param{7});

@@ -37,6 +37,7 @@ classdef FIGURE_EXP
             obj.data.time_idx = varargin{1}.time_idx;
             obj.data.yrange = varargin{1}.yrange;
 
+
             obj = obj.decide_phase();
             obj = obj.store_data();
             % obj = obj.store_data_takeoff();
@@ -51,7 +52,7 @@ classdef FIGURE_EXP
             calt = obj.data.logt;
             % plot_title = strcat(strrep(obj.filename,'_','-'));
             plot_title = '';
-            xrange_max = 10;
+            xrange_max = obj.data.logt(end);
             % xrange_max = obj.data.logt(end);
             set(0,'defaultAxesFontSize', 20)
             set(0, 'DefaultLineLineWidth', 1.5);
@@ -104,8 +105,9 @@ classdef FIGURE_EXP
             % calculation time
             plot(obj.data.logt(1:end-1), diff(calt), 'LineWidth', 1.5);
             % obj.background_color(-0.1, gca, obj.log.Data.phase); 
-            yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+            yline(0.025, '--', 'Color', 'red', 'LineWidth', 1.5); hold off;
             ytickformat('%.3f'); xlim([0 xrange_max]); grid on;
+            xlabel("Time [s]"); ylabel("Calculation time [s]"); legend("calculation time", "control time","Location","best");
             ylim([0 0.025])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             obj.data.fignum = obj.data.fignum+1;
             

@@ -46,18 +46,22 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         % tra = [cos(2*pi*(tt-0.5)'/T), sin(2*pi*(tt-0.5)'/T), 0 * tt' + 1];
         
         %% マウスによる入力
-        % figure
-        % figt = 0:0.1:50;
-        % x = cos(2*pi*figt/T); % 書きたいreference のプロット
-        % y = sin(2*pi*figt/T);  
-        % scatter(x,y); hold on;
-        % scatter(tra(1,1), tra(1,2), '*');
-        % daspect([1 1 1]);
-        % [x1,y1] = ginput;
-        % middle_wp = [x1, y1, ones(size(x1,1),1)];
-        % disp('The midpoint is inserted by mouse click.')
-        % 
-        % if isempty(x1); close all; error('Error creating point'); end
+        figure
+        xlim([-1 1]); ylim([-1 1]);
+        daspect([1 1 1]);
+
+        xdata = []; ydata = []; hold on; % プロットをする
+        for i = 1:size(time,1)-2
+            [x,y] = ginput(1); xdata = [xdata; x]; ydata = [ydata; y]; plot(x, y, '*');
+        end
+
+        % [xdata,ydata] = ginput(size(time,1)-2); % プロットしない
+        middle_wp = [xdata, ydata, ones(size(xdata,1),1)];
+        disp('The midpoint is inserted by mouse click.'); pause(1);
+        close all;
+
+        wp = [0, 0, 1;middle_wp; 0, 0, 1];
+        waypoints = [time, wp];
 
         %% 直接入力
         % middle_wp = [0, -0.05, 1;

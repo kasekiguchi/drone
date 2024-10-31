@@ -34,7 +34,7 @@ classdef MPC_CONTROLLER_HLMC < handle
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
-      obj.param = param.param; % obj.param = Controller_HLMCMPC.mで設定したパラメーター
+      obj.param = param; % obj.param = Controller_HLMCMPC.mで設定したパラメーター
       %%  入力や制約などのパラメータ
       obj.input = obj.param.input;
       obj.const = obj.param.const;

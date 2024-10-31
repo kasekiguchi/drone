@@ -30,8 +30,8 @@ initial_state.w = [0; 0; 0];
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
+% model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
+model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
 load(model_file,'est') %vzから算出したzで学習、総推力
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -146,7 +146,7 @@ app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 % Graphplot(app)
 % app.agent(1).animation(app.logger,"target",1,"opt_plot",[]);
 
-flg.figtype = 0; % 0:subplot
+flg.figtype = 1; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
 flg.animation = 0;
@@ -160,7 +160,7 @@ end
 
 function result_plot(app)
     app.fExp = 1;
-    flg.figtype = 0; % 0:subplot
+    flg.figtype = 1; % 0:subplot
     flg.savefig = 0;
     flg.animation_save = 0;
     flg.animation = 0;

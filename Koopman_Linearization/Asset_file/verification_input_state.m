@@ -101,7 +101,8 @@ torque = zeros(3, step_num);
 
 Est = zeros(9,1);
 % Est = Est_result(:, start_num);
-X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est});
+mode = 2; % 1:00, 2:10, 0:free
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
 
 % 位置含まないモデルのとき
 p = [0;0;0];
