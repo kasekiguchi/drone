@@ -17,9 +17,9 @@ Controller.F4=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);%yawの位置、速度�
 %↓関口
 At = diag([1,1,1,1,1],1);
 Bt = [0;0;0;0;0;1];
-f2 = lqr(At,Bt,diag([10000,10,10,1,0.001,0.001]),0.5);
+f2 = lqr(At,Bt,diag([50000,50000,10,1,0.001,0.001]),0.01);
 pc = eig(At-Bt*f2);
-tt = 0.015;
+tt = 0.025;
 pd = exp(pc*tt);
 sysc = ss(At,Bt,eye(6),0);
 sysd = c2d(sysc,tt);

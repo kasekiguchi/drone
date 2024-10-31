@@ -113,7 +113,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.result.input = uf +[0;us(2:4)];
                end
             end
-            
+            % max,min are applied for the safty
+      obj.result.input = [max(0,min(15,obj.result.input(1)));max(-1,min(1,obj.result.input(2)));max(-1,min(1,obj.result.input(3)));max(-1,min(1,obj.result.input(4)))];
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
 
             result = obj.result;
