@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1031nabu_xy_same1_Log(31-Oct-2024_16_28_44).mat");
+load("sl1031nabu_en_movie2_Log(31-Oct-2024_18_22_46).mat");
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 % load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");
@@ -217,7 +217,7 @@ if figtype == 1
     figure(9); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
     grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
-    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Reference",'Interpreter','latex');
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone","Load", "Reference",'Interpreter','latex');
     %目標軌道と機体と荷物のxyz重ねて表示↓
     figure(10);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
@@ -300,7 +300,7 @@ if z_ari==0
     plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
     grid on; xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
-    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Load", "Reference",'Interpreter','latex');
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone","Load", "Reference",'Interpreter','latex');
     
 else
 %z_ari
@@ -350,7 +350,7 @@ plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(lo
     plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
     grid on; xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
-    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Load", "Reference",'Interpreter','latex');
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone","Load", "Reference",'Interpreter','latex');
     
 subplot(m,n,7);plot(logt, Z_1); 
      % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
