@@ -31,7 +31,8 @@ initial_state.w = [0; 0; 0];
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
+model_file = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
+% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
 load(model_file,'est') %vzから算出したzで学習、総推力
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -44,7 +45,7 @@ catch
     B = est.B;
     C = est.C;
 end
-%% 位置を含まないモデルの場合，速度から算出する行列に変更
+%% 位置を含まないモデルの場合，速度から算出する行列に変更 controller内で変更するようにした
 % なんか上手くいかない部分ができちゃったから封印
 % if model_file == '2024-09-11_Exp_Kiyama_code10_saddle.mat'
 % A_1 = [eye(3), zeros(3), eye(3)*dt, zeros(3, size(A,1)-6)];
@@ -76,17 +77,17 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 
 %% 1コンのとき  100行目もコメントイン
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
 % conmode = 1;
 %% 2つのコントローラの設定  101行目もコメントイン
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.result.input = [0;0;0;0];
-agent.controller.do = @controller_do;
-conmode = 2;
+% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.result.input = [0;0;0;0];
+% agent.controller.do = @controller_do;
+% conmode = 2;
 
 %%
 run("ExpBase");
