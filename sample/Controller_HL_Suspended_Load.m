@@ -17,7 +17,7 @@ Controller.F4=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);%yawの位置、速度�
 %↓関口
 At = diag([1,1,1,1,1],1);
 Bt = [0;0;0;0;0;1];
-f2 = lqr(At,Bt,diag([50000,50000,10,1,0.001,0.001]),0.01);
+f2 = lqr(At,Bt,diag([50000,75000,10,1,0.001,0.001]),0.01);
 pc = eig(At-Bt*f2);
 tt = 0.025;
 pd = exp(pc*tt);
@@ -27,17 +27,18 @@ sysd = c2d(sysc,tt);
 Controller.F2 = place(Ad,Bd,pd);%[ 101.6973  254.1684  237.2560  126.4411   43.0970    9.1920];
 % Contorller.F2= [ 3162.3  3189.1  1608.1  514.1   109.6    14.8];%関口ベタ打ち
  % Controller.F2 = lqrd([0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0],[0;0;0;0;0;1],diag([10000,10,10,1,1,1]),[0.1],0.025);
-% Contoroller.F3=Controller.F2;
-At = diag([1,1,1,1,1],1);
-Bt = [0;0;0;0;0;1];
-f2 = lqr(At,Bt,diag([10000,10,10,1,1,1]),0.01);
-pc = eig(At-Bt*f2);
-tt = 0.015;
-pd = exp(pc*tt);
-sysc = ss(At,Bt,eye(6),0);
-sysd = c2d(sysc,tt);
-[Ad,Bd, ~,~] = ssdata(sysd);
-Controller.F3 = place(Ad,Bd,pd);
+ Controller.F3 = Controller.F2;
+%↓従来F3
+% At = diag([1,1,1,1,1],1);
+% Bt = [0;0;0;0;0;1];
+% f2 = lqr(At,Bt,diag([10000,10,10,1,1,1]),0.01);
+% pc = eig(At-Bt*f2);
+% tt = 0.015;
+% pd = exp(pc*tt);
+% sysc = ss(At,Bt,eye(6),0);
+% sysd = c2d(sysc,tt);
+% [Ad,Bd, ~,~] = ssdata(sysd);
+% Controller.F3 = place(Ad,Bd,pd);
 
 %↑関口
  % Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);%位置z、速度z
