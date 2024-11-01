@@ -5,7 +5,7 @@ time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
-% motive = Connector_Natnet('192.168.100.208');
+% motive = Connector_Natnet('192.168.100.208'); %総研？
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
