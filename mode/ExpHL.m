@@ -1,8 +1,8 @@
-ts = 0; % initial time
-dt = 0.025; % sampling period
-te = 10000; % termina time
-time = TIME(ts,dt,te);
-in_prog_func = @(app) in_prog(app);
+ts = 0; % initial time %実機実験の初期時刻
+dt = 0.025; % sampling period %サンプリング時間　制御周期のこと？
+te = 10000; % termina time %最終時刻　これ以上プログラムは動かせない？
+time = TIME(ts,dt,te); %上3つの関数をまとめている
+in_prog_func = @(app) in_prog(app); %ExpHL下部でin_prog(app)が定義
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
