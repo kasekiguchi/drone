@@ -17,7 +17,7 @@ fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
 endTime = 1e2/2;%1E3;
-fnowdata = 1;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -31,7 +31,8 @@ if fnowdata==1
     end
     droneID = logger.target(1:end-1);
 else 
-    loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
+    % loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
+    loggers = simple_log_expandSysEKF;
     droneID = 1:length(loggers)-1;
 end
 lgnd.payload=["payload","split payload" + droneID];
@@ -64,6 +65,7 @@ lgnd.drone="drone" + droneID;
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
      n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
+     n = ["t_errx0","t_erry0","t_errz0"];
      % n = ["mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      % n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
@@ -166,7 +168,7 @@ if isSaved
         date2=string(datetime('now','Format','yyyy_MMdd'));%日付
         
     %変更========================================================
-       % date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
+       date2 = "2024_1022";%日付が変わってしまった場合は自分で変更
     subfolder='sim';%sim or exp
     ExpSimName='coop4droneNoise';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容

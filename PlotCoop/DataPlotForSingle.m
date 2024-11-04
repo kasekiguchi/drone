@@ -17,8 +17,8 @@ fnowData = 0;%現在の結果を描画する
 fMul =0;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 40;
-endTime = 62;%1E3;
+startTime = 0;
+endTime = 50;%1E3;
 % startTime = 32;
 % endTime = 95;%1E3;
 %どの時間の範囲を描画するか指定   
@@ -41,8 +41,9 @@ endTime = 62;%1E3;
     % log2=changeResult(log_addingTtoEL3, "elc");
  %simplifyLogger
     loggers = {
-        offlineLogger
-        simple_log
+        % offlineLogger
+        % simple_log
+        simple_log_expandSysEKF
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -106,6 +107,7 @@ endTime = 62;%1E3;
      n = "input";
      n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D","uHL","t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","t_vxL" ,"t_vyL" ,"t_vzL"];%比較するとき複数まとめる
      n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"];%比較するとき複数まとめる
+     n=["t_errx","t_erry","t_errz"];
 %========================================================================
 % multiFigure
 
