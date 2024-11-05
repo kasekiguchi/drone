@@ -1,4 +1,4 @@
-classdef HLMCMPC_CONTROLLER < handle
+classdef HLMCMPC_controller < handle
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -28,7 +28,7 @@ classdef HLMCMPC_CONTROLLER < handle
   end
 
   methods
-    function obj = HLMCMPC_CONTROLLER(self, param)
+    function obj = HLMCMPC_controller(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -37,7 +37,7 @@ classdef HLMCMPC_CONTROLLER < handle
       obj.input = obj.param.input;
       obj.const = obj.param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-      obj.input.input_TH = obj.param.input.range; % 最大最小入力
+      % obj.input.input_TH = obj.param.input.range(:,1); % 最大最小入力
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = obj.param.input.Initsigma;  % 初期化
@@ -142,20 +142,21 @@ classdef HLMCMPC_CONTROLLER < handle
         obj.input.AllRemove = 0;
       end
 
+      rng("shuffle");
       %% ホライズンにかけて分散大きく
       ksigma_max = 0.1 * obj.param.H;
       ksigma = linspace(1,1+ksigma_max,obj.param.H);
       inputSigma = ksigma .* obj.input.sigma';
-      obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
-      obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
-      obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
-      obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
+      obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
+      obj.input.u2 = max(-obj.input.input_TH(2), min(obj.input.input_TH(2), normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
+      obj.input.u3 = max(-obj.input.input_TH(3), min(obj.input.input_TH(3), normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
+      obj.input.u4 = max(-obj.input.input_TH(4), min(obj.input.input_TH(4), normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
 
       %% 正規分布ふつう
-      % obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
-      % obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
-      % obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
-      % obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
+      % obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
+      % obj.input.u2 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
+      % obj.input.u3 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
+      % obj.input.u4 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
@@ -205,7 +206,8 @@ classdef HLMCMPC_CONTROLLER < handle
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+        % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         obj.input.u = [vf; vs];
 
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
@@ -221,6 +223,7 @@ classdef HLMCMPC_CONTROLLER < handle
         else
           obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
           % obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
+          obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))'));
         end
 
       elseif removeF == obj.N    % 全棄却
@@ -268,7 +271,7 @@ classdef HLMCMPC_CONTROLLER < handle
           obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
           obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
       fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+          obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), exitflag);
       fprintf("\n");
       
       result = obj.result;
