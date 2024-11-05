@@ -147,32 +147,90 @@ xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
 close all
 filename = '2024-09-11_Exp_Kiyama_code10_saddle';
 log1=load(strcat(filename, '.mat'), 'est');
-filename = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
-log2=load(strcat(filename, '.mat'), 'est');
+Est1 = zeros(9,1);
+% filename = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
+% log2=load(strcat(filename, '.mat'), 'est');
+% Est2 = zeros(9,1); % 位置含まないモデル：zeros(9,1), 通常：zeros(12,1)
 filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 log3=load(strcat(filename, '.mat'), 'est');
+Est3 = zeros(12,1);
 
 clear X
 N = 100;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
-thrust = 0.5884 * 9.81 * ones(1, step_num);  
+thrust = 0.5884 * 9.81065 * ones(1, step_num);  
 % thrust = zeros(1, step_num);
 torque = zeros(3, step_num);
 % thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
 % torque = input_result(2:4,start_num:step_num);
 
-Est1 = zeros(9,1);
-Est2 = zeros(9,1); % 位置含まないモデル：zeros(9,1), 通常：zeros(12,1)
-Est3 = zeros(12,1);
 X1 = input_state({log1.est.A, log1.est.B, log1.est.C, step_num, thrust, torque, Est1},2);
-X2 = input_state({log2.est.A, log2.est.B, log2.est.C, step_num, thrust, torque, Est2},2);
+% X2 = input_state({log2.est.A, log2.est.B, log2.est.C, step_num, thrust, torque, Est2},2);
 X3 = input_state({log3.est.A, log3.est.B, log3.est.C, step_num, thrust, torque, Est3},1);
 
 % 位置含まないモデルのとき
 init = [0;0;0];
 X1 = without_position(init, step_num, X1);
-X2 = without_position(init, step_num, X2);
+% X2 = without_position(init, step_num, X2);
+% X3 = without_position(init, step_num, X3);
+
+Fontsize = 15;  
+set(0,'defaultAxesFontSize',25);
+set(0,'defaultTextFontsize',15);
+set(0,'defaultLineLineWidth',2);
+set(0,'defaultLineMarkerSize',15);
+ylimsetting = [-inf inf; -inf inf; -inf inf];
+% ylimsetting = [0 1.5; -0.15 0; -25 0];
+legendlist = {'NoIncludePosition', 'IncludePosition'}; % 位置ありと位置なしの比較
+% legendlist = {'Without-Standardization', 'With-Standardization'};
+% legendlist = {'Without-Standardization', 'With-Standardization', 'Previous'};
+state = [1:3]';
+figure(1);
+subplot(1,3,1);
+plot(0:step_num,X1(1,:)); hold on; 
+% plot(0:step_num,X2(1,:)); 
+plot(0:step_num,X3(1,:));
+hold off;
+grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
+xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex'); legend(legendlist, 'Location','best');
+
+subplot(1,3,2);
+plot(0:step_num,X1(2,:)); hold on; 
+% plot(0:step_num,X2(2,:)); 
+plot(0:step_num,X3(2,:)); 
+hold off; 
+grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
+xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
+
+subplot(1,3,3);
+plot(0:step_num,X1(3,:)); hold on; 
+% plot(0:step_num,X2(3,:)); 
+plot(0:step_num,X3(3,:)); 
+hold off; 
+grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
+xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
+
+%% 比較するデータ数を可変にしたい
+clear; close all;
+init = [0;0;0];
+P = [0.5884 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
+filename{1} = '2024-09-11_Exp_Kiyama_code10_saddle';
+filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename{3} = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
+filename{3} = @roll_pitch_yaw_thrust_torque_physical_parameter_model;
+Estnum = [9 12 12];
+withoutp = [1 0 0];
+nonlinear = [0 0 1];
+log = {size(filename,2)};
+X = {size(filename,2)};
+
+N = 100;
+start_num = 1; % 単体で利用時はステップ数
+step_num = start_num + N;
+% thrust = 0.5884 * 9.81065 * ones(1, step_num);  
+thrust = zeros(1, step_num);
+torque = zeros(3, step_num);
 
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',25);
@@ -183,34 +241,43 @@ ylimsetting = [-inf inf; -inf inf; -inf inf];
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
 % legendlist = {'NoIncludePosition', 'IncludePosition'}; % 位置ありと位置なしの比較
 % legendlist = {'Without-Standardization', 'With-Standardization'};
-legendlist = {'Without-Standardization', 'With-Standardization', 'Previous'};
-state = [1:3]';
+% legendlist = {'Without-Standardization', 'Previous', 'With-Standardization'};
+legendlist = {'NoIncludePosition', 'IncludePosition', 'Non-linear'};
+
 figure(1);
-subplot(1,3,1);
-plot(0:step_num,X1(1,:)); hold on; 
-plot(0:step_num,X2(1,:)); 
-plot(0:step_num,X3(1,:));
-hold off;
-grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex'); legend(legendlist, 'Location','best');
+for i = 1:size(filename,2)
+    Est{i} = zeros(Estnum(i),1);
+    if nonlinear(i) == 1
+        X{i} = nonlinear_equ(Est{i}, step_num, filename{i}, [thrust; torque], P); %非線形モデル
+    else
+        log{i} = load(strcat(filename{i}, '.mat'), 'est');
+        % 位置無しモデル
+        if withoutp(i) == 1
+            X{i} = input_state({log{i}.est.A, log{i}.est.B, log{i}.est.C, step_num, thrust, torque, Est{i}},2);
+            X{i} = without_position(init, step_num, X{i});   
+        else
+            X{i} = input_state({log{i}.est.A, log{i}.est.B, log{i}.est.C, step_num, thrust, torque, Est{i}},1);
+        end
+    end
+    % plot
+    subplot(1,3,1);
+    plot(0:step_num,X{i}(1,:)); hold on; 
+    grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
+    xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex'); legend(legendlist, 'Location','best');
 
-subplot(1,3,2);
-plot(0:step_num,X1(2,:)); hold on; 
-plot(0:step_num,X2(2,:)); 
-plot(0:step_num,X3(2,:)); 
+    subplot(1,3,2);
+    plot(0:step_num,X{i}(2,:)); hold on;
+    grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
+    xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex'); %legend(legendlist, 'Location','best');
+
+    subplot(1,3,3);
+    plot(0:step_num,X{i}(3,:)); hold on;
+    grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
+    xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex'); %legend(legendlist, 'Location','best');
+end
 hold off; 
-grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
 
-subplot(1,3,3);
-plot(0:step_num,X1(3,:)); hold on; 
-plot(0:step_num,X2(3,:)); 
-plot(0:step_num,X3(3,:)); 
-hold off; 
-grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
-
-%%
+%% 部分の行列抜き出し
 A3 = log3.est.A(7:9,7:9);
 B3 = log3.est.B(7:9,:); % 昨年度
 
@@ -260,4 +327,12 @@ function X = without_position(init, step_num, X)
         p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
     end
     X = [p; X];
+end
+
+function p = nonlinear_equ(init, step_num, plant, u, P)
+    p(:,1) = init;
+    for i = 1:step_num
+        [~,tmpx] = ode15s(@(t,x) plant(p(:,i),u(:,i),P),[0 0.025],p(:,i));
+        p(:,i+1) = tmpx(end,:)';
+    end
 end
