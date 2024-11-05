@@ -1,5 +1,6 @@
 %% Initialize settings
 % set path
+% ここでプログラムを動かしている
 %パスの準備--このセッションの実行によってパスが通る
 clear all %全ての変数をワークスペースから削除する
 cf = pwd; %cfにpwdを代入 pwd=現在のフォルダを返すmain.mがあるフォルダをcfに

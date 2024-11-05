@@ -1,4 +1,5 @@
 classdef LOGGER < handle % handleクラスにしないとmethodの中で値を変えられない
+  % データの保存と保存したデータの呼び出しを行うファイル
   % データ保存用クラス
   % obj = LOGGER(target,row,items)
   % target : 保存対象の agent indices : example 2:4 : default 1:N
@@ -8,19 +9,19 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
   % obj.Data.t : time
   % obj.Data.agent = {row, item_id, target_id}
   properties
-    Data
-    k; % time index for logging
-    target % 保存対象の agent indices : example 2:4 : default 1:N
+    Data %　保存データの一番大きなくくり
+    k; % time index for logging　logに保存するフライトの時間
+    target % 保存対象の agent indices : example 2:4 : default 1:N 保存対象の数を表している
     items % 追加で保存するアイテム名
     item_num % 追加保存のアイテム数
     agent_items % result以外で追加保存するagent内の変数
-    fExp
-    overwrite_target = ["all"];
+    fExp %実機とシミュレーションを切り替える 実機実験時は1を指定
+    overwrite_target = ["all"]; %"all":ベクトルのすべての要素が 0 以外の場合は True
   end
 
   methods
 
-    function obj = LOGGER(target, number, fExp, items, agent_items, option)
+    function obj = LOGGER(target, number, fExp, items, agent_items, option) %保存したmatファイルのデータを呼び出すときに使用
       % LOGGER(target,row,items)
       % target : ログを取る対象　example 1:3, usage agent(obj.target)
       % number : 確保するデータサイズ　length(ts:dt:te)
@@ -34,20 +35,27 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       % logger=LOGGER("Data/filename.mat")
       % logger=LOGGER("Data/dirname");
       arguments
-        target
-        number = []
-        fExp = []
-        items = []
-        agent_items = []
-        option.overwrite_target = []
+        target % target : ログを取る対象　example 1:3, usage agent(obj.target)
+        number = []% number : 確保するデータサイズ　length(ts:dt:te)
+        fExp = [] %実機とシミュレーションを切り替える 実機実験時は1を指定
+        items = [] % items  : agent 以外で保存するデータの名前
+        agent_items = [] % agent_items : default以外で保存するデータ ["inner_input"]
+        option.overwrite_target = [] % ログを取る対象を更新して上書きする判定?
       end
 
       if isstring(target) || ischar(target) % save で保存されたデータを呼び出す場合
+          % isstring:targetがstring配列である場合1(true)を返し，それ以外の場合は0(false)を返す
+          % ischar:targetが文字配列の場合はlogical 1(true)，その他の場合はlogical 0(false)を返す
+          % target(ログを取る対象)がstring配列(テキストをデータとして処理)または文字配列(文字列を収納するために使用するchart型配列)の場合
 
         if contains(target, "Data.mat") | ~contains(target, ".mat") % separate で保存された場合
+            % contains:target内に"Data.mat"といるパターンがあるか
+            % |:ビットOR演算子 両辺を0,1に変換してどちらかが1ならその一のビットの位置で1を返す
+            % targetがstring配列または文字配列かつtarget内に"Data.mat"が含まれているか".mat"が含まれていないとき
 
           if contains(target, "Data.mat")
-            target = erase(target, "/Data.mat");
+              % targetがstring配列または文字配列かつtarget内に"Data.mat"が含まれているとき
+            target = erase(target, "/Data.mat"); %target内から"/Data.mat"の文字を削除する(配列自体は残る)
           end
 
           tmp = load(target + "/Data.mat");

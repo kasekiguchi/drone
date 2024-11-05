@@ -12,7 +12,6 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 // Emergence        :  [ HIGH LOW ]
 #define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
 #define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
-#define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
@@ -65,48 +64,13 @@ void setup()
   digitalWrite(GLED_PIN, LOW); //15(A1)ピンから0V出力
   pinMode(RLED_PIN, OUTPUT); //14(A0)ピンを出力に設定
   digitalWrite(RLED_PIN, HIGH); //14(A0)ピンから5V出力
-  pinMode(EM_PIN, INPUT_PULLUP); // emergency_stop を割り当てるピン D3ピンを入力に設定でプルアップ抵抗を有効
-  pinMode(RST_PIN, INPUT_PULLUP); //A4ピンを入力に設定でプルアップ抵抗を有効
 
   setupPPM(); // ppm 出力開始
-
-  // 緊急停止
- //attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
-  while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
-  {
-  }
-  last_received_time = micros(); //micros():Arduinoボードがプログラムの実行を開始した時から現在までの時間をマイクロ秒単位で返す約70分で0に戻る　最後に受信されたメッセージが読み取られた時刻をast_received_timeに格納
 }
 
 void loop()
 {
-  receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
-    // if (!isEmergency)
-    // {
-    //   receive_serial();
-    // }
-    // else
-    // {
-    //   if (digitalRead(EM_PIN) == HIGH && fReset == false)
-    //   {
-    //     delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-    //     if (digitalRead(EM_PIN) == HIGH)
-    //     {
-          
-    //       Serial.println("Reset available.");
-    //       digitalWrite(LED_PIN, LOW);
-    //       digitalWrite(RLED_PIN, LOW);
-    //       digitalWrite(GLED_PIN, HIGH);
-          
-    //       fReset = true;
-    //     }
-    //   }
-    //   else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
-    //   {
-    //     software_reset();
-    //   }
-    // }
-    
+  receive_serial();
 }
 //*********** local functions  *************************//
 void receive_serial() // ---------- loop function : receive signal by UDP 信号を受信したら実行
@@ -137,68 +101,59 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
           pw[i] = CH_MAX; // pw = 1000
         }
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
-        // REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
+        REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
         
 
-        /*
-    if (i == 4)
-    {
-      if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
-        if (fInitial == true){
-        //Serial.println("Deactivate arming");
-        digitalWrite( GLED_PIN, HIGH );
-        digitalWrite( RLED_PIN, LOW );
-        }else{
-        //Serial.println("Arming");
-        digitalWrite( GLED_PIN, LOW );
-        digitalWrite( RLED_PIN, LOW );
-        }
-        else
-        {
-          Serial.println("Arming");
-          digitalWrite(GLED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-        }
-      }
-      else
-      {
-        if (fInitial == true)
-        {
-          fInitial = false;
-        }
-        //Serial.println("Ready");
-        digitalWrite( GLED_PIN, LOW );
-        digitalWrite( RLED_PIN, HIGH );
-      }
-    }
-*/
+    // //ここを入れてみる
+    // if (i == 4)
+    // {
+    //   if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
+    //     if (fInitial == true){
+    //     //Serial.println("Deactivate arming");
+    //     digitalWrite( GLED_PIN, HIGH );
+    //     digitalWrite( RLED_PIN, LOW );
+    //     }else{
+    //     //Serial.println("Arming");
+    //     digitalWrite( GLED_PIN, LOW );
+    //     digitalWrite( RLED_PIN, LOW );
+    //     }
+    //     else
+    //     {
+    //       Serial.println("Arming");
+    //       digitalWrite(GLED_PIN, LOW);
+    //       digitalWrite(RLED_PIN, LOW);
+    //     }
+    //   }
+    //   else
+    //   {
+    //     if (fInitial == true)
+    //     {
+    //       fInitial = false;
+    //     }
+    //     //Serial.println("Ready");
+    //     digitalWrite( GLED_PIN, LOW );
+    //     digitalWrite( RLED_PIN, HIGH );
+    //   }
+    // }
       }
       last_received_time = micros();
       isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
-      // if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
-      //   {
-      //     pw[0] = pw[0] - 8;
-      //   }
-      //start_H = REMAINING_W - 9 * TIME_LOW + 680;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
+      start_H = REMAINING_W - 9 * TIME_LOW;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
   }
-  // else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
-  // {
-  //   pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
-  //   pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
-  //   pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
-  //   pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
-  //   pw[4] = CH_OFFSET;              // AUX1 1620
-  //   pw[5] = CH_OFFSET;              // AUX2 1620
-  //   pw[6] = CH_OFFSET;              // AUX3 1620
-  //   pw[7] = CH_OFFSET;              // AUX4 1620
-  //   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-  //   //start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-  //   //        digitalWrite( GLED_PIN, HIGH );
-  //   // digitalWrite( RLED_PIN, LOW );
-  // }
+  else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
+  {
+    pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
+    pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
+    pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
+    pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
+    pw[4] = CH_OFFSET;              // AUX1 1620
+    pw[5] = CH_OFFSET;              // AUX2 1620
+    pw[6] = CH_OFFSET;              // AUX3 1620
+    pw[7] = CH_OFFSET;              // AUX4 1620
+    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
+  }
 }
 
 void Pulse_control() //★パルスの制御
@@ -255,31 +210,3 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
   Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
 }
-// void emergency_stop()
-// {
-//   if (!isEmergency)
-//   {
-//     pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-//     pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-//     pw[2] = CH_OFFSET - CH_MIN;     // throttle
-//     pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-//     pw[4] = CH_OFFSET;              // AUX1
-//     pw[5] = CH_OFFSET;              // AUX2
-//     pw[6] = CH_OFFSET;              // AUX3
-//     pw[7] = CH_OFFSET;              // AUX4
-//     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
-//     isEmergency = true;
-//     digitalWrite(LED_PIN, LOW);
-//     digitalWrite(RLED_PIN, LOW);
-//     digitalWrite(GLED_PIN, HIGH);
-//     Serial.println("EMERGENCY !! ");
-//   }
-// }
-// void software_reset()
-// {
-//   Serial.println("Reset!");
-//   //delay(500);
-//   pinMode(RST_PIN, OUTPUT);
-//   digitalWrite(RST_PIN, LOW);
-//   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
-// }
