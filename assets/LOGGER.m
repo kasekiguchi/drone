@@ -58,10 +58,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             target = erase(target, "/Data.mat"); %target内から"/Data.mat"の文字を削除する(配列自体は残る)
           end
 
-          tmp = load(target + "/Data.mat");
-          fn = fieldnames(obj);
+          tmp = load(target + "/Data.mat"); %load:指定されたファイルから変数を読み込みワークスペースへ
+          %target変数に含まれるパス文字列に "/Data.mat" を追加して、Data.matファイルの完全なパスを作成
+          fn = fieldnames(obj); %構造体objのフィールド名を返すcell配列に返す
 
-          for i = fn'
+          for i = fn' %fnの転置がiの時繰り返す
             obj.(i{1}) = tmp.log.(i{1});
           end
 

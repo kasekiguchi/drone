@@ -5,7 +5,7 @@ te = 10000; % termina time %最終時刻　これ以上プログラムは動か�
 time = TIME(ts,dt,te); %上3つの関数をまとめている
 in_prog_func = @(app) in_prog(app); %ExpHL下部でin_prog(app)が定義　緊急時に中央画面左上にテキストを表示
 post_func = @(app) post(app); %ExpHL下部でpost(app)が定義　GUI画面に表示される結果の表示するものを定義している
-logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]); %LOGGER.mで定義　フライトデータの記録と保存　現在調査中
+logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]); %LOGGER.mで定義　フライトデータの記録と保存　かなり長いため後で調査
 
 motive = Connector_Natnet('192.168.1.2'); % connect to Motive motiveのIPアドレス
 motive.getData([], []); % get data from Motive　motiveからデータを持ってきている
