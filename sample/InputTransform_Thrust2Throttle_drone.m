@@ -18,6 +18,6 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % u_trans_param.gain =[600;600;600;20];%EL
     u_trans_param.gain =[300;300;300;20]; %iflight
     % u_trans_param.th_offset = 230;         % offset 3s[1021] 4s[900]　発掘[926]
-    u_trans_param.th_offset = 230; %iflight
+    u_trans_param.th_offset = 350; %iflight
     % u_trans_param.th_offset = 360;   
 end
