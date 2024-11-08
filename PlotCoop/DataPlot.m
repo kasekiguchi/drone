@@ -12,7 +12,7 @@
 close all
 clear multiFigure option addingContents f
 %選択
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
@@ -80,7 +80,7 @@ nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"th
 % nM = {"mui"+droneID};%比較するとき複数まとめる
 if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
-    nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
+    nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
 
@@ -347,7 +347,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         %controller : "input(1-N)" "mui(muid,mui)"
         %input      : "input(1-N)"
         %=DRONE===================================================
-        %plant      : "p" "v" "q" "w" "pL" "vL" "pT" "wL"
+        %plant      : "p" "v" "q" "w" "pL" "vL" "pT" "wL" (p,v以外は対応する変数に分割前ペイロードの真値が代入されている)
         %sensor     : "p" "v" "q" "w" "pL" "vL" "pT" "wL"
         %estimator  : "p" "v" "q" "w" "pL" "vL" "pT" "wL"
         %reference  : "xd" "p" "v" "ai" "mui" "mLi"
@@ -392,12 +392,10 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             epL{i} = ep{i};
         else
             j = i - 1;
-            refx{j} = rp{i}(1,:);
+            % estimator
+            refx{j} = rp{i}(1,:);%
             refy{j} = rp{i}(2,:);
             refz{j} = rp{i}(3,:);
-            estx{j} = epL{i}(1,:);
-            esty{j} = epL{i}(2,:);
-            estz{j} = epL{i}(3,:);
             err{i} = epL{i}-rp{i};%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);
@@ -414,6 +412,8 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             wroll{j} = ew{i}(1,:);
             wpitch{j} = ew{i}(2,:);
             wyaw{j} = ew{i}(3,:);
+            epi{j} = ep{i};
+            eqi{j} = eq{i};
             epLi{j} = epL{i};
             epLx{j} = epL{i}(1,:);
             epLy{j} = epL{i}(2,:);
@@ -427,10 +427,15 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             epTy{j} = -epT{i}(2,:);
             epTz{j} = -epT{i}(3,:);
             ewLi{j} = ewL{i};
+            %plant
+            ppi{j} = pp{i};
+            pqi{j} = pq{i};
+            ppLi{j} = ppL{i};
             pvi{j} = pv{i};
             pwi{j} = pw{i};
             pvLi{j} = pvL{i};
             pwLi{j} = pwL{i};
+            %controller
             cinputT{j} = cinput{i}(1,:);
             cinputR{j} = cinput{i}(2,:);
             cinputP{j} = cinput{i}(3,:);
@@ -502,12 +507,12 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
 
         time2 = time(2:end);
         allData.t_p = {struct('x',{[time2,time2]},'y',{[rp(2:end),ep(2:end)]}), struct('x','time (s)','y','position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
-        allData.x_y = {struct('x',{[estx,refx]},'y',{[esty,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
-        allData.x_z = {struct('x',{[estx,refx]},'y',{[estz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
-        allData.y_z = {struct('x',{[esty,refy]},'y',{[estz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
-        allData.t_x = {struct('x',{[time2,time2]},'y',{[estx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rci,add_option([],option,addingContents)};
-        allData.t_y = {struct('x',{[time2,time2]},'y',{[esty,refy]}), struct('x','time (s)','y','$y$ (m)'),Rci,add_option([],option,addingContents)};
-        allData.t_z = {struct('x',{[time2,time2]},'y',{[estz,refz]}), struct('x','time (s)','y','$z$ (m)'),Rci,add_option([],option,addingContents)};
+        allData.x_y = {struct('x',{[epLx,refx]},'y',{[epLy,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
+        allData.x_z = {struct('x',{[epLx,refx]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
+        allData.y_z = {struct('x',{[epLy,refy]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
+        allData.t_x = {struct('x',{[time2,time2]},'y',{[epLx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rci,add_option([],option,addingContents)};
+        allData.t_y = {struct('x',{[time2,time2]},'y',{[epLy,refy]}), struct('x','time (s)','y','$y$ (m)'),Rci,add_option([],option,addingContents)};
+        allData.t_z = {struct('x',{[time2,time2]},'y',{[epLz,refz]}), struct('x','time (s)','y','$z$ (m)'),Rci,add_option([],option,addingContents)};
         allData.error = { struct('x',{time2},'y',{err}), struct('x','time (s)','y','error (m)'), LgndCrt(["$x$","$y$","$z$"],Ci),add_option([],option,addingContents)};
         allData.t_errx = {struct('x',{time2},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),Ci,add_option([],option,addingContents)};
         allData.t_erry = {struct('x',{time2},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),Ci,add_option([],option,addingContents)};
@@ -556,6 +561,10 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             allData.("pwi"+string(i)) = {struct('x',{t2},'y',{{pwi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' angular velocity (rad/s)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             allData.("pwLi"+string(i)) = {struct('x',{t2},'y',{{pwLi{i}'}}), struct('x','time (s)','y','link'+string(i) +' angular velocity (rad/s)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             %plant+est
+            allData.("pepi"+string(i)) = {struct('x',{t2},'y',{[{ppi{i}'},{epi{i}'}]}), struct('x','time (s)','y','drone'+string(i) +' position (m)'), ["$x_p$","$y_p$","$z_p$","$x_e$","$y_e$","$z_e$"],add_option([],option,addingContents)};
+            allData.("pepLi"+string(i)) = {struct('x',{t2},'y',{[{ppLi{i}'},{epLi{i}'}]}), struct('x','time (s)','y','payload'+string(i) +' position (m)'), ["$x_p$","$y_p$","$z_p$","$x_e$","$y_e$","$z_e$"],add_option([],option,addingContents)};            
+            allData.("peqi"+string(i)) = {struct('x',{t2},'y',{[{pqi{i}'},{eqi{i}'}]}), struct('x','time (s)','y','drone'+string(i) +' angle (rad)'), ["$roll_p$","$pitch_p$","$yaw_p$","$roll_e$","$pitch_e$","$yaw_e$"],add_option([],option,addingContents)};
+            
             allData.("pevi"+string(i)) = {struct('x',{t2},'y',{[{pvi{i}'},evi{i}']}), struct('x','time (s)','y','drone'+string(i) +' velocity (m/s)'), ["$x_p$","$y_p$","$z_p$","$x_e$","$y_e$","$z_e$"],add_option([],option,addingContents)};
             allData.("pevLi"+string(i)) = {struct('x',{t2},'y',{[{pvLi{i}'},{evLi{i}'}]}), struct('x','time (s)','y','payload'+string(i) +' velocity (m/s)'), ["$x_p$","$y_p$","$z_p$","$x_e$","$y_e$","$z_e$"],add_option([],option,addingContents)};            
             allData.("pewi"+string(i)) = {struct('x',{t2},'y',{[{pwi{i}'},{ewi{i}'}]}), struct('x','time (s)','y','drone'+string(i) +' angular velocity (rad/s)'), ["$roll_p$","$pitch_p$","$yaw_p$","$roll_e$","$pitch_e$","$yaw_e$"],add_option([],option,addingContents)};

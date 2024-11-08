@@ -140,7 +140,7 @@ for j = 1:tn
                 sp = sensor1.p;
                 sR = RodriguesQuaternion(sensor1.Q);%回転行列
                 %分割後ペイロード
-                spL = sp + sR * rho(:,i-1)+noize_sp(:,j) + [0.01;0.01;0];%分割後の質量重心位置
+                spL = sp + sR * rho(:,i-1)+noize_sp(:,j) + 0*[0.2;-0.2;0];%分割後の質量重心位置
                 spT = sensor1.qi(3*i-5:3*i-3,1)+noize_spT(:,j);%分割後の紐の方向ベクトル
                 %ドローン
                 spDrone = spL - agent(1).parameter.li(i-1)*spT;
