@@ -48,6 +48,7 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 % param.jz = 0.03;
                 param.mass = 0.699;
                 % param.mass = 0.810;
+                % param.mass = 0.730; %iflight
                 param.Lx = 0.16;
                 param.Ly = 0.16;
                 param.lx = 0.16/2;%0.05;
@@ -55,6 +56,13 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 param.jx = 0.06;
                 param.jy = 0.06;
                 param.jz = 0.06;
+                % param.Lx = 0.175;
+                % param.Ly = 0.175;
+                % param.lx = 0.175/2;%0.05;
+                % param.ly = 0.175/2;%0.05;
+                % param.jx = 0.085;
+                % param.jy = 0.085;
+                % param.jz = 0.085;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
