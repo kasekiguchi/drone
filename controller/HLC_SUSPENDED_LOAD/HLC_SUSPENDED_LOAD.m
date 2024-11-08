@@ -125,10 +125,10 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % obj.result.mL = elm.mL;
                 % P(15) = elm.mL;
             end
-            P(15) = model.state.mL;
+            % P(15) = model.state.mL;
             % aaa = P(15) 
             % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
-            disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
+            % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
             % obj.result.mLi=P(15);
             F1 = Param.F1;
             F2 = Param.F2;

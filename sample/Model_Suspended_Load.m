@@ -24,6 +24,11 @@ Model.type="Suspended_Load_Model"; % model name
 Setting.method = get_model_name("Load_HL"); % model dynamicsの実体名
 Setting.dim=[24,4,21];
 Setting.num_list = [3,3,3,3,3,3,3,3];
+if ~isempty(agent.plant)
+Setting.method = get_model_name("Load_ex_ey_ez"); % model dynamicsの実体名
+Setting.dim=[24,4,21];
+Setting.num_list = [3,3,3,3,3,3,3,3];
+end
 
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial;
@@ -44,6 +49,6 @@ if ~isempty(agent.plant) && isEstLoadMass
 end
 
 Model.param = Setting;
-Model.parameter_name = ["m","Lx","Ly", "lx", "ly", "lz", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "rotor_r","Length","mL", "cableL"];
+Model.parameter_name = ["m","Lx","Ly", "lx", "ly", "lz", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "rotor_r","Length","mL", "cableL","ex","ey","ez"];
 end
 

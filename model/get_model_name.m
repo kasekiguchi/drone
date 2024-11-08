@@ -20,6 +20,8 @@ end
             model_full_name = "rotation_matrix_thrust_force_physical_parameter_model";
         case "Load"
             model_full_name = "with_load_model";
+        case "Load_ex_ey_ez"
+            model_full_name = "euler_with_load_model";
         case "Load_HL"
             model_full_name = "with_load_model_euler_for_HL";
         case "Load_mL_HL"

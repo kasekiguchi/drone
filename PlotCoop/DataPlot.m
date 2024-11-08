@@ -17,7 +17,7 @@ fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
 endTime = 1e2/2;%1E3;
-fnowdata = 10;
+fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];

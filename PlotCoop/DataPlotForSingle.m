@@ -13,8 +13,8 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 0;%現在の結果を描画する
-fMul =0;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 1;%現在の結果を描画する
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 startTime = 0;
@@ -43,7 +43,7 @@ endTime = 50;%1E3;
     loggers = {
         % offlineLogger
         % simple_log
-        simple_log_expandSysEKF
+        % simple_log_expandSysEKF
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
