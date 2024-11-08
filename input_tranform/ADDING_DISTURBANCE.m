@@ -18,6 +18,7 @@ methods
         %% u = [uthr, uroll, upitch, uyaw, dst]
             i = varargin{1, 1}.k ;
             obj.result = [varargin{1, 5}.controller.result.input;obj.dst(:,i)];%各時刻の入力の後ろに外乱の配列を追加する
+            % obj.result = [varargin{1, 5}.controller.result.input + obj.dst(3:6,i);zeros(6,1)];%入力に外乱を入れる
             u = obj.result;
             obj.self.controller.result.input= obj.result;
     end

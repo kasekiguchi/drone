@@ -6,6 +6,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
         parameter_name % 物理パラメータの名前
         parameter_raw
         type
+        model_error
     end
 
     methods
@@ -21,7 +22,8 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                 fn(fn=="type") = [];
                 fn(fn=="parameter") = [];
                 fn(fn=="parameter_name") = [];     
-                fn(fn=="additional") = [];  
+                fn(fn=="additional") = [];
+                fn(fn=="model_error") = [];
                 obj.parameter_name = string(fn);
                 for i = 1:length(fn)
                     obj.(fn{i}) = param.(fn{i});
@@ -40,11 +42,12 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
         end
     end
     methods
-        function v = get(obj,p,type)
+        function v = get(obj,p,type,fmodelError)
             arguments
                 obj
                 p = "all";
                 type = obj.type;
+                fmodelError=0;
             end
             if strcmp(p,"all")
               if strcmp(type, "row")
@@ -52,6 +55,11 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
               else
                 v = obj.parameter_raw;
               end
+                if fmodelError==0
+                    v = obj.parameter;
+                else
+                    v = obj.model_error;%モデル誤差あり
+                end
             else
                 for i = 1:length(p)
                     if strcmp(type,"row")

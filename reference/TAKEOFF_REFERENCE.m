@@ -5,11 +5,17 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
+
+    %高度0.5m
     te = 10;
-    zd = 1.5; % goal altitude
+    zd = 0.5; % goal altitude
+    % %高度1m
+    % te = 15;
+    % zd = 1.0;
     result
     th_offset
-    th_offset0 = 200;
+    th_offset0 = 280;
+    % th_offset0 = 150;
   end
 
   methods
@@ -23,8 +29,9 @@ classdef TAKEOFF_REFERENCE < handle
       if isempty( obj.base_state ) % first take
         obj.base_time=varargin{1}.t;
         obj.base_state = obj.self.estimator.result.state.p;
+        % obj.base_state = sub2ind(size(obj.self.estimator.result.state.p),row(1),col(1));
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
-        obj.th_offset = obj.self.input_transform.param.th_offset_tl;
+        obj.th_offset = obj.self.input_transform.param.th_offset(1);
       end
       obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);

@@ -25,7 +25,7 @@ methods
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
-        obj.hover_thrust_force = P(1) * P(9);
+        obj.hover_thrust_force =P(1) * P(9);
         obj.state = state_copy(self.estimator.result.state);
     end
 
@@ -34,7 +34,7 @@ methods
         % [Input] varargin : time, cha, logger, env, agent, i
 
         cha = varargin{2};
-        input = varargin{5}(varargin{6}).controller.result.input;
+        input = varargin{5}.controller.result.input;
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
         end

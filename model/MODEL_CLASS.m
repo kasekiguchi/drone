@@ -26,6 +26,7 @@ classdef MODEL_CLASS < dynamicprops & handle
     fig
     self
     loadmass
+    fmodelError
   end
 
   properties %(Access=private)
@@ -34,12 +35,14 @@ classdef MODEL_CLASS < dynamicprops & handle
 
   methods
 
-    function obj = MODEL_CLASS(self,args) % constructor
+    function obj = MODEL_CLASS(self,args,fmE) % constructor
 
       arguments
         self
         args
+        fmE=0;
       end
+      obj.fmodelError=fmE;
       obj.self = self;
       if ~isempty(self.parameter)
          obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
@@ -106,9 +109,11 @@ classdef MODEL_CLASS < dynamicprops & handle
       if (cha == 'q' || cha == 's' || cha == 'a')
         return
       end
-      u = obj.self.controller.result.input;
-      if isempty(obj.param)
-        obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
+
+      if obj.fmodelError && isprop(obj.self,"input_transform")
+                u= obj.self.input_transform.result;
+      else
+                u = obj.self.controller.result.input;
       end
       %複数牽引物用========================================
       % if obj.self.plant.state.p(3) < 0
@@ -132,7 +137,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       %
       %     u = u + obj.noise.value .* randn(size(u));
       %            end
-
+        
       % 状態更新
       if contains(obj.time_scale, 'discrete')
         obj.set_state(obj.projection(obj.method(obj.state.get(), u, obj.param)));
