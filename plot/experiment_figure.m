@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20241024_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_good.mat");
+load("20241025_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_great.mat");
 
 %%
 figtype = 2;
@@ -42,6 +42,7 @@ for i = flight_start_idx:flight_finish_idx
 
     %InnerInput(:,i-flight_start_idx+1) = Agent.inner_input{i};
 end
+Ref(4:6,:) = (zeros(3,flight_finish_idx-flight_start_idx + 1));
 
 m = 2; n = 3;
 a = 2; b = 2;
@@ -97,8 +98,10 @@ elseif figtype == 2
     ytickformat('%.1f');
     subplot(m,n,6); plot(Est(1,:), Est(2,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:)); hold off;
     xlabel("x [m]"); ylabel("y [m]"); legend("Estimate", "Reference","Location","best");
-    % daspect([1 1 1]);
+    daspect([1 1 1]);
     grid on; xlim([-3, 3]); ylim([-3, 3]);
+    xticks([-3:1:3]);
+    yticks([-3:1:3]);
     % subplot(m,n,6); plot3(Est(1,:), Est(2,:), Est(3,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:),Ref(3,:), "LineWidth", 1.5); hold off;
     % xlabel("x [m]"); ylabel("y [m]"); zlabel("z [m]"); legend("Estimate", "Reference","Location","best");
     % grid on; xlim([-3, 3]); ylim([-3, 3]); zlim([-3, 3]);
