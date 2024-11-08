@@ -20,14 +20,17 @@ initial_state.w = [0; 0; 0];
 initial_state.vL = [0; 0; 0];
 initial_state.pT = [0; 0; -1];
 initial_state.wL = [0; 0; 0];
-% initial_state.p = [1;0;1.46];
-% initial_state.p = [0;0;0];
+ %=推定方法を変える場合==========================================================================
+%-拡張質量システム：
+% Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass=1
+% agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
+%=============================================================================================
 
 agent = DRONE;
 %agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));%無線プロポ
   agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM6"));%有線プロポ。COMいるVer
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q", "pL", "pT"]));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent,1)), ["p", "q", "pL", "pT"]));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
 %todo機体数と牽引物の剛体情報を振り分ける方法を考えるここを要修正or先生と相談orシミュレーションで確認==============================================================================================================
 %generatemodelでwith_load_model,with_load_model_euler_for_HL（永久先輩はこちら用いてる）で何が違うのか確認、なんの物理パラメータを使うか
@@ -37,10 +40,14 @@ agent.sensor.do = @sensor_do;
 %==============================================================================================================
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;0.8]},"Suspended"});
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
-agent.controller.do = @controller_do;
-agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass)*agent.parameter.gravity;0;0;0];
+%通常
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
+% agent.controller.do = @controller_do;
+%質量推定
+agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
+
+agent.controller.result.input = [(agent.parameter.loadmass*0+agent.parameter.mass)*agent.parameter.gravity;0;0;0];
 
 run("ExpBase");
 %%

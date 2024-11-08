@@ -24,11 +24,11 @@ Model.type="Suspended_Load_Model"; % model name
 Setting.method = get_model_name("Load_HL"); % model dynamicsの実体名
 Setting.dim=[24,4,21];
 Setting.num_list = [3,3,3,3,3,3,3,3];
-if ~isempty(agent.plant)
-Setting.method = get_model_name("Load_ex_ey_ez"); % model dynamicsの実体名
-Setting.dim=[24,4,21];
-Setting.num_list = [3,3,3,3,3,3,3,3];
-end
+% if ~isempty(agent.plant)
+% Setting.method = get_model_name("Load_ex_ey_ez"); % model dynamicsの実体名
+% Setting.dim=[24,4,21];
+% Setting.num_list = [3,3,3,3,3,3,3,3];
+% end
 
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial;

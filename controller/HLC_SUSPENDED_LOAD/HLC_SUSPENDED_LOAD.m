@@ -57,19 +57,6 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.vdro_pre = model.state.v;
                 ai=0;
                 aidrn=0;
-                %filt
-                % vdro = model.state.v;
-                % vL = model.state.vL;
-                % aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.01,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-                % ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.01,[3,1]);%牽引物加速度
-                % obj.aidrns = [obj.aidrns(:,2:end),aidrn];
-                % obj.ais = [obj.ais(:,2:end),ai];
-                % windowSize =10;
-                % b = (1/windowSize)*ones(1,windowSize);
-                % faidrn = filter(b,1,obj.aidrns);
-                % fai = filter(b,1,obj.ais);
-                % obj.aidrns(:,end) = faidrn(:,end);
-                % obj.ais(:,end) = fai(:,end);
 
             else
             %張力算出
@@ -125,9 +112,9 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % obj.result.mL = elm.mL;
                 % P(15) = elm.mL;
             end
-            % P(15) = model.state.mL;
-            % aaa = P(15) 
-            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            %EKFで質量推定
+            P(15) = model.state.mL;
+            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
             % obj.result.mLi=P(15);
             F1 = Param.F1;
@@ -278,8 +265,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % obj.result.a =a;
 
                 
-            obj.result.input = tmp;
-            % obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            % obj.result.input = tmp;
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
             
             
