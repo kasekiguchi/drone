@@ -13,8 +13,9 @@ classdef TAKEOFF_REFERENCE < handle
     % zd = 1.0;
     result
     th_offset
-    th_offset0 = 200;
-    % th_offset0 = 150;
+    th_offset0 = 200; %iflight 大きすぎる?
+    %th_offset0 = 180;
+    % th_offset0 = 150; %eikyu
   end
 
   methods
