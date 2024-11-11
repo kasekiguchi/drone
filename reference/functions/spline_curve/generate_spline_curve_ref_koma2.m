@@ -33,7 +33,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
         %% xyz-directional
         wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
-        wp_z  = max( 0.5, min(1.5, round(0.3*randn(pointN-2,1)+1.0,3)));
+        wp_z  = max( 0.5, min(1.5, round(0.5*randn(pointN-2,1)+1.0,3)));
         wp = [0, 0, 1;wp_xy, wp_z; 0, 0, 1];
         waypoints = [time, wp];
         
@@ -46,22 +46,22 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         % tra = [cos(2*pi*(tt-0.5)'/T), sin(2*pi*(tt-0.5)'/T), 0 * tt' + 1];
         
         %% マウスによる入力
-        figure
-        xlim([-1 1]); ylim([-1 1]);
-        daspect([1 1 1]);
-
-        xdata = []; ydata = []; hold on; % プロットをする
-        for i = 1:size(time,1)-2
-            [x,y] = ginput(1); xdata = [xdata; x]; ydata = [ydata; y]; plot(x, y, '*');
-        end
-
-        % [xdata,ydata] = ginput(size(time,1)-2); % プロットしない
-        middle_wp = [xdata, ydata, ones(size(xdata,1),1)];
-        disp('The midpoint is inserted by mouse click.'); pause(1);
-        close all;
-
-        wp = [0, 0, 1;middle_wp; 0, 0, 1];
-        waypoints = [time, wp];
+        % figure
+        % xlim([-1 1]); ylim([-1 1]);
+        % daspect([1 1 1]);
+        % 
+        % xdata = []; ydata = []; hold on; % プロットをする
+        % for i = 1:size(time,1)-2
+        %     [x,y] = ginput(1); xdata = [xdata; x]; ydata = [ydata; y]; plot(x, y, '*');
+        % end
+        % 
+        % % [xdata,ydata] = ginput(size(time,1)-2); % プロットしない
+        % middle_wp = [xdata, ydata, ones(size(xdata,1),1)];
+        % disp('The midpoint is inserted by mouse click.'); pause(1);
+        % close all;
+        % 
+        % wp = [0, 0, 1;middle_wp; 0, 0, 1];
+        % waypoints = [time, wp];
 
         %% 直接入力
         % middle_wp = [0, -0.05, 1;
