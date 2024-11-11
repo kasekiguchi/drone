@@ -9,7 +9,7 @@ classdef LANDING_REFERENCE < handle
     base_time
     te = 10
     th_offset
-    th_offset0 = 225;
+    th_offset0 = 260;%勝手に+20ぐらいされる
   end
 
   methods

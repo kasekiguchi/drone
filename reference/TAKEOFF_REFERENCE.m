@@ -5,17 +5,12 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
-
-    %高度0.5m
-    te = 10;
-    zd = 0.5; % goal altitude
-    % %高度1m
-    % te = 15;
-    % zd = 1.0;
+    te = 15;%10;%15;%15は1.5m用
+    zd = 1.45; % goal altitude
     result
     th_offset
-    th_offset0 = 280;
-    % th_offset0 = 150;
+    % th_offset0 = 235;%エーシン
+    th_offset0 = 280;%ifli
   end
 
   methods

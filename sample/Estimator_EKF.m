@@ -60,18 +60,15 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
 
     if strcmp(Estimator.model.name,"load")
         Estimator.sensor_param = ["p", "q", "pL", "pT"]; % parameter for sensor_func
-        % x=[p;q;dp;ob;pl;dpl;pT;ol]状態の並び
-        % f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];一階微分の並び
-        % 複数牽引の時は紐についてのシステムノイズは大きくする必要がある．現在はシステムノイズ1E0，観測ノイズ1E-10
-        % Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-1); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
-        Estimator.Q = blkdiag(eye(3)*1E-1,eye(3)*1E-1,eye(3)*1E-1,eye(3)*1E1); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
-        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);% システムノイズ（Modelクラス由来）
-        Estimator.R = blkdiag(eye(3)*1e-10, eye(3)*1e-8,eye(3)*1e-10,eye(3)*1e-10);%観測ノイズ
-        % Estimator.R = blkdiag(eye(3)*1e-4, eye(3)*1e-4,eye(3)*1e-4,eye(3)*1e-8);%観測ノイズ
-        % Estimator.R = blkdiag(eye(3)*1e-2, eye(3)*1e-2,eye(3)*1e-2,eye(3)*1e-2);%観測ノイズ
+        %6288で飛んだ。7278でmass足したら飛ばない。EKFにも質量足すことで解決するかを確認する必要がある。ダメなら戻して小さく変更。
+        Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-6,eye(3)*1E-2); % システムノイズ（Modelクラス由来）-2次回-6とか下げてみる
+        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);
+        Estimator.R = blkdiag(eye(3)*1e-10, eye(3)*1e-8,eye(3)*1e-8,eye(3)*1e-8);%-8ここはあげたほうが良いかも観測ノイズ
         % Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
         % % Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5); % システムノイズ（Modelクラス由来）
         % Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
+ekf_load=1
+
     end
 
     if strcmp(Estimator.model.name,"load_mL_HL")

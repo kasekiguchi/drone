@@ -1,11 +1,13 @@
 clc
 ts = 0; % initial time
-dt = 0.025; % sampling period
+dt = 0.025;%0.025; % sampling period
+% dt=0.03%粉砕
 te = 10000; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
-logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
+ % logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);%今までのやつ
+logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
@@ -28,7 +30,7 @@ initial_state.wL = [0; 0; 0];
 
 agent = DRONE;
 %agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));%無線プロポ
-  agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM6"));%有線プロポ。COMいるVer
+  agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5"));%有線プロポ。COMいるVer
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent,1)), ["p", "q", "pL", "pT"]));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
@@ -83,12 +85,23 @@ function result = controller_do(varargin)
 end
 
 function post(app)
-app.logger.plot({1, "p", "ser"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "plant.result.state.pL", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "p", "ser"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
+%%
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+
+dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));
+t = app.logger.data(0,'t',[]);
+figure(100)
+plot(t(1:end-1),dt);
+
+Graphplot(app)
 end
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];

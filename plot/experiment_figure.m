@@ -11,7 +11,7 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 %load("sl600_xy_x20_hover_yokunai_Log(03-Jul-2024_20_06_56).mat");
-load("sl0708_600_253daen_Log(08-Jul-2024_19_11_22).mat");%
+load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
@@ -34,21 +34,25 @@ Road_est = zeros(9, flight_finish_idx-flight_start_idx+1);
 Ref = zeros(3,  flight_finish_idx-flight_start_idx+1);
 Input = zeros(4,flight_finish_idx-flight_start_idx+1);
 InnerInput = zeros(8, flight_finish_idx-flight_start_idx+1);
+Step_time=zeros(flight_finish_idx-flight_start_idx+1,1);
 for i = flight_start_idx:flight_finish_idx
     Est(:,i-flight_start_idx+1) = [Agent.estimator.result{i}.state.p;
                 Agent.estimator.result{i}.state.q;
                 Agent.estimator.result{i}.state.v;
                 Agent.estimator.result{i}.state.w];
-    Road_est(:,i-flight_start_idx+1) = [Agent.estimator.result{i}.state.pL;
-                Agent.estimator.result{i}.state.vL;
-                Agent.estimator.result{i}.state.wL];
+    % Road_est(:,i-flight_start_idx+1) = [Agent.estimator.result{i}.state.pL;
+    %             Agent.estimator.result{i}.state.vL;
+    %             Agent.estimator.result{i}.state.wL];
     Ref(:,i-flight_start_idx+1) = [Agent.reference.result{i}.state.p];
 
     Input(:,i-flight_start_idx+1) = Agent.input{i};
-
+% cul_step_time(i)=logt(1,i)-logt(1,i-1);
+kari_logt=[0;logt(1:end-1)];
+    Step_time= logt-kari_logt;
     %InnerInput(:,i-flight_start_idx+1) = Agent.inner_input{i};
 end
-
+count_gross_over_0025=length( find( Step_time >= 0.025 ) )
+count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
 m = 3; n = 3;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
@@ -98,6 +102,11 @@ if figtype == 1
     figure(10);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:));, hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state","$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+        %各ステップにおける計算時間表示↓
+    figure(11);  plot(logt, Step_time); 
+    % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+     xlabel("Time [s]",'Interpreter','latex'); ylabel("step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 elseif figtype == 2
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));

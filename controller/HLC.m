@@ -4,7 +4,7 @@ classdef HLC < handle
     self
     result
     param
-    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
+    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass"];
   end
 
   methods
@@ -21,6 +21,7 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
+       P(1)=P(1)+P(18);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
@@ -50,8 +51,8 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       % max,min are applied for the safty
-      % obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-      obj.result.input = tmp;
+      obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+      % obj.result.input = tmp;
       result = obj.result;
     end
   end
