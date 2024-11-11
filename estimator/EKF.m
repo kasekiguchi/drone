@@ -64,9 +64,11 @@ classdef EKF < handle
             dt = obj.dt;
           end
           if varargin{1}.t ~= 0
-              if obj.self.plant.flight_phase =='t' || obj.self.plant.flight_phase =='l'
-                  obj.self.parameter.mass = obj.self.parameter.mass+obj.self.parameter.loadmass;
-              end
+              % if obj.self.plant.flight_phase =='t' || obj.self.plant.flight_phase =='l'%t→fでの機体重量変化をなくすプログラムの残骸（HLCにもある
+              %     obj.self.parameter.mass = varargin{5}.parameter.parameter(1)+varargin{5}.parameter.parameter(20);
+              % elseif obj.self.plant.flight_phase =='f'
+              %     obj.self.parameter.mass=varargin{5}.parameter.parameter(1);
+              % end
             y = obj.sensor(obj.self,obj.sensor_param); % sensor output
             x = obj.result.state.get(); % estimated state at previous step
             obj.model.do(varargin{:}); % update state
