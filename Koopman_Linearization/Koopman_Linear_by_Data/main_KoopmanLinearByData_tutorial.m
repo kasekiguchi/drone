@@ -186,8 +186,12 @@ fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    if flg.without_pos; est = KL(Data.X(4:end,:), Data.U, Data.Y(4:end,:), F); % 位置を観測量に入れないときのKL
-    else; est = KL(Data.X,Data.U,Data.Y,F); end%クープマン線形化の具体的な計算をしてる部分
+    if flg.without_pos
+        est = KL(Data.X(4:end,:), Data.U, Data.Y(4:end,:), F); % 位置を観測量に入れないときのKL
+    else 
+        est = KL(Data.X,Data.U,Data.Y,F); 
+        est = KL_error(Data.X,Data.U,Data.Y,F);
+    end%クープマン線形化の具体的な計算をしてる部分
 
     % 最適化による算出
     % est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算

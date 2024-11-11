@@ -31,9 +31,10 @@ initial_state.w = [0; 0; 0];
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-model_file = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
-% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
-load(model_file,'est') %vzから算出したzで学習、総推力
+% model_file = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
+model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
+% model_file = "20241110_iflight_randam100_z50_est"; % 加藤君モデル
+load(model_file,'est');
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
     args = d2d(ssmodel, Controller_param.dt);
@@ -45,6 +46,7 @@ catch
     B = est.B;
     C = est.C;
 end
+agent = DRONE;
 %% 位置を含まないモデルの場合，速度から算出する行列に変更 controller内で変更するようにした
 % なんか上手くいかない部分ができちゃったから封印
 % if model_file == '2024-09-11_Exp_Kiyama_code10_saddle.mat'
@@ -55,14 +57,12 @@ end
 % C = blkdiag(eye(3), C);
 % end
 %% 非線形モデルをプラントに設定する場合
-agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% クープマンモデルをプラントに設定する場合
-% model_discrete: クープマンモデルを使用するうえでA,B行列の設定をする、discrete_linear_modelの観測量
-% agent = DRONE;
+% % model_discrete: クープマンモデルを使用するうえでA,B行列の設定をする、discrete_linear_modelの観測量
 % agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
 % agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)); 
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
@@ -77,17 +77,18 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+% conmode = 2;
 
-%% 1コンのとき  100行目もコメントイン
-% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-% conmode = 1;
-%% 2つのコントローラの設定  101行目もコメントイン
+%% 誤差モデル
+% % 1コンのとき  100行目もコメントイン
+agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+conmode = 1;
+% % 2つのコントローラの設定  101行目もコメントイン
 % agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
 % agent.controller.hlc = HLC(agent,Controller_HL(dt));
 % agent.controller.result.input = [0;0;0;0];
 % agent.controller.do = @controller_do;
-% conmode = 2;
 
 %%
 run("ExpBase");
