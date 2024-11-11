@@ -21,7 +21,7 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
-      % P(1)=P(1)+P(18);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+       P(1)=P(1)+P(18);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
