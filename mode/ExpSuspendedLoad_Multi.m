@@ -1,6 +1,10 @@
 %todo
 % ==内の部分を修正
-
+%=推定方法を変える場合==========================================================================
+%-拡張質量システム：
+% Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass=1
+% agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
+%=============================================================================================
 ts = 0; % initial time　開始時間
 dt = 0.025; % sampling period　サンプリング間隔
 te = 10000; % termina time　終了時間
@@ -38,11 +42,13 @@ agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state, i)), ["p", "q"]));
 agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,eul(3), motive));
-%=====================================
-agent(i).sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));%荷物のも取ってこれるはず
-agent(i).sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load([1,2]));%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+
+%sensor [2*-1,2*i]:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
+%各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
+agent(i).sensor.motive = MOTIVE(agent, Sensor_Motive(2*i-1,0, motive));%機体の情報のクラス，機体のidを入れる
+agent(i).sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load(2*i));%牽引物の情報のクラス，牽引物のidを入れる
 agent(i).sensor.do = @sensor_do;
-%=====================================
+
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
@@ -60,6 +66,21 @@ agent(i).controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,a
 %=======================================================
 end
 run("ExpBase");
+
+function result = sensor_do(varargin)
+    result_motive = varargin{5}.sensor.motive.do(varargin);
+    result_forload = varargin{5}.sensor.forload.do(varargin);
+    result_forload.state.p =  result_motive.state.p;
+    result_forload.state.q =  result_motive.state.q;
+    varargin{5}.sensor.result = result_forload;
+    result=result_forload;
+end
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result = controller.hlc.do(varargin);
+    result = merge_result(result,controller.load.do(varargin));
+    varargin{5}.controller.result = result;
+end
 
 function post(app)
 app.logger.plot({1, "p", "ers"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

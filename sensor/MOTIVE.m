@@ -50,7 +50,7 @@ methods
             obj.old_time = data.time;
         end
 
-        id = obj.rigid_num(1);
+        id = obj.rigid_num;
 
         if sum(contains(obj.result.state.list, "q")) == 1
             tmpq = quaternion(data.rigid(id).q');
