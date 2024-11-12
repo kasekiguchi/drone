@@ -1,4 +1,12 @@
 classdef MODEL_CLASS < dynamicprops & handle
+  % classdef a < b aクラスはbクラスを継承するaクラスはbクラスのサブクラス（子クラス） となり、b クラスに定義されているプロパティやメソッドを継承
+  % dynamicprops & handleはどちらもmatlab公式
+  % handle
+  % ハンドルクラスのオブジェクトを他の変数に代入すると、同じオブジェクトの参照がコピーされる．つまり，別の変数で同じオブジェクトを共有
+  % ある変数でオブジェクトのプロパティを変更すると，他の変数でも変更が反映される
+  % 値クラスの場合，別の変数にコピーすると独立した別のインスタンスが作成される（値のコピー）
+  % dynamicprops
+  % addpropメソッドを使用して実行時にプロパティを追加することが可能に
   % general model class
   % obj = MODEL_CLASS(name,param)
   %      name : 名前（obsolete）
@@ -16,8 +24,8 @@ classdef MODEL_CLASS < dynamicprops & handle
     time_scale % discrete or continuous
     solver = str2func('ode15s') % 指数1　のDAEを解ける．
     % solver = str2func('ode45') % 指数1　のDAEを解ける．
-    ts = 0;
-    dt = 0.025;
+    ts = 0; %初期時刻
+    dt = 0.025; %プログラムの制御周期
     % state.list % 例 ["p","q","v","w"]
     % state.num_list % 例 [3,4,3,3]
     param % parameters
@@ -33,14 +41,14 @@ classdef MODEL_CLASS < dynamicprops & handle
 
   methods
 
-    function obj = MODEL_CLASS(self,args) % constructor
+    function obj = MODEL_CLASS(self,args) % constructor %DRONE_EXP_MODELで使用
 
       arguments
         self
         args
       end
       obj.self = self;
-      if ~isempty(self.parameter)
+      if ~isempty(self.parameter) % self.parameterが空でない場合実行
          obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
       if isempty(regexp(args.type, "EXP", 'once'))

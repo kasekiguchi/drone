@@ -1,5 +1,11 @@
 classdef DRONE < handle
+  % classdef a < b aクラスはbクラスを継承するaクラスはbクラスのサブクラス（子クラス） となり、b クラスに定義されているプロパティやメソッドを継承
+  % DRONEはhandleのサブクラスでhandleはmatlab公式で以下の特徴がある
+  % ハンドルクラスのオブジェクトを他の変数に代入すると、同じオブジェクトの参照がコピーされる．つまり，別の変数で同じオブジェクトを共有
+  % ある変数でオブジェクトのプロパティを変更すると，他の変数でも変更が反映される
+  % 値クラスの場合，別の変数にコピーすると独立した別のインスタンスが作成される（値のコピー）
   % Drone class
+  %対象がドローンの時に使用されているファイル
   properties %(Access = private)
     fig
     plant
@@ -14,13 +20,15 @@ classdef DRONE < handle
 
   methods
 
-    function obj = DRONE(args)
-      arguments
-        args = struct("type","sim");
+    function obj = DRONE(args) %SimHLやExpHLで使用されている　対象物の定義
+      arguments %関数の入力引数を宣言 引数が宣言されていないときはargsがstruct("type","sim")となる
+        args = struct("type","sim"); %フィールドtypeがデフォルトで"sim"に設定されている　つまり普段はシミュレーション
       end
-      obj.input_transform.do = @(varargin) [];
-      if contains(args.type, "EXP")
-        obj.plant = DRONE_EXP_MODEL(args);
+      obj.input_transform.do = @(varargin) []; 
+      %varargin.m:matlab公式の変数で任意の数の入力引数を関数で受け入れ可能にする関数定義ステートメントの入力変数
+      %実行後vararginは１行N列のcell配列になる．Nは明示的に宣言された入力の後に関数が受け取る入力の数で，入力を受け取らない場合は空となる
+      if contains(args.type, "EXP") %args.type内にEXPがあるなら実行
+        obj.plant = DRONE_EXP_MODEL(args); %DRONE_EXP_MODEL.m
       end
     end
   end

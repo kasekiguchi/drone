@@ -16,7 +16,7 @@ initial_state.q = sstate.q; %剛体の初期角度[rad]　motiveから情報を�
 initial_state.v = [0; 0; 0]; %剛体の初期速度[m/s]　固定
 initial_state.w = [0; 0; 0]; %剛体の初期角速度[rad/s] 固定
 
-agent = DRONE; %DRONE.mで定義されている　制御対象を定義　複雑なので後で見る
+agent = DRONE; %DRONE.mで定義されている　制御対象を定義　今見ている
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state,"udp", [1, 252])); udp（無線）の時に使用
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM16")); %有線の時に使用　
 % DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "プロポのCOM番号(デバイスマネージャで確認"))　後で見る

@@ -1,4 +1,5 @@
 classdef DRONE_EXP_MODEL < MODEL_CLASS
+    % classdef DRONE_EXP_MODEL < MODEL_CLASS DRONE_EXP_MODELクラスはMODEL_CLASSクラスを継承するDRONE_EXP_MODELクラスはMODEL_CLASSクラスのサブクラス（子クラス） となり，MODEL_CLASSクラスに定義されているプロパティやメソッドを継承
   % Lizard 実験用モデル
   properties% (Access=private)
     ESPr_num
@@ -7,14 +8,14 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
   end
   properties
     msg
-    arming_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-    stop_msg = [500 500 0 500 0 0 0 0];
+    arming_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4]; %これはアーミング時の入力
+    stop_msg = [500 500 0 500 0 0 0 0]; %これは停止時の入力
   end
 
 
   methods
-    function obj = DRONE_EXP_MODEL(varargin)
-      obj@MODEL_CLASS(varargin{:});      
+      function obj = DRONE_EXP_MODEL(varargin) %vararginはDRONE.mで定義？ varargin自体はMatlab公式の関数
+      obj@MODEL_CLASS(varargin{:});  %MODEL_CLASS.m  a@b:クラス b に定義されているメソッド a を呼び出すための構文   
       param=varargin{2}.param;
       obj.dt = 0.025;
       %% variable set
