@@ -130,7 +130,7 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
         %速度から算出
         for i = 1:data.N-1
             % data.est.z(:,i+1) = data.est.z(:,i) + (tmpv(:,i)'*(data.t(i+1,:)-data.t(i,:)))'; % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
-            data.est.z(:,i+1) = data.est.z(:,i) + (tmpv(:,i)'.*(data.t(1,i+1)-data.t(1,i)))';
+            data.est.z(:,i+1) = data.est.z(:,i) + (tmpv(:,i).*(data.t(i+1,1)-data.t(i,1)))';
         end
         %---------------------------------------------------------------------------------------------------
     else
@@ -163,7 +163,7 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
         data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
         data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
         data.U(:,i) = [data.input(i,:)'];
-        data.T(:,i) = [data.t(1,i)];
+        data.T(:,i) = [data.t(i,1)];
         end
     elseif data.vxyz == 1 % vx, vy, vzから位置を算出する
         for i=1:data.N-1

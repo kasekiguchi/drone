@@ -123,15 +123,21 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.reference.qp = zeros(16,obj.H);
 
             %% 最適化部分の関数化とmex化
-            obj.input.lb(2:4) = obj.param.input.lb(2:4) - obj.input.u_HL(2:4);
-            obj.input.ub = obj.param.input.ub - obj.input.u_HL;
-            Param = struct('current_state',obj.previous_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.input.lb,'ub',obj.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            % [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
-            [var, fval, exitflag] = quad_drone(Param);
-            u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+            % obj.input.lb(2:4) = obj.param.input.lb(2:4) - obj.input.u_HL(2:4);
+            % obj.input.ub = obj.param.input.ub - obj.input.u_HL;
+            % Param = struct('current_state',obj.previous_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.input.lb,'ub',obj.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            % % [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            % [var, fval, exitflag] = quad_drone(Param);
+            % u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+            % obj.result.input = u;
 
-            %% 入力の封じ込め
-            % obj.result.input = [max(0, min(10, u(1)));max(-1, min(1, u(2:4)))];
+            %% 疑似逆行列から求める
+            deltaU = abs(obj.result.input - obj.input.u_HL);
+            V = [obj.previous_state; obj.current_state; obj.input.u_HL];
+            J = @(P) obj.previous_state - V*P - obj.B*deltaU;
+            x = fminunc(J,zeros(1,28));
+            delU = -pinv(obj.B)*V*x;
+            u = obj.input.u_HL - delU;
             obj.result.input = u;
 
             %% データ表示用
