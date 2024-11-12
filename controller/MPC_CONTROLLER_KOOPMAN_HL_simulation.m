@@ -120,7 +120,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             %% reference
             obj.previous_state = obj.current_state - obj.state.HL'; % 誤差モデル
             % obj.reference.qp = [obj.reference.xr(1:12,:) - repmat(obj.state.HL',1,obj.H); obj.reference.xr(13:16,:)]; % 誤差モデル ref:Controller_MPC_Koopanのref_inputもいじってる
-            obj.reference.qp = zeros(16,obj.H);
+            obj.reference.qp = zeros(16,obj.H); % 誤差を0にしたい
 
             %% 最適化部分の関数化とmex化
             % obj.input.lb(2:4) = obj.param.input.lb(2:4) - obj.input.u_HL(2:4);
@@ -133,9 +133,12 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% 疑似逆行列から求める
             deltaU = abs(obj.result.input - obj.input.u_HL);
-            V = [obj.previous_state; obj.current_state; obj.input.u_HL];
-            J = @(P) obj.previous_state - V*P - obj.B*deltaU;
-            x = fminunc(J,zeros(1,28));
+            Z = quaternions_all(obj.previous_state);
+            % V = [obj.previous_state; obj.current_state; obj.input.u_HL]; % e x u
+            V = [quaternions_all(obj.current_state)];
+            J = @(P) Z - V*P - obj.B*deltaU;
+            x0 = [obj.current_state; zeros(26-12,1)];
+            x = fminunc(J,x0);
             delU = -pinv(obj.B)*V*x;
             u = obj.input.u_HL - delU;
             obj.result.input = u;
