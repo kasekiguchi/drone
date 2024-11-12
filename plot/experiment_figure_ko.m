@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1111len_mass_plus35g_Log(11-Nov-2024_20_39_00).mat");
+load("sl1112len_dame02_Log(12-Nov-2024_12_53_29).mat");
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 % load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");
@@ -19,7 +19,7 @@ load("sl1111len_mass_plus35g_Log(11-Nov-2024_20_39_00).mat");
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
@@ -35,7 +35,7 @@ flight_finish_idx = find(log.Data.phase==102, 1, 'last');%)の後に-1000すれ�
 % initialize data
 Est = zeros(12, flight_finish_idx-arming_start_idx+1);
 Road_est = zeros(9, flight_finish_idx-arming_start_idx+1);
-Road_sensor = zeros(3, flight_finish_idx-arming_start_idx+1);
+Load_sensor = zeros(3, flight_finish_idx-arming_start_idx+1);
 Ref = zeros(3,  flight_finish_idx-arming_start_idx+1);
 Input = zeros(4,flight_finish_idx-arming_start_idx+1);
 InnerInput = zeros(8, flight_finish_idx-arming_start_idx+1);
@@ -227,8 +227,8 @@ if figtype == 1
     %ytickformat('%.1f');
     % Title = 
     %荷物のプロット↓
-    figure(7); plot(logt, Road_est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
-    xlabel("Time [s]",'Interpreter','latex'); ylabel("Load position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
+    figure(7); plot(logt, Road_est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--');plot(logt, Load_sensor(1:3,:)); hold off;
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Load position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference","$$x$$.Load sensor", "$$y$$.Load sensor", "$$z$$.Load sensor",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     %機体と荷物のxy重ねて表示↓
     figure(8); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--'); hold off;

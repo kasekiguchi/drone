@@ -4,7 +4,7 @@ classdef HLC < handle
     self
     result
     param
-    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass"];
+    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 
   methods
@@ -26,6 +26,14 @@ classdef HLC < handle
       % elseif obj.self.plant.flight_phase =='f'
       %   P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
       % end
+
+            switch obj.self.plant.flight_phase
+              case {'s','a','t','l'}
+                P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+              case 'f'
+                P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
+            end
+
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
