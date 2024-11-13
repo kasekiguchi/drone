@@ -4,7 +4,7 @@ classdef HLC < handle
     self
     result
     param
-    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass"];
+    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 
   methods
@@ -21,7 +21,6 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
-       P(1)=P(1)+P(18);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
