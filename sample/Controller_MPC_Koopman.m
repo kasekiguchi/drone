@@ -2,7 +2,8 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 %UNTITLED この関数の概要をここに記述
 %   各種値
    % Controller_param.m = 0.540; %下限sim30s
-    Controller_param.m = 0.5884; %ドローンの質量、質量は統一 eachine+4cell
+   % Controller_param.m = 0.5884; %ドローンの質量、質量は統一 eachine+4cell
+    Controller_param.m = 0.670;
    % Controller_param.m = 0.669; %上限sim30s
    % Controller_param.m = 0.640;
   %  Controller_param.m = 0.730; %ドローンの質量、質量は統一 iflight+6cell
