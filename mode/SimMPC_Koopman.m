@@ -24,11 +24,12 @@ initial_state.w = [0; 0; 0];
 % % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;0;0],"g",[0;0;1],"h",[0;0;0],"j",[0;0;1]),5});
 % % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",60,"orig",[0;0;1],"size",[1,1,1]},"HL"});
 % % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 % run("ExpBase");
 
 %% クープマンモデルをプラントに設定する場合
- load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+%  load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
  %load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat",'est')
 A = est.A;
 B = est.B;
