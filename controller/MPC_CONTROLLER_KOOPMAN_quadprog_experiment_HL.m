@@ -88,17 +88,16 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             obj.t = time.t;
             %% phaseによるcontrollerの選択
             % result: controllerで算出された入力
+            obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             if phase == 'a'
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
                 obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
                 result = obj.controller_KMPC(varargin);
                 disp('controller: MC,  phase: a');
             elseif phase == 't' || phase == 'l'
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
                 result = obj.controller_HL(varargin);
                 disp('controller: HL  phase: t or l');
             elseif phase == 'f'
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
                 obj.reference.xr = obj.generate_reference();
                 result = obj.controller_KMPC(varargin);
                 disp('controller: MC  phase: f');
