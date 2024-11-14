@@ -1,7 +1,8 @@
 function Controller = Controller_MPC_Koopman(dt, model, agent)
 %UNTITLED この関数の概要をここに記述
 %   各種値
-    Controller_param.m = 0.5884; %ドローンの質量、質量は統一
+    % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
+    Controller_param.m = agent.parameter.mass;
     Controller_param.dt = 0.08; % MPCステップ幅 0.07
     Controller_param.H = 10 %ホライズン数
     Controller_param.state_size = 12;
@@ -116,7 +117,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
 
     %% 誤差モデル
-    Controller_param.ref_input = [0; 0; 0; 0]; % 誤差モデル
+    % Controller_param.ref_input = [0; 0; 0; 0]; % 誤差モデル
     % Controller_param.weight.R = diag([0.1; 0.1; 0.1; 0.1]);     % 入力
 
     Controller.name = "mpc";

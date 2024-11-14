@@ -21,7 +21,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
 initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -32,8 +32,8 @@ initial_state.w = [0; 0; 0];
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
 % model_file = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
-model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
-% model_file = "20241110_iflight_randam100_z50_est"; % 加藤君モデル
+% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
+model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
 load(model_file,'est');
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -59,6 +59,8 @@ agent = DRONE;
 %% 非線形モデルをプラントに設定する場合
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
+% agent.parameter.mass = 0.5884;
+agent.parameter.mass = 0.730;
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% クープマンモデルをプラントに設定する場合
@@ -77,13 +79,12 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
-% conmode = 2;
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 
 %% 誤差モデル
 % % 1コンのとき  100行目もコメントイン
-agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-conmode = 1;
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+% conmode = 1;
 % % 2つのコントローラの設定  101行目もコメントイン
 % agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
 % agent.controller.hlc = HLC(agent,Controller_HL(dt));

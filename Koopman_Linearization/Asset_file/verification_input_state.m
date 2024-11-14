@@ -25,9 +25,9 @@ mode.training_data = 'Kiyama';
 % filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
 % filename = '2024-07-14_Exp_KiyamaX20_code00_saddle';
 % filename = '2024-08-06_Exp_KiyamaY20_code00_saddle';
-% filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename = '2024-09-11_Exp_Kiyama_code10_saddle';
-filename = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
+% filename = '2024-11-14_Exp_Kato_code00_saddle';
 load(strcat(filename, '.mat'), 'est');
 
 % Input_file = 'Input_X20_result.mat';
@@ -95,24 +95,24 @@ mode = 0; % 0:free, 1:00; 2:10
 
 clear X
 N = 100;
-start_num = 101; % 単体で利用時はステップ数
+start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
-thrust = zeros(1, step_num);
+thrust = zeros(1, step_num) + 0.5884 * 9.81; % iFlight:0.730, eachine:0.5884
 torque = zeros(3, step_num);
 % thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
 % torque = input_result(2:4,start_num:step_num);
 
-Est = zeros(9,1);
+Est = zeros(12,1);
 % Est = Est_result(:, start_num);
-mode = 2; % 1:00, 2:10, 0:free
+mode = 0; % 1:00, 2:10, 0:free
 X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
 
 % 位置含まないモデルのとき
-p = [0;0;0];
-for i = 2:step_num+1
-    p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
-end
-X = [p; X];
+% p = [0;0;0];
+% for i = 2:step_num+1
+%     p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
+% end
+% X = [p; X];
 
 
 % plot
@@ -122,10 +122,11 @@ set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
-ylimsetting = [-inf inf; -inf inf; -inf inf];
+ylimsetting = [-0.1 0.1; -0.1 0.1; -0.1 0.1];
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
 
 figure(1);
+sgtitle('Exp.Kiyama.Dataset, code00');
 % sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
 % subplot(2,3,1);
 % plot(0:10,X(1:3,:)); grid on;
