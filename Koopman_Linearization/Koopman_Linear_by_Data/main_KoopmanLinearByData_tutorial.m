@@ -71,9 +71,10 @@ fprintf('\n選択されている観測量：%s\n',func2str(F))
 
 fprintf('\n＜データセットの結合を行います＞\n')
 %
+tic
 if ~exist('FileName')
-    loading_filename = '0805_HL_spline_y'; 
-    Data.HowmanyDataset = 20;
+    loading_filename = 'Exp_Kato'; 
+    Data.HowmanyDataset = 150;
 end% ここだけ実行時
 for i = 1:Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -104,7 +105,7 @@ for i = 1:Data.HowmanyDataset
     end
     disp(append('loading data number: ',num2str(i),', now data:',num2str(Dataset.N),', all data: ',num2str(size(Data.X,2))))
 end
-
+toc
 fprintf('\n＜データセットの結合が完了しました＞\n')
 
 %% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
