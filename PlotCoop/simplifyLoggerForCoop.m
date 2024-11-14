@@ -16,7 +16,11 @@ function newLog = simplifyLoggerForCoop(log,agentNum)
             end
         end
         %状態の格納
-        for i = 1:length(fields)
+        nf = length(fields);
+        % if newLog.fExp
+        %     nf = nf-1;
+        % end
+        for i = 1:nf
             F = fields{i};%Flowing phase
             for i2 = 1:newLog.k
                 states = agenti.(fields{i}).result{1, i2}.state.list;

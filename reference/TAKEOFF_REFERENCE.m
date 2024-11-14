@@ -47,7 +47,7 @@ classdef TAKEOFF_REFERENCE < handle
       %    : yd is a yaw angle reference
 
       %% Variable set
-      Xd  = zeros( 20, 1);
+      Xd  = zeros( 28, 1);
       d = obj.zd-obj.base_state(3); % goal altitude : relative value
       te = obj.te; % terminal time to reach zd
       %% Set Xd
