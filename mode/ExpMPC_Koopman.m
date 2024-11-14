@@ -18,7 +18,7 @@ initial_state.w = [0; 0; 0];
 
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM1")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -28,7 +28,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
 %% ##############################################################
-% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = "2024-08-06_Exp_KiyamaY20_code00_saddle.mat"; % y方向増加
@@ -37,36 +37,38 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 % model_file = "2024-09-11_Exp_Kiyama_code10_saddle.mat";
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
 
+%% controllerでHL, KMPCをphaseで判別して動かす
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent));
 %% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.result.input = [0;0;0;0];
-agent.controller.do = @controller_do;
+% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.result.input = [0;0;0;0];
+% agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
 
-disp(['Select model confirmation: ' + model_file]); % dispはダブルクォーテーションのみ対応
+% disp(['Select model confirmation: ' + model_file]); % dispはダブルクォーテーションのみ対応
 run("ExpBase");
 
 %% function
-function result = controller_do(varargin)
-tic
-    controller = varargin{5}.controller;
-    if varargin{2} == 'a'
-        result = controller.mpc.do(varargin); % arming: KMPC
-    elseif varargin{2} == 't'
-        result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
-        result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
-        result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
-    elseif varargin{2} == 'f'
-        result.mpc = controller.mpc.do(varargin); % flight: KMPC
-        result.hlc = controller.hlc.do(varargin);
-        result = result.mpc;
-    elseif varargin{2} == 'l'
-        result = controller.hlc.do(varargin); % landing: HL
-   end
-    varargin{5}.controller.result = result;
-    toc
-end
+% function result = controller_do(varargin)
+% tic
+%     controller = varargin{5}.controller;
+%     if varargin{2} == 'a'
+%         result = controller.mpc.do(varargin); % arming: KMPC
+%     elseif varargin{2} == 't'
+%         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
+%         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
+%         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
+%     elseif varargin{2} == 'f'
+%         result.mpc = controller.mpc.do(varargin); % flight: KMPC
+%         result.hlc = controller.hlc.do(varargin);
+%         result = result.mpc;
+%     elseif varargin{2} == 'l'
+%         result = controller.hlc.do(varargin); % landing: HL
+%    end
+%     varargin{5}.controller.result = result;
+%     toc
+% end
 
 function post(app)
 close all;
@@ -116,11 +118,12 @@ filename = string(datetime('now'), 'yyyy-MM-dd');
 % plot(logt, controller_time);
 
 %% other parts
-disp(['P  ',num2str(diag(app.agent.controller.mpc.weight(1:3,1:3))')])
-disp(['Q  ',num2str(diag(app.agent.controller.mpc.weight(4:6,4:6))')])
-disp(['V  ',num2str(diag(app.agent.controller.mpc.weight(7:9,7:9))')])
-disp(['W  ',num2str(diag(app.agent.controller.mpc.weight(10:12,10:12))')])
-disp(['R  ',num2str(diag(app.agent.controller.mpc.weightR)')])
+% 1コントローラだとずっとKoopmanが回っているわけではないから'f'だけ抜き取る必要あり。
+% disp(['P  ',num2str(diag(app.agent.controller.mpc.weight(1:3,1:3))')])
+% disp(['Q  ',num2str(diag(app.agent.controller.mpc.weight(4:6,4:6))')])
+% disp(['V  ',num2str(diag(app.agent.controller.mpc.weight(7:9,7:9))')])
+% disp(['W  ',num2str(diag(app.agent.controller.mpc.weight(10:12,10:12))')])
+% disp(['R  ',num2str(diag(app.agent.controller.mpc.weightR)')])
 end
 
 % GUI上に現在位置（推定値）を表示する

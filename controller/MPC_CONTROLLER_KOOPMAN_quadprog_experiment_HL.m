@@ -21,6 +21,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
         reference
         fRemove
         model
+        t
     end
 
     properties
@@ -38,7 +39,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
         function obj = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(self, param)
             %-- 変数定義
             obj.self = self; %agentへの接続
-            obj.param.P = self.parameter.get(obj.parameter_name);
 
             %---MPCパラメータ設定---%
             obj.param = param.param; %Controller_MPC_Koopmanの値を保存
@@ -48,6 +48,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             obj.C = obj.param.C;
 
             %%
+            obj.param.P = self.parameter.get(obj.parameter_name);
             obj.input = obj.param.input;
             obj.model = self.plant;
             
@@ -61,11 +62,11 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             obj.weightR = obj.param.weight.R;
 
             %% A行列にxyzの位置を加えた拡張係数行列とする
-            A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
-            A_2 = [zeros(size(obj.A,2), 3), obj.A];
-            obj.param.A = [A_1; A_2];
-            obj.param.B = [zeros(3, 4); obj.B];
-            obj.param.C = blkdiag(eye(3), obj.C);
+            % A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
+            % A_2 = [zeros(size(obj.A,2), 3), obj.A];
+            % obj.param.A = [A_1; A_2];
+            % obj.param.B = [zeros(3, 4); obj.B];
+            % obj.param.C = blkdiag(eye(3), obj.C);
 
             %% QP change_equationの共通項をあらかじめ計算
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
@@ -84,21 +85,20 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             %%initialize
             time = varargin{1};
             phase = varargin{2};
-            obj.param.t = time.t;
+            obj.t = time.t;
             %% phaseによるcontrollerの選択
             % result: controllerで算出された入力
+            obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             if phase == 'a'
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
                 result = obj.controller_KMPC(varargin);
                 disp('controller: MC,  phase: a');
             elseif phase == 't' || phase == 'l'
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
                 result = obj.controller_HL(varargin);
                 disp('controller: HL  phase: t or l');
             elseif phase == 'f'
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                obj.state.ref = obj.generate_reference();
+                obj.reference.xr = obj.generate_reference();
                 result = obj.controller_KMPC(varargin);
                 disp('controller: MC  phase: f');
             end 
@@ -110,14 +110,12 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            obj.param.t = varargin{1}.t;
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
             
             %% ------------------------------------------------------------
             % 最適化部分の関数化とmex化
             Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
             [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
-            % [var, fval, exitflag] = quad_drone(Param);
       
             %%
             obj.previous_input = var;
@@ -134,24 +132,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
-
-            %% 情報表示
-            % state_monte = obj.self.estimator.result.state;
-            % fprintf("==================================================================\n")
-            % fprintf("==================================================================\n")
-            % fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
-            %         state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-            %         state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-            %         state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
-            %         state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
-            % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
-            %         obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-            %         obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-            %         obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
-            %         obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
-            % fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
-            %     rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
-            % fprintf("\n");
         end
         
         function result = controller_HL(obj,varargin)
@@ -193,7 +173,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             result = obj.result;
         end
 
-        function [xr] = generate_reference(obj, T)
+        function [xr] = generate_reference(obj)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
@@ -201,7 +181,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
             for h = 0:obj.H-1
-                t = T + obj.param.dt * h; % reference生成の時刻をずらす
+                t = obj.t + obj.param.dt * h; % reference生成の時刻をずらす
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3);
                 xr(7:9, h+1) = ref(5:7);
