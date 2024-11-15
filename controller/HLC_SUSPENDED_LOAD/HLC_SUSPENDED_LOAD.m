@@ -14,6 +14,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         ais
         ms
         estimate_load_mass
+        flag_anti_spike=0
     end
     
     methods
@@ -115,18 +116,23 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
             
-            cha = obj.self.reference.cha;
+            cha = agent{2};
             tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
             if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-                tmp = uf + us;
+                 if obj.flag_anti_spike < 5
+                   tmp =[uf(1);0;0;0];
+                   obj.flag_anti_spike=obj.flag_anti_spike+1;
+                 else
+                    tmp = uf + us;
+                 end
             else
                 tmp = tmpHL;
             end
-            obj.self.controller.result.input = tmp;
-            obj.result.input = tmp;
-            
+            obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
+            obj.self.controller.result.input = obj.result.input;%tmp;
+            result = obj.result;  
 
-            tmp = uf + us;
+            % tmp = uf + us;
             % control barrier funciton
                 % fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
                 % a=[10;4.8];
@@ -209,9 +215,9 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % obj.result.a =a;
 
                 
-            % obj.result.input = tmp;
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
-            result = obj.result;
+            % % obj.result.input = tmp;
+            % obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
+            % result = obj.result;
             
             
         end
