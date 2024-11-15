@@ -50,7 +50,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            if model.state.p(3) < 1
+            if model.state.pL(3) < 1
                 P(15) =0;% obj.self.estimater.model.loadmass;
 
                 obj.vL_pre = model.state.vL;
