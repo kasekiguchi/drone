@@ -84,7 +84,11 @@ endTime = 50;%1E3;
            % "ELft"
         ];
     if fnowData==1
-        loggers = { simplifyLoggerForSingle(gui.logger) };
+        agentNum = length(gui.logger.Data.agent);
+        loggers = cell(agentNum,1);
+        for i = 1:agentNum
+            loggers{i} = simplifyLoggerForSingle(gui.logger,i);
+        end
         c = [];
     end
 %========================================================================
