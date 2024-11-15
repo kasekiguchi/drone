@@ -13,8 +13,8 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 1;%現在の結果を描画する
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 10;%現在の結果を描画する
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 startTime = 0;
@@ -42,7 +42,7 @@ endTime = 50;%1E3;
  %simplifyLogger
     loggers = {
         % offlineLogger
-        % simple_log
+        simple_log_EKF
         % simple_log_expandSysEKF
                 % simple_log_noEstimate
                 % simple_log_Estimate
@@ -68,7 +68,7 @@ endTime = 50;%1E3;
                 % simplify_
         };
     c=[
-        "offline","exp"
+        % "offline","exp"
         % "HLLS","HLFT"
         % "LS","FT"
         % "FT"
@@ -102,12 +102,12 @@ endTime = 50;%1E3;
 %singleFigure
      % n=["t_p","t_x","t_y","t_z","error","t_errx","t_erry","t_errz","input","Trs","attitude","velocity","angular_velocity","x_y" ,"three_D","z1","z2","z3","z4","uHL"];%,"F1z1","F2z2","F3z3","F4z4"];
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
-     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
+     % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
-     n = "input";
-     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D","uHL","t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","t_vxL" ,"t_vyL" ,"t_vzL"];%比較するとき複数まとめる
+     % n = "input";
+     % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D","uHL","t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","t_vxL" ,"t_vyL" ,"t_vzL"];%比較するとき複数まとめる
      n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"];%比較するとき複数まとめる
-     n=["t_errx","t_erry","t_errz"];
+     % n=["t_errx","t_erry","t_errz"];
 %========================================================================
 % multiFigure
 
