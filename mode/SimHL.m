@@ -77,7 +77,7 @@ ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 20; % terminal time
 time = TIME(ts,dt,te); % instance of time class
-in_prog_func = @(app) dfunc(app); % in progress plot
+in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
@@ -163,9 +163,9 @@ run("ExpBase");
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 %%
 function dfunc(app)
-app.logger.plot({1, "p", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "p", "r"},"ax",app.UIAxes_2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "p", "r"},"ax",app.UIAxes_2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 
@@ -189,4 +189,14 @@ function result_plot(app)
     filename = string(datetime('now'), 'yyyy-MM-dd');
     fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
     fig.main_figure();
+end
+
+function in_prog(app)
+p = round(app.agent.estimator.result.state.get("p"), 3);
+pr = round(app.agent.estimator.result.state.get("p"),3);
+input = round(app.agent.controller.result.input,3);
+% app.Label_2.Text = ["estimator p : " + app.agent(1).estimator.result.state.get("p")];
+app.Label_2.Text = ["estimator: x="+p(1)+", y="+p(2)+", z="+p(3)];
+app.Label_3.Text = ["reference: x="+pr(1)+", y="+pr(2)+", z="+pr(3)];
+app.Label_4.Text = ["input: "+input(1)+", "+input(2)+", "+input(3)+", "+input(4)];
 end
