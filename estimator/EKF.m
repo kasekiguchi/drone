@@ -21,6 +21,7 @@ classdef EKF < handle
         self
         model
         timer= [];
+        load_flag
     end
     
     methods
@@ -52,6 +53,11 @@ classdef EKF < handle
             obj.B = param.B;
             obj.result.P = param.P;
             obj.result.G = zeros(obj.n,size(obj.R,2));
+            obj.load_flag=0;%牽引のときだけ機体重量に牽引物を足すスイッチングをする
+            % obj.load_flag=isfield(obj.self.controller,'load');
+            % if obj.model.name == 'load'
+            % obj.load_flag=1;
+            % end
         end
         
         function [result]=do(obj,varargin)
@@ -65,6 +71,16 @@ classdef EKF < handle
             dt = obj.dt;
           end
           if varargin{1}.t ~= 0
+              obj.load_flag=isfield(obj.self.controller,'load');
+              if obj.load_flag ==1
+            switch obj.self.plant.flight_phase
+              case {'s','a','t','l'}
+                obj.self.parameter.mass=varargin{5}.parameter.parameter(1)+varargin{5}.parameter.parameter(20);%varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+              case 'f'
+                obj.self.parameter.mass=varargin{5}.parameter.parameter(1);%varargin{1,1}{1,5}.parameter.parameter(1);
+            end
+              end
+
             y = obj.sensor(obj.self,obj.sensor_param); % sensor output
             x = obj.result.state.get(); % estimated state at previous step
             obj.model.do(varargin{:}); % update state
