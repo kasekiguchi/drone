@@ -16,8 +16,14 @@ syms t real
 % y = y_0;
 % z = z_0;
 
+% % 円旋回
+% T=10;
+% x=sin(2*pi*t/T);
+% y=cos(2*pi*t/T);
+% z=0.5;
+
 % 円旋回
-T=10;
+T=12;
 x=sin(2*pi*t/T);
 y=cos(2*pi*t/T);
 z=0.5;

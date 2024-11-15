@@ -6,12 +6,18 @@ function Controller= Controller_HL(dt)
 % Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 % Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
 
+% % iflight
+% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
+% Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),[0.0001],dt); % xdiag([100,10,10,1]) 位置、速度、加速度、加速度の微分
+% Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),[0.0001],dt); % ydiag([100,10,10,1])
+% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);    % もうちょい位置を挙げてもいい?
+% % Controller.F4=lqrd(A,B,状態の重み行列[q,p,v,w?],入力の重み行列,dt);
+
 % iflight
 Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),[0.0001],dt); % xdiag([100,10,10,1])
-Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),[0.0001],dt); % ydiag([100,10,10,1])
+Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([500,1000,200,1]),[0.001],dt); % xdiag([100,10,10,1]) 位置、速度、加速度、加速度の微分
+Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([500,1000,200,1]),[0.001],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);    % もうちょい位置を挙げてもいい?
-% Controller.F4=lqrd(A,B,状態の重み行列[q,p,v,w?],入力の重み行列,dt);
 
 % % dt = 0.2 くらいの時用
 % Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
