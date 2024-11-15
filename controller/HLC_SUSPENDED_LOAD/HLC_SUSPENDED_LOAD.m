@@ -50,44 +50,17 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            % if model.state.p(3) < 1
-            %     P(15) =0;% obj.self.estimater.model.loadmass;
-            % 
-            %     obj.vL_pre = model.state.vL;
-            %     obj.vdro_pre = model.state.v;
-            %     ai=0;
-            %     aidrn=0;
-            % 
-            % else
-            % %張力算出
-            % %MODELクラスのインスタンスでloadmassの代入とdoメソッドで質量の代入を確認する
-            %     g = [0;0;-P(6)];
-            %     mi   = P(1);
-            %     Ri = model.state.getq("rotm");
-            %     vdro = model.state.v;
-            %     vL = model.state.vL;
-            % 
-            %     ui  = Ri*[0;0;obj.self.controller.result.input(1) + 0*normrnd(0,0.5)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-            %     aidrn = (vdro - obj.vdro_pre)/Param.dt + 0*normrnd(0,0.1,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-            %     ai = (vL - obj.vL_pre)/Param.dt + 0*normrnd(0,0.1,[3,1]);%牽引物加速度
-            %     mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
-            %     mui      = -mui;%分割後の牽引物系から張力
-            % 
-            %     obj.vL_pre = vL;
-            %     obj.vdro_pre = vdro;
-            % %分割後質量推定 mLi*ai = mLi*g + mui
-            %     A    = ai - g;
-            %     AtA  = A'*A;
-            %     mLi  = (AtA\A')*mui;%分割後質量
-            %     obj.result.mLi =mLi;
-            %     P(15) = mLi;
-            % end
-            
-            %EKFで質量推定
-            % P(15) = model.state.mL;
-            % obj.result.mLi=P(15);
-            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+           
 
+            if model.state.pL(3)<-10000
+                P(15) = 0;
+            else
+                 %EKFで質量推定
+            P(15) = model.state.mL;
+            obj.result.mLi=P(15);
+            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            end
+       
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;
@@ -237,7 +210,7 @@ classdef HLC_SUSPENDED_LOAD < handle
 
                 
             % obj.result.input = tmp;
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])];
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             result = obj.result;
             
             
