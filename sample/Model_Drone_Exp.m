@@ -11,7 +11,7 @@ arguments
   dt
   ~
   conn_type
-  id
+  id string
 end
 Setting.dt = dt;
 Model.id = id;

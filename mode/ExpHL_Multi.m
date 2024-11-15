@@ -10,7 +10,7 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
-COMs = string([3,5]);%割り当てる順番に設定
+COMs = [3,5];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
@@ -20,7 +20,7 @@ refPointName= {
                  {struct("f",[1;1;1],"g",[0;1;1],"h",[-1;1;1],"j",[-1;0;1],"k",[-1;-1;1]),8},...
                  {struct("f",[-1;-1;1],"g",[0;-1;1],"h",[1;-1;1],"j",[1;0;1],"k",[1;1;1]),8}
                  };
-logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめている？
+logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
 for i = 1:N
 sstate = motive.result.rigid(i); %状態の取得？

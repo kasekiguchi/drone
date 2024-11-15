@@ -24,6 +24,10 @@ fnowdata = 1;
 
 % clear allData
 if fnowdata==1
+    if exist("gui","var")
+        logger = gui.logger;
+        logger.fExp = gui.fExp;
+    end
     if ~exist("loggers","var")
         for i = 1:length(logger.target)
             loggers{i,1} = simplifyLoggerForCoop(logger,i);
@@ -355,16 +359,16 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         %=========================================================
         time{i} = ts{i}-t0(i);
         if i == 1
-            cmui{i} = loggers{1}.controller.mui;  
-            for j =1:logNum-1
-                reMui = reshape(cmui{i}(:,j),6,[]);
-                muid = reMui(1:3,:);
-                muid_norm = sqrt(sum(muid.^2));
-                muid_unit = muid./muid_norm;
-                muid_units(:,:,j) = muid_unit;
-            
-                linki(:,:,j) = -eqi{i}(3*j-2:3*j,:);
-            end
+            % cmui{i} = loggers{1}.controller.mui;  
+            % for j =1:logNum-1
+            %     reMui = reshape(cmui{i}(:,j),6,[]);
+            %     muid = reMui(1:3,:);
+            %     muid_norm = sqrt(sum(muid.^2));
+            %     muid_unit = muid./muid_norm;
+            %     muid_units(:,:,j) = muid_unit;
+            % 
+            %     linki(:,:,j) = -eqi{i}(3*j-2:3*j,:);
+            % end
 
             refx0{1} = rp{i}(1,:);
             refy0{1} = rp{i}(2,:);

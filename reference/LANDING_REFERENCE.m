@@ -47,7 +47,7 @@ classdef LANDING_REFERENCE < handle
       %    : yd is a yaw angle reference
 
       %% Variable set
-      Xd  = zeros( 20, 1);
+      Xd  = zeros( 28, 1);
       %% Set Xd
       if t<=obj.te
         Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
