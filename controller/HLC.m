@@ -16,9 +16,9 @@ classdef HLC < handle
       obj.result.input = zeros(self.estimator.model.dim(2),1);
       obj.load_flag=0;%牽引のときだけ機体重量に牽引物を足すスイッチングをする
        % obj.load_flag=isfield(obj.self.controller,'load');
-      % if obj.self.plant.name == 'load'
-      %   obj.load_flag=1;
-      % end
+      if obj.self.estimator.model.name == 'load'
+        obj.load_flag=1;
+      end
     end
 
     function result = do(obj,varargin)
@@ -27,7 +27,7 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
-      obj.load_flag=isfield(obj.self.controller,'load');
+      % obj.load_flag=isfield(obj.self.controller,'load');
       if obj.load_flag == 1
       switch obj.self.plant.flight_phase
         case {'s','a','t','l'}

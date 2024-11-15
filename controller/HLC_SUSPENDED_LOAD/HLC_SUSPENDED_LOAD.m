@@ -52,14 +52,14 @@ classdef HLC_SUSPENDED_LOAD < handle
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
            
 
-            if model.state.pL(3)<-10000
-                P(15) = 0;
-            else
-                 %EKFで質量推定
-            P(15) = model.state.mL;
-            obj.result.mLi=P(15);
-            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
-            end
+            % if model.state.pL(3)<-10000
+            %     P(15) = 0;
+            % else
+            %      %EKFで質量推定
+            % P(15) = model.state.mL;
+            % obj.result.mLi=P(15);
+            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            % end
        
             F1 = Param.F1;
             F2 = Param.F2;
@@ -114,7 +114,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
                 vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
-            %{
+            
             cha = obj.self.reference.cha;
             tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
             if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
@@ -124,7 +124,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             end
             obj.self.controller.result.input = tmp;
             obj.result.input = tmp;
-            %}
+            
 
             tmp = uf + us;
             % control barrier funciton
