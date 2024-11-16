@@ -1,6 +1,7 @@
 %todo
 % ==内の部分を修正
 % 牽引のみでできるようにtakeoffの方法を変更する
+%元の牽引物のログをとる必要がある。牽引物のagentを実験用に修正する必要あり
 %=推定方法を変える場合==========================================================================
 %-拡張質量システム：
 % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass=1
@@ -12,12 +13,11 @@ te = 10000; % termina time　終了時間
 time = TIME(ts,dt,te); %上の3つの時間をまとめる．
 in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
-% N = 2;
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-N = motive.result.rigid_num/2;%機体と牽引物の組数
+N = round(motive.result.rigid_num/2);%機体と牽引物の組数
 COMs = [5,12];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
@@ -30,7 +30,23 @@ refPointName= {
                  };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
-for i = 1:N
+isCoop = mod(N,2);
+firstId = 1;
+if isCoop == 1
+    %実験用に修正する必要あり
+    % firstId = 2;
+    % COMs = ["",COMs];
+    % agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
+    % agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
+    % agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
+    % agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
+    % % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
+    % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
+    % % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
+    % agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+end
+
+for i = firstId:N
 sstate = motive.result.rigid(i); %状態の取得？
 initial_state.p = sstate.p; %初期位置の取得
 initial_state.q = sstate.q; %初期角度の取得
@@ -43,19 +59,23 @@ agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i))),  ["p", "q", "pL", "pT"]));
 
-%sensor [2*-1,2*i]:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
+%sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
 %各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
-agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i));%牽引物の情報のクラス，牽引物のidを入れる
+agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-firstId,eul(3), motive));%機体の情報のクラス，機体のidを入れる
+agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)));%牽引物の情報のクラス，牽引物のidを入れる
 agent(i).sensor.do = @sensor_do;
 
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
+if isCoop
+    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));
+else
 % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
 % agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
 % agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
 agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
 % agent(i).reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
+end
 %=======================================================
 %通常
 agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
