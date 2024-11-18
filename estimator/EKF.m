@@ -70,12 +70,12 @@ classdef EKF < handle
               %     obj.self.parameter.mass=varargin{5}.parameter.parameter(1);
               % end
 
-            switch obj.self.plant.flight_phase
-              case {'s','a','t','l'}
-                obj.self.parameter.mass=varargin{5}.parameter.parameter(1)+varargin{5}.parameter.parameter(20);%varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
-              case 'f'
-                obj.self.parameter.mass=varargin{5}.parameter.parameter(1);%varargin{1,1}{1,5}.parameter.parameter(1);
-            end
+            % switch obj.self.plant.flight_phase
+            %   case {'s','a','t','l'}
+            %     obj.self.parameter.mass=varargin{5}.parameter.parameter(1)+varargin{5}.parameter.parameter(20);%varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+            %   case 'f'
+            %     obj.self.parameter.mass=varargin{5}.parameter.parameter(1);%varargin{1,1}{1,5}.parameter.parameter(1);
+            % end
 
             y = obj.sensor(obj.self,obj.sensor_param); % sensor output
             x = obj.result.state.get(); % estimated state at previous step
