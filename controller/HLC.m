@@ -28,14 +28,15 @@ classdef HLC < handle
       xd0 =xd;
       P = obj.param.P;
       % obj.load_flag=isfield(obj.self.controller,'load');
-      if obj.load_flag == 1
-      switch obj.self.plant.flight_phase
-        case {'s','a','t','l'}
-            P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
-        case 'f'
-            P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
-      end
-      end
+      % if obj.load_flag == 1
+      %     % obj.self.plant.flight_phase='f';%シミュレーションするときはコメントアウト外す。
+      % switch obj.self.plant.flight_phase%シミュレーションではフライトフェーズないからエラー出る。↑
+      %   case {'s','a','t','l'}
+      %       P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+      %   case 'f'
+      %       P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
+      % end
+      % end
 
       F1 = obj.param.F1;
       F2 = obj.param.F2;
