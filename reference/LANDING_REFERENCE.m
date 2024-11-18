@@ -25,6 +25,7 @@ classdef LANDING_REFERENCE < handle
       if isempty(obj.result.state.xd) % first take
         obj.base_time=varargin{1}.t;
         obj.base_state = [obj.self.estimator.result.state.p(1:2);obj.self.estimator.result.state.p(3)]; % x,y : current position, z : reference using at flight phase
+        obj.base_state = obj.self.estimator.result.state.pL; % 質量推定用
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
         obj.th_offset = obj.self.input_transform.param.th_offset;
       end
@@ -50,7 +51,8 @@ classdef LANDING_REFERENCE < handle
       Xd  = zeros( 28, 1);
       %% Set Xd
       if t<=obj.te
-        Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
+        Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,-obj.self.parameter.get("cableL"),0);%質量推定用
+        % Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
       elseif t> obj.te
         Zd = zeros(1,5);
       end

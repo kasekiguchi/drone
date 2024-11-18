@@ -32,7 +32,12 @@ classdef HLC_SUSPENDED_LOAD < handle
             % obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         
-        function result=do(obj,agent,~)
+        function result=do(obj,varargin)
+            if isscalar(varargin)
+                agent = varargin{1};
+            else
+                agent = varargin;
+            end
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
@@ -57,9 +62,9 @@ classdef HLC_SUSPENDED_LOAD < handle
             %     P(15) = 0;
             % else
             %      %EKFで質量推定
-            % P(15) = model.state.mL;
-            % obj.result.mLi=P(15);
-            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            P(15) = model.state.mL;
+            obj.result.mLi=P(15);
+            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             % end
        
             F1 = Param.F1;
@@ -117,7 +122,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
             
             cha = agent{2};
-            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
             if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
                  if obj.flag_anti_spike < 5
                    tmp =[uf(1);0;0;0];
@@ -126,7 +131,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                     tmp = uf + us;
                  end
             else
-                tmp = tmpHL;
+                % tmp = tmpHL;
+                tmp = uf + us;
             end
             obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             obj.self.controller.result.input = obj.result.input;%tmp;
