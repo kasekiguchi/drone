@@ -15,6 +15,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         ms
         estimate_load_mass
         flag_anti_spike=0
+        % preT
     end
     
     methods
@@ -22,7 +23,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));    
-            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
+            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass*0)*self.parameter.gravity;0;0;0];
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
             obj.vdro_pre = 0;
             obj.vL_pre = 0;
@@ -134,6 +135,11 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % tmp = tmpHL;
                 tmp = uf + us;
             end
+            %est load mass
+            if tmp(1)< 7
+                tmp(1) = obj.u_opt0;
+            end
+            % obj.u_opt0=tmp(1);
             obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             obj.self.controller.result.input = obj.result.input;%tmp;
             result = obj.result;  
