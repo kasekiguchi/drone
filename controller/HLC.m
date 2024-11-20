@@ -21,19 +21,22 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
+      % obj.self.plant.flight_phase = varargin{1,1}{1,2};
       % if obj.self.plant.flight_phase =='t' || obj.self.plant.flight_phase =='l' %t→fでの機体重量変化をなくすプログラムの残骸（EKFにもある
       %  P(1)=P(1)+P(18);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
       % elseif obj.self.plant.flight_phase =='f'
       %   P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
       % end
-
-            switch obj.self.plant.flight_phase
+   
+if varargin{1, 1}{1, 5}.plant.name == 'load'
+            switch varargin{1,1}{1,2}
               case {'s','a','t','l'}
                 P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
               case 'f'
                 P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
             end
-
+end
+      
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
