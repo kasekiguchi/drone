@@ -40,7 +40,8 @@ agent.sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load(2));%[1,1+N]%for
 agent.sensor.do = @sensor_do;
 %==============================================================================================================
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;0.4]},"Suspended"});
+% agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;0.4]},"Suspended"});
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;0.4],"g",[0;1;0.4],"h",[-1;1;0.4],"j",[-1;0;0.4],"k",[-1;-1;0.4]),10});
 %通常
 % agent.controller.hlc = HLC(agent,Controller_HL(dt));
 % agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
@@ -75,6 +76,11 @@ function result = sensor_do(varargin)
     result_forload.state.q =  result_motive.state.q;
     varargin{5}.sensor.result = result_forload;
     result=result_forload;
+
+    % sensor = varargin{5}.sensor;
+    % result = sensor.motive.do(varargin);
+    % result = merge_result(result,sensor.forload.do(varargin));
+    % varargin{5}.sensor.result = result;
 end
 function result = controller_do(varargin)
     controller = varargin{5}.controller;

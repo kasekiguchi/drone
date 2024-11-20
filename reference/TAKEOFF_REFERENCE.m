@@ -5,7 +5,7 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
-    te = 25;%10;%15;%15は1.5m用
+    te = 20;%10;%15;%15は1.5m用
     % zd = 1.35; % goal altitude
     zd = 0.4;%質量推定用
     result
@@ -25,16 +25,13 @@ classdef TAKEOFF_REFERENCE < handle
       if isempty( obj.base_state ) % first take
         obj.base_time=varargin{1}.t;
         obj.base_state = obj.self.estimator.result.state.p;
-        if obj.self.estimator.model.name == "load_mL_HL"
+        if obj.self.estimator.model.name == "load_mL_HL"||"load"
             obj.base_state = obj.self.sensor.result.state.pL;%======質量推定用
         end
         % obj.base_state = sub2ind(size(obj.self.estimator.result.state.p),row(1),col(1));
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
         obj.th_offset = obj.self.input_transform.param.th_offset(1);
       end
-      % if obj.self.estimator.model.name == "load_mL_HL" && obj.self.sensor.result.state.pL(3)<=0.2
-      %       obj.base_state(1:2) = obj.self.sensor.result.state.pL(1:2);%======質量推定用
-      % end
       obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);

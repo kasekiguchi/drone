@@ -14,11 +14,11 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fnowData = 1;%現在の結果を描画する
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 startTime = 0;
-endTime = 50;%1E3;
+endTime = 1000;%1E3;
 % startTime = 32;
 % endTime = 95;%1E3;
 %どの時間の範囲を描画するか指定   

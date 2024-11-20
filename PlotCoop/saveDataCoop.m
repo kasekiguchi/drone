@@ -3,9 +3,8 @@
 %plotに必要なところだけ抜き取ったファイルを作成するプログラムを追加する．
 %------------------------
     %変更しない
-    % ExportFolder='A:\Work2024\momose';%実験用pcのパス
-    % % ExportFolder='C:\Users\acsl_students\Documents\students\workspace2024\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='A:\Work2024\momose';%実験用pcのパス
+    % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
     % ExportFolder='Data';%github内
     DataFig='data';%データか図か
@@ -13,10 +12,10 @@
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付フォルダ
 %変更==============================================================================
     % date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
-    subfolder='sim';%sim or exp
-    ExpSimName='coop4droneNoise';%実験,シミュレーション名
+     subfolder='exp';%sim or exp
+    ExpSimName='loadMassEst';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='expandSysEKF';%実験,シミュレーション内容64文字以内
+    contents='hover';%実験,シミュレーション内容
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内
@@ -51,11 +50,18 @@
         eval([simpleLoggerContents,'= loggers;']);
     else
     % single var : save logger, simple logger and agent
+        agentNum = length(gui.logger.Data.agent);
         eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
         eval([loggerContents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
-        eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger);']);
+        eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger,agentNum );']);
+        eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
+        
+        %Dataフォルダから読み込んだ場合agentはなし
+        % agentNum = length(log.Data.agent);
+        % eval([loggerContents '= log;']);%loggerの名前をlogger_contentsに変更
+        % eval([simpleLoggerContents,'= simplifyLoggerForSingle(log,agentNum );']);
     end
-save(fullfile(FolderNamed, SaveTitle2),agentContents);
+% save(fullfile(FolderNamed, SaveTitle2),agentContents);
 save(fullfile(FolderNamed, SaveTitle),loggerContents);
 save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
     %savefig

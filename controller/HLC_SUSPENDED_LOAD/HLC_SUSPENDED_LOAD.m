@@ -85,34 +85,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
             
-            %subsystemでcfbを用いる
-            % z2 = obj.result.Z2;
-            % z3 =  obj.result.Z3;
-            % ref = reshape(xd,4,[])';
-            % refx = ref(:,1);
-            % refy = ref(:,2);
-            % pL = model.state.pL;
-            % p = model.state.p;
-            % a = [1E5;1E4;1E3;1E2;1E1;1E0]*1e-2;
-            % a = [1e2;1e-1;1e-1;1e-1;1e-2;1e-2];
-            % C = 1;
-            % if model.state.p(3) > 1
-            %     vs(1:2)
-            %     j = [2,1];
-            %         % fun = @(u_opt) sqrt((u_opt - vs(1:2))*(u_opt - vs(1:2)'));
-            %         fun =  @(u_opt)sqrt(([u_opt(1),u_opt(2)]-vs(1:2))*([u_opt(1),u_opt(2)]-vs(1:2))');
-            %         % [A,b] = conic_cfb_HL(refx, refy, z2, z3, p(1), p(2), a,C);%{refx, refy, xix, xiy, sxQ, syQ, a,C}
-            %         [A,b] = conic_cfb_HL2(refx(1), refy(1), z2, z3, p(1), p(2), a,C);%{refx, refy, xix, xiy, sxQ, syQ, a,C}
-            %         vs(1:2) = fmincon(fun,[0;0],A,b,[],[],[],[],[],obj.fmc_options);
-            %     % for i = 1:2
-            %     %     fun = @(u_opt) sqrt((u_opt - vs(i))'*(u_opt - vs(i)));
-            %     %     [A,b] = conic_cfb_HL(z2z3(:,i), pL(j(i)),p(i),p(j(i)),a,C);
-            %     %     vs(i) = fmincon(fun,0,A,b,[],[],[],[],[],obj.fmc_options);
-            %     % end
-            %     vs(1:2)
-            %     % theta = acos(-[0,0,1]*model.state.pT)*180/pi
-            %     sqrt(sum((p(1:2)-pL(1:2)).^2))
-            % end
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
             
@@ -125,112 +97,20 @@ classdef HLC_SUSPENDED_LOAD < handle
             cha = agent{2};
             % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
             if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-                 if obj.flag_anti_spike < 5
-                   tmp =[uf(1);0;0;0];
-                   obj.flag_anti_spike=obj.flag_anti_spike+1;
-                 else
+                 % if obj.flag_anti_spike < 5
+                 %   tmp =[uf(1);0;0;0];
+                 %   obj.flag_anti_spike=obj.flag_anti_spike+1;
+                 % else
                     tmp = uf + us;
-                 end
+                 % end
             else
                 % tmp = tmpHL;
                 tmp = uf + us;
             end
-            %est load mass
-            if tmp(1)< 7
-                tmp(1) = obj.u_opt0;
-            end
-            % obj.u_opt0=tmp(1);
+
             obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             obj.self.controller.result.input = obj.result.input;%tmp;
             result = obj.result;  
-
-            % tmp = uf + us;
-            % control barrier funciton
-                % fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                % a=[10;4.8];
-                % k = 5;
-                % C=5;%deg
-                % Cq =5;%機体角度
-                % % [A,b] = conic_q_cfb(x,P,a,C*pi/180,Cq*pi/180);
-                % % [A,b] = conic_cfb(x,P,a,C*pi/180);
-                % 
-                % % [A,b] = conic_cfb_x3(x,P,a,C*pi/180);
-                % % x = [model.state.q;model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
-                % % [A,b] = conic_cfb_eul(x,P,a,C*pi/180);
-                % % [A,b] = conic_cfb_sigmoid(x,P,a,k,C*pi/180);
-                % % [A,b] = conic_cfb_log(x,P,a,C*pi/180);
-                % % [h1,h2]=conic_cfb_h1h2(x,obj.u_opt0,P,a,C*pi/180);
-                % 
-                % 
-                % % if h2 < 0
-                % %     am=[100;10];
-                % %     [A,b] = conic_cfb(x,P,am,C*pi/180);
-                % % else
-                % %     aM=[100;10];
-                % %     [A,b] = conic_cfb(x,P,aM,C*pi/180);
-                % % 
-                % % % [A,b] = conic_cfb_sigmoid(x,P,aM,k,C*pi/180);
-                % % end
-                % [A,b] = conic_cfb(x,P,a,C*pi/180);
-                % tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
-                % % obj.u_opt0 = 10;
-                % obj.u_opt0 = tmp_opt;
-                % if agent{1}.t >0
-                %     tmp = tmp_opt;
-                % end
-                % 
-                % %チェック用
-                % pT = model.state.pT;
-                % % wL = model.state.wL
-                % % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
-                % % [h1,h2] = conic_q_cfb_h1h2(x,tmp_opt,P,a,C*pi/180,Cq*pi/180);
-                % [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
-                % % [h1,h2]=conic_cfb_x3_h1h2(x,tmp_opt,P,a,C*pi/180);
-                % % [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
-                % % [h1,h2]=conic_cfb_sigumoid_h1h2(x,tmp_opt,P,a,k,C*pi/180);
-                % % [h1,h2]=conic_cfb_log_h1h2(x,tmp_opt,P,a,C*pi/180);
-                % theta = acos(-[0,0,1]*pT)*180/pi;
-                % 
-                % % [ERb0,EL] = RodriguesQuaternion(model.state.getq('4')); 
-                % % h0=-pT(3)-cos(C*pi/180)+(ERb0*[0;0;1])'*[0;0;1] - cos(Cq*pi/180);
-                % h0=-pT(3)-cos(C*pi/180);
-                % 
-                % % if h2<0
-                % %     a_h0 = am(1)*h0;
-                % % else
-                % %     a_h0 = aM(1)*h0;
-                % % end
-                % % dh0 = h1 - a_h0;
-                % % if h2<0
-                % %     a_h1 = am(2)*h1;
-                % % else
-                % %     a_h1 = aM(2)*h1;
-                % % end
-                % 
-                % a_h0 = a(1)*h0;
-                % dh0 = h1 - a_h0;
-                % a_h1 = a(2)*h1;
-                % % a_h1 = a(2)*h1^3;
-                % % a_h1 = a(2)*(1/(exp(-k*h1) + 1) - 0.5);
-                % % a_h1 = a(2)*log(h1 +1);
-                % dh1 = h2 - a_h1;
-                % 
-                % fprintf("t:%3.3f[s] \t  theta:%3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \t h2:%1.3f \t A:%1.3f \t  B:%1.3f \t b/A:%1.3f \n\n", agent{1}.t,theta,h0,dh0,h1,dh1,h2, A(1),b, b/A(1))
-                % obj.result.C = C;
-                % obj.result.theta = theta;
-                % obj.result.h0 = h0;
-                % obj.result.ah0 = a_h0;
-                % obj.result.dh0 = dh0;
-                % obj.result.h1 = h1;
-                % obj.result.ah1 = a_h1;
-                % obj.result.dh1 =dh1;
-                % obj.result.a =a;
-
-                
-            % % obj.result.input = tmp;
-            % obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
-            % result = obj.result;
-            
             
         end
         function show(obj)

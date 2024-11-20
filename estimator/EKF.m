@@ -95,10 +95,6 @@ classdef EKF < handle
             P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
             tmpvalue = xh_pre + G*(y-yh);	% Update state estimate
             tmpvalue = obj.model.projection(tmpvalue);
-            %質量推定用
-            % if obj.model.name == "load_mL_HL"&&tmpvalue(15)<0
-            %     tmpvalue(end)=0;
-            % end
             obj.result.state.set_state(tmpvalue);
             obj.model.state.set_state(tmpvalue);
             obj.result.G = G;
