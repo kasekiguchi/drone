@@ -8,7 +8,7 @@ function output = KL(X,U,Y,F,flg)
 %   F             観測量 関数ハンドル
 
 %Xlift,Yliftを計算する
-for i = 1:size(X,2)%1:Data.num
+parfor i = 1:size(X,2)%1:Data.num
     if flg.hermite
         dx = [X(:,i);U(:,i)]; % hermite
         dy = [Y(:,i);U(:,i)];
