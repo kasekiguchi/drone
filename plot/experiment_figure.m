@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20241025_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_great.mat");
+load("20241120_iflight_Exp_KMPC_olddata_hovering_[1000,1000,1000,100],328,0.730kg_good.mat");
 
 %%
 figtype = 2;
