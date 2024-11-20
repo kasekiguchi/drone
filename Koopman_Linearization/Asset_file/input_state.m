@@ -21,6 +21,10 @@ function state = input_state(param,mode)
         Z = obs1(param{7});
     elseif mode == 2
         Z = obs2(param{7});
+    elseif mode == 3
+        Z = quaternions_all([param{7}; [0.5844*9.81;0;0;0]]);
+    elseif mode == 14
+        Z = hermite_code14([param{7}; [0.5844*9.81;0;0;0]]);
     end
 
     try
@@ -99,4 +103,44 @@ isobe_z = [W1*W2;
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
 z2 = [common_except_pos_z; isobe_z];
+end
+
+function z3 = hermite_code14(x)
+P1 = x(1,1);
+P2 = x(2,1);
+P3 = x(3,1);
+Q1 = x(4,1); % roll
+Q2 = x(5,1); % pitch
+Q3 = x(6,1); % yaw
+V1 = x(7,1);
+V2 = x(8,1);
+V3 = x(9,1);
+W1 = x(10,1);
+W2 = x(11,1);
+W3 = x(12,1);
+u1 = x(10,1);
+u2 = x(11,1);
+u3 = x(12,1);
+u4 = x(13,1);
+R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
+R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
+R33 = (cos(Q2).*cos(Q1));
+common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
+            R13;
+            R23;
+            R33;
+            1];
+X = x(1:12,1);
+U = x(13:16,1);
+H0 = 1;
+H1x = 2.*X;
+H1u = 2.*U;
+hermite_x = [H0; H1x];
+hermite_u = [H0; H1u];
+H1 = @(x) [1; 2.*x]; % H0; H1
+kron_p = kron(kron(H1(P1),H1(P2)), kron(H1(sin(Q3)), H1(cos(Q3))));
+kron_v = kron(kron(H1(V1),H1(V2)), kron(H1(sin(W3)), H1(cos(W3))));
+kron_x = [kron_p; kron_v];
+hermite_WheeledRobot_z = kron(kron_x, hermite_u);
+z3 = [common_z; hermite_WheeledRobot_z];
 end

@@ -1,4 +1,4 @@
-function output = KL_error(X,U,Y,F)
+function output = KL_error(X,U,Y,Xe,Ue,Ye,F)
 %KL クープマン線形化によって線形アフィン系状態方程式の係数行列ABCを求める
 %   output = KoopmanLinear(X,U,Y)
 %   outuput.A .B  観測量空間における線形アフィン系の係数行列 Z[k+1] = A*Z[k]+Bu[k]
@@ -9,12 +9,30 @@ function output = KL_error(X,U,Y,F)
 
 %Xlift,Yliftを計算する
 for i = 1:size(X,2)%1:Data.num
-    Xlift(:,i) = F(X(:,i));
+    Xlift(:,i) = F(X(:,i)); % 誤差
     Ylift(:,i) = F(Y(:,i));
+    Xelift(:,i) = F(Xe(:,i)); % 実機
+    Yelift(:,i) = F(Ye(:,i));
 end
 
 [numX, ~] = size(Xlift); %[numX, ~]=size(Xlift): Xliftのサイズ=(A行,B列)のとき，A行の値をnumXに入れ，B列の値は使わない(~:notの意味)
 [numU, ~] = size(U);
+
+% 誤差A, B, C
+G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
+V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
+M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX) 
+
+% ΔA, ΔB, ΔC
+G = [Xelift ; Ue]*[Xelift ; Ue]'; % size(G) = (numX+numU, numX+numU)
+V = Yelift*[Xelift ; Ue]';       % size(V) = (numX,      numX+numU)
+M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+output.Ae = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+output.Be = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+output.Ce = Xe*pinv(Xelift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX) 
 
 %% 誤差モデル
 

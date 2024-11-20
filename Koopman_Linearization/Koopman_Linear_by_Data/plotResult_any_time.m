@@ -37,7 +37,8 @@ mode.training_data = 'Kiyama';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
-loadfilename{1} = '2024-09-12_Exp_Kiyama_code11_saddle';
+% loadfilename{1} = '2024-11-14_Exp_Kato_code00_saddle';
+loadfilename{1} = '2024-11-19_Exp_Kiyama_code15_saddle_4';
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
 % % loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
@@ -156,7 +157,7 @@ dt = diff(file{WhichRef}.simResult.reference.T);
 % startTimeを超えたインデックスからstepNステップ
 startIdx = find(file{WhichRef}.simResult.reference.T>=startTime, 1, 'first');
 tlength = file{WhichRef}.simResult.initTindex + startIdx:file{WhichRef}.simResult.initTindex+stepN-1 + startIdx;
-simResult.Z(:,startIdx) = F(file{WhichRef}.simResult.reference.X(:,startIdx)); %検証用データの初期値を観測量に通して次元を合わせてる
+simResult.Z(:,startIdx) = F([file{WhichRef}.simResult.reference.X(:,startIdx);file{WhichRef}.simResult.reference.U(:,startIdx)]); %検証用データの初期値を観測量に通して次元を合わせてる
 simResult.Xhat(:,startIdx) = file{WhichRef}.simResult.reference.X(:,startIdx);
 for j = startIdx:startIdx+stepN
     simResult.Z(:,j+1) = file{1}.est.A * simResult.Z(:,j) + file{1}.est.B * file{WhichRef}.simResult.U(:,j); 

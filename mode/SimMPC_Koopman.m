@@ -1,16 +1,16 @@
 %%
 %% Initialize
-% tmp = matlab.desktop.editor.getActive;
-% dir = fileparts(tmp.Filename);
-% if ~contains(path,dir)
-%     cd(erase(dir,'\mode'));
-% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-% close all hidden; clear ; clc;
-% userpath('clear');
-% end
-% 
-% clear gui
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
+
+clear gui
 %%
 clc
 ts = 0; % initial timefghj
@@ -27,25 +27,17 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
-% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
 % model_file = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
-model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
-load(model_file,'est');
-try
-    ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-    args = d2d(ssmodel, Controller_param.dt);
-    A = args.A;
-    B = args.B;
-    C = args.C;
-catch
-    A = est.A;
-    B = est.B;
-    C = est.C;
-end
+% model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
+% model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
+% model_file = "2024-11-19_Exp_Kiyama_code15_saddle_3";
+load(model_file,'est'); % main
+[A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 agent = DRONE;
 %% 位置を含まないモデルの場合，速度から算出する行列に変更 controller内で変更するようにした
 % なんか上手くいかない部分ができちゃったから封印
@@ -70,8 +62,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
-% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
@@ -80,7 +72,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
-
+conmode = 2;
 %% 誤差モデル
 % % 1コンのとき  100行目もコメントイン
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
@@ -95,24 +87,24 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_M
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-% for i = 1:te/dt
-%     % if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     pre_est = agent.estimator.result;
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
-%     else; agent(1).controller.do(time, 'f', agent);
-%     end
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc;
-% end
+for i = 1:te/dt
+    % if i < 20 || rem(i, 10) == 0 end
+    tic
+    pre_est = agent.estimator.result;
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
+    if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
+    else; agent(1).controller.do(time, 'f', agent);
+    end
+    agent(1).plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc;
+end
 %%
-% logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 % logger.save("10_hokukai");
 % log = logger;

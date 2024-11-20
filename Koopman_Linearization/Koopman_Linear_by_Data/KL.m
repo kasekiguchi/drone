@@ -1,4 +1,4 @@
-function output = KL(X,U,Y,F)
+function output = KL(X,U,Y,F,flg)
 %KL クープマン線形化によって線形アフィン系状態方程式の係数行列ABCを求める
 %   output = KoopmanLinear(X,U,Y)
 %   outuput.A .B  観測量空間における線形アフィン系の係数行列 Z[k+1] = A*Z[k]+Bu[k]
@@ -9,8 +9,15 @@ function output = KL(X,U,Y,F)
 
 %Xlift,Yliftを計算する
 for i = 1:size(X,2)%1:Data.num
-    Xlift(:,i) = F(X(:,i));
-    Ylift(:,i) = F(Y(:,i));
+    if flg.hermite
+        dx = [X(:,i);U(:,i)]; % hermite
+        dy = [Y(:,i);U(:,i)];
+    else
+        dx = X(:,i); % ふつう
+        dy = Y(:,i);
+    end
+    Xlift(:,i) = F(dx); 
+    Ylift(:,i) = F(dy);
 end
 
 [numX, ~] = size(Xlift); %[numX, ~]=size(Xlift): Xliftのサイズ=(A行,B列)のとき，A行の値をnumXに入れ，B列の値は使わない(~:notの意味)

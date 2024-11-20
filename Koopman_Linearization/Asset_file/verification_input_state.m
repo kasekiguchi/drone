@@ -25,10 +25,15 @@ mode.training_data = 'Kiyama';
 % filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
 % filename = '2024-07-14_Exp_KiyamaX20_code00_saddle';
 % filename = '2024-08-06_Exp_KiyamaY20_code00_saddle';
-filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename = '2024-09-11_Exp_Kiyama_code10_saddle';
-% filename = '2024-11-14_Exp_Kato_code00_saddle';
+filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
+% filename = '2024-11-14_Exp_Kato_code00_saddle'; % kato
+% code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
+
+% extract code number
+codenum = cell2mat(extractBetween(filename, 'code', '_saddle'));
 
 % Input_file = 'Input_X20_result.mat';
 Input_file = 'Input_Kiyama_result.mat';
@@ -40,6 +45,64 @@ Est_file = 'Est_Kiyama_result.mat';
 
 load(Input_file);
 load(Est_file);
+
+%% 普通に使いたいとき
+% thrust，torqueの値を設定する
+% thrust = ones(1, xx);
+% torque = zeros(3, xx);
+
+clear X; close all;
+N = 20;
+start_num = 1; % 単体で利用時はステップ数
+step_num = start_num + N;
+thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
+torque = zeros(3, step_num);
+% thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
+% torque = input_result(2:4,start_num:step_num);
+
+Est = zeros(12,1);
+% Est = Est_result(:, start_num);
+mode = 3; % 1:00, 2:10, 3:hermite, 0:free
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
+
+% 位置含まないモデルのとき
+% p = [0;0;0];
+% for i = 2:step_num+1
+%     p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
+% end
+% X = [p; X];
+
+% plot
+% step_num = step_num-start_num+1;
+Fontsize = 15;  
+set(0,'defaultAxesFontSize',15);
+set(0,'defaultTextFontsize',15);
+set(0,'defaultLineLineWidth',1.5);
+set(0,'defaultLineMarkerSize',15);
+ylimsetting = [-0.1 0.1; -0.1 0.1; -0.1 0.1];
+% ylimsetting = [0 1.5; -0.15 0; -25 0];
+
+figure(1);
+sgtitle(strrep(filename, '_', '-'));
+% sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
+% subplot(2,3,1);
+% plot(0:10,X(1:3,:)); grid on;
+% xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
+
+subplot(1,3,1);
+plot(0:step_num,X(1,:)); grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
+text(0.2, 0.1, num2str(round(max(abs(X(1,:))), 5)), 'Units', 'normalized', 'FontSize', 10);
+xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex');
+
+subplot(1,3,2);
+plot(0:step_num,X(2,:)); grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
+text(0.2, 0.1, num2str(round(max(abs(X(2,:))),5)), 'Units', 'normalized', 'FontSize', 10);
+xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex');
+
+subplot(1,3,3);
+plot(0:step_num,X(3,:)); grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
+text(0.2, 0.1, num2str(round(max(abs(X(3,:))),5)), 'Units', 'normalized', 'FontSize', 10);
+xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
 
 %input_state({A, B, C, step数, thrust, torque, 初期状態に使う配列, 初期状態のインデックス});
 
@@ -87,146 +150,24 @@ subplot(m,n,m*n); plot(0:10, 0.1*[0:10], 0:10, 0.1*[0:10], 0:10, 0.1*[0:10]); le
 sgtitle(strcat(strrep(filename, '_', ' '), "--", strrep(Input_file, '_', ' ')))
 f.WindowState = "maximized";
 
-%% 普通に使いたいとき
-% thrust，torqueの値を設定する
-% thrust = ones(1, xx);
-% torque = zeros(3, xx);
-mode = 0; % 0:free, 1:00; 2:10
-
-clear X
-N = 100;
-start_num = 1; % 単体で利用時はステップ数
-step_num = start_num + N;
-thrust = zeros(1, step_num) + 0.5884 * 9.81; % iFlight:0.730, eachine:0.5884
-torque = zeros(3, step_num);
-% thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
-% torque = input_result(2:4,start_num:step_num);
-
-Est = zeros(12,1);
-% Est = Est_result(:, start_num);
-mode = 0; % 1:00, 2:10, 0:free
-X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
-
-% 位置含まないモデルのとき
-% p = [0;0;0];
-% for i = 2:step_num+1
-%     p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
-% end
-% X = [p; X];
-
-
-% plot
-% step_num = step_num-start_num+1;
-Fontsize = 15;  
-set(0,'defaultAxesFontSize',15);
-set(0,'defaultTextFontsize',15);
-set(0,'defaultLineLineWidth',1.5);
-set(0,'defaultLineMarkerSize',15);
-ylimsetting = [-0.1 0.1; -0.1 0.1; -0.1 0.1];
-% ylimsetting = [0 1.5; -0.15 0; -25 0];
-
-figure(1);
-sgtitle('Exp.Kiyama.Dataset, code00');
-% sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
-% subplot(2,3,1);
-% plot(0:10,X(1:3,:)); grid on;
-% xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
-
-subplot(1,3,1);
-plot(0:step_num,X(1,:)); grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex');
-
-subplot(1,3,2);
-plot(0:step_num,X(2,:)); grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex');
-
-subplot(1,3,3);
-plot(0:step_num,X(3,:)); grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
-
-%% グラフを重ねる
-close all
-filename = '2024-09-11_Exp_Kiyama_code10_saddle';
-log1=load(strcat(filename, '.mat'), 'est');
-Est1 = zeros(9,1);
-% filename = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
-% log2=load(strcat(filename, '.mat'), 'est');
-% Est2 = zeros(9,1); % 位置含まないモデル：zeros(9,1), 通常：zeros(12,1)
-filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
-log3=load(strcat(filename, '.mat'), 'est');
-Est3 = zeros(12,1);
-
-clear X
-N = 100;
-start_num = 1; % 単体で利用時はステップ数
-step_num = start_num + N;
-thrust = 0.5884 * 9.81065 * ones(1, step_num);  
-% thrust = zeros(1, step_num);
-torque = zeros(3, step_num);
-% thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
-% torque = input_result(2:4,start_num:step_num);
-
-X1 = input_state({log1.est.A, log1.est.B, log1.est.C, step_num, thrust, torque, Est1},2);
-% X2 = input_state({log2.est.A, log2.est.B, log2.est.C, step_num, thrust, torque, Est2},2);
-X3 = input_state({log3.est.A, log3.est.B, log3.est.C, step_num, thrust, torque, Est3},1);
-
-% 位置含まないモデルのとき
-init = [0;0;0];
-X1 = without_position(init, step_num, X1);
-% X2 = without_position(init, step_num, X2);
-% X3 = without_position(init, step_num, X3);
-
-Fontsize = 15;  
-set(0,'defaultAxesFontSize',25);
-set(0,'defaultTextFontsize',15);
-set(0,'defaultLineLineWidth',2);
-set(0,'defaultLineMarkerSize',15);
-ylimsetting = [-inf inf; -inf inf; -inf inf];
-% ylimsetting = [0 1.5; -0.15 0; -25 0];
-legendlist = {'NoIncludePosition', 'IncludePosition'}; % 位置ありと位置なしの比較
-% legendlist = {'Without-Standardization', 'With-Standardization'};
-% legendlist = {'Without-Standardization', 'With-Standardization', 'Previous'};
-state = [1:3]';
-figure(1);
-subplot(1,3,1);
-plot(0:step_num,X1(1,:)); hold on; 
-% plot(0:step_num,X2(1,:)); 
-plot(0:step_num,X3(1,:));
-hold off;
-grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex'); legend(legendlist, 'Location','best');
-
-subplot(1,3,2);
-plot(0:step_num,X1(2,:)); hold on; 
-% plot(0:step_num,X2(2,:)); 
-plot(0:step_num,X3(2,:)); 
-hold off; 
-grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
-
-subplot(1,3,3);
-plot(0:step_num,X1(3,:)); hold on; 
-% plot(0:step_num,X2(3,:)); 
-plot(0:step_num,X3(3,:)); 
-hold off; 
-grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
-xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex'); %legend('NoIncludePosition', 'IncludePosition');
-
 %% 比較するデータ数を可変にしたい
 clear; close all;
 init = [0;0;0];
 P = [0.5884 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
-filename{1} = '2024-09-11_Exp_Kiyama_code10_saddle';
-filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename{1} = '2024-11-14_Exp_Kato_code00_saddle';
+filename{1} = '2024-11-19_Exp_Kiyama_code14_saddle';
+filename{2} = '2024-11-19_Exp_Kiyama_code15_saddle_4';
+% filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename{3} = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
 filename{3} = @roll_pitch_yaw_thrust_torque_physical_parameter_model;
-Estnum = [9 12 12];
-withoutp = [1 0 0];
+Estnum = [12 12 12];
+withoutp = [0 0 0];
 nonlinear = [0 0 1];
+modef = [14 3 0];
 log = {size(filename,2)};
 X = {size(filename,2)};
 
-N = 100;
+N = 20;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
 % thrust = 0.5884 * 9.81065 * ones(1, step_num);  
@@ -238,12 +179,15 @@ set(0,'defaultAxesFontSize',25);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',2);
 set(0,'defaultLineMarkerSize',15);
-ylimsetting = [-inf inf; -inf inf; -inf inf];
-% ylimsetting = [0 1.5; -0.15 0; -25 0];
+% ylimsetting = [-inf inf; -inf inf; -inf inf];
+ylimsetting = [-50 50; -50 50; -1.5 0.1];
 % legendlist = {'NoIncludePosition', 'IncludePosition'}; % 位置ありと位置なしの比較
 % legendlist = {'Without-Standardization', 'With-Standardization'};
 % legendlist = {'Without-Standardization', 'Previous', 'With-Standardization'};
-legendlist = {'NoIncludePosition', 'IncludePosition', 'Non-linear'};
+legendlist = {'hermite-wheeled-robot', 'hermite-many', 'Non-linear'};
+color = [0.00,0.45,0.74; 0.85,0.33,0.10; 0.93,0.69,0.13];
+testfontsize = 20;
+tmp = [0.05 0.05];
 
 figure(1);
 for i = 1:size(filename,2)
@@ -252,30 +196,35 @@ for i = 1:size(filename,2)
         X{i} = nonlinear_equ(Est{i}, step_num, filename{i}, [thrust; torque], P); %非線形モデル
     else
         log{i} = load(strcat(filename{i}, '.mat'), 'est');
+        [log{i}.est.A, log{i}.est.B, log{i}.est.C] = AB_transfer(log{i}.est.A, log{i}.est.B, log{i}.est.C, 0.025, 0.025);
         % 位置無しモデル
         if withoutp(i) == 1
             X{i} = input_state({log{i}.est.A, log{i}.est.B, log{i}.est.C, step_num, thrust, torque, Est{i}},2);
             X{i} = without_position(init, step_num, X{i});   
         else
-            X{i} = input_state({log{i}.est.A, log{i}.est.B, log{i}.est.C, step_num, thrust, torque, Est{i}},1);
+            X{i} = input_state({log{i}.est.A, log{i}.est.B, log{i}.est.C, step_num, thrust, torque, Est{i}},modef(i));
         end
     end
     % plot
     subplot(1,3,1);
     plot(0:step_num,X{i}(1,:)); hold on; 
     grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
+    text(tmp(1), tmp(2)+(i-1)*tmp(2), strcat('max:',legendlist{i},'=',num2str(max(abs(X{i}(1,:))))), 'Units', 'normalized', 'Color', color(i,:), 'FontSize', testfontsize);
     xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex'); legend(legendlist, 'Location','best');
 
     subplot(1,3,2);
     plot(0:step_num,X{i}(2,:)); hold on;
     grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
+    text(tmp(1), tmp(2)+(i-1)*tmp(2), strcat('max:',legendlist{i},'=',num2str(max(abs(X{i}(2,:))))), 'Units', 'normalized', 'Color', color(i,:), 'FontSize', testfontsize);
     xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex'); %legend(legendlist, 'Location','best');
 
     subplot(1,3,3);
     plot(0:step_num,X{i}(3,:)); hold on;
     grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
+    text(tmp(1), tmp(2)+(i-1)*tmp(2), strcat('max:',legendlist{i},'=',num2str(max(abs(X{i}(3,:))))), 'Units', 'normalized', 'Color', color(i,:), 'FontSize', testfontsize);
     xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex'); %legend(legendlist, 'Location','best');
 end
+text(tmp(1), tmp(2)+(i)*tmp(2), strcat('Free fall (0.025s)','=',num2str(1/2*9.81*(0.025*N)^2)), 'Units', 'normalized', 'Color', 'black', 'FontSize', testfontsize);
 hold off; 
 
 %% 部分の行列抜き出し

@@ -1,10 +1,7 @@
 classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
     % MCMPC_CONTROLLER MPCのコントローラー
-    % Imai Case study 
-    % 勾配MPCコントローラー
 
     properties
-%         options
         param
         current_state
         previous_input
@@ -26,6 +23,9 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         A
         B
         C
+        Ae
+        Be
+        Ce
         H
         qpparam
     end
@@ -48,6 +48,12 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.A = obj.param.A;
             obj.B = obj.param.B;
             obj.C = obj.param.C;
+
+            if isfield(obj.param, 'Ae')
+                obj.Ae = obj.param.Ae;
+                obj.Be = obj.param.Be;
+                obj.Ce = obj.param.Ce;
+            end
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値

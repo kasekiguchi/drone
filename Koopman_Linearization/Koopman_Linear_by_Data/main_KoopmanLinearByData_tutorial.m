@@ -129,24 +129,25 @@ clear; clc;
 flg.bilinear = 0;
 flg.normalize = 0;
 flg.without_pos = 0;
+flg.hermite = 1;
 F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
-% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
-exp_data = 'Exp_Kato';
+exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+% exp_data = 'Exp_Kato';
 % exp_data = 'Exp_KiyamaY20_Zdecreased20k';
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 % exp_data = 'Exp_Kiyama_XY_20data';
-% exp_data = 'Exp_Kiyama_Error_correct';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
+% exp_data = 'Exp_Kiyama_Error';
+FileName = strcat(FileName_common, exp_data, '_', 'code14_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
-load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat'); % 以前+xyz速度から
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_45k_Zdecreased.mat'); % z方向45000データ減少
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
@@ -161,6 +162,7 @@ load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
+
 
 % データのかさまし
 % Data = data_increased(Data, 0.001, 20);
@@ -189,10 +191,14 @@ if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
     if flg.without_pos
-        est = KL(Data.X(4:end,:), Data.U, Data.Y(4:end,:), F); % 位置を観測量に入れないときのKL
+        est = KL(Data.X(4:end,:), Data.U, Data.Y(4:end,:), F, flg); % 位置を観測量に入れないときのKL
     else 
-        est = KL(Data.X,Data.U,Data.Y,F); 
-        % est = KL_error(Data.X,Data.U,Data.Y,F);
+        est = KL(Data.X,Data.U,Data.Y,F,flg); 
+
+        % 誤差モデル
+        % Datae = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat', 'Data');
+        % Data2 = Datae.Data;
+        % est = KL_error(Data.X,Data.U,Data.Y,Data2.X,Data2.U,Data2.Y,F);
     end%クープマン線形化の具体的な計算をしてる部分
 
     % 最適化による算出
@@ -215,7 +221,8 @@ fileName = WhichLoadFile(Exp_tra, 2, []);
 
 verification_data = fileName;
 simResult.reference = ImportFromExpData_verification(verification_data); %検証用データを格納
-
+if flg.hermite; f_data = [simResult.reference.X(:,1); simResult.reference.U(:,1)];
+else; f_data = simResult.reference.X(:,1); end
 %arming時の実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
     takeoff_idx = find(simResult.reference.T,1,'first');
@@ -227,7 +234,7 @@ if simResult.reference.fExp == 1
     simResult.reference.N = simResult.reference.N - takeoff_idx;
 end
 
-simResult.Z(:,1) = F(simResult.reference.X(:,1)); %検証用データの初期値を観測量に通して次元を合わせてる
+simResult.Z(:,1) = F(f_data); %検証用データの初期値を観測量に通して次元を合わせてる
 simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
@@ -286,8 +293,11 @@ else
 end
 simResult.state.N = simResult.reference.N-1;
 
-% save(targetpath,'est','Data','simResult','F')
-save(targetpath,'est')
+if strcmp(exp_data, 'Exp_Kato')
+    save(targetpath,'est')
+else
+    save(targetpath,'est','Data','simResult','F')
+end
 disp('Saved to')
 disp(targetpath)
 

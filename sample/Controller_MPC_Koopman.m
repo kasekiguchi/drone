@@ -21,17 +21,8 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
     % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     load(model, 'est');
-    try
-        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-        args = d2d(ssmodel, Controller_param.dt);
-        Controller_param.A = args.A;
-        Controller_param.B = args.B;
-        Controller_param.C = args.C;
-    catch
-        Controller_param.A = est.A;
-        Controller_param.B = est.B;
-        Controller_param.C = est.C;
-    end
+    [Controller_param.A, Controller_param.B, Controller_param.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller_param.dt);
+    if isfield(est, 'Ae'); [Controller_param.Ae,Controller_param.Be,Controller_param.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller_param.dt); end
 
     % Controller_param.A = model{1};
     % Controller_param.B = model{2};
@@ -58,7 +49,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     elseif size(Controller_param.A,1) == 71
         Controller_param.quad_drone = @quad_drone_code08_mex;
     else
-        error('観測量に合うコントローラーがありませｎ')
+        warning('観測量に合うmexコントローラーがありませｎ');
     end
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い

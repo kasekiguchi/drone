@@ -19,7 +19,7 @@ km = 0.03010685884691849; % ロータ定数
 k = 0.000008048;          % 推力定数
 
 % 状態がクォータニオンを用いた13次元の場合
-if size(x,1) == 9
+if size(x,1) == 9+4
     % P1 = 0;
     % P2 = 0;
     % P3 = 0;
@@ -32,8 +32,12 @@ if size(x,1) == 9
     W1 = x(7,1);
     W2 = x(8,1);
     W3 = x(9,1);
+    u1 = x(10,1);
+    u2 = x(11,1);
+    u3 = x(12,1);
+    u4 = x(13,1);
 %状態がオイラー角を用いた12次元の場合
-elseif size(x,1) ==12
+elseif size(x,1) == 12+4
     P1 = x(1,1);
     P2 = x(2,1);
     P3 = x(3,1);
@@ -46,6 +50,10 @@ elseif size(x,1) ==12
     W1 = x(10,1);
     W2 = x(11,1);
     W3 = x(12,1);
+    u1 = x(13,1);
+    u2 = x(14,1);
+    u3 = x(15,1);
+    u4 = x(16,1);
     % q0-q3 : 与えたオイラー角から求めたクォータニオン
     % eul2quat,quaternion はsingleかdouble型にしか使え無くて関数ハンドルを設定した時にエラーをはいた 残念
     q0 = cos(Q1/2)*cos(Q2/2)*cos(Q3/2)+sin(Q1/2)*sin(Q2/2)*sin(Q3/2);
@@ -58,7 +66,7 @@ end
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
 R33 = (cos(Q2).*cos(Q1));
-if size(x,1) == 12
+if size(x,1) == 12+4
 common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
@@ -165,8 +173,51 @@ partial_param_z_3 = [comat_1; comat_2; comat_12_1; comat_12_2;
                 comat_3; comat_4; comat_34_1; comat_34_2]; % (9,1)
 partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 
+%% Hermite polynomial & kronecker product code=12
+X = x(1:12,1);
+U = x(13:16,1);
+H0 = 1;
+H1x = 2.*X;
+H1u = 2.*U;
+hermite_x = [H0; H1x];
+hermite_u = [H0; H1u];
+hermite_z = kron(hermite_x, hermite_u); % ちょっと違うかも
+
+%% Table 1のD(x)を基に算出 Wheeled Robot \thetaはyawと仮定
+% kronの組み合わせをたくさんつくる
+H1 = @(x) [1; 2.*x]; % H0; H1
+kron_p = kron(kron(H1(P1),H1(P2)), kron(H1(sin(Q3)), H1(cos(Q3))));
+kron_v = kron(kron(H1(V1),H1(V2)), kron(H1(sin(W3)), H1(cos(W3))));
+kron_x = [kron_p; kron_v];
+hermite_WheeledRobot_z = kron(kron_x, hermite_u);
+
+kron_state = H1(x(1:12,:)); % point on a line
+kron_pxyz = kron(kron(H1(P1),H1(P2)), H1(P3)); % point on a 3D space
+kron_vxyz = kron(kron(H1(V1),H1(V2)), H1(V3));
+kron_qxyz = kron(kron(H1(Q1),H1(Q2)), H1(Q3));
+kron_wxyz = kron(kron(H1(W1),H1(W2)), H1(W3));
+kron_pxy_yaw = kron(kron(H1(P1),H1(P2)), kron(H1(sin(Q3)),H1(cos(Q3)))); % wheeled robot
+kron_vxy_yaw = kron(kron(H1(V1),H1(V2)), kron(H1(sin(W3)),H1(cos(W3))));
+kron_pxy = kron(H1(P1),H1(P2)); % point on a plane
+kron_vxy = kron(H1(V1),H1(V2));
+kron_qxy = kron(H1(Q1),H1(Q2));
+kron_wxy = kron(H1(W1),H1(W2));
+kron_q1 = kron(H1(cos(Q1)), H1(cos(Q2))); % original
+kron_q2 = kron(H1(sin(Q1)), H1(sin(Q2)));
+kron_q3 = kron(H1(cos(Q1)), H1(sin(Q2)));
+kron_q4 = kron(H1(sin(Q1)), H1(cos(Q2)));
+kron_qq1 = kron(kron_q1, H1(Q3));
+kron_qq2 = kron(kron_q2, H1(Q3));
+kron_qq3 = kron(kron_q3, H1(Q3));
+kron_qq4 = kron(kron_q4, H1(Q3));
+hermite_total = [kron_state; kron_pxyz; kron_vxyz; kron_qxyz; kron_wxyz;
+    kron_pxy_yaw; kron_vxy_yaw; kron_pxy; kron_vxy; kron_qxy; kron_wxy];
+hermite_original_z = [kron_q1; kron_q2; kron_q3; kron_q4;
+    kron_qq1; kron_qq2; kron_qq3; kron_qq4];
+hermite_total_z = kron([hermite_total; hermite_original_z], hermite_u);
+
 %% まとめ
-z = [common_z; isobe_z]; % 00
+% z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
@@ -177,6 +228,10 @@ z = [common_z; isobe_z]; % 00
 % z = [common_except_pos_z; isobe_z; partial_param_z]; % 09  11の位置を含まない版
 % z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
 % z = [common_z; isobe_z; partial_param_z]; % 11
+% z = [common_z; hermite_z]; % 12
+% z = [common_z; isobe_z; hermite_z]; % 13
+% z = [common_z; hermite_WheeledRobot_z]; % 14
+z = [common_z; hermite_total_z]; % 15
 
 end
 
