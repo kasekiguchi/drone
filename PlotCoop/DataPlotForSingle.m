@@ -13,11 +13,11 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 1;%現在の結果を描画する
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 10;%現在の結果を描画する
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
-startTime = 0;
+fF=1;%flightのみは１
+startTime = 12;
 endTime = 1000;%1E3;
 % startTime = 32;
 % endTime = 95;%1E3;
@@ -43,7 +43,7 @@ endTime = 1000;%1E3;
     loggers = {
         % offlineLogger
         % simple_log_EKF
-        % simple_log_ptop_iniLoadMass0_0
+        simple_log_saddle_iniLoadMass0_0
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -628,8 +628,8 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),CC,add_option([],option,addingContents)};
       
          % if fExp ==1
-            allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
-            allData.u = { struct('x',{time},'y',{u}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+            allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],c),add_option([],option,addingContents)};
+            allData.u = { struct('x',{time},'y',{u}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],c),add_option([],option,addingContents)};
         % else
         %     allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1 ","2 ","3 ","4","dst"],c),add_option([],option,addingContents)};
         % end
@@ -857,7 +857,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         allData.t_errx = {struct('x',{time},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),CC,add_option([],option,addingContents)};
         allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),CC,add_option([],option,addingContents)};
         allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),CC,add_option([],option,addingContents)};
-        allData.input = { struct('x',{time},'y',{cinput}), struct('x','time (s)','y','input (N)'), LgndCrt(["T","roll","pitch","yaw"],c),add_option([],option,addingContents)};
+        allData.input = { struct('x',{time},'y',{cinput}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],c),add_option([],option,addingContents)};
         allData.u = { struct('x',{time},'y',{cu}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],c),add_option([],option,addingContents)};
         allData.inner_input = { struct('x',{time},'y',{inner_input}), struct('x','time (s)','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],c),add_option([],option,addingContents)};
         allData.attitude = {struct('x',{time},'y',{eq}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};

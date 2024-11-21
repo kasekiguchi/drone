@@ -9,11 +9,11 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付ファイル
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付フォルダ
 %変更==============================================================================
-    % date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
-    subfolder='sim';%sim or exp
-    ExpSimName='singleEpandLoadMassEKF';%実験,シミュレーション名
+    date2 = "2024_1020";%日付が変わってしまった場合は自分で変更
+    subfolder='exp';%sim or exp
+    ExpSimName='loadMassEst';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='saddleS0002_Th001Tr0001';%実験,シミュレーション内容64文字以内
+    contents='saddle_iniLoadMass0_0';%実験,シミュレーション内容64文字以内
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内
