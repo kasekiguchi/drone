@@ -20,12 +20,18 @@ run("makeSavePath")
         eval([simpleLoggerContents,'= loggers;']);
     else
     % single var : save logger, simple logger and agent
+        agentNum = length(gui.logger.Data.agent);
         eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
         eval([loggerContents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
-        agentNum = length(gui.logger.Data.agent);
-        eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger,',num2str(agentNum),');']);
+        eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger,agentNum );']);
+        eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
+        
+        %Dataフォルダから読み込んだ場合agentはなし
+        % agentNum = length(log.Data.agent);
+        % eval([loggerContents '= log;']);%loggerの名前をlogger_contentsに変更
+        % eval([simpleLoggerContents,'= simplifyLoggerForSingle(log,agentNum );']);
     end
-save(fullfile(FolderNamed, SaveTitle2),agentContents);
+% save(fullfile(FolderNamed, SaveTitle2),agentContents);
 save(fullfile(FolderNamed, SaveTitle),loggerContents);
 save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
     %savefig

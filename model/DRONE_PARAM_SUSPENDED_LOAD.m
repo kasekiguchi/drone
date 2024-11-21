@@ -48,14 +48,45 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 name % DIATONE
                 param.parameter_name = [];
 %                 param.mass = 0.5236;
-                param.mass = 0.800;%ドローンの質量
-                param.Lx = 0.195;
-                param.Ly = 0.195;
-                param.lx = 0.195/2;%0.05;
-                param.ly = 0.195/2;%0.05;
-                param.jx = 0.0820;
-                param.jy = 0.0820;
-                param.jz = 0.1377;
+%====================百瀬シミュレーション↓
+                % param.mass = 0.800;%ドローンの質量
+                % param.Lx = 0.195;
+                % param.Ly = 0.195;
+                % param.lx = 0.195/2;%0.05;
+                % param.ly = 0.195/2;%0.05;
+                % param.jx = 0.0820;
+                % param.jy = 0.0820;
+                % param.jz = 0.1377;
+                % param.gravity = 9.81;
+                % param.km1 = 0.0301; % ロータ定数
+                % param.km2 = 0.0301; % ロータ定数
+                % param.km3 = 0.0301; % ロータ定数
+                % param.km4 = 0.0301; % ロータ定数
+                % param.k1 = 0.000008;          % 推力定数
+                % param.k2 = 0.000008;          % 推力定数
+                % param.k3 = 0.000008;          % 推力定数
+                % param.k4 = 0.000008;          % 推力定数
+                % param.rotor_r = 0.0392;
+                % param.Length = 1;%cableLと同じ似なければならないくそ
+                % param.loadmass = 0.200;
+                % % param.loadmass = 0.086;
+                % param.cableL = 1;
+                % 
+                % param.ex = 0.5;
+                % param.ey = 0.5;
+                % param.ez = 0;
+ %====================百瀬シミュレーション↑
+
+%===================↓三宅実験
+% 6セル
+                param.mass = 0.745;%0.73
+                param.Lx = 0.175;
+                param.Ly = 0.175;
+                param.lx = 0.0175/2;%0.05;
+                param.ly = 0.0175/2;%0.05;
+                param.jx = 0.06;
+                param.jy = 0.06;
+                param.jz = 0.06;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
@@ -66,15 +97,19 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
-                param.Length = 1;%cableLと同じ似なければならないくそ
-                param.loadmass = 0.200;
-                % param.loadmass = 0.086;
-                param.cableL = 1;
-                
-                param.ex = 0.5;
-                param.ey = 0.5;
-                param.ez = 0;
+                param.Length = 0.91;
+                % param.loadmass =0.0725;% 0.0773;%0.0725;
+                %param.loadmass = 0.0864;%中身ねじ
+                param.loadmass = 0.09%　　中身電池
+                param.cableL = 0.91;%0.61灰色
+                % param.cableL =0.41; %0.54;%0.46;
+                % param.ex = 0.0735417984963207;
+                %param.ey = 0.0628671906594029;
+                param.ex = 0.0;%
+                param.ey = 0.0;
+                param.ez = 0;%0.037;
 
+%===================↑三宅実験
                 % param.ex = 0.0735417984963207;
                 % param.ey = 0.0628671906594029;
                 % param.ez = 0.037;

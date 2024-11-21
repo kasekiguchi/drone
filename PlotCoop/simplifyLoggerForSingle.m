@@ -22,8 +22,13 @@ function newLog = simplifyLoggerForSingle(log,agentNum)
                 states = agenti.(fields{i}).result{1, i2}.state.list;
                 for i3 = 1:length(states)
                     S = states(i3);%State
-                    if S ~= "xd"
-                        newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                    if (F)+(S) ~= "referenceq"
+                        if F + S == "referencexd"
+                            xd = agenti.(F).result{1, i2}.state.(S);
+                            newLog.(F).(S)(:,i2) = [xd;zeros(28-length(xd),1)];
+                        else
+                            newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                        end
                     end
                 end
             end

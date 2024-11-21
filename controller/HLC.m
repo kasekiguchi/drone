@@ -5,6 +5,7 @@ classdef HLC < handle
     result
     param
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
+    load_flag
   end
 
   methods
@@ -13,6 +14,11 @@ classdef HLC < handle
       obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.load_flag=0;%牽引のときだけ機体重量に牽引物を足すスイッチングをする
+       % obj.load_flag=isfield(obj.self.controller,'load');
+      if obj.self.estimator.model.name == 'load'
+        obj.load_flag=1;
+      end
     end
 
     function result = do(obj,varargin)
@@ -21,6 +27,19 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
+      obj.load_flag=isfield(obj.self.controller,'load');
+      if obj.load_flag == 1
+          % obj.self.plant.flight_phase='f';%シミュレーションするときはコメントアウト外す。
+      switch obj.self.plant.flight_phase%シミュレーションではフライトフェーズないからエラー出る。↑
+        case {'s','a','t','l'}
+            mL = model.state.mL;
+            P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+mL;
+            % P(1)=varargin{1,1}{1,5}.parameter.parameter(1)+varargin{1,1}{1,5}.parameter.parameter(20);%機体質量足すけん引物。EKFのほうでも工夫しないとダメ
+        case 'f'
+            P(1)=varargin{1,1}{1,5}.parameter.parameter(1);
+      end
+      end
+
       F1 = obj.param.F1;
       F2 = obj.param.F2;
       F3 = obj.param.F3;
@@ -50,7 +69,7 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       % max,min are applied for the safty
-      obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+      obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
       % obj.result.input = tmp;
       result = obj.result;
     end

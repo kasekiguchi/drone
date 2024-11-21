@@ -29,7 +29,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"ori
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
 agent.controller.do = @controller_do;
-agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass)*agent.parameter.gravity;0;0;0];
+agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass*0)*agent.parameter.gravity;0;0;0];
 
 run("ExpBase");
 %%
