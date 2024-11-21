@@ -162,39 +162,8 @@ end
 toc
 isSaved = 0;%input("Save figure : '1' \nNot now : '0' \nFill in : ");
 if isSaved
-    %% make folder
-    %変更しない
-        % ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
-            ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
-            % ExportFolder='Data';
-        DataFig='figure';%データか図か
-        date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
-        date2=string(datetime('now','Format','yyyy_MMdd'));%日付
-        
-    %変更========================================================
-       date2 = "2024_1022";%日付が変わってしまった場合は自分で変更
-    subfolder='sim';%sim or exp
-    ExpSimName='coop4droneNoise';%実験,シミュレーション名
-    % contents='FT_apx_max';%実験,シミュレーション内容
-     contents='expandSysEKF';%実験,シミュレーション内容64文字以内
-    % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
-    % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
-    %==========================================================
-    FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
-    FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
-    FolderNameF=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
-    FolderNameL=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'logger');%保存先のpath
-    
-    %フォルダができてないとき
-        if ~exist(FolderNameD,"dir")
-            mkdir(FolderNameD);
-            mkdir(FolderNameF);
-            mkdir(FolderNameL);
-            addpath(genpath(ExportFolder));
-        end
-    %フォルダをrmる
-    %     rmpath(genpath(ExportFolder))
     %% save 
+    run("makeSavePath")
     % n=[2,7,10,11];%spider
     fself = 10;
     if fMul==1 && fself ~=1
@@ -224,6 +193,7 @@ if isSaved
     end
     %%
     %RMSEの保存
+    run("makeSavePath")
     RMSE(1,1)="";
     filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
@@ -521,7 +491,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.t_errx = {struct('x',{time2},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),Ci,add_option([],option,addingContents)};
         allData.t_erry = {struct('x',{time2},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),Ci,add_option([],option,addingContents)};
         allData.t_errz = {struct('x',{time2},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),Ci,add_option([],option,addingContents)};
-        allData.input = { struct('x',{time2},'y',{cinput}), struct('x','time (s)','y','input (N)'), LgndCrt(["T","roll","pitch","yaw"],Ci),add_option([],option,addingContents)};
+        allData.input = { struct('x',{time2},'y',{cinput}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],Ci),add_option([],option,addingContents)};
         allData.inner_input = { struct('x',{time2},'y',{inner_input}), struct('x','time (s)','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],Ci),add_option([],option,addingContents)};
         allData.attitude = {struct('x',{time2},'y',{eqi}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],Ci),add_option([],option,addingContents)};
         allData.t_qroll = {struct('x',{time2},'y',{qroll}), struct('x','time (s)','y','$q_{roll}$ (rad)'),Ci,add_option([],option,addingContents)};

@@ -13,11 +13,11 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 10;%現在の結果を描画する
+fnowData = 1;%現在の結果を描画する
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 0;
+startTime = 5;
 endTime = 50;%1E3;
 % startTime = 32;
 % endTime = 95;%1E3;
@@ -42,8 +42,9 @@ endTime = 50;%1E3;
  %simplifyLogger
     loggers = {
         % offlineLogger
-        simple_log_EKF
+        % simple_log_EKF
         % simple_log_expandSysEKF
+        simple_log_EKF_load_model_mL
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -156,6 +157,7 @@ if isa(loggers{1},'LOGGER')
 else
     [allData,RMSE] = dataSummarize2(loggers, c, option, addingContents, fF, startTime, endTime);
 end
+endTime = allData.t_p{1, 1}.x{1, 1}(end);
 % 
 % for i =1:2
 %     zm1(i)=max(abs(allData.z1{1, 1}.y{1, 1}(i,:)));
@@ -310,36 +312,8 @@ toc
 
 isSaved = 0;%input("Save figure : '1' \nNot now : '0' \nFill in : ");
 if isSaved
-    %% make folder
-    %変更しない
-        % ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
-            ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
-            % ExportFolder='Data';
-        DataFig='figure';%データか図か
-        date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
-        date2=string(datetime('now','Format','yyyy_MMdd'));%日付
-        
-    %変更========================================================
-        subfolder='sim';%sim or exp
-    ExpSimName='offlineEstimationLoadMass';%実験,シミュレーション名
-    % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='hun_seki035';%実験,シミュレーション内容
-    %==========================================================
-    FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
-    FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
-    FolderNameF=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
-    FolderNameL=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'logger');%保存先のpath
-    
-    %フォルダができてないとき
-        if ~exist(FolderNameD,"dir")
-            mkdir(FolderNameD);
-            mkdir(FolderNameF);
-            mkdir(FolderNameL);
-            addpath(genpath(ExportFolder));
-        end
-    %フォルダをrmる
-    %     rmpath(genpath(ExportFolder))
     %% save 
+    run("makeSavePath")
     % n=[2,7,10,11];%spider
     fself = 10;
     if fMul==1 && fself ~=1
@@ -357,26 +331,27 @@ if isSaved
     for i=1:nf
     %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
         SaveTitle(i)=strcat(contents,'_',nn(i));
-        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
+        saveas(f(i), fullfile(FolderNamef, SaveTitle(i)),'fig');
         % 見切れないようにする
         f(i).Units = 'centimeters';
         f(i).PaperUnits = f(i).Units;
         f(i).PaperPosition = [0, 0, f(i).Position(3:4)];
         f(i).PaperSize = f(i).Position(3:4);
-        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'pdf');
+        saveas(f(i), fullfile(FolderNamef, SaveTitle(i)),'pdf');
         % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'jpg');
         % saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
     end
     %%
     %todo時間間隔を分かるようにする
+    run("makeSavePath")
     %RMSEの保存
     RMSE(1,1)="";
-    filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
+    filenameRMSE=strcat(fullfile(FolderNamer, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
     if fExist
-        writematrix([strings(1,4);"<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
+        writematrix([strings(1,4);"<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
     else
-        writematrix(["<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
+        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNamer, 'RMSEs'),'.txt'),'Delimiter','tab')
     end
     %% single save
     i=6;%figiureの番号
@@ -651,7 +626,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
       
          % if fExp ==1
             allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
-            allData.u = { struct('x',{time},'y',{u}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+            allData.u = { struct('x',{time},'y',{u}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
         % else
         %     allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1 ","2 ","3 ","4","dst"],c),add_option([],option,addingContents)};
         % end
@@ -880,7 +855,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),CC,add_option([],option,addingContents)};
         allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),CC,add_option([],option,addingContents)};
         allData.input = { struct('x',{time},'y',{cinput}), struct('x','time (s)','y','input (N)'), LgndCrt(["T","roll","pitch","yaw"],c),add_option([],option,addingContents)};
-        allData.u = { struct('x',{time},'y',{cu}), struct('x','time (s)','y','input (N)'), LgndCrt(["T","roll","pitch","yaw"],c),add_option([],option,addingContents)};
+        allData.u = { struct('x',{time},'y',{cu}), struct('x','time (s)','y','thrust (N) or trque (Nm)'), LgndCrt(["thrust","roll","pitch","yaw"],c),add_option([],option,addingContents)};
         allData.inner_input = { struct('x',{time},'y',{inner_input}), struct('x','time (s)','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],c),add_option([],option,addingContents)};
         allData.attitude = {struct('x',{time},'y',{eq}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
         allData.t_qroll = {struct('x',{time},'y',{qroll}), struct('x','time (s)','y','$q_{roll}$ (rad)'),CC,add_option([],option,addingContents)};

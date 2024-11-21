@@ -84,9 +84,9 @@ classdef HLC_SUSPENDED_LOAD < handle
             % end
             
             %EKFで質量推定
-            % P(15) = model.state.mL;
-            % obj.result.mLi=P(15);
-            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            P(15) = model.state.mL;
+            obj.result.mLi=P(15);
+            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
 
             F1 = Param.F1;
             F2 = Param.F2;
