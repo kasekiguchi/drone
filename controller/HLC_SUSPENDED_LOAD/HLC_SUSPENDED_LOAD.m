@@ -63,10 +63,11 @@ classdef HLC_SUSPENDED_LOAD < handle
             %     P(15) = 0;
             % else
             %      %EKFで質量推定
-            P(15) = model.state.mL;
-            obj.result.mLi=P(15);
-            disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
-            % end
+            if obj.self.estimator.model.name == "load_mL_HL"
+                P(15) = model.state.mL;
+                obj.result.mLi=P(15);
+                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            end
        
             F1 = Param.F1;
             F2 = Param.F2;
@@ -96,17 +97,18 @@ classdef HLC_SUSPENDED_LOAD < handle
             
             cha = agent{2};
             % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
-            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-                 % if obj.flag_anti_spike < 5
-                 %   tmp =[uf(1);0;0;0];
-                 %   obj.flag_anti_spike=obj.flag_anti_spike+1;
-                 % else
-                    tmp = uf + us;
-                 % end
-            else
-                % tmp = tmpHL;
-                tmp = uf + us;
-            end
+            % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+            %      % if obj.flag_anti_spike < 5
+            %      %   tmp =[uf(1);0;0;0];
+            %      %   obj.flag_anti_spike=obj.flag_anti_spike+1;
+            %      % else
+            %         tmp = uf + us;
+            %      % end
+            % else
+            %     % tmp = tmpHL;
+            %     tmp = uf + us;
+            % end
+            tmp = uf + us;
 
             obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             obj.self.controller.result.input = obj.result.input;%tmp;

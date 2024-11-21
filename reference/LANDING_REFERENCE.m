@@ -32,7 +32,7 @@ classdef LANDING_REFERENCE < handle
       obj.result.state.xd = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);
-      obj.self(varargin{6}).input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+      obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
       result = obj.result;
     end
     function Xd = gen_ref_for_landing(obj,t)
@@ -51,7 +51,7 @@ classdef LANDING_REFERENCE < handle
       Xd  = zeros( 28, 1);
       %% Set Xd
       if t<=obj.te
-        if obj.self.estimator.model.name == "load_mL_HL"||"load"
+        if obj.self.estimator.model.name == "load_mL_HL"||obj.self.estimator.model.name =="load"
             Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,-obj.self.parameter.get("cableL"),0);%質量推定用
         else
             Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
