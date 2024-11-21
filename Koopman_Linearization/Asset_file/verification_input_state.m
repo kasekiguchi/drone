@@ -27,7 +27,8 @@ mode.training_data = 'Kiyama';
 % filename = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename = '2024-09-11_Exp_Kiyama_code10_saddle';
-filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
+% filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
+filename = '2024-11-21_Exp_Kiyama_code16_saddle_new'; % hermite [1; x]
 % filename = '2024-11-14_Exp_Kato_code00_saddle'; % kato
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');

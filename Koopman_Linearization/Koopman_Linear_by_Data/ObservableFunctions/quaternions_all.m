@@ -185,7 +185,8 @@ hermite_z = kron(hermite_x, hermite_u); % ちょっと違うかも
 
 %% Table 1のD(x)を基に算出 Wheeled Robot \thetaはyawと仮定
 % kronの組み合わせをたくさんつくる
-H1 = @(x) [1; 2.*x]; % H0; H1
+% H1 = @(x) [1; 2.*x]; % H0; H1  code12-15 物理的
+H1 = @(x) [1; x]; % 確率論的
 kron_p = kron(kron(H1(P1),H1(P2)), kron(H1(sin(Q3)), H1(cos(Q3))));
 kron_v = kron(kron(H1(V1),H1(V2)), kron(H1(sin(W3)), H1(cos(W3))));
 kron_x = [kron_p; kron_v];
@@ -231,7 +232,8 @@ hermite_total_z = kron([hermite_total; hermite_original_z], hermite_u);
 % z = [common_z; hermite_z]; % 12
 % z = [common_z; isobe_z; hermite_z]; % 13
 % z = [common_z; hermite_WheeledRobot_z]; % 14
-z = [common_z; hermite_total_z]; % 15
+% z = [common_z; hermite_total_z]; % 15
+z = [common_z; isobe_z; hermite_WheeledRobot_z]; % 16
 
 end
 
