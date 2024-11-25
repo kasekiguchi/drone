@@ -31,7 +31,7 @@ run("makeSavePath")
         % eval([loggerContents '= log;']);%loggerの名前をlogger_contentsに変更
         % eval([simpleLoggerContents,'= simplifyLoggerForSingle(log,agentNum );']);
     end
-% save(fullfile(FolderNamed, SaveTitle2),agentContents);
+save(fullfile(FolderNamed, SaveTitle2),agentContents);
 save(fullfile(FolderNamed, SaveTitle),loggerContents);
 save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
     %savefig

@@ -10,17 +10,6 @@ Model.id = id;
 Model.name="load"; % print name
 Model.type="Suspended_Load_Model"; % model name
 
-%Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21))];
-% if ~strcmp(agent ,"plant")
-% if isempty(agent.plant)
-%   Setting.method = get_model_name("Load_HL"); % KF未実装
-%   Setting.dim=[25,4,16];
-%   Setting.num_list = [3,4,3,3,3,3,3,3];
-% else
-%   Setting.method = get_model_name("Load_HL"); % model dynamicsの実体名
-%   Setting.dim=[24,4,21];
-%   Setting.num_list = [3,3,3,3,3,3,3,3];
-% end
 Setting.method = get_model_name("Load_HL"); % model dynamicsの実体名
 Setting.dim=[24,4,21];
 Setting.num_list = [3,3,3,3,3,3,3,3];

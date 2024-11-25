@@ -13,11 +13,11 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 10;%現在の結果を描画する
+fnowData = 1;%現在の結果を描画する
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
-startTime = 12;
+fF=0;%flightのみは１
+startTime = 0;
 endTime = 1000;%1E3;
 % startTime = 32;
 % endTime = 95;%1E3;
@@ -43,7 +43,7 @@ endTime = 1000;%1E3;
     loggers = {
         % offlineLogger
         % simple_log_EKF
-        simple_log_saddle_iniLoadMass0_0
+        % simple_log_saddle_iniLoadMass0_0
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -127,7 +127,7 @@ nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_err
     multiFigure.title = ["bars","err_inp","vqw","position","loadp","loadv"];%[" state", " subsystem"];%title name
 if fnowData
     nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D","uHL"]};%比較するとき複数まとめる
-    nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erryL","t_errzL","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D","uHL"],...
+    nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errxL","t_erryL","t_errzL","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D","uHL"],...
             ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi"],["t_vxL" ,"t_vyL" ,"t_vzL"]};%比較するとき複数まとめる
     multiFigure.layout = {[2,3],[2,3],[3,3],[2,3],[2,3],[1,3]};
     multiFigure.title = ["bars","err_inp","vqw","position","loadp","loadv"];%[" state", " subsystem"];%title name

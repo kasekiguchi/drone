@@ -31,7 +31,8 @@ classdef FOR_LOAD < SENSOR_CLASS
             spL=obj.self.sensor.motive.result.rigid(obj.rigid_num).p;
             if strcmp(varargin{1}{2},'f')%obj.result.state.pL(3) >= 0.2&&(cha,'f')||strcmp(cha,'l')
                 obj.result.state.pL = spL;
-            elseif strcmp(varargin{1}{2},'t')&&spL(3)>0.3%(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
+            elseif strcmp(varargin{1}{2},'t')&&spL(3)>0.35&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
+            % elseif strcmp(varargin{1}{2},'t')&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
                 obj.result.state.pL(1:2) = spL(1:2);
                 obj.fpLXY=1;
             end
