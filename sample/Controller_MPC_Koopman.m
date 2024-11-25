@@ -15,8 +15,8 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-     load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
+     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    % load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
 %    load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_code02_Exp_Kiyama_code03_2.mat", "est");
@@ -34,7 +34,7 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い QとV逆だったらしい
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用
+    Controller_param.weight.P = diag([20; 10; 30]);    % 位置　10,20刻み 調整用
     Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み
    % Controller_param.weight.V = diag([10; 40; 20]);    % 速度  10,20刻み
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
