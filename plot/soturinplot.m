@@ -1,6 +1,10 @@
 %まずは現在のフォルダからパスが通っているかを確認
 %%
+% newLog1 = LOGGER("Data/20241119_1524_kizon_double_Log(19-Nov-2024_15_24_43).mat");
+% logging(newLog1, newLog1.Data.t, 102, 1:2)
+% data = return_state_prop(newLog1)
 newLog1 = simplifyLogger(log);
+% [newLog1,newLog2] = simplifyLogger(log);
 t = newLog1.t; %t:時間
 phase = newLog1.phase;%phase:アーミングやフライトなどの状態
 k = newLog1.k;%データ数
@@ -798,269 +802,197 @@ hold off
 
 %% 収束後　姿勢
 
-% 誤差の計算
-error_x_1 = abs(x_est_sel - x_ref_sel);
-error_y_1 = abs(y_est_sel - y_ref_sel);
-error_z_1 = abs(z_est_sel - z_ref_sel);
-
-% % 収束閾値を設定（例：0.01）
-% threshold = 0.1;
+% % 誤差の計算
+% error_x_1 = abs(x_est_sel - x_ref_sel);
+% error_y_1 = abs(y_est_sel - y_ref_sel);
+% error_z_1 = abs(z_est_sel - z_ref_sel);
 % 
-% % 各軌道が収束する最初の時刻を見つける
-% convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
-% convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
-% convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
-% convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+% % % 収束閾値を設定（例：0.01）
+% % threshold = 0.1;
+% % 
+% % % 各軌道が収束する最初の時刻を見つける
+% % convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
+% % convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
+% % convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
+% % convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+% % 
+% % % どれか遅い方の収束時刻を選ぶ
+% % convergence_time_index = max(convergence_time_xyz);
+% % convergence_time = t_sel(1:convergence_time_index); % 収束時刻
 % 
-% % どれか遅い方の収束時刻を選ぶ
-% convergence_time_index = max(convergence_time_xyz);
-% convergence_time = t_sel(1:convergence_time_index); % 収束時刻
-
-threshold = 0.15;  % 収束閾値
-T_continuous = 3;  % 連続収束の閾値（秒）
-
-% 収束時間を計算するための変数
-convergence_start_time = NaN;  % 収束開始時刻
-convergence_duration = 0;      % 収束時間の初期化
-convergence_row = NaN;         % 収束開始行の初期化
-found_convergence = false;     % 収束が確認されたかどうかのフラグ
-
-for i = 1:length(error_z_1)
-    % 現在の誤差が収束閾値を満たしているか確認
-    if abs(error_x_1(i)) < threshold && abs(error_y_1(i)) < threshold && abs(error_z_1(i)) < threshold
-        if isnan(convergence_start_time)  % 収束開始時刻が未設定の場合
-            convergence_start_time = t_sel(i);  % 収束開始時刻を設定
-            convergence_row = i;                % 収束開始行を記録
-        end
-    else
-        % 収束条件が満たされない場合
-        if ~isnan(convergence_start_time)  % 収束開始時刻が設定されている場合
-            end_time = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
-            duration = end_time - convergence_start_time;  % 収束が続いた時間を計算
-
-            % T_continuous（連続収束の閾値）を満たしているか確認
-            if duration >= T_continuous
-                fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
-                found_convergence = true;
-                break;  % 最初の収束が確認されたらループを終了
-            else
-                % 時間が足りなかった場合、再度リセットして次の期間を確認
-                convergence_start_time = NaN;
-                convergence_row = NaN;
-            end
-        end
-    end
-end
-
-% 最後のデータ点で収束しているか確認
-if ~found_convergence && ~isnan(convergence_start_time)
-    end_time = t_sel(end);  % 最後の時刻を取得
-    duration = end_time - convergence_start_time;
-
-    if duration >= T_continuous
-        fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
-    else
-        fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
-    end
-end
-
-error_vx_1 = abs(vx_est_sel - vx_ref_sel);
-error_vy_1 = abs(vy_est_sel - vy_ref_sel);
-error_vz_1 = abs(vz_est_sel - vz_ref_sel);
-threshold_v = 0.15;  % 収束閾値
-T_continuous_v = 3;  % 連続収束の閾値（秒）
-
-% 収束時間を計算するための変数
-convergence_start_time_v = NaN;  % 収束開始時刻
-convergence_duration_v = 0;      % 収束時間の初期化
-convergence_row_v = NaN;         % 収束開始行の初期化
-found_convergence_v = false;     % 収束が確認されたかどうかのフラグ
-
-for i = 1:length(error_z_1)
-    % 現在の誤差が収束閾値を満たしているか確認
-    if abs(error_vx_1(i)) < threshold_v && abs(error_vy_1(i)) < threshold_v && abs(error_vz_1(i)) < threshold_v
-        if isnan(convergence_start_time_v)  % 収束開始時刻が未設定の場合
-            convergence_start_time_v = t_sel(i);  % 収束開始時刻を設定
-            convergence_row_v = i;                % 収束開始行を記録
-        end
-    else
-        % 収束条件が満たされない場合
-        if ~isnan(convergence_start_time_v)  % 収束開始時刻が設定されている場合
-            end_time_v = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
-            duration_v = end_time_v - convergence_start_time_v;  % 収束が続いた時間を計算
-
-            % T_continuous（連続収束の閾値）を満たしているか確認
-            if duration_v >= T_continuous_v
-                fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time_v, duration, convergence_row_v);
-                found_convergence_v = true;
-                break;  % 最初の収束が確認されたらループを終了
-            else
-                % 時間が足りなかった場合、再度リセットして次の期間を確認
-                convergence_start_time_v = NaN;
-                convergence_row_v = NaN;
-            end
-        end
-    end
-end
-
-% 最後のデータ点で収束しているか確認
-if ~found_convergence_v && ~isnan(convergence_start_time_v)
-    end_time_v = t_sel(end);  % 最後の時刻を取得
-    duration = end_time_v - convergence_start_time_v;
-
-    if duration >= T_continuous_v
-        fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time_v, duration, convergence_row_v);
-    else
-        fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
-    end
-end
-
-% 収束開始行を結果として返す
-convergence_time_index = max([convergence_row convergence_row_v]);
-
-% 収束時刻以降のデータ
-trajectory_roll_1_post_convergence = roll_est_sel(convergence_time_index:end);
-trajectory_pitch_1_post_convergence = pitch_est_sel(convergence_time_index:end);
-trajectory_yaw_1_post_convergence = yaw_est_sel(convergence_time_index:end);
-t_1_post_convergence = t_sel(convergence_time_index:end);
-
-reference_roll_1_post_convergence = roll_ref_sel(convergence_time_index:end);
-reference_pitch_1_post_convergence = pitch_ref_sel(convergence_time_index:end);
-reference_yaw_1_post_convergence = yaw_ref_sel(convergence_time_index:end);
-
-%誤差の計算
-%姿勢
-er_roll_1 = mean(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence);
-er_pitch_1 = mean(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence);
-er_yaw_1 = mean(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence);
-er_roll_1_fig = trajectory_roll_1_post_convergence - reference_roll_1_post_convergence;
-er_pitch_1_fig = trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence;
-er_yaw_1_fig = trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence;
-
-% % MSEの計算
+% threshold = 0.15;  % 収束閾値
+% T_continuous = 3;  % 連続収束の閾値（秒）
+% 
+% % 収束時間を計算するための変数
+% convergence_start_time = NaN;  % 収束開始時刻
+% convergence_duration = 0;      % 収束時間の初期化
+% convergence_row = NaN;         % 収束開始行の初期化
+% found_convergence = false;     % 収束が確認されたかどうかのフラグ
+% 
+% for i = 1:length(error_z_1)
+%     % 現在の誤差が収束閾値を満たしているか確認
+%     if abs(error_x_1(i)) < threshold && abs(error_y_1(i)) < threshold && abs(error_z_1(i)) < threshold
+%         if isnan(convergence_start_time)  % 収束開始時刻が未設定の場合
+%             convergence_start_time = t_sel(i);  % 収束開始時刻を設定
+%             convergence_row = i;                % 収束開始行を記録
+%         end
+%     else
+%         % 収束条件が満たされない場合
+%         if ~isnan(convergence_start_time)  % 収束開始時刻が設定されている場合
+%             end_time = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
+%             duration = end_time - convergence_start_time;  % 収束が続いた時間を計算
+% 
+%             % T_continuous（連続収束の閾値）を満たしているか確認
+%             if duration >= T_continuous
+%                 fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+%                 found_convergence = true;
+%                 break;  % 最初の収束が確認されたらループを終了
+%             else
+%                 % 時間が足りなかった場合、再度リセットして次の期間を確認
+%                 convergence_start_time = NaN;
+%                 convergence_row = NaN;
+%             end
+%         end
+%     end
+% end
+% 
+% % 最後のデータ点で収束しているか確認
+% if ~found_convergence && ~isnan(convergence_start_time)
+%     end_time = t_sel(end);  % 最後の時刻を取得
+%     duration = end_time - convergence_start_time;
+% 
+%     if duration >= T_continuous
+%         fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time, duration, convergence_row);
+%     else
+%         fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
+%     end
+% end
+% 
+% error_vx_1 = abs(vx_est_sel - vx_ref_sel);
+% error_vy_1 = abs(vy_est_sel - vy_ref_sel);
+% error_vz_1 = abs(vz_est_sel - vz_ref_sel);
+% threshold_v = 0.15;  % 収束閾値
+% T_continuous_v = 3;  % 連続収束の閾値（秒）
+% 
+% % 収束時間を計算するための変数
+% convergence_start_time_v = NaN;  % 収束開始時刻
+% convergence_duration_v = 0;      % 収束時間の初期化
+% convergence_row_v = NaN;         % 収束開始行の初期化
+% found_convergence_v = false;     % 収束が確認されたかどうかのフラグ
+% 
+% for i = 1:length(error_z_1)
+%     % 現在の誤差が収束閾値を満たしているか確認
+%     if abs(error_vx_1(i)) < threshold_v && abs(error_vy_1(i)) < threshold_v && abs(error_vz_1(i)) < threshold_v
+%         if isnan(convergence_start_time_v)  % 収束開始時刻が未設定の場合
+%             convergence_start_time_v = t_sel(i);  % 収束開始時刻を設定
+%             convergence_row_v = i;                % 収束開始行を記録
+%         end
+%     else
+%         % 収束条件が満たされない場合
+%         if ~isnan(convergence_start_time_v)  % 収束開始時刻が設定されている場合
+%             end_time_v = t_sel(i - 1);  % 収束終了時刻（直前の時刻）
+%             duration_v = end_time_v - convergence_start_time_v;  % 収束が続いた時間を計算
+% 
+%             % T_continuous（連続収束の閾値）を満たしているか確認
+%             if duration_v >= T_continuous_v
+%                 fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time_v, duration, convergence_row_v);
+%                 found_convergence_v = true;
+%                 break;  % 最初の収束が確認されたらループを終了
+%             else
+%                 % 時間が足りなかった場合、再度リセットして次の期間を確認
+%                 convergence_start_time_v = NaN;
+%                 convergence_row_v = NaN;
+%             end
+%         end
+%     end
+% end
+% 
+% % 最後のデータ点で収束しているか確認
+% if ~found_convergence_v && ~isnan(convergence_start_time_v)
+%     end_time_v = t_sel(end);  % 最後の時刻を取得
+%     duration = end_time_v - convergence_start_time_v;
+% 
+%     if duration >= T_continuous_v
+%         fprintf('連続収束が確認されました。収束開始時刻: %.5f秒, 収束時間: %.5f秒, 収束開始行: %d\n', convergence_start_time_v, duration, convergence_row_v);
+%     else
+%         fprintf('収束は確認されたが、時間が%.5f秒でT_continuousを満たしていません。\n', duration);
+%     end
+% end
+% 
+% % 収束開始行を結果として返す
+% convergence_time_index = max([convergence_row convergence_row_v]);
+% 
+% % 収束時刻以降のデータ
+% trajectory_roll_1_post_convergence = roll_est_sel(convergence_time_index:end);
+% trajectory_pitch_1_post_convergence = pitch_est_sel(convergence_time_index:end);
+% trajectory_yaw_1_post_convergence = yaw_est_sel(convergence_time_index:end);
+% t_1_post_convergence = t_sel(convergence_time_index:end);
+% 
+% reference_roll_1_post_convergence = roll_ref_sel(convergence_time_index:end);
+% reference_pitch_1_post_convergence = pitch_ref_sel(convergence_time_index:end);
+% reference_yaw_1_post_convergence = yaw_ref_sel(convergence_time_index:end);
+% 
+% %誤差の計算
 % %姿勢
-% mse_roll_1 = mean((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2);
-% mse_pitch_1 = mean((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2);
-% mse_yaw_1 = mean((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2);
-% mse_roll_1_fig = (trajectory_vx_1_post_convergence - reference_roll_1_post_convergence).^2;
-% mse_pitch_1_fig = (trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2;
-% mse_yaw_1_fig = (trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2;
-
-% RMSEの計算
-%姿勢
-rmse_roll_1 = sqrt(mean((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2));
-rmse_pitch_1 = sqrt(mean((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2));
-rmse_yaw_1 = sqrt(mean((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2));
-rmse_roll_1_fig = sqrt((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2);
-rmse_pitch_1_fig = sqrt((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2);
-rmse_yaw_1_fig = sqrt((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2);
-
-% % MAEの計算
+% er_roll_1 = mean(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence);
+% er_pitch_1 = mean(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence);
+% er_yaw_1 = mean(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence);
+% er_roll_1_fig = trajectory_roll_1_post_convergence - reference_roll_1_post_convergence;
+% er_pitch_1_fig = trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence;
+% er_yaw_1_fig = trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence;
+% 
+% % % MSEの計算
+% % %姿勢
+% % mse_roll_1 = mean((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2);
+% % mse_pitch_1 = mean((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2);
+% % mse_yaw_1 = mean((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2);
+% % mse_roll_1_fig = (trajectory_vx_1_post_convergence - reference_roll_1_post_convergence).^2;
+% % mse_pitch_1_fig = (trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2;
+% % mse_yaw_1_fig = (trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2;
+% 
+% % RMSEの計算
 % %姿勢
-% mae_roll_1 = mean(abs(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence));
-% mae_pitch_1 = mean(abs(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence));
-% mae_yaw_1 = mean(abs(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence));
-% mae_roll_1_fig = abs(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence);
-% mae_pitch_1_fig = abs(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence);
-% mae_yaw_1_fig = abs(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence);
-
-%最大誤差
-max_error_roll_1 = max(abs(roll_est_sel(convergence_time_index:end) - roll_ref_sel(convergence_time_index:end)));
-max_error_pitch_1 = max(abs(pitch_est_sel(convergence_time_index:end) - pitch_ref_sel(convergence_time_index:end)));
-max_error_yaw_1 = max(abs(yaw_est_sel(convergence_time_index:end) - yaw_ref_sel(convergence_time_index:end)));
-
-% 結果を表示
-fprintf('姿勢roll_1の収束後の姿勢誤差: %f\n', er_roll_1);
-fprintf('姿勢pitch_1の収束後の姿勢誤差: %f\n', er_pitch_1);
-fprintf('姿勢yaw_1の収束後の姿勢誤差: %f\n', er_yaw_1);
-% fprintf('姿勢roll_1の収束後の姿勢MSE: %f\n', mse_roll_1);
-% fprintf('姿勢pitch_1の収束後の姿勢MSE: %f\n', mse_pitch_1);
-% fprintf('姿勢yaw_1の収束後の姿勢MSE: %f\n', mse_yaw_1);
-fprintf('姿勢roll_1の収束後の姿勢RMSE: %f\n', rmse_roll_1);
-fprintf('姿勢pitch_1の収束後の姿勢RMSE: %f\n', rmse_pitch_1);
-fprintf('姿勢yaw_1の収束後の姿勢RMSE: %f\n', rmse_yaw_1);
-% fprintf('姿勢rollの収束後の姿勢MAE: %f\n', mae_roll_1);
-% fprintf('姿勢pitch_1の収束後の姿勢MAE: %f\n', mae_pitch_1);
-% fprintf('姿勢yaw_1の収束後の姿勢MAE: %f\n', mae_yaw_1);
-fprintf('姿勢rollの収束後の姿勢最大誤差: %f\n', max_error_roll_1);
-fprintf('姿勢pitch_1の収束後の姿勢最大誤差: %f\n', max_error_pitch_1);
-fprintf('姿勢yaw_1の収束後の姿勢最大誤差: %f\n', max_error_yaw_1);
-
-%推定値と目標値
-figure;
-plot(t_1_post_convergence,roll_est_sel(convergence_time_index:end), '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Attitude[rad]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_1_post_convergence(1,1) inf])
-ylim([-5 5])
-hold on
-plot(t_1_post_convergence,pitch_est_sel(convergence_time_index:end), '-','LineWidth',2);
-plot(t_1_post_convergence,yaw_est_sel(convergence_time_index:end), '-','LineWidth',2);
-plot(t_1_post_convergence,roll_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-plot(t_1_post_convergence,pitch_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-plot(t_1_post_convergence,yaw_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('\Phi.est','\theta.est','\Psi.estr', ...
-    '\Phi.ref','\theta.ref','\Psi.ref','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-%誤差
-figure;
-plot(t_1_post_convergence,er_roll_1_fig(1:end), '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Attitude[rad]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_1_post_convergence(1,1) inf])
-ylim([-5 5])
-hold on
-plot(t_1_post_convergence,er_pitch_1_fig(1:end), '-','LineWidth',2);
-plot(t_1_post_convergence,er_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('\Phi.error','\theta.error','\Psi.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-% %MSE
+% rmse_roll_1 = sqrt(mean((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2));
+% rmse_pitch_1 = sqrt(mean((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2));
+% rmse_yaw_1 = sqrt(mean((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2));
+% rmse_roll_1_fig = sqrt((trajectory_roll_1_post_convergence - reference_roll_1_post_convergence).^2);
+% rmse_pitch_1_fig = sqrt((trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence).^2);
+% rmse_yaw_1_fig = sqrt((trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence).^2);
+% 
+% % % MAEの計算
+% % %姿勢
+% % mae_roll_1 = mean(abs(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence));
+% % mae_pitch_1 = mean(abs(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence));
+% % mae_yaw_1 = mean(abs(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence));
+% % mae_roll_1_fig = abs(trajectory_roll_1_post_convergence - reference_roll_1_post_convergence);
+% % mae_pitch_1_fig = abs(trajectory_pitch_1_post_convergence - reference_pitch_1_post_convergence);
+% % mae_yaw_1_fig = abs(trajectory_yaw_1_post_convergence - reference_yaw_1_post_convergence);
+% 
+% %最大誤差
+% max_error_roll_1 = max(abs(roll_est_sel(convergence_time_index:end) - roll_ref_sel(convergence_time_index:end)));
+% max_error_pitch_1 = max(abs(pitch_est_sel(convergence_time_index:end) - pitch_ref_sel(convergence_time_index:end)));
+% max_error_yaw_1 = max(abs(yaw_est_sel(convergence_time_index:end) - yaw_ref_sel(convergence_time_index:end)));
+% 
+% % 結果を表示
+% fprintf('姿勢roll_1の収束後の姿勢誤差: %f\n', er_roll_1);
+% fprintf('姿勢pitch_1の収束後の姿勢誤差: %f\n', er_pitch_1);
+% fprintf('姿勢yaw_1の収束後の姿勢誤差: %f\n', er_yaw_1);
+% % fprintf('姿勢roll_1の収束後の姿勢MSE: %f\n', mse_roll_1);
+% % fprintf('姿勢pitch_1の収束後の姿勢MSE: %f\n', mse_pitch_1);
+% % fprintf('姿勢yaw_1の収束後の姿勢MSE: %f\n', mse_yaw_1);
+% fprintf('姿勢roll_1の収束後の姿勢RMSE: %f\n', rmse_roll_1);
+% fprintf('姿勢pitch_1の収束後の姿勢RMSE: %f\n', rmse_pitch_1);
+% fprintf('姿勢yaw_1の収束後の姿勢RMSE: %f\n', rmse_yaw_1);
+% % fprintf('姿勢rollの収束後の姿勢MAE: %f\n', mae_roll_1);
+% % fprintf('姿勢pitch_1の収束後の姿勢MAE: %f\n', mae_pitch_1);
+% % fprintf('姿勢yaw_1の収束後の姿勢MAE: %f\n', mae_yaw_1);
+% fprintf('姿勢rollの収束後の姿勢最大誤差: %f\n', max_error_roll_1);
+% fprintf('姿勢pitch_1の収束後の姿勢最大誤差: %f\n', max_error_pitch_1);
+% fprintf('姿勢yaw_1の収束後の姿勢最大誤差: %f\n', max_error_yaw_1);
+% 
+% %推定値と目標値
 % figure;
-% plot(t_1_post_convergence,mse_roll_1_fig(1:end), '-','LineWidth',2);
-% grid on
-% xlabel('Time[s]','FontSize',12) 
-% ylabel('Attitude[rad^2]','FontSize',12)
-% set(gca().XAxis, 'Fontsize', 12)
-% set(gca().YAxis, 'Fontsize', 12)
-% xlim([t_1_post_convergence(1,1) inf])
-% ylim([-5 5])
-% hold on
-% plot(t_1_post_convergence,mse_pitch_1_fig(1:end), '-','LineWidth',2);
-% plot(t_1_post_convergence,mse_yaw_1_fig(1:end), '-','LineWidth',2);
-% legend('\Phi.error','\theta.error','\Psi.error','Location', ...
-%     'southwest','fontsize',8,'NumColumns',2)
-% hold off
-
-%RMSE
-figure;
-plot(t_1_post_convergence,rmse_roll_1_fig(1:end), '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Attitude[rad]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_1_post_convergence(1,1) inf])
-ylim([-5 5])
-hold on
-plot(t_1_post_convergence,rmse_pitch_1_fig(1:end), '-','LineWidth',2);
-plot(t_1_post_convergence,rmse_yaw_1_fig(1:end), '-','LineWidth',2);
-legend('\Phi.error','\theta.error','\Psi.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-% %MAE
-% figure;
-% plot(t_1_post_convergence,mae_roll_1_fig(1:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,roll_est_sel(convergence_time_index:end), '-','LineWidth',2);
 % grid on
 % xlabel('Time[s]','FontSize',12) 
 % ylabel('Attitude[rad]','FontSize',12)
@@ -1069,11 +1001,83 @@ hold off
 % xlim([t_1_post_convergence(1,1) inf])
 % ylim([-5 5])
 % hold on
-% plot(t_1_post_convergence,mae_pitch_1_fig(1:end), '-','LineWidth',2);
-% plot(t_1_post_convergence,mae_yaw_1_fig(1:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,pitch_est_sel(convergence_time_index:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,yaw_est_sel(convergence_time_index:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,roll_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+% plot(t_1_post_convergence,pitch_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+% plot(t_1_post_convergence,yaw_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+% legend('\Phi.est','\theta.est','\Psi.estr', ...
+%     '\Phi.ref','\theta.ref','\Psi.ref','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+% 
+% %誤差
+% figure;
+% plot(t_1_post_convergence,er_roll_1_fig(1:end), '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Attitude[rad]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_1_post_convergence(1,1) inf])
+% ylim([-5 5])
+% hold on
+% plot(t_1_post_convergence,er_pitch_1_fig(1:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,er_yaw_1_fig(1:end), '-','LineWidth',2);
 % legend('\Phi.error','\theta.error','\Psi.error','Location', ...
 %     'southwest','fontsize',8,'NumColumns',2)
 % hold off
+% 
+% % %MSE
+% % figure;
+% % plot(t_1_post_convergence,mse_roll_1_fig(1:end), '-','LineWidth',2);
+% % grid on
+% % xlabel('Time[s]','FontSize',12) 
+% % ylabel('Attitude[rad^2]','FontSize',12)
+% % set(gca().XAxis, 'Fontsize', 12)
+% % set(gca().YAxis, 'Fontsize', 12)
+% % xlim([t_1_post_convergence(1,1) inf])
+% % ylim([-5 5])
+% % hold on
+% % plot(t_1_post_convergence,mse_pitch_1_fig(1:end), '-','LineWidth',2);
+% % plot(t_1_post_convergence,mse_yaw_1_fig(1:end), '-','LineWidth',2);
+% % legend('\Phi.error','\theta.error','\Psi.error','Location', ...
+% %     'southwest','fontsize',8,'NumColumns',2)
+% % hold off
+% 
+% %RMSE
+% figure;
+% plot(t_1_post_convergence,rmse_roll_1_fig(1:end), '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Attitude[rad]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_1_post_convergence(1,1) inf])
+% ylim([-5 5])
+% hold on
+% plot(t_1_post_convergence,rmse_pitch_1_fig(1:end), '-','LineWidth',2);
+% plot(t_1_post_convergence,rmse_yaw_1_fig(1:end), '-','LineWidth',2);
+% legend('\Phi.error','\theta.error','\Psi.error','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+% 
+% % %MAE
+% % figure;
+% % plot(t_1_post_convergence,mae_roll_1_fig(1:end), '-','LineWidth',2);
+% % grid on
+% % xlabel('Time[s]','FontSize',12) 
+% % ylabel('Attitude[rad]','FontSize',12)
+% % set(gca().XAxis, 'Fontsize', 12)
+% % set(gca().YAxis, 'Fontsize', 12)
+% % xlim([t_1_post_convergence(1,1) inf])
+% % ylim([-5 5])
+% % hold on
+% % plot(t_1_post_convergence,mae_pitch_1_fig(1:end), '-','LineWidth',2);
+% % plot(t_1_post_convergence,mae_yaw_1_fig(1:end), '-','LineWidth',2);
+% % legend('\Phi.error','\theta.error','\Psi.error','Location', ...
+% %     'southwest','fontsize',8,'NumColumns',2)
+% % hold off
 
 %% 収束後　入力
 
