@@ -21,6 +21,6 @@ SimBaseMode = ["","SimHL","SimMPC","SimMPC_Koopman","SimMPC_HL","SimMPC_HLMC"];
 ExpBaseMode = ["","ExpHL","ExpMPC_Koopman","ExpMPC_HL","ExpMPC_HLMC","ExpMPC_HLMC_HL"];
 % comment out :  "ExpFHL_Servo", "ExpFT", "ExpEL","ExpTestMotiveConnection", "ExpFHL","SimFHL",
 fExp = 1;
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp, fDebug, PInterval);
