@@ -5,6 +5,7 @@ classdef HLC < handle
     result
     param
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
+    flag_anti_spike
   end
 
   methods
@@ -13,6 +14,7 @@ classdef HLC < handle
       obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.flag_anti_spike=0;
     end
 
     function result = do(obj,varargin)
@@ -50,6 +52,17 @@ classdef HLC < handle
         vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
+
+        cha = varargin{1,1}{1,2};
+
+        if strcmp(cha,'t')
+            if obj.flag_anti_spike < 10
+                tmp = [tmp(1);0;0;0];
+                obj.flag_anti_spike = obj.flag_anti_spike + 1
+            end
+        end
+
+
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
 %       state_monte = obj.self.estimator.result.state;

@@ -34,12 +34,13 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い QとV逆だったらしい
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
-    Controller_param.weight.P = diag([20; 10; 30]);    % 位置　10,20刻み 調整用
-    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み
-   % Controller_param.weight.V = diag([10; 40; 20]);    % 速度  10,20刻み
+    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 増やすとよくない
+   % Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み 木山
+    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み　調整用 倍していくと悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み
+   % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山
+    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み　調整用 角速度2倍だめ
     %Controller_param.weight.QW = diag([10; 1; 1.1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み yawちょっと改善    
     %Controller_param.weight.QW = diag([10; 1; 0.9; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み よくない
     %Controller_param.weight.QW = diag([5; 0.5; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
