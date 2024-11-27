@@ -27,6 +27,7 @@ classdef TAKEOFF_REFERENCE < handle
         obj.base_state = obj.self.estimator.result.state.p;
         if obj.self.estimator.model.name == "load_mL_HL"||obj.self.estimator.model.name =="load"
             obj.base_state = obj.self.sensor.result.state.pL;%======質量推定用
+            obj.base_state(1:2) = obj.self.sensor.result.state.real_pL(1:2);%======質量推定用
         end
         % obj.base_state = sub2ind(size(obj.self.estimator.result.state.p),row(1),col(1));
         obj.result.state.xd = [obj.base_state;zeros(17,1)];

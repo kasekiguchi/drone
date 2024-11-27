@@ -5,10 +5,12 @@ classdef FOR_LOAD < SENSOR_CLASS
         rigid_num
         self
         fpLXY=0;
-        tf0
+        tt0
         tl0
-        te = 10;%センサー値を何秒で100%使うか
-        rate = 1/te^2;%二次関数で0-1の間で変化する
+        tte = 10;%センサー値を何秒で100%使うか
+        tle = 5;%センサー値を何秒で100%使うか
+        ratet
+        ratel
     end
     
     methods
@@ -19,11 +21,9 @@ classdef FOR_LOAD < SENSOR_CLASS
                     obj.rigid_num = varargin{1,1}.rigid_num;
                 end
             end
-            obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT"],"num_list",[3,4,3,3]));
-            % if sum(contains(self.model.state.list,"q"))==1
-            %     obj.result.state.num_list=[3,length(self.model.state.q),3]; % modelと合わせる
-            %     obj.result.state.type = length(self.model.state.q);
-            % end
+            obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT","real_pL"],"num_list",[3,4,3,3]));
+            obj.ratet = 1/obj.tte^2;%二次関数で0-1の間で変化する
+            obj.ratel = 1/obj.tle^2;%二次関数で0-1の間で変化する
         end
         
         function [result]=do(obj,varargin)
@@ -34,35 +34,37 @@ classdef FOR_LOAD < SENSOR_CLASS
             ipL = sp -[0;0;obj.self.parameter.get("cableL")];% For:PE-Model
             if strcmp(varargin{1}{2},'f')%obj.result.state.pL(3) >= 0.2&&(cha,'f')||strcmp(cha,'l')
                 obj.result.state.pL = spL;
-                obj.tf0=[];
+                obj.tt0=[];
                 obj.tl0=[];
             % elseif strcmp(varargin{1}{2},'t')&&spL(3)>0.35&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
             % % elseif strcmp(varargin{1}{2},'t')&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
             %     obj.result.state.pL(1:2) = spL(1:2);
             %     obj.fpLXY=1;
             elseif strcmp(varargin{1}{2},'t')&&ipL(3)>0.1%take off
-                if isempty(obj.tf0)
-                    obj.tf0 = varargin{1}{1}.t;
+                if isempty(obj.tt0)
+                    obj.tt0 = varargin{1}{1}.t;
                 end
-                t = min((varargin{1}{1}.t - obj.tf0),obj.te);
-                k = obj.rate*t^2;%反映割合
+                t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
+                k = obj.ratet*t^2;%反映割合
                 spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-                % spL = spL + min(k,0)*(spL - sp);
             elseif strcmp(varargin{1}{2},'l')&&ipL(3)>0.1%landing
                 if isempty(obj.tl0)
                     obj.tl0 = varargin{1}{1}.t;
                 end
-                t = min(varargin{1}{1}.t - obj.tl0, obj.te);
-                k = obj.rate*(t - obj.te)^2;%反映割合
-                spL = spL + k*(spL - sp);
+                t = min(varargin{1}{1}.t - obj.tl0, obj.tle);
+                k = -obj.ratel*t^2 + 1;%反映割合
+                % spL = spL + k*(spL - sp);
+                spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
+                % spL(3) = ipL(3);
             else
                 spL = ipL;% For:PE-Model
-                obj.tf0=[];
+                obj.tt0=[];
                 obj.tl0=[];
             end
             obj.result.state.p = sp;
             obj.result.state.q = sq;
             obj.result.state.pL = spL;
+            obj.result.state.real_pL = obj.self.sensor.motive.result.rigid(obj.rigid_num).p;
             obj.result.state.pT = (spL-sp)/norm(spL-sp);
             result = obj.result;
         end

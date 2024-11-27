@@ -17,20 +17,24 @@ post_func = @(app) post(app); %35行目にある
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-N = round(motive.result.rigid_num/2);%機体と牽引物の組数
-COMs = [4,5];%割り当てる順番に設定
+rigid_num = motive.result.rigid_num;%剛体数
+N = round(rigid_num/2);%機体と牽引物の組数
+COMs = [5,4];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
-                 {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
+                 % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
+                 % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
+                 {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
+                 {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[0;1;0.5],"k",[1;1;0.5]),10}
+                 
                  };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
-isCoop = mod(N,2);
+isCoop = mod(rigid_num,2);
 firstId = 1;
 if isCoop == 1
     %実験用に修正する必要あり
@@ -45,7 +49,8 @@ if isCoop == 1
     % % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
     % agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 end
-cableL=[0.61,0.91];
+% cableL=[0.61,0.91];
+cableL =[0.869,0.869];
 length=cableL;
 for i = firstId:N
 sstate = motive.result.rigid(2*i-firstId); %状態の取得？なんか使われていない
@@ -107,6 +112,11 @@ function result = controller_do(varargin)
 end
 
 function post(app)
+% app.logger.plot({1, "p", "ser"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "sensor.result.state.pL", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "estimator.result.state.pL", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({2, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);

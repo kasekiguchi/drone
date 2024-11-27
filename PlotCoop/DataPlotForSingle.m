@@ -14,7 +14,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fnowData = 1;%現在の結果を描画する
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=0;%flightのみは１
 startTime = 0;
@@ -44,6 +44,7 @@ endTime = 1000;%1E3;
         % offlineLogger
         % simple_log_EKF
         % simple_log_saddle_iniLoadMass0_0
+        % log_ptop_LoadMassEst%ここに後で描画したいデータ名を書く
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -90,6 +91,13 @@ endTime = 1000;%1E3;
             loggers{i} = simplifyLoggerForSingle(gui.logger,i);
         end
         c = [];
+    else
+        agentNum = length(loggers{1}.Data.agent);
+        pre_loggers = cell(agentNum,1);
+        for i = 1:agentNum
+            pre_loggers{i} = simplifyLoggerForSingle(loggers{1},i);
+        end
+        loggers = pre_loggers;
     end
 %========================================================================
 %図を選ぶ
