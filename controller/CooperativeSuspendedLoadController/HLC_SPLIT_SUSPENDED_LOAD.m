@@ -65,7 +65,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             else
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
-            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4)
             % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);

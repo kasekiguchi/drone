@@ -51,7 +51,8 @@ if contains(qtype, "eul")
     %initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
-    initial_state(1).Q = [1; 0; 0; 0];
+    % initial_state(1).Q = [1; 0; 0; 0];
+    initial_state(1).Q = Eul2Quat([0;0;10*pi/180]);
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
@@ -126,9 +127,9 @@ polyin = polyshape(x1,y1);
 G = [x;y;0.5];
 rhos = p-G;
 
-noize_sp = normrnd(0,0.01,[3,tn]);
-noize_spT = 1*normrnd(0,0.001,[3,tn]);
-noize_sqDrone = 1*normrnd(0,0.0017,[3,tn]);%degで0.1くらいの標準偏差
+noize_sp = normrnd(0,0.0,[3,tn]);
+noize_spT = 1*normrnd(0,0.00,[3,tn]);
+noize_sqDrone = 1*normrnd(0,0.00,[3,tn]);%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn

@@ -32,7 +32,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         ts
         te % goal time
         zd % goal altitude
-        
+        k_yaw
+        rotForYaw
 
     end
 
@@ -46,10 +47,19 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 self   
                 args
                 agent1
-            end            
+            end     
+            
             obj.self = self;
             obj.N = args{4};
             obj.P = self.parameter.get("all","row");
+            
+            % A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
+            % B6 = [0;0;0;0;0;1];
+            % obj.k_yaw=lqrd(A6,B6,diag([100000,1000,100,10,10,10]),0.01,0.025);
+            % rhoi = agent1.parameter.rho(:,obj.self.id-1);
+            % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
+            % obj.rotForYaw = eul2rotm([yaw,0,0]);
+
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             if length(args) > 2
@@ -86,7 +96,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
                     obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
 
-                elseif strcmp(args{3}, "Split")%ドローン目標軌道
+                elseif strcmp(args{3}, "Split")%分割後の目標軌道
+                    A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
+                    B6 = [0;0;0;0;0;1];
+                    obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
+                    % rhoi = agent1.parameter.rho(:,obj.self.id-1);
+                    % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
+                    % yaw = atan2(rhoi(2),rhoi(1));
+                    % obj.rotForYaw = eul2rotm([yaw,0,0]);
+
                     obj.com = args{3};
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi"], 'num_list', [24, 3, 3, 3]));  
                     
@@ -176,7 +194,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                R0d  = agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
-               xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
+               xid  = x0d + rhoi;       %分割後のペイロードの位置目標軌道
+               % xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
                dxid = dx0d + dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
                %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
@@ -184,6 +203,38 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
                drefi    = [reshape(ref0(4:21),3,[]);zeros(1,6)];%目標軌道微分
                refi(5:end)   = reshape(drefi,[],1);
+
+               %牽引物yaw角補正================================================================================
+               % agenti = varargin{5};
+               % agenti = obj.self;
+               id
+               paramators = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
+                alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
+                alpi_e = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
+                alpi_ep = [-alpi_e(2);alpi_e(1)];%alpi_eに垂直な単位ベクトル
+                % rhoi_e = rhoi(1:2)/norm(rhoi(1:2));
+                thetai = atan2(alpi_e(2),alpi_e(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
+                % alpi_e-rhoi_e
+                model = obj.self.estimator.result;
+                x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+                
+                F1 = obj.self.controller.load.param.F1;
+                vf = Vfd_SuspendedLoad(dt,x,refi',paramators,F1);
+                refxId = (1:6) *4 -3; 
+                refyId = (1:6) *4 -2;
+                X = Z2_SuspendedLoad(x,refi',vf,paramators) + refi(refxId);%zで設計された現時刻の入力を用いるので少し違う
+                Y = Z3_SuspendedLoad(x,refi',vf,paramators) + refi(refyId);%zで設計された現時刻の入力を用いるので少し違う
+                % X = Z2_SuspendedLoad(x,zeros(28,1)',vf,paramators);
+                % Y = Z3_SuspendedLoad(x,zeros(28,1)',vf,paramators);
+                
+                V = dot(alpi_ep.*ones(2,5),[X(2:6)';Y(2:6)']).*alpi_ep;%alpi_epへ射影
+                W = cross([alpi_e;0].*ones(3,5),[V;zeros(1,5)]);%グローバルのz軸回りの角速度ベクトル
+                u_yaw = -obj.k_yaw*[thetai,W(3,:)]';%必要なyaw角の6階微分
+                u_xy = cross([0;0;u_yaw],[alpi;0])
+                obj.result.u_yaw = u_xy(1:2);
+
+
+               %================================================================================
 
            %実際のリンクと紐の加速度と張力,機体の加速度を求めてから張力を求める           
            %方針：計測した値を用いて各単機モデルで推定する．
