@@ -392,41 +392,41 @@ fprintf('軌道z_1の収束後の位置RMSE: %f\n', rmse_z_1);
 fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
 fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
 fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
-
+itigosa = [er_x_1;er_y_1;er_z_1;rmse_x_1;rmse_y_1;rmse_z_1;max_error_x_1;max_error_y_1;max_error_z_1];
 % % xy
-% figure;
-% plot(x_est_sel(convergence_time_index:end), y_est_sel(convergence_time_index:end), '-','LineWidth',2);
-% grid on
-% xlabel('X[m]') 
-% ylabel('Y[m]')
-% set(gca().XAxis, 'Fontsize', 12)
-% set(gca().YAxis, 'Fontsize', 12)
-% daspect([1 1 1])
-% xlim([-1.5 1.5])
-% ylim([-1.5 1.5])
-% hold on
-% plot(x_ref_sel(convergence_time_index:end), y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-% legend('Estimater','Reference','fontsize',12)
-% hold off
-
-% % xyz
-plot3(x_est_sel(convergence_time_index:end), y_est_sel(convergence_time_index:end), z_est_sel(convergence_time_index:end),  '-','LineWidth', 2);  % 軌道の太さを指定
-grid on                         % グリッドを表示
-xlabel('X[m]','FontSize',12) 
-ylabel('Y[m]','FontSize',12)
-zlabel('Z[m]','FontSize',12)
+figure;
+plot(x_est_sel(convergence_time_index:end), y_est_sel(convergence_time_index:end), '-','LineWidth',2);
+grid on
+xlabel('X[m]') 
+ylabel('Y[m]')
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-set(gca().ZAxis, 'Fontsize', 12)
+daspect([1 1 1])
 xlim([-1.5 1.5])
 ylim([-1.5 1.5])
-zlim([0 1.5])
-pbaspect([1 1 1])
 hold on
-plot3(x_ref_sel(convergence_time_index:end), y_ref_sel(convergence_time_index:end), z_ref_sel(convergence_time_index:end), '--', 'LineWidth', 2)
-legend('Estimator','Reference','Location', ...
-    'southwest','fontsize',8)
+plot(x_ref_sel(convergence_time_index:end), y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+legend('Estimater','Reference','fontsize',12)
 hold off
+
+% % % xyz
+% plot3(x_est_sel(convergence_time_index:end), y_est_sel(convergence_time_index:end), z_est_sel(convergence_time_index:end),  '-','LineWidth', 2);  % 軌道の太さを指定
+% grid on                         % グリッドを表示
+% xlabel('X[m]','FontSize',12) 
+% ylabel('Y[m]','FontSize',12)
+% zlabel('Z[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% set(gca().ZAxis, 'Fontsize', 12)
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+% zlim([0 1.5])
+% pbaspect([1 1 1])
+% hold on
+% plot3(x_ref_sel(convergence_time_index:end), y_ref_sel(convergence_time_index:end), z_ref_sel(convergence_time_index:end), '--', 'LineWidth', 2)
+% legend('Estimator','Reference','Location', ...
+%     'southwest','fontsize',8)
+% hold off
 
 %推定値と目標値
 figure;
@@ -439,14 +439,14 @@ set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
 ylim([-1.5 1.5])
 hold on
-plot(t_1_post_convergence,y_est_sel(convergence_time_index:end), '-','LineWidth',2);
-plot(t_1_post_convergence,z_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,x_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,y_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,z_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,z_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('x.est','y.est','z.est', ...
-    'x.ref','y.ref','z.ref','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+legend('x.est','x.ref','y.est','y.ref','z.est', ...
+    'z.ref','Location', ...
+    'northeast','fontsize',12,'NumColumns',3)
 hold off
 
 %誤差
@@ -463,7 +463,7 @@ hold on
 plot(t_1_post_convergence,er_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_z_1_fig(1:end), '-','LineWidth',2);
 legend('x.error','y.error','z.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',12,'NumColumns',2)
 hold off
 
 % %MSE
@@ -492,12 +492,12 @@ ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-0.4 0.4])
+ylim([0 0.4])
 hold on
 plot(t_1_post_convergence,rmse_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_z_1_fig(1:end), '-','LineWidth',2);
 legend('x.error','y.error','z.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',12,'NumColumns',2)
 hold off
 
 % %MAE
@@ -706,7 +706,7 @@ fprintf('速度vz_1の収束後の速度RMSE: %f\n', rmse_vz_1);
 fprintf('速度vx_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
 fprintf('速度vy_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
 fprintf('速度vz_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
-
+sokudogosa = [er_vx_1;er_vy_1;er_vz_1;rmse_vx_1;rmse_vy_1;rmse_vz_1;max_error_vx_1;max_error_vy_1;max_error_vz_1];
 %推定値と目標値
 figure;
 plot(t_1_post_convergence,vx_est_sel(convergence_time_index:end), '-','LineWidth',2);
@@ -716,16 +716,16 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
+ylim([-1 1])
 hold on
-plot(t_1_post_convergence,vy_est_sel(convergence_time_index:end), '-','LineWidth',2);
-plot(t_1_post_convergence,vz_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,vx_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,vy_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,vy_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,vz_est_sel(convergence_time_index:end), '-','LineWidth',2);
 plot(t_1_post_convergence,vz_ref_sel(convergence_time_index:end), '--','LineWidth',2);
-legend('v_x.est','v_y.est','v_z.est', ...
-    'v_x.ref','v_y.ref','v_z.ref','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+legend('v_x.est','v_x.ref','v_y.est','v_y.ref','v_z.est', ...
+    'v_z.ref','Location', ...
+    'northeast','fontsize',12,'NumColumns',3)
 hold off
 
 %誤差
@@ -737,12 +737,12 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-0.4 0.4])
+ylim([-0.3 0.3])
 hold on
 plot(t_1_post_convergence,er_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,er_vz_1_fig(1:end), '-','LineWidth',2);
 legend('v_x.error','v_y.error','v_z.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',12,'NumColumns',2)
 hold off
 
 % %MSE
@@ -771,12 +771,12 @@ ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
-ylim([-0.4 0.4])
+ylim([0 0.3])
 hold on
 plot(t_1_post_convergence,rmse_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_vz_1_fig(1:end), '-','LineWidth',2);
 legend('v_x.error','v_y.error','v_z.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',12,'NumColumns',2)
 hold off
 
 % %MAE
