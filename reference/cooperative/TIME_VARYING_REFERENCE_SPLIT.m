@@ -210,11 +210,33 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                id
                paramators = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
                 alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
-                alpi_e = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
-                alpi_ep = [-alpi_e(2);alpi_e(1)];%alpi_eに垂直な単位ベクトル
-                % rhoi_e = rhoi(1:2)/norm(rhoi(1:2));
-                thetai = atan2(alpi_e(2),alpi_e(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
-                % alpi_e-rhoi_e
+                alpi_unit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
+                alpi_v_unit = [-alpi_unit(2);alpi_unit(1)];%alpi_unitに垂直な単位ベクトル
+                % rhoi_unit = rhoi(1:2)/norm(rhoi(1:2));
+
+                % alpi = obj.self.sensor.result.state.pL - agent1.sensor.result.state.p;
+                % alpi_unit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
+                % alpi_v_unit = [-alpi(2);alpi(1);0]/norm([-alpi(2);alpi(1);0]);%alpiに垂直でz方向が0となるベクトル,z軸反時計回りとなる
+                % rhoi_unit = rhoi/norm(rhoi);%rhoの単位ベクトル
+                % theta_alpi = acos(alpi_unit'*rhoi_unit);%alpiのrhoに対する回転角
+                % rot_axis = cross(rhoi_unit,alpi_unit);%alpiのrhoに対する回転角の軸
+                % q = obj.generate_quaternion(theta_alpi,rot_axis/norm(rot_axis));%alpiの回転を表すクオータニオン
+                % eul = Quat2Eul(q);%euler角に変換
+                % yaw = eul(3)%alpiのyaw回転角
+                
+                %ダメ
+                % alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
+                % rhoi = rhoi(1:2);
+                % deltai = alpi - rhoi;
+                % alpi_true = alpi + deltai;
+                % alpi_unit =  alpi/norm(alpi);
+                % alpi_true_unit = alpi_true/norm(alpi_true);
+                % delta_yaw = sign(cross([alpi_unit;0],[alpi_true_unit;0]))*acos(alpi_unit'*alpi_true_unit);
+                % yaw = yaw + delta_yaw;
+
+
+                yaw = atan2(alpi_unit(2),alpi_unit(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
+                % alpi_unit-rhoi_unit
                 model = obj.self.estimator.result;
                 x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
                 
@@ -227,9 +249,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 % X = Z2_SuspendedLoad(x,zeros(28,1)',vf,paramators);
                 % Y = Z3_SuspendedLoad(x,zeros(28,1)',vf,paramators);
                 
-                V = dot(alpi_ep.*ones(2,5),[X(2:6)';Y(2:6)']).*alpi_ep;%alpi_epへ射影
-                W = cross([alpi_e;0].*ones(3,5),[V;zeros(1,5)]);%グローバルのz軸回りの角速度ベクトル
-                u_yaw = -obj.k_yaw*[thetai,W(3,:)]';%必要なyaw角の6階微分
+                V = dot(alpi_v_unit.*ones(2,5),[X(2:6)';Y(2:6)']).*alpi_v_unit;%alpi_unitpへ射影
+                W = cross([alpi_unit;0].*ones(3,5),[V;zeros(1,5)]);%グローバルのz軸回りの角速度ベクトル
+                u_yaw = -obj.k_yaw*[yaw,W(3,:)]';%必要なyaw角の6階微分
                 u_xy = cross([0;0;u_yaw],[alpi;0])
                 obj.result.u_yaw = u_xy(1:2);
 
@@ -390,6 +412,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
           Xd(12,1) = d3tra;
           Xd(15,1) = d4tra;
           Xd(18,1) = d5tra;
+        end
+
+        function q = generate_quaternion(obj,theta_alpi,rot_axis)
+            q = [
+                cos(theta_alpi/2);
+                rot_axis*sin(theta_alpi/2);
+                ];
         end
 
     end
