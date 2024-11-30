@@ -52,7 +52,7 @@ if contains(qtype, "eul")
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
     % initial_state(1).Q = [1; 0; 0; 0];
-    initial_state(1).Q = Eul2Quat([0;0;20*pi/180]);
+    initial_state(1).Q = Eul2Quat([0;0;80*pi/180]);
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
@@ -62,7 +62,7 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",0*[2,2,0.5]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
@@ -238,7 +238,7 @@ run("DataPlot.m")
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 % mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
-mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",5);
+mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",1);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 

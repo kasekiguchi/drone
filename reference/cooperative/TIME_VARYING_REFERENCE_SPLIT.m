@@ -100,6 +100,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
                     B6 = [0;0;0;0;0;1];
                     obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
+
+                    obj.k_yaw=lqrd(0,1,1,1,0.025);
                     % rhoi = agent1.parameter.rho(:,obj.self.id-1);
                     % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
                     % yaw = atan2(rhoi(2),rhoi(1));
@@ -196,7 +198,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
                xid  = x0d + rhoi;       %分割後のペイロードの位置目標軌道
                % xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
-               dxid = dx0d + dR0d*rhoi;     %分割後のペイロードの速度目標軌道
+               dxid = dx0d; %+ dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
                %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                refi         = zeros(28,1);  %機体のreference
@@ -236,24 +238,42 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
 
                 yaw = atan2(alpi_unit(2),alpi_unit(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
+                if abs(yaw)>10
+                w = -obj.k_yaw*yaw;
+                dw = (-obj.k_yaw)^2*yaw*0;%入力の微分dyaw = -k*yawの関係を用いる
+                d2w = (-obj.k_yaw)^3*yaw*0;
+                d3w = (-obj.k_yaw)^4*yaw*0;
+                d4w = (-obj.k_yaw)^5*yaw*0;
+                W = [zeros(2,5);w,dw,d2w,d3w,d4w];
+                Vxyz = cross(W,[alpi;0]+zeros(3,5))';
+                Vxy = reshape(Vxyz(:,1:2),[],1);
+                signVxy = sign(Vxy);
+                refxy = [refi((2:6) *4 -3);refi((2:6) *4 -2)];
+                
+                ref_new = signVxy.*max(signVxy.*Vxy,signVxy.*refxy);
+                refi_4_ = reshape(refi,4,[]);
+                refi_4_(1:2,2:6) = reshape(ref_new,5,2)';
+                refi = reshape(refi_4_,[],1);
+                aaa = ref_new - Vxy
+                end
                 % alpi_unit-rhoi_unit
-                model = obj.self.estimator.result;
-                x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
-                
-                F1 = obj.self.controller.load.param.F1;
-                vf = Vfd_SuspendedLoad(dt,x,refi',paramators,F1);
-                refxId = (1:6) *4 -3; 
-                refyId = (1:6) *4 -2;
-                X = Z2_SuspendedLoad(x,refi',vf,paramators) + refi(refxId);%zで設計された現時刻の入力を用いるので少し違う
-                Y = Z3_SuspendedLoad(x,refi',vf,paramators) + refi(refyId);%zで設計された現時刻の入力を用いるので少し違う
-                % X = Z2_SuspendedLoad(x,zeros(28,1)',vf,paramators);
-                % Y = Z3_SuspendedLoad(x,zeros(28,1)',vf,paramators);
-                
-                V = dot(alpi_v_unit.*ones(2,5),[X(2:6)';Y(2:6)']).*alpi_v_unit;%alpi_unitpへ射影
-                W = cross([alpi_unit;0].*ones(3,5),[V;zeros(1,5)]);%グローバルのz軸回りの角速度ベクトル
-                u_yaw = -obj.k_yaw*[yaw,W(3,:)]';%必要なyaw角の6階微分
-                u_xy = cross([0;0;u_yaw],[alpi;0])
-                obj.result.u_yaw = u_xy(1:2);
+                % model = obj.self.estimator.result;
+                % x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+                % 
+                % F1 = obj.self.controller.load.param.F1;
+                % vf = Vfd_SuspendedLoad(dt,x,refi',paramators,F1);
+                % refxId = (1:6) *4 -3; 
+                % refyId = (1:6) *4 -2;
+                % X = Z2_SuspendedLoad(x,refi',vf,paramators) + refi(refxId);%zで設計された現時刻の入力を用いるので少し違う
+                % Y = Z3_SuspendedLoad(x,refi',vf,paramators) + refi(refyId);%zで設計された現時刻の入力を用いるので少し違う
+                % % X = Z2_SuspendedLoad(x,zeros(28,1)',vf,paramators);
+                % % Y = Z3_SuspendedLoad(x,zeros(28,1)',vf,paramators);
+                % 
+                % V = dot(alpi_v_unit.*ones(2,5),[X(2:6)';Y(2:6)']).*alpi_v_unit;%alpi_unitpへ射影
+                % W = cross([alpi_unit;0].*ones(3,5),[V;zeros(1,5)]);%グローバルのz軸回りの角速度ベクトル
+                % u_yaw = -obj.k_yaw*[yaw,W(3,:)]';%必要なyaw角の6階微分
+                % u_xy = cross([0;0;u_yaw],[alpi;0])
+                % obj.result.u_yaw = u_xy(1:2);
 
 
                %================================================================================
