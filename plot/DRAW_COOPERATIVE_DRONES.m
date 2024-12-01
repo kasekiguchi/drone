@@ -272,8 +272,8 @@ classdef DRAW_COOPERATIVE_DRONES
           obj.ax.YLim = obj.ylim;
           obj.ax.ZLim = obj.zlim;
         end
-
-        pause(0.01);
+        campos([0,0,10])
+        pause(0.1);
         if isfield(param,'gif')
           im = frame2im(getframe(obj.ax));
           [imind,cm] = rgb2ind(im,sizen);

@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 20;
+te = 5;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -52,7 +52,7 @@ if contains(qtype, "eul")
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
     % initial_state(1).Q = [1; 0; 0; 0];
-    initial_state(1).Q = Eul2Quat([0;0;80*pi/180]);
+    initial_state(1).Q = Eul2Quat([0;0;90*pi/180]);
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
@@ -62,7 +62,7 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",0*[2,2,0.5]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
@@ -230,7 +230,7 @@ end
 disp(time.t)
 %%
 % close all
-run("DataPlot.m")
+% run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all

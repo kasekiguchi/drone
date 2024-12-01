@@ -34,6 +34,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         zd % goal altitude
         k_yaw
         rotForYaw
+        errorVector
 
     end
 
@@ -101,7 +102,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     B6 = [0;0;0;0;0;1];
                     obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
-                    obj.k_yaw=lqrd(0,1,1,1,0.025);
+                    obj.k_yaw=lqrd(0,1,10,1,0.025);
                     % rhoi = agent1.parameter.rho(:,obj.self.id-1);
                     % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
                     % yaw = atan2(rhoi(2),rhoi(1));
@@ -163,6 +164,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                li   = obj.P(end);                           %紐の長さ
                g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = agent1.parameter.rho(:,obj.self.id-1);%ペイロードの中心位置からリンクまでの距離
+               % [rhoMaxNorm,rhoMaxId] = max(norm(agent1.parameter.rho));
+               % rhoMax = agent1.parameter.rho(:,rhoMaxId);
                %reference
                ref0 = agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
                x0d  = ref0(1:3);
@@ -212,9 +215,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                id
                paramators = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
                 alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
-                alpi_unit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
-                alpi_v_unit = [-alpi_unit(2);alpi_unit(1)];%alpi_unitに垂直な単位ベクトル
-                % rhoi_unit = rhoi(1:2)/norm(rhoi(1:2));
+                alpiUnit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
+                alpiVecUnit = [-alpiUnit(2);alpiUnit(1)];%alpi_unitに垂直な単位ベクトル
+                rhoiUnit = rhoi(1:2)/norm(rhoi(1:2));
 
                 % alpi = obj.self.sensor.result.state.pL - agent1.sensor.result.state.p;
                 % alpi_unit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
@@ -237,24 +240,37 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 % yaw = yaw + delta_yaw;
 
 
-                yaw = atan2(alpi_unit(2),alpi_unit(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
-                if abs(yaw)>10
-                w = -obj.k_yaw*yaw;
-                dw = (-obj.k_yaw)^2*yaw*0;%入力の微分dyaw = -k*yawの関係を用いる
-                d2w = (-obj.k_yaw)^3*yaw*0;
-                d3w = (-obj.k_yaw)^4*yaw*0;
-                d4w = (-obj.k_yaw)^5*yaw*0;
-                W = [zeros(2,5);w,dw,d2w,d3w,d4w];
-                Vxyz = cross(W,[alpi;0]+zeros(3,5))';
-                Vxy = reshape(Vxyz(:,1:2),[],1);
-                signVxy = sign(Vxy);
-                refxy = [refi((2:6) *4 -3);refi((2:6) *4 -2)];
-                
-                ref_new = signVxy.*max(signVxy.*Vxy,signVxy.*refxy);
-                refi_4_ = reshape(refi,4,[]);
-                refi_4_(1:2,2:6) = reshape(ref_new,5,2)';
-                refi = reshape(refi_4_,[],1);
-                aaa = ref_new - Vxy
+                % yaw = atan2(alpiUnit(2),alpiUnit(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
+                % yaw = sign(cross([rhoiUnit;0],[alpiUnit;0]))*acos(alpiUnit'*rhoiUnit)%180以上回転した時の条件分岐を作る
+                yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
+                yaw*180/pi
+                if abs(yaw)>10*pi/180 %&& abs(yaw) < 170*pi/180 %pi
+                    if isempty(obj.errorVector)
+                        obj.errorVector = agent1.sensor.result.state.p(1:2) - x0d(1:2);
+                    end
+    
+                    w = -obj.k_yaw*yaw;
+                    dw = (-obj.k_yaw)^2*yaw*1;%入力の微分dyaw = -k*yawの関係を用いる
+                    d2w = (-obj.k_yaw)^3*yaw*1;
+                    d3w = (-obj.k_yaw)^4*yaw*1;
+                    d4w = (-obj.k_yaw)^5*yaw*1;
+                    W = [zeros(2,5);w,dw,d2w,d3w,d4w];%加速度と微分
+                    vL = obj.self.estimator.result.state.vL;
+                    if vL~=0
+                        vLVec = [alpiVecUnit;0]'* vL/norm(vL)*vL;
+                    else
+                        vLVec = 0;
+                    end
+                    A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
+                    Vxyz = cross(W,[alpi;0]+zeros(3,5));
+                    refi4_ = reshape(refi,4,[]);
+                    refi4_(1:2,2:6) = Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                    refi = reshape(refi4_,[],1);
+                    %yaw修正中の目標軌道
+                    x0dForCorrection = x0d(1:2) + obj.errorVector;
+                    refi(1:2) = alpi + x0dForCorrection;
+                else
+                    obj.errorVector=[];
                 end
                 % alpi_unit-rhoi_unit
                 % model = obj.self.estimator.result;
