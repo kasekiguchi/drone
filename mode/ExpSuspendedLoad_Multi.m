@@ -38,16 +38,24 @@ isCoop = mod(rigid_num,2);
 firstId = 1;
 if isCoop == 1
     %実験用に修正する必要あり
-    % firstId = 2;
-    % COMs = ["",COMs];
-    % agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
-    % agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
-    % agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
-    % agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-    % % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
+    firstId = 2;
+    COMs = ["",COMs];
+    rigitp = motive.result.rigit.p;
+    %fot 文でrhoを計算
+    rho = zeros(3,N-1);
+    for i = 1:N-1
+        rho(:,i) = rigitp(i+1) - rigitp(1);
+    end
+    agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
+    agent(1).plant = @nothing_do;
+    agent(1).sensor.motive = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
+    agent(1).estimator = @nothing_do;
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
-    % % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
-    % agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+    agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
+    takeoff_ref(1) = @nothing_do;
+    landing_ref(1) = @nothing_do;
+    agent(1).controller = @nothing_do;
+    agent(1).input_transform = @nothing_do;
 end
 % cableL=[0.61,0.91];
 cableL =[0.869,0.869];
@@ -96,6 +104,8 @@ agent(i).controller.result.input = [(agent(i).parameter.loadmass*0+agent(i).para
 end
 run("ExpBase");
 
+function [] = nothing_do(varargin)
+end
 function result = sensor_do(varargin)
     result_motive = varargin{5}.sensor.motive.do(varargin);
     result_forload = varargin{5}.sensor.forload.do(varargin);

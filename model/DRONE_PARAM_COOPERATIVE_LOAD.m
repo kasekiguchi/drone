@@ -47,6 +47,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             else
               rho0 = [0;0;-1/4];
             end
+            if isempty(param.rho)&& 1
             %非対称牽引物
                 % x1 = [-1 -1 0 1 1 0];
                 % y1 = [-1 1/2 1 1/2 -1/2 -1];
@@ -59,6 +60,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 G = [x;y;0.5];
                 rho = p-G;
                 param.rho = rho(:,1:N);
+            end
                 
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める

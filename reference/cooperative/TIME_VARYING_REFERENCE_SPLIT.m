@@ -35,6 +35,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         k_yaw
         rotForYaw
         errorVector
+        agent1
 
     end
 
@@ -49,17 +50,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 args
                 agent1
             end     
-            
+            obj.agent1=agent1;
             obj.self = self;
             obj.N = args{4};
             obj.P = self.parameter.get("all","row");
-            
-            % A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
-            % B6 = [0;0;0;0;0;1];
-            % obj.k_yaw=lqrd(A6,B6,diag([100000,1000,100,10,10,10]),0.01,0.025);
-            % rhoi = agent1.parameter.rho(:,obj.self.id-1);
-            % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
-            % obj.rotForYaw = eul2rotm([yaw,0,0]);
 
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
@@ -98,26 +92,22 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
 
                 elseif strcmp(args{3}, "Split")%分割後の目標軌道
-                    A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
-                    B6 = [0;0;0;0;0;1];
-                    obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
+                    % A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
+                    % B6 = [0;0;0;0;0;1];
+                    % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
                     obj.k_yaw=lqrd(0,1,10,1,0.025);
-                    % rhoi = agent1.parameter.rho(:,obj.self.id-1);
-                    % yaw = acos([1,0]*rhoi(1:2)/norm(rhoi(1:2)));
-                    % yaw = atan2(rhoi(2),rhoi(1));
-                    % obj.rotForYaw = eul2rotm([yaw,0,0]);
 
                     obj.com = args{3};
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi"], 'num_list', [24, 3, 3, 3]));  
                     
-                    P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
+                    P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],obj.agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
-                    % obj.Muid_method = str2func(agent1.controller.Param.method2);
+                    % obj.Muid_method = str2func(obj.agent1.controller.Param.method2);
                     obj.result.mLi = [];
                     obj.result.Muid = [];
 
-                    if agent1.estimator.model.state.type ==3
+                    if obj.agent1.estimator.model.state.type ==3
                         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
                     else
                         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
@@ -157,23 +147,21 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %================================================
                % ~0は分割前ペイロード，~iは分割後のペイロードを表す
                %================================================
-               agent1 = varargin{3};
+               % agent1 = varargin{3};
                id     = obj.self.id - 1;                    %機体の番号
                %parameter
                mi   = obj.P(1);                             %機体の質量
                li   = obj.P(end);                           %紐の長さ
                g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
-               rhoi = agent1.parameter.rho(:,obj.self.id-1);%ペイロードの中心位置からリンクまでの距離
-               % [rhoMaxNorm,rhoMaxId] = max(norm(agent1.parameter.rho));
-               % rhoMax = agent1.parameter.rho(:,rhoMaxId);
+               rhoi = obj.agent1.parameter.rho(:,obj.self.id-1);%ペイロードの中心位置からリンクまでの距離
                %reference
-               ref0 = agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
+               ref0 = obj.agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
                x0d  = ref0(1:3);
                dx0d = ref0(4:6);
                o0d  = ref0(22:24);                          %分割前目標角速度
                do0d = ref0(25:27);                          %分割前目標角加速度
                %state
-               model= agent1.estimator.result.state;        % x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
+               model= obj.agent1.estimator.result.state;        % x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
                Q0   = model.Q;
                O0   = model.O;
                v0   = model.v;
@@ -196,7 +184,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %todo:ペイロードの姿勢も考慮する場合は角度の5階微分まで求める必要がある
                %================================================================================
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
-               R0d  = agent1.reference.result.state.getq("rotm");%ペイロード角度固定
+               R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
                xid  = x0d + rhoi;       %分割後のペイロードの位置目標軌道
@@ -213,40 +201,17 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % agenti = varargin{5};
                % agenti = obj.self;
                id
-               paramators = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-                alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
+               % paramators = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
+                alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                 alpiUnit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
-                alpiVecUnit = [-alpiUnit(2);alpiUnit(1)];%alpi_unitに垂直な単位ベクトル
+                % alpiVecUnit = [-alpiUnit(2);alpiUnit(1)];%alpi_unitに垂直な単位ベクトル
                 rhoiUnit = rhoi(1:2)/norm(rhoi(1:2));
 
-                % alpi = obj.self.sensor.result.state.pL - agent1.sensor.result.state.p;
-                % alpi_unit = alpi/norm(alpi);%牽引物が垂直に傾かないと仮定
-                % alpi_v_unit = [-alpi(2);alpi(1);0]/norm([-alpi(2);alpi(1);0]);%alpiに垂直でz方向が0となるベクトル,z軸反時計回りとなる
-                % rhoi_unit = rhoi/norm(rhoi);%rhoの単位ベクトル
-                % theta_alpi = acos(alpi_unit'*rhoi_unit);%alpiのrhoに対する回転角
-                % rot_axis = cross(rhoi_unit,alpi_unit);%alpiのrhoに対する回転角の軸
-                % q = obj.generate_quaternion(theta_alpi,rot_axis/norm(rot_axis));%alpiの回転を表すクオータニオン
-                % eul = Quat2Eul(q);%euler角に変換
-                % yaw = eul(3)%alpiのyaw回転角
-                
-                %ダメ
-                % alpi = obj.self.sensor.result.state.pL(1:2) - agent1.sensor.result.state.p(1:2);
-                % rhoi = rhoi(1:2);
-                % deltai = alpi - rhoi;
-                % alpi_true = alpi + deltai;
-                % alpi_unit =  alpi/norm(alpi);
-                % alpi_true_unit = alpi_true/norm(alpi_true);
-                % delta_yaw = sign(cross([alpi_unit;0],[alpi_true_unit;0]))*acos(alpi_unit'*alpi_true_unit);
-                % yaw = yaw + delta_yaw;
-
-
-                % yaw = atan2(alpiUnit(2),alpiUnit(1)) - atan2(rhoi(2),rhoi(1))%180以上回転した時の条件分岐を作る
-                % yaw = sign(cross([rhoiUnit;0],[alpiUnit;0]))*acos(alpiUnit'*rhoiUnit)%180以上回転した時の条件分岐を作る
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 yaw*180/pi
                 if abs(yaw)>10*pi/180 %&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
-                        obj.errorVector = agent1.sensor.result.state.p(1:2) - x0d(1:2);
+                        obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
     
                     w = -obj.k_yaw*yaw;
@@ -255,13 +220,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     d3w = (-obj.k_yaw)^4*yaw*1;
                     d4w = (-obj.k_yaw)^5*yaw*1;
                     W = [zeros(2,5);w,dw,d2w,d3w,d4w];%加速度と微分
-                    vL = obj.self.estimator.result.state.vL;
-                    if vL~=0
-                        vLVec = [alpiVecUnit;0]'* vL/norm(vL)*vL;
-                    else
-                        vLVec = 0;
-                    end
-                    A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
+                    % vL = obj.self.estimator.result.state.vL;
+                    % if vL~=0
+                    %     vLVec = [alpiVecUnit;0]'* vL/norm(vL)*vL;
+                    % else
+                    %     vLVec = 0;
+                    % end
+                    % A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
                     Vxyz = cross(W,[alpi;0]+zeros(3,5));
                     refi4_ = reshape(refi,4,[]);
                     refi4_(1:2,2:6) = Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
@@ -330,7 +295,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % delta_ai = vi - ai
            %ペイロードの速度からリンクの速度を求めてそこからリンクの加速度求める
                % id = obj.self.id;
-               % muid_mui = agent1.controller.result.mui; %3xN 
+               % muid_mui = obj.agent1.controller.result.mui; %3xN 
                % mui = muid_mui(1:3,id-1); %3x1%理想の張力
                % % mui = muid_mui(4:6,id-1); %3x1%現実の張力
                % ai = (vi - obj.vi_pre)/dt; 
