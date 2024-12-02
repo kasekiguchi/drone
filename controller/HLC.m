@@ -53,7 +53,7 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
-        cha = varargin{1,1}{1,2};
+        cha = varargin{1,1}{1,2}; 
 
         if strcmp(cha,'t')
             if obj.flag_anti_spike < 10

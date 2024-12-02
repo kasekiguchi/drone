@@ -7,7 +7,7 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
    % Controller_param.m = 0.669; %上限sim30s
    % Controller_param.m = 0.640;
     Controller_param.m = 0.730; %ドローンの質量、質量は統一 iflight+6cell
-    Controller_param.dt = 0.07; % MPCステップ幅
+    Controller_param.dt = 0.035; % MPCステップ幅
     Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
@@ -34,13 +34,13 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い QとV逆だったらしい
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 増やすとよくない
+    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 10倍×
    % Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み 木山
-    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み　調整用 増やすのあり yaw,pitchのみ10倍× rollのみ10倍悪くない
+    Controller_param.weight.V = diag([300; 20; 10]);    % 速度  10,20刻み　調整用 増やすのあり yaw,pitchのみ10倍× rollのみ10倍悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み　調整用 角速度2倍だめ
+    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み　調整用 速度 vx10倍xの位置が-方向にゆっくり発散 vy10倍yの位置が-方向に発散 vz10倍landingみたいになる 角速度10倍xyだめ z10倍x良いyだめ
     %Controller_param.weight.QW = diag([10; 1; 1.1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み yawちょっと改善    
     %Controller_param.weight.QW = diag([10; 1; 0.9; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み よくない
     %Controller_param.weight.QW = diag([5; 0.5; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
