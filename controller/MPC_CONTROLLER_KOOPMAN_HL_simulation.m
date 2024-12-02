@@ -139,15 +139,17 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% 疑似逆行列から求める
             deltaU = abs(obj.result.input - obj.input.u_HL);
-            Z = quaternions_all(obj.previous_state);
+            Z = obj.A * quaternions_all([obj.previous_state; deltaU]) + obj.B * deltaU;
+            er = obj.C(Z);
             % V = [obj.previous_state; obj.current_state; obj.input.u_HL]; % e x u
-            V = [quaternions_all(obj.current_state)];
-            J = @(P) Z - V*P - obj.B*deltaU;
+            V = [quaternions_all(obj.previous_state)];
+            J = @(P) er - V*P - obj.B*deltaU;
             x0 = [obj.current_state; zeros(26-12,1)];
             x = fminunc(J,x0);
             delU = -pinv(obj.B)*V*x;
             u = obj.input.u_HL - delU;
             obj.result.input = u;
+            % MODEL_CLASSも変更必要
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -157,6 +159,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.result.mpc.exitflag = exitflag;
             obj.result.mpc.fval = fval;
             obj.result.mpc.xr = obj.reference.xr;
+            % obj.result.mpc.input = obj.result.input;
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
@@ -182,7 +185,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
             %     rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
             fprintf("t: %f \t calT: %f \t fval: %f \t flag: %d \n", rt, calT, fval, exitflag);
-            fprintf("u: %f %f %f %f \t diff_u: %f %f %f %f", obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), var(1,1), var(2,1), var(3,1), var(4,1));
+            % fprintf("u: %f %f %f %f \t diff_u: %f %f %f %f", obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), var(1,1), var(2,1), var(3,1), var(4,1));
             fprintf("\n");
             % profile viewer
 

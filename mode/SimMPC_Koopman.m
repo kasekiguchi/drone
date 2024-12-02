@@ -72,12 +72,12 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
-agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation_hermite(agent,Controller_MPC_Koopman(dt, model_file, agent));
-conmode = 2;
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation_hermite(agent,Controller_MPC_Koopman(dt, model_file, agent));
+% conmode = 2;
 %% 誤差モデル
 % % 1コンのとき  100行目もコメントイン
-% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-% conmode = 1;
+agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+conmode = 1;
 % % 2つのコントローラの設定  101行目もコメントイン
 % agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
 % agent.controller.hlc = HLC(agent,Controller_HL(dt));
@@ -85,7 +85,8 @@ conmode = 2;
 % agent.controller.do = @controller_do;
 
 %%
-run("ExpBase");
+% run("ExpBase");
+run("SimBase");
 
 %% modeファイル内でプログラムを回す
 % for i = 1:te/dt

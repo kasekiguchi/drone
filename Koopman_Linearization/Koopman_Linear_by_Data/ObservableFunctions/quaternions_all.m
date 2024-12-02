@@ -229,12 +229,12 @@ d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S)
 du = [H(u1); H(u2); H(u3); H(u4)];
 
 % z = [common_z; kron(d1, du)]; % 17
-z = [common_z; kron(d2, du)]; % 18
+% z = [common_z; kron(d2, du)]; % 18
 % z = [common_z; d1]; % 19
 % z = [common_z; d2]; % 20
 
 %% まとめ
-% z = [common_z; isobe_z]; % 00
+z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
