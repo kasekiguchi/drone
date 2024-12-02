@@ -225,13 +225,13 @@ k3 = kron(kron(H(sin(Q1)), H(cos(Q1))), kron(H(sin(Q2)), H(cos(Q2)))); % S
 k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S
 
 d1 = [k1; k2; k3; k4];
-d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S)
+d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S) 
 du = [H(u1); H(u2); H(u3); H(u4)];
 
-% z = [common_z; kron(d1, du)]; % 17
-% z = [common_z; kron(d2, du)]; % 18
-% z = [common_z; d1]; % 19
-% z = [common_z; d2]; % 20
+z = [common_z; kron(d1, du)]; % 17 528
+% z = [common_z; kron(d2, du)]; % 18 52万次元のため中断
+% z = [common_z; d1]; % 19 80
+% z = [common_z; d2]; % 20 6万5000次元のため中断
 
 %% まとめ
 z = [common_z; isobe_z]; % 00
