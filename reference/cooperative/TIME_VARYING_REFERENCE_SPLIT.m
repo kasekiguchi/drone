@@ -106,13 +106,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % obj.Muid_method = str2func(obj.agent1.controller.Param.method2);
                     obj.result.mLi = [];
                     obj.result.Muid = [];
-
-                    if obj.agent1.estimator.model.state.type ==3
-                        obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
+                    if isfield(obj.agent1.sensor,"motive")
+                        obj.toR=eye(3);
                     else
-                        obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
+                        if obj.agent1.estimator.model.state.type ==3 
+                            obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
+                        else
+                            obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
+                        end
                     end
-
                     obj.result.state.set_state("xd",zeros(28,1));
                     % obj.vi_pre = obj.result.state.xd(9:11);
                     obj.vi_pre = zeros(3,1);

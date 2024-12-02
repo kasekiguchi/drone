@@ -38,9 +38,8 @@ classdef MY_POINT_REFERENCE < handle
             obj.i=1;%目標地点を自動で更新するためのインデックスの初期値
             obj.result.state = STATE_CLASS(struct('state_list',["xd","p", "q","v"],'num_list',[20,3,3,3]));
             obj.result.state.set_state("xd",zeros(6,1));
-            obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-            obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+           if isprop(obj.self.estimator.result.state,"p"), obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));end
+           if isprop(obj.self.estimator.result.state,"q"), obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));end
         end
         function  result= do(obj,varargin)
             % 【Input】result = {Xd(optional)}
@@ -72,8 +71,7 @@ classdef MY_POINT_REFERENCE < handle
                     obj.result.state.q(3,1) = obj.param.(obj.cha)(4);%yaw
                 end
             end
-            obj.result.state.v = [0;0;0];
-            obj.result.state.xd = [obj.result.state.p; obj.result.state.q(3,1); obj.result.state.v; 0];
+            obj.result.state.xd = [obj.result.state.p; obj.result.state.q(3,1); zeros(3,1); 0];
             result = obj.result;
         end
          function show(obj, logger)

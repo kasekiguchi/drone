@@ -40,22 +40,28 @@ if isCoop == 1
     %実験用に修正する必要あり
     firstId = 2;
     COMs = ["",COMs];
-    rigitp = motive.result.rigit.p;
+    rigids = motive.result.rigid.p;
+    eul = Quat2Eul(motive.result.rigid(1).q);
     %fot 文でrhoを計算
     rho = zeros(3,N-1);
     for i = 1:N-1
-        rho(:,i) = rigitp(i+1) - rigitp(1);
+        rho(:,i) = motive.result.rigid(1+2*i).p - motive.result.rigid(1).p;
     end
+    agent(1) = DRONE; %対象をドローンにしている？ DRONE.m
     agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
-    agent(1).plant = @nothing_do;
-    agent(1).sensor.motive = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-    agent(1).estimator = @nothing_do;
+    agent(1).plant = struct("do",@nothing_do, "arming" ,[500 500 0 500 1000 0 0 0],"stop",[500 500 0 500 0 0 0 0]);
+    agent(1).plant.connector.serial = [];
+    agent(1).estimator.do = @nothing_do;
+    agent(1).estimator.result.state = STATE_CLASS(struct('state_list', ["p", "q"], "num_list", [3, 3]));
+    agent(1).estimator.result.state.p = motive.result.rigid(1).p;
+    agent(1).estimator.result.state.q = eul;
+    agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
     agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
-    takeoff_ref(1) = @nothing_do;
-    landing_ref(1) = @nothing_do;
-    agent(1).controller = @nothing_do;
-    agent(1).input_transform = @nothing_do;
+    
+    agent(1).controller.do = @nothing_do;
+    agent(1).controller.result=[];
+    agent(1).input_transform.do = @nothing_do;
 end
 % cableL=[0.61,0.91];
 cableL =[0.869,0.869];
@@ -70,8 +76,8 @@ initial_state.w = [0; 0; 0]; %初期角加速度の取得
 
 agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
 agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
-agent(i).parameter.set("cableL",cableL(i));
-agent(i).parameter.set("Length",length(i));
+agent(i).parameter.set("cableL",cableL(i - firstId + 1));
+agent(i).parameter.set("Length",length(i - firstId + 1));
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
 
@@ -86,11 +92,11 @@ agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2
 if isCoop
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));
 else
-% agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
-% agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
-agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
-% agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
-% agent(i).reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
+    % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
+    % agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
+    agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
+    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
+    % agent(i).reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
 end
 %=======================================================
 %通常

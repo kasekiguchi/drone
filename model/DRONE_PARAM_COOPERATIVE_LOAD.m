@@ -41,10 +41,10 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
-            if contains(type,"zup")
+            if contains(type,"zup")&&isempty(param.rho)
               rho0 = [0;0;1/4];
               rho0 = [0;0;1/2];
-            else
+            elseif isempty(param.rho)
               rho0 = [0;0;-1/4];
             end
             if isempty(param.rho)&& 1
