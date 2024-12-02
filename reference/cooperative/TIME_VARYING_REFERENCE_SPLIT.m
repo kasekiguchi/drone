@@ -36,6 +36,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         rotForYaw
         errorVector
         agent1
+        yawRef
 
     end
 
@@ -96,7 +97,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % B6 = [0;0;0;0;0;1];
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
-                    obj.k_yaw=lqrd(0,1,10,1,0.025);
+                    obj.k_yaw=lqrd(0,1,1,1,0.025);
+                    obj.yawRef = obj.generate_yawReference(obj.k_yaw*0.1);
 
                     obj.com = args{3};
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi"], 'num_list', [24, 3, 3, 3]));  
@@ -236,6 +238,18 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     %yaw修正中の目標軌道
                     x0dForCorrection = x0d(1:2) + obj.errorVector;
                     refi(1:2) = alpi + x0dForCorrection;
+                    %new version
+                    thetaAlp = acos(alpiUnit'*[1;0]);
+                    fsign = sign(cross([1;0;0],[rhoiUnit;0]));
+                    if fsign(3) < 0
+                        thetaAlp = 2*pi - thetaAlp; 
+                    end
+
+                    newRef = obj.yawRef(norm(rhoi(1:2)),yaw,thetaAlp,0);
+                    refi4_ = reshape(refi,4,[]);
+                    refi4_(1:2,1:6) = [newRef(:,1) + x0dForCorrection,newRef(:,2:6)];
+                    refi = reshape(refi4_,[],1);
+
                 else
                     obj.errorVector=[];
                 end
@@ -377,7 +391,44 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
             ylabel("y [m]");
             hold off
         end
-
+        function yawRef = generate_yawReference(obj,k_yaw)
+            syms l yaw theta tyaw
+            syms w
+            syms d4w d3w d2w d1w d0w
+            x = l*cos(w*tyaw + theta);
+            y = l*sin(w*tyaw + theta);
+            r = [x;y];
+            dr = diff(r,tyaw);
+            d2r = diff(dr,tyaw);
+            d3r = diff(d2r,tyaw);
+            d4r = diff(d3r,tyaw);
+            d5r = diff(d4r,tyaw);
+            rs = [r,dr,d2r,d3r,d4r,d5r];
+            dnyaw = [(-k_yaw)^5*yaw,(-k_yaw)^4*yaw,(-k_yaw)^3*yaw,(-k_yaw)^2*yaw,-k_yaw*yaw];
+            dnw = [diff(w,tyaw,4),diff(w,tyaw,3),diff(w,tyaw,2),diff(w,tyaw,1),w];
+            dnw2 = [d4w,d3w,d2w,d1w,d0w];
+            subsrs1 = subs(rs,[dnw,tyaw],[dnw2,0]);
+            subsrs2 = subs(subsrs1 ,dnw2,dnyaw);
+            yawRef = matlabFunction(subsrs2,"Vars",{l,yaw,theta,tyaw});
+            %  syms l yaw theta tyaw
+            % syms w(tyaw)
+            % syms d4w d3w d2w d1w d0w
+            % x = l*cos(w*tyaw + theta);
+            % y = l*sin(w*tyaw + theta);
+            % r = [x;y];
+            % dr = diff(r,tyaw);
+            % d2r = diff(dr,tyaw);
+            % d3r = diff(d2r,tyaw);
+            % d4r = diff(d3r,tyaw);
+            % d5r = diff(d4r,tyaw);
+            % rs = [r,dr,d2r,d3r,d4r,d5r];
+            % dnyaw = [(-k_yaw)^5*yaw,(-k_yaw)^4*yaw,(-k_yaw)^3*yaw,(-k_yaw)^2*yaw,-k_yaw*yaw];
+            % dnw = [diff(w,tyaw,4),diff(w,tyaw,3),diff(w,tyaw,2),diff(w,tyaw,1),w];
+            % dnw2 = [d4w,d3w,d2w,d1w,d0w];
+            % subsrs1 = subs(rs,[dnw,tyaw],[dnw2,0]);
+            % subsrs2 = subs(subsrs1 ,dnw2,dnyaw);
+            % yawRef = matlabFunction(subsrs2,"Vars",{l,yaw,theta,tyaw});
+        end
         function Xd = gen_ref_for_take_off(obj,t)
           %% Setting
           % calc reference position and its higher time derivatives

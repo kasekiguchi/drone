@@ -526,7 +526,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             %全ての状態について作る
             allData.("DronePayload"+string(i)) = {struct('x',{[time(1),time2(i)]},'y',{[ep(1),epLi(i)]}), struct('x','time (s)','y','position (m)'), ["$x_{0}$","$y_{0}$","$z_{0}$",combineLgntI(["$x$","$y$","$z$"],i)] ,add_option([],option,addingContents)};
             t2 = {ones(lt(i+1),3).*time2{i}'};
-            allData.("linkDir"+string(i)) = {struct('x',{t2},'y',{{linki(:,:,i)'}}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~Link$","$y~Link$","$z~Link$"] ,i),add_option([],option,addingContents)};
+            % allData.("linkDir"+string(i)) = {struct('x',{t2},'y',{{linki(:,:,i)'}}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~Link$","$y~Link$","$z~Link$"] ,i),add_option([],option,addingContents)};
             % allData.("linkDir"+string(i)) = {struct('x',{[t2,t2,t2]},'y',{[{muid_units(:,:,i)'},{linki(:,:,i)'},{epTi{i}'}]}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~\mu d$","$y~\mu d$","$z~\mu d$","$x~Link$","$y~Link$","$z~Link$","$x~pT$","$y~pT$","$z~pT$"] ,i),add_option([],option,addingContents)};
             allData.("mui"+string(i)) = {struct('x',{t2},'y',{{mui{i}'}}), struct('x','time (s)','y','payload'+string(i)+' tension (N)'),["$x$","$y$","$z$"],add_option([],option,addingContents)};
             %plant
