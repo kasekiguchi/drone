@@ -136,7 +136,7 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
 %% f(x, u, param)からdf/dparam したときの項+磯部先輩 code = 04
 roll = Q1; pitch = Q2; yaw = Q3;
 o1 = W1; o2 = W2; o3 = W3;
-u1 = 1; u2 = 1; u3 = 1; u4 = 1;
+% u1 = 1; u2 = 1; u3 = 1; u4 = 1;
 diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
             (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
             -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
@@ -217,6 +217,22 @@ hermite_original_z = [kron_q1; kron_q2; kron_q3; kron_q4;
     kron_qq1; kron_qq2; kron_qq3; kron_qq4];
 hermite_total_z = kron([hermite_total; hermite_original_z], hermite_u);
 
+%% hermite ちゃんと頑張った版 
+H = @(x) [1; x];
+k1 = kron(kron(H(P1), H(P2)), kron(H(sin(Q3)), H(cos(Q3)))); % RxS
+k2 = kron(kron(H(V1), H(V2)), kron(H(sin(W3)), H(cos(W3)))); % RxS
+k3 = kron(kron(H(sin(Q1)), H(cos(Q1))), kron(H(sin(Q2)), H(cos(Q2)))); % S
+k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S
+
+d1 = [k1; k2; k3; k4];
+d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S)
+du = [H(u1); H(u2); H(u3); H(u4)];
+
+% z = [common_z; kron(d1, du)]; % 17
+z = [common_z; kron(d2, du)]; % 18
+% z = [common_z; d1]; % 19
+% z = [common_z; d2]; % 20
+
 %% まとめ
 % z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
@@ -233,7 +249,7 @@ hermite_total_z = kron([hermite_total; hermite_original_z], hermite_u);
 % z = [common_z; isobe_z; hermite_z]; % 13
 % z = [common_z; hermite_WheeledRobot_z]; % 14
 % z = [common_z; hermite_total_z]; % 15
-z = [common_z; isobe_z; hermite_WheeledRobot_z]; % 16
+% z = [common_z; isobe_z; hermite_WheeledRobot_z]; % 16
 
 end
 
