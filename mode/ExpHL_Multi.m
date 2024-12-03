@@ -4,12 +4,13 @@ te = 10000; % termina time　終了時間
 time = TIME(ts,dt,te); %上の3つの時間をまとめる．
 in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
-N = 2;
+% N = 2;
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
+N = 2;
 COMs = string([3,5]);%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
