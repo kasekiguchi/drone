@@ -19,7 +19,8 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
-COMs = [5,4];%割り当てる順番に設定
+% COMs = [5,4];%割り当てる順番に設定
+COMs = [3];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
@@ -49,19 +50,22 @@ if isCoop == 1
     end
     agent(1) = DRONE; %対象をドローンにしている？ DRONE.m
     agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
-    agent(1).plant = struct("do",@nothing_do, "arming" ,[500 500 0 500 1000 0 0 0],"stop",[500 500 0 500 0 0 0 0]);
+    agent(1).plant = struct("do",@(varargin)[], "arming" ,[],"stop",[]);
     agent(1).plant.connector.serial = [];
-    agent(1).estimator.do = @nothing_do;
+
+    agent(1).estimator.do = @(varargin)[];
     agent(1).estimator.result.state = STATE_CLASS(struct('state_list', ["p", "q"], "num_list", [3, 3]));
     agent(1).estimator.result.state.p = motive.result.rigid(1).p;
     agent(1).estimator.result.state.q = eul;
+
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
     agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
-    agent(1).controller.do = @nothing_do;
-    agent(1).controller.result=[];
-    agent(1).input_transform.do = @nothing_do;
+    agent(1).controller.do = @(varargin)[];
+    agent(1).controller.result.input=[];
+    
+    agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
 end
 % cableL=[0.61,0.91];
 cableL =[0.869,0.869];
@@ -75,11 +79,12 @@ initial_state.v = [0; 0; 0]; %初期速度の取得
 initial_state.w = [0; 0; 0]; %初期角加速度の取得
 
 agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
+agent(i).id = i;
 agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent(i).parameter.set("cableL",cableL(i - firstId + 1));
 agent(i).parameter.set("Length",length(i - firstId + 1));
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
-agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
+agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),0)),  ["p", "q", "pL", "pT"]));
 
 %sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
 %各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
@@ -110,8 +115,6 @@ agent(i).controller.result.input = [(agent(i).parameter.loadmass*0+agent(i).para
 end
 run("ExpBase");
 
-function [] = nothing_do(varargin)
-end
 function result = sensor_do(varargin)
     result_motive = varargin{5}.sensor.motive.do(varargin);
     result_forload = varargin{5}.sensor.forload.do(varargin);
@@ -128,17 +131,17 @@ function result = controller_do(varargin)
 end
 
 function post(app)
-% app.logger.plot({1, "p", "ser"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "sensor.result.state.pL", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "estimator.result.state.pL", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "p", "esr"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "sensor.result.state.pL", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "estimator.result.state.pL", "esr"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
 
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({2, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({2, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({2, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({2, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));

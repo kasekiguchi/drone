@@ -101,14 +101,18 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.yawRef = obj.generate_yawReference(obj.k_yaw*0.1);
 
                     obj.com = args{3};
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi"], 'num_list', [24, 3, 3, 3]));  
-                    
+                    % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q","yaw"], 'num_list', [28, 3, 3, 1]));  
+                    obj.result.state.set_state("xd",zeros(28,1));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                    obj.result.state.yaw=0;
+
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],obj.agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
                     % obj.Muid_method = str2func(obj.agent1.controller.Param.method2);
-                    obj.result.mLi = [];
-                    obj.result.Muid = [];
-                    if isfield(obj.agent1.sensor,"motive")
+                    
+                    if class(obj.agent1.sensor) == "MOTIVE"
                         obj.toR=eye(3);
                     else
                         if obj.agent1.estimator.model.state.type ==3 
@@ -117,16 +121,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                             obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
                         end
                     end
-                    obj.result.state.set_state("xd",zeros(28,1));
+                    
                     % obj.vi_pre = obj.result.state.xd(9:11);
-                    obj.vi_pre = zeros(3,1);
-                    obj.v0_pre = zeros(3,1);
-                    obj.O0_pre = zeros(3,1);
-                    obj.wi_pre = zeros(3,1);
-                    obj.result.vi_pre = obj.vi_pre;
-
-                    obj.vdro_pre = zeros(3,1);
-                    obj.vL_pre = zeros(3,1);
+                    % obj.vi_pre = zeros(3,1);
+                    % obj.v0_pre = zeros(3,1);
+                    % obj.O0_pre = zeros(3,1);
+                    % obj.wi_pre = zeros(3,1);
+                    % 
+                    % obj.vdro_pre = zeros(3,1);
+                    % obj.vL_pre = zeros(3,1);
                 else
                     obj.result.state.set_state("xd",obj.func(0));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
@@ -154,46 +157,46 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % agent1 = varargin{3};
                id     = obj.self.id - 1;                    %機体の番号
                %parameter
-               mi   = obj.P(1);                             %機体の質量
-               li   = obj.P(end);                           %紐の長さ
+               % mi   = obj.P(1);                             %機体の質量
+               % li   = obj.P(end);                           %紐の長さ
                g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
-               rhoi = obj.agent1.parameter.rho(:,obj.self.id-1);%ペイロードの中心位置からリンクまでの距離
+               rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
                %reference
                ref0 = obj.agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
                x0d  = ref0(1:3);
-               dx0d = ref0(4:6);
-               o0d  = ref0(22:24);                          %分割前目標角速度
-               do0d = ref0(25:27);                          %分割前目標角加速度
-               %state
-               model= obj.agent1.estimator.result.state;        % x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
-               Q0   = model.Q;
-               O0   = model.O;
-               v0   = model.v;
-               a0   = model.a;%要チェック論文も!!!!!!!!!!!!!!
-               dO0  = model.dO;
-               Qi   = model.Qi(4*id-3:4*id);
-               qi   = model.qi(3*id-2:3*id);
-               wi   = model.wi(3*id-2:3*id);
-               R0       = obj.toR(Q0);                                          %分割前ペイロードの回転行列
-               dR0      = R0*Skew(O0);                                          %分割前ペイロードの回転行列の微分
-               SKO0     = Skew(O0);                                             %SK:歪対称行列
-               SKrhoi   = Skew(rhoi);
-               SKqi     = Skew(qi);
-               SKwi     = Skew(wi);
-               % Ri       = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
-               Ri       = obj.toR(Qi);                                          %機体回転行列
-               vi       = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
+               % dx0d = ref0(4:6);
+               % o0d  = ref0(22:24);                          %分割前目標角速度
+               % do0d = ref0(25:27);                          %分割前目標角加速度
+               % %state
+               % model= obj.agent1.estimator.result.state;        % x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
+               % Q0   = model.Q;
+               % O0   = model.O;
+               % v0   = model.v;
+               % a0   = model.a;%要チェック論文も!!!!!!!!!!!!!!
+               % dO0  = model.dO;
+               % Qi   = model.Qi(4*id-3:4*id);
+               % qi   = model.qi(3*id-2:3*id);
+               % wi   = model.wi(3*id-2:3*id);
+               % R0       = obj.toR(Q0);                                          %分割前ペイロードの回転行列
+               % dR0      = R0*Skew(O0);                                          %分割前ペイロードの回転行列の微分
+               % SKO0     = Skew(O0);                                             %SK:歪対称行列
+               % SKrhoi   = Skew(rhoi);
+               % SKqi     = Skew(qi);
+               % SKwi     = Skew(wi);
+               % % Ri       = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
+               % Ri       = obj.toR(Qi);                                          %機体回転行列
+               % vi       = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
 
            %紐接合部の目標軌道を算出
            %todo:ペイロードの姿勢も考慮する場合は角度の5階微分まで求める必要がある
                %================================================================================
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
-               R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
+               % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
-               dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
+               % dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
                xid  = x0d + rhoi;       %分割後のペイロードの位置目標軌道
                % xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
-               dxid = dx0d; %+ dR0d*rhoi;     %分割後のペイロードの速度目標軌道
+               % dxid = dx0d; %+ dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
                %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                refi         = zeros(28,1);  %機体のreference
@@ -274,66 +277,19 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
 
                %================================================================================
-
-           %実際のリンクと紐の加速度と張力,機体の加速度を求めてから張力を求める           
-           %方針：計測した値を用いて各単機モデルで推定する．
-               % ai       = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %分割後のペイロードの加速度
-               ai = (vi - obj.vi_pre)/dt; 
-               obj.vi_pre = vi;
-               a0 = (v0 - obj.v0_pre)/dt; 
-               obj.v0_pre = v0;
-               dO0 = (O0 - obj.O0_pre)/dt; %差分を使うとダメ
-               % obj.O0_pre = dO0;
-               dwi = (wi - obj.wi_pre)/dt; %紐の角加速度%発散に関係なさそう
-               obj.wi_pre = wi;
-               %張力を算出
-               % qqTi     = qi*qi';
-               ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-               % uvi      = (eye(3) - qqTi)*ui;                               %uの垂直成分
-               % aig      = a0 + g + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %紐の角加速度算出に用いる加速度
-               % dwi      = (SKqi*aig - SKqi*uvi/mi)/li;              %(8)
-               aidrn    = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0 + li*SKqi*dwi - li*SKwi^2*qi;      %分割後の機体の加速度
-               mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
-               mui      = -mui;%分割後の牽引物系から張力
-                
-               %単機牽引モデルで推定した機体速度，牽引物速度を用いて後退差分によりそれぞれの加速度を算出
-               ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-               vdro = obj.self.estimator.result.state.v;
-               aidrn = (vdro - obj.vdro_pre)/dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-               obj.vdro_pre = vdro;
-               vL = obj.self.estimator.result.state.vL;
-               ai = (vL - obj.vL_pre)/dt;%牽引物加速度
-               obj.vL_pre = vL;
-               mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
-               mui      = -mui;%分割後の牽引物系から張力
-
-               % delta_a0 = v0 - a0
-               % delta_ai = vi - ai
-           %ペイロードの速度からリンクの速度を求めてそこからリンクの加速度求める
-               % id = obj.self.id;
-               % muid_mui = obj.agent1.controller.result.mui; %3xN 
-               % mui = muid_mui(1:3,id-1); %3x1%理想の張力
-               % % mui = muid_mui(4:6,id-1); %3x1%現実の張力
-               % ai = (vi - obj.vi_pre)/dt; 
-               % obj.vi_pre = vi;
-
-           %分割後質量推定 mLi*ai = mLi*g + mui
-               A    = ai - g;%
-               AtA  = A'*A;
-               mLi  = (AtA\A')*mui;%分割後質量
-               % mLi  = mLi;
            %log
-               obj.result.x0d     = x0d;
-               obj.result.R0d     = R0d;
+               % obj.result.x0d     = x0d;
+               % obj.result.R0d     = R0d;
                obj.result.state.xd      = refi;
-               obj.result.state.p       = xid;
-               obj.result.state.v       = dxid;
-               obj.result.state.mui     = mui';
+               obj.result.state.yaw      = yaw;
+               % obj.result.state.p       = xid;
+               % obj.result.state.v       = dxid;
+               % obj.result.state.mui     = mui';
                % obj.result.state.vi_pre  = vi;
-               obj.result.state.ai      = ai;
-               obj.result.state.aidrn   = aidrn;
-               obj.result.state.dwi     = dwi;
-               obj.result.state.mLi     = mLi;
+               % obj.result.state.ai      = ai;
+               % obj.result.state.aidrn   = aidrn;
+               % obj.result.state.dwi     = dwi;
+               % obj.result.state.mLi     = mLi;
 
            elseif strcmp(obj.com, "TakeOff")
                if isempty( obj.base_state )

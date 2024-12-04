@@ -71,7 +71,7 @@ classdef MY_POINT_REFERENCE < handle
                     obj.result.state.q(3,1) = obj.param.(obj.cha)(4);%yaw
                 end
             end
-            obj.result.state.xd = [obj.result.state.p; obj.result.state.q(3,1); zeros(3,1); 0];
+            obj.result.state.xd = [obj.result.state.p; obj.result.state.q(3,1); zeros(24,1)];
             result = obj.result;
         end
          function show(obj, logger)
