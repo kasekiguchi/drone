@@ -10,10 +10,7 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 // 飛行可能（初期状態）： [ LOW HIGH ]
 // Arming           :  [ LOW LOW  ]
 // Emergence        :  [ HIGH LOW ]
-#define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
-#define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
-#define EM_PIN 5    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
-#define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
+
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
 boolean fInitial = true; //変数boolean fInitialにtrueを格納
@@ -58,55 +55,21 @@ void setup()
 {
   Serial.begin(115200); // MATLABの設定と合わせる　パソコンとマイコンの通信速度を合わせている
   // Serial.setTimeout(10); //
-  Serial.println("Start"); //シリアル通信でメッセージ(Start)をPCに送信
-  pinMode(LED_PIN, OUTPUT); //pinMode:ピンの動作を入力か出力に設定　13ピンが出力
-  digitalWrite(LED_PIN, HIGH); //digitalWrite:指定したピンにHIGH(UNOは5V)もしくはLOW(0V)を出力　13ピンから5V出力
-  pinMode(GLED_PIN, OUTPUT); //15(A1)ピンを出力に設定
-  digitalWrite(GLED_PIN, LOW); //15(A1)ピンから0V出力
-  pinMode(RLED_PIN, OUTPUT); //14(A0)ピンを出力に設定
-  digitalWrite(RLED_PIN, HIGH); //14(A0)ピンから5V出力
-  pinMode(EM_PIN, INPUT_PULLUP); // emergency_stop を割り当てるピン D3ピンを入力に設定でプルアップ抵抗を有効
-  pinMode(RST_PIN, INPUT_PULLUP); //A4ピンを入力に設定でプルアップ抵抗を有効
+ 
 
   setupPPM(); // ppm 出力開始
 
   // 緊急停止
- attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
-  while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
-  {
-  }
+ 
   last_received_time = micros(); //micros():Arduinoボードがプログラムの実行を開始した時から現在までの時間をマイクロ秒単位で返す約70分で0に戻る　最後に受信されたメッセージが読み取られた時刻をast_received_timeに格納
 }
 
 void loop()
 {
   //receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
-    if (!isEmergency)
-    {
+    
       receive_serial();
-    }
-    else
-    {
-      if (digitalRead(EM_PIN) == HIGH && fReset == false)
-      {
-        delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-        if (digitalRead(EM_PIN) == HIGH)
-        {
-          
-          Serial.println("Reset available.");
-          digitalWrite(LED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-          digitalWrite(GLED_PIN, HIGH);
-          
-          fReset = true;
-        }
-      }
-      else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
-      {
-        //software_reset();
-        SCB_AIRCR = 0x05FA0004; //Teensy
-      }
-    }
+    
     
 }
 //*********** local functions  *************************//
@@ -255,32 +218,4 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   // CPUのクロック周波数でPPM信号を制御
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
   Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
-}
-void emergency_stop()
-{
-  if (!isEmergency)
-  {
-    pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-    pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-    pw[2] = CH_OFFSET - CH_MIN;     // throttle
-    pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-    pw[4] = CH_OFFSET;              // AUX1
-    pw[5] = CH_OFFSET;              // AUX2
-    pw[6] = CH_OFFSET;              // AUX3
-    pw[7] = CH_OFFSET;              // AUX4
-    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
-    isEmergency = true;
-    digitalWrite(LED_PIN, LOW);
-    digitalWrite(RLED_PIN, LOW);
-    digitalWrite(GLED_PIN, HIGH);
-    Serial.println("EMERGENCY !! ");
-  }
-}
-void software_reset()
-{
-  Serial.println("Reset!");
-  delay(500);
-  pinMode(RST_PIN, OUTPUT);
-  digitalWrite(RST_PIN, LOW);
-  Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
 }
