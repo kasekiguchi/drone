@@ -5,13 +5,10 @@
 #include <TimerOne.h>
 
 uint8_t i; //符号なし8bit整数型(0~255)のi
-#define LED_PIN 13 //13ピン(D10)をLED_PINと定義 現在結線されておらず，動作に関係していない．プログラム中には何度も登場するため確認が必要
 // [ Green Red ] : HIGHで消灯、LOWで点滅
 // 飛行可能（初期状態）： [ LOW HIGH ]
 // Arming           :  [ LOW LOW  ]
 // Emergence        :  [ HIGH LOW ]
-#define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
-#define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
 #define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
@@ -59,12 +56,6 @@ void setup()
   Serial.begin(115200); // MATLABの設定と合わせる　パソコンとマイコンの通信速度を合わせている
   // Serial.setTimeout(10); //
   Serial.println("Start"); //シリアル通信でメッセージ(Start)をPCに送信
-  pinMode(LED_PIN, OUTPUT); //pinMode:ピンの動作を入力か出力に設定　13ピンが出力
-  digitalWrite(LED_PIN, HIGH); //digitalWrite:指定したピンにHIGH(UNOは5V)もしくはLOW(0V)を出力　13ピンから5V出力
-  pinMode(GLED_PIN, OUTPUT); //15(A1)ピンを出力に設定
-  digitalWrite(GLED_PIN, LOW); //15(A1)ピンから0V出力
-  pinMode(RLED_PIN, OUTPUT); //14(A0)ピンを出力に設定
-  digitalWrite(RLED_PIN, HIGH); //14(A0)ピンから5V出力
   pinMode(EM_PIN, INPUT_PULLUP); // emergency_stop を割り当てるピン D3ピンを入力に設定でプルアップ抵抗を有効
   pinMode(RST_PIN, INPUT_PULLUP); //A4ピンを入力に設定でプルアップ抵抗を有効
 
@@ -94,9 +85,6 @@ void loop()
         {
           
           Serial.println("Reset available.");
-          digitalWrite(LED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-          digitalWrite(GLED_PIN, HIGH);
           
           fReset = true;
         }
@@ -269,9 +257,6 @@ void emergency_stop()
     pw[7] = CH_OFFSET;              // AUX4
     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     isEmergency = true;
-    digitalWrite(LED_PIN, LOW);
-    digitalWrite(RLED_PIN, LOW);
-    digitalWrite(GLED_PIN, HIGH);
     Serial.println("EMERGENCY !! ");
   }
 }
