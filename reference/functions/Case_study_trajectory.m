@@ -29,13 +29,7 @@ syms t real
 % y = 0.5*cos(3*pi*t/T);
 % z = 0.5*sin(3*pi*t/T)+1;
 %%
-% 円旋回 HL
-% T = 12;
-% x = sin(2*pi*t/T);
-% y = cos(2*pi*t/T);
-% z = 1;
-%%
-% 円旋回 KMPC
+% 円旋回
 % T = 15;
 % x = sin(2*pi*t/T);
 % y = cos(2*pi*t/T);
