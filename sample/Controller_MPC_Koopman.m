@@ -45,8 +45,10 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     %% quadprogを実行するmexファイルを選択
     % 観測量によってファイルが異なる
+    Controller_param.F = @quaternions_all;
     if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
         Controller_param.quad_drone = @quad_drone_code00_mex;
+        Controller_param.F = @observables_isobe; % isobe code00
     elseif size(Controller_param.A,1) == 39
         Controller_param.quad_drone = @quad_drone_code04_mex;
     elseif size(Controller_param.A,1) == 71
@@ -55,6 +57,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
         Controller_param.quad_drone = @quad_drone;
         warning('観測量に合うmexコントローラーがありませｎ');
     end
+    
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30

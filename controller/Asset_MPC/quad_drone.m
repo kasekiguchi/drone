@@ -3,7 +3,8 @@ function [var, fval, exitflag] = quad_drone(param)
 %　パラメータの定義
 
     % QP設定
-    opts = optimoptions('quadprog','Algorithm','active-set','OptimalityTolerance',1e-5);
+    opts = optimoptions('quadprog','Algorithm','active-set','OptimalityTolerance',1e-5,'MaxIterations',1.e+2,'ConstraintTolerance',1.e-5);
+    % opts = optimoptions('quadprog','Algorithm','active-set','OptimalityTolerance',1e-5);
     opts.Display = 'none';   % 計算結果の表示
 
     % opts = optimoptions('quadprog');
@@ -11,11 +12,11 @@ function [var, fval, exitflag] = quad_drone(param)
     % opts = optimoptions(opts,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
     
     % Calculate the coefficient matrix of QP
-    Xc = quaternions_all(param.current_state); % for Koopman
+    % Xc = quaternions_all(param.current_state); % for Koopman
     % Xc = param.current_state; % for HL
 
-    % Xcc = quaternions_all(param.current_state(4:12)); % 位置なしモデル
-    % Xc = [param.current_state(1:3); Xcc];
+    % Xc = repmat(param.F(param.current_state), param.H, 1);
+    Xc = param.F(param.current_state); % mex化できない
  
     r  = param.ref(1:12,:);
     r = r(:); %目標値、列ベクトルに変換

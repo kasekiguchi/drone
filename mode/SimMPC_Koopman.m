@@ -1,18 +1,18 @@
 %%
 %% Initialize
-% tmp = matlab.desktop.editor.getActive;
-% dir = fileparts(tmp.Filename);
-% if ~contains(path,dir)
-%     cd(erase(dir,'\mode'));
-% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-% close all hidden; clear ; clc;
-% userpath('clear');
-% end
-% 
-% clear gui
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
+
+clear gui
 %%
-clc
+clc; close all;
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -53,7 +53,7 @@ agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 % agent.parameter.mass = 0.5884;
-agent.parameter.mass = 0.730;
+% agent.parameter.mass = 0.730;
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% クープマンモデルをプラントに設定する場合
@@ -63,8 +63,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
-% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
@@ -90,24 +90,26 @@ conmode = 2;
 run("SimBase");
 
 %% modeファイル内でプログラムを回す
-% for i = 1:te/dt
-%     % if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     pre_est = agent.estimator.result;
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
-%     else; agent(1).controller.do(time, 'f', agent);
-%     end
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc;
-% end
+phase = 'f'
+for i = 1:te/dt
+    % if i < 20 || rem(i, 10) == 0 end
+    tic
+    pre_est = agent.estimator.result;
+    agent(1).sensor.do(time, phase);
+    agent(1).estimator.do(time, phase);
+    agent(1).reference.do(time, phase);
+    agent(1).controller.do(time, phase);
+    % if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
+    % else; agent(1).controller.do(time, 'f', agent);
+    % end
+    agent(1).plant.do(time, phase);
+    logger.logging(time, phase, agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    toc
+end
 %%
-% logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 % logger.save("10_hokukai");
 % log = logger;

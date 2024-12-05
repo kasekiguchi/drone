@@ -83,34 +83,32 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
         %-- main()的な
         function result = do(obj,varargin)
             % profile on
-            tic
+            % tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            obj.param.t = varargin{1}.t;
-            rt = obj.param.t; %時間
-            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            obj.param.t = varargin{1}.t; % current time
+            % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             
             if strcmp(varargin{2}, 'f')
-                obj.reference.xr = obj.Reference(rt); %リファレンスの更新
+                obj.reference.xr = obj.Reference(); %リファレンスの更新
             else
                 obj.reference.xr = repmat([0;0;1;zeros(9,1);obj.param.ref_input],1,obj.H);
-            end
- 
-            obj.previous_state = repmat(obj.current_state, 1, obj.H);
-      
+            end 
+            
             %% ------------------------------------------------------------
             % 最適化部分の関数化とmex化
-            % if strcmp(obj.param.filename, 'hermite')
-            % obj.current_state = [obj.current_state; obj.input.u]; % hermite
-            % end
-            
-            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            if ~strcmp(func2str(obj.param.F), 'observables_isobe')
+                obj.previous_state = [obj.current_state; obj.input.u]; % code00 以外
+            else
+                obj.previous_state = obj.current_state;
+            end    
+            Param = struct('current_state',obj.previous_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H,'F',obj.param.F);
             % [var, fval, exitflag] = quad_drone_mex(Param); %code00用 自PCでcontroller:0.6ms, 全体:2.7ms
             % [var, fval, exitflag] = quad_drone_code08_mex(Param); %code08用
-            % [var, fval, exitflag] = quad_drone(Param);
-            [var, fval, exitflag] = obj.param.quad_drone(Param);
+            [var, fval, exitflag] = quad_drone(Param);
+            % [var, fval, exitflag] = obj.param.quad_drone(Param);
                  
             %%
             obj.previous_input = var;
@@ -118,7 +116,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
             %% データ表示用
             obj.input.u = obj.result.input; 
-            calT = toc
+            calT = toc;
             obj.result.mpc.calt = calT; %計算時間保存したいときコメントイン
             obj.result.mpc.var = var;
             obj.result.mpc.exitflag = exitflag;
@@ -146,15 +144,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
                     obj.reference.xr(4,1), obj.reference.xr(5,1), obj.reference.xr(6,1), ...
                     obj.reference.xr(10,1), obj.reference.xr(11,1), obj.reference.xr(12,1))  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
-                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
+                obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
             fprintf("\n");
             % profile viewer
-
-            %% z < 0で終了
-            if obj.self.estimator.result.state < 0
-                warning("墜落しました")
-            end
-            
         end
         function show(obj)
             obj.result
