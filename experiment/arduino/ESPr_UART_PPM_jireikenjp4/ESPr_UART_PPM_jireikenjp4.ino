@@ -36,7 +36,7 @@ char packetBuffer[255];
 #define TOTAL_CH 8    // number of channels
 // https://create-it-myself.com/research/study-ppm-spec/
 #define PPM_PERIOD 22500   // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
-#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上 Futaba はこちら
+#define TIME_LOW 360       // PPM信号 LOW時の幅　 // 同上 Futaba はこちら
 #define TIME_HIGH_MIN 0    // PPM幅の最小 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
 #define TIME_HIGH_MAX 1000 // PPM幅の最大 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
 
@@ -44,7 +44,7 @@ char packetBuffer[255];
 #define CH_NEUTRAL 500 // PPM幅の中間 [us]
 #define CH_MAX 1000    // PPM幅の最大 [us]
 
-#define CH_OFFSET 600 // 共通オフセット値
+#define CH_OFFSET 659 // 共通オフセット値
 
 
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）

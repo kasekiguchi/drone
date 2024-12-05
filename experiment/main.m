@@ -41,7 +41,7 @@ pause(1.45)
     sy = 0;
     while Command <= 10000
         pause(0.005)
-        msg=gen_msg([0,0,1000,0,1000,1000,1000,1000]); %([Roll,Pitch,Throttle,Yaw,arming])
+        msg=gen_msg([1000,1000,500,1000,500,500,500,5002]); %([Roll,Pitch,Throttle,Yaw,arming])
         agent.plant.connector.sendData(msg)
 
         Command = Command + 1;
