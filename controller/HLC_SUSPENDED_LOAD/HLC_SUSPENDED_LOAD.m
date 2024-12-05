@@ -34,6 +34,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         end
         
         function result=do(obj,varargin)
+            tStart = tic;
             if isscalar(varargin)
                 agent = varargin{1};
             else
@@ -68,7 +69,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.result.mLi=P(15);
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             end
-       
+            
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;
@@ -80,7 +81,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             else
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
-            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',P);
             % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
@@ -88,14 +89,15 @@ classdef HLC_SUSPENDED_LOAD < handle
             
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            
+            toc(tStart)
             %usの計算
                 % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
                 invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+                toc(tStart)
                 vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                toc(tStart)
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
-            
-            cha = agent{2};
+            % cha = agent{2};
             % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
             % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
             %      % if obj.flag_anti_spike < 5
@@ -109,8 +111,8 @@ classdef HLC_SUSPENDED_LOAD < handle
             %     tmp = uf + us;
             % end
             tmp = uf + us;
-
-            obj.result.input = [max(0,min(15,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
+            obj.result.tmp =tmp;
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             obj.self.controller.result.input = obj.result.input;%tmp;
             result = obj.result;  
             

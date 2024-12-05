@@ -10,7 +10,7 @@ run("makeSavePath")
     simpleLoggerContents = strcat('simple_',loggerContents);
     simpleSaveTitle=strcat(date,'_',simpleLoggerContents);
 
-    if exist("logger","var")
+    if ~exist("logger","var")
     % multiple var : save logger, simple logger and agent
         eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
         eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更

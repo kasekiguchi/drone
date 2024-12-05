@@ -28,7 +28,14 @@ function newLog = simplifyLoggerForCoop(log,agentNum)
                     S = states(i3);%State
                     reult = agenti.(F).result{1, i2}.state.(S);
                     if ~isempty(reult)
-                        newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                        if (F)+(S) ~= "referenceq"
+                            if F + S == "referencexd"
+                                xd = agenti.(F).result{1, i2}.state.(S);
+                                newLog.(F).(S)(:,i2) = [xd;zeros(28-length(xd),1)];
+                            else
+                                newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                            end
+                        end
                     end
                 end
             end

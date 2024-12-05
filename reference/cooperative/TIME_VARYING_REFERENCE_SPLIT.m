@@ -216,7 +216,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 yaw*180/pi
-                if abs(yaw)>10*pi/180 %&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>5*pi/180 %&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end

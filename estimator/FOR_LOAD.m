@@ -8,7 +8,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         tt0
         tl0
         tte = 10;%センサー値を何秒で100%使うか
-        tle = 5;%センサー値を何秒で100%使うか
+        tle = 25;%センサー値を何秒で0%使うか
         ratet
         ratel
     end
@@ -40,14 +40,14 @@ classdef FOR_LOAD < SENSOR_CLASS
             % % elseif strcmp(varargin{1}{2},'t')&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
             %     obj.result.state.pL(1:2) = spL(1:2);
             %     obj.fpLXY=1;
-            elseif strcmp(varargin{1}{2},'t')&&ipL(3)>0.1%take off
+            elseif strcmp(varargin{1}{2},'t')&&ipL(3)>0.25%take off
                 if isempty(obj.tt0)
                     obj.tt0 = varargin{1}{1}.t;
                 end
                 t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
                 k = obj.ratet*t^2;%反映割合
                 spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-            elseif strcmp(varargin{1}{2},'l')&&ipL(3)>0.1%landing
+            elseif strcmp(varargin{1}{2},'l')&&ipL(3)>0.25%landing
                 if isempty(obj.tl0)
                     obj.tl0 = varargin{1}{1}.t;
                 end

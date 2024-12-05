@@ -19,21 +19,21 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
-% COMs = [5,4];%割り当てる順番に設定
-COMs = [3];%割り当てる順番に設定
+COMs = [5,4];%割り当てる順番に設定
+% COMs = [3];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
+                 {struct("f",[0;0;0.5],"g",[0.5;0;0.5],"h",[1;0;0.5],"j",[0.5;0;0.5],"k",[0;0;0.5]),0}
                  % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
                  % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
-                 {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
-                 {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[0;1;0.5],"k",[1;1;0.5]),10}
+                 % {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
+                 % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[0;1;0.5],"k",[1;1;0.5]),10}
                  
                  };
-logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
 isCoop = mod(rigid_num,2);
 firstId = 1;
@@ -48,7 +48,8 @@ if isCoop == 1
     for i = 1:N-1
         rho(:,i) = motive.result.rigid(1+2*i).p - motive.result.rigid(1).p;
     end
-    agent(1) = DRONE; %対象をドローンにしている？ DRONE.m
+    rho
+    agent(1) = DRONE; %DRONE.m
     agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
     agent(1).plant = struct("do",@(varargin)[], "arming" ,[],"stop",[]);
     agent(1).plant.connector.serial = [];
@@ -68,10 +69,10 @@ if isCoop == 1
     agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
 end
 % cableL=[0.61,0.91];
-cableL =[0.869,0.869];
+cableL =[0.8,0.8];
 length=cableL;
 for i = firstId:N
-sstate = motive.result.rigid(2*i-firstId); %状態の取得？なんか使われていない
+sstate = motive.result.rigid(2*i-firstId); %なんか使われていない
 initial_state.p = sstate.p; %初期位置の取得
 initial_state.q = sstate.q; %初期角度の取得
 eul = Quat2Eul(initial_state.q);
@@ -84,7 +85,7 @@ agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent(i).parameter.set("cableL",cableL(i - firstId + 1));
 agent(i).parameter.set("Length",length(i - firstId + 1));
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
-agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),0)),  ["p", "q", "pL", "pT"]));
+agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
 
 %sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
 %各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
@@ -113,8 +114,12 @@ agent(i).controller = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(d
 %=======================================================
 agent(i).controller.result.input = [(agent(i).parameter.loadmass*0+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
-run("ExpBase");
 
+logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]);%logger
+% logger = LOGGER(1:N-firstId+1, size(ts:dt:te, 2), 1, [],[]);%logger
+
+run("ExpBase");
+%% functions
 function result = sensor_do(varargin)
     result_motive = varargin{5}.sensor.motive.do(varargin);
     result_forload = varargin{5}.sensor.forload.do(varargin);
@@ -148,6 +153,10 @@ dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));
 t = app.logger.data(0,'t',[]);
 figure(100)
 plot(t(1:end-1),dt);
+hold on
+yline(0.025,"LineWidth",0.5)
+ylim([0 0.05])
+hold off
 end
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
