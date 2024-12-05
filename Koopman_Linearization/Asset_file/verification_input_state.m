@@ -28,8 +28,9 @@ mode.training_data = 'Kiyama';
 % filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename = '2024-09-11_Exp_Kiyama_code10_saddle';
 % filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
-filename = '2024-11-21_Exp_Kiyama_code16_saddle_new'; % hermite [1; x]
-% filename = '2024-11-14_Exp_Kato_code00_saddle'; % kato
+% filename = '2024-11-21_Exp_Kiyama_code16_saddle_new'; % hermite [1; x]
+% filename = '2024-12-05_Exp_Kiyama_code22_saddle_qw1-1';
+filename = '2024-12-04_Exp_Kiyama_code22_saddle';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -156,15 +157,15 @@ clear; close all;
 init = [0;0;0];
 P = [0.5884 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
 % filename{1} = '2024-11-14_Exp_Kato_code00_saddle';
-filename{1} = '2024-11-19_Exp_Kiyama_code14_saddle';
-filename{2} = '2024-11-19_Exp_Kiyama_code15_saddle_4';
-% filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+filename{1} = '2024-12-04_Exp_Kiyama_code22_saddle';
+% filename{2} = '2024-11-19_Exp_Kiyama_code15_saddle_4';
+filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename{3} = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
 filename{3} = @roll_pitch_yaw_thrust_torque_physical_parameter_model;
 Estnum = [12 12 12];
 withoutp = [0 0 0];
 nonlinear = [0 0 1];
-modef = [14 3 0];
+modef = [3 1 0];
 log = {size(filename,2)};
 X = {size(filename,2)};
 
@@ -181,11 +182,11 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',2);
 set(0,'defaultLineMarkerSize',15);
 % ylimsetting = [-inf inf; -inf inf; -inf inf];
-ylimsetting = [-50 50; -50 50; -1.5 0.1];
+ylimsetting = [-0.1 0.1; -0.1 0.1; -1.5 0.1];
 % legendlist = {'NoIncludePosition', 'IncludePosition'}; % 位置ありと位置なしの比較
 % legendlist = {'Without-Standardization', 'With-Standardization'};
 % legendlist = {'Without-Standardization', 'Previous', 'With-Standardization'};
-legendlist = {'hermite-wheeled-robot', 'hermite-many', 'Non-linear'};
+legendlist = {'hermite', 'previous', 'Non-linear'};
 color = [0.00,0.45,0.74; 0.85,0.33,0.10; 0.93,0.69,0.13];
 testfontsize = 20;
 tmp = [0.05 0.05];
@@ -227,16 +228,20 @@ for i = 1:size(filename,2)
 end
 text(tmp(1), tmp(2)+(i)*tmp(2), strcat('Free fall (0.025s)','=',num2str(1/2*9.81*(0.025*N)^2)), 'Units', 'normalized', 'Color', 'black', 'FontSize', testfontsize);
 hold off; 
+if isa(filename{3}, 'char') 
+    sgtitle(strrep(strcat(':', filename{1}, ',', filename{2}, ',', filename{3}), '_', '-'));
+else
+    sgtitle(strrep(strcat(':', filename{1}, ',  :previous', ',  :Nonlinear'), '_', '-'));
+end
 
 %% 部分の行列抜き出し
-A3 = log3.est.A(7:9,7:9);
-B3 = log3.est.B(7:9,:); % 昨年度
-
-A2 = log2.est.A(4:6,4:6);
-B2 = log2.est.B(4:6,:); % あり
-
-A1 = log1.est.A(4:6,4:6);
-B1 = log1.est.B(4:6,:); % 無し
+clear re
+legendlist
+re.x1(:,1) = zeros(12,1); re.x2(:,1) = zeros(12,1);
+for j = 1:10-1
+re.x1(:,j+1) = log{1}.est.C * log{1}.est.A*quaternions_all([re.x1(:,j); zeros(4,1)]);
+re.x2(:,j+1) = log{2}.est.C * log{2}.est.A*observables_isobe(re.x2(:,j));
+end
 %% 可制御性
 clc
 Co = ctrb(est.A,est.B);

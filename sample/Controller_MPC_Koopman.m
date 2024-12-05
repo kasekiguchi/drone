@@ -1,10 +1,13 @@
 function Controller = Controller_MPC_Koopman(dt, model, agent)
 %UNTITLED この関数の概要をここに記述
 %   各種値
+
+    % Controller_param.controller_model = 'hermite';
+
     % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.m = agent.parameter.mass;
     Controller_param.dt = 0.08; % MPCステップ幅 0.07
-    Controller_param.H = 10 %ホライズン数
+    Controller_param.H = 20; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -49,6 +52,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     elseif size(Controller_param.A,1) == 71
         Controller_param.quad_drone = @quad_drone_code08_mex;
     else
+        Controller_param.quad_drone = @quad_drone;
         warning('観測量に合うmexコントローラーがありませｎ');
     end
 

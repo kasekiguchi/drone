@@ -30,10 +30,20 @@ end
 % C = X*pinv(Xlift);
 
 %% A,Bをまとめて計算するデータ数が多い場合のやりかた
-G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
-V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
-M = V * pinv(G);              % size(M) = (numX,      numX+numU)
-output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
-output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
-output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX)
+if flg.weight 
+    Q = blkdiag(flg.weight_Qp, flg.weight_Qq, flg.weight_Qv, flg.weight_Qw, eye(numX-12)); % 状態以外の観測量部分は1とする
+    % 汎用性のためにflgにweightを格納
+    G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
+    V = (Q*Ylift)*[(Q*Xlift) ; U]';       % size(V) = (numX,      numX+numU)
+    M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+    output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+    output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+    output.C = (Q(1:12,1:12)*X)*pinv(Q*Xlift);
+else
+    G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
+    V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
+    M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+    output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+    output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+    output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX)
 end

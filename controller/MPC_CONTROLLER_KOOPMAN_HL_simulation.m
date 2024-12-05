@@ -28,6 +28,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         Ce
         H
         qpparam
+        t
     end
 
     properties
@@ -97,22 +98,49 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % obj.state.previous.pvw = [state(1:3);state(7:9);state(10:12)];
         end
 
-        %-- main()的な
-        function result = do(obj,varargin)
-            % profile on
+        function result = do(obj, varargin)
             tic
+            %%initialize
+            time = varargin{1};
+            phase = varargin{2};
+            obj.t = time.t;
+            %% phaseによるcontrollerの選択
+            % result: controllerで算出された入力
+            obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+            if phase == 'a'
+                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                result = obj.controller_KMPC(varargin);
+                disp('controller: MC,  phase: a');
+            elseif phase == 't' || phase == 'l'
+                result = obj.controller_HL(varargin);
+                disp('controller: HL  phase: t or l');
+            elseif phase == 'f'
+                obj.reference.xr = obj.generate_reference(obj.t);
+                obj.input.u_hl   = obj.controller_HL(varargin); % calculated current HL input
+                result = obj.controller_KMPC(varargin);
+                disp('controller: MC  phase: f');
+            end 
+            % obj.show();
+            calT = toc;
+            % result.calc = calT;
+        end
+
+        %-- main()的な
+        function result = controller_KMPC(obj, varargin)
+            % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            var = varargin;
-            obj.param.t = var{1}.t;
+            var = varargin{1};
+            obj.param.t = obj.t;
             rt = obj.param.t; %時間
             idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            [obj.reference.xr, obj.reference.xr_HL] = obj.Reference(rt); %リファレンスの更新
+            % [obj.reference.xr, obj.reference.xr_HL] = obj.generate_reference(rt); %リファレンスの更新
 
             %% HLによる入力計算
             obj.input.u_HL = obj.input.u_HL_pre;
-            obj.input.u_HL_current = obj.controller_HL(var); % controllerで同時計算
+            obj.input.u_HL_current = obj.input.u_HL; % controllerで同時計算
 
             % 次時刻状態の計算
             x = obj.current_state;
@@ -140,18 +168,21 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             %% 疑似逆行列から求める
             deltaU = abs(obj.result.input - obj.input.u_HL);
             Z = obj.A * quaternions_all([obj.previous_state; deltaU]) + obj.B * deltaU;
-            er = obj.C(Z);
+            % er = obj.C*Z;
             % V = [obj.previous_state; obj.current_state; obj.input.u_HL]; % e x u
-            V = [quaternions_all(obj.previous_state)];
-            J = @(P) er - V*P - obj.B*deltaU;
-            x0 = [obj.current_state; zeros(26-12,1)];
+            V = [quaternions_all([obj.previous_state; deltaU])];
+            J = @(P) abs(sum(Z - V*P - obj.B*deltaU));
+            % x0 = [obj.current_state; zeros(26-12,1)];
+            x0 = 0;
             x = fminunc(J,x0);
             delU = -pinv(obj.B)*V*x;
             u = obj.input.u_HL - delU;
             obj.result.input = u;
+            fval = 0; exitflag = 0;
             % MODEL_CLASSも変更必要
 
             %% データ表示用
+            
             obj.input.u = obj.result.input; 
             calT = toc;
             obj.result.mpc.calt = calT; %計算時間保存したいときコメントイン
@@ -167,16 +198,26 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% 情報表示
             % state_monte = obj.self.estimator.result.state;
-            if idx == 1; state_monte = obj.self.estimator.result.state;
-            else; state_monte = obj.self.plant.result; end
+            % if idx == 1; state_monte = obj.self.estimator.result.state;
+            % else; state_monte = obj.self.plant.result; end
+            obj.state.x = obj.self.estimator.result.state.get();
             
+            obj.show(calT,rt,fval,exitflag);
+
+            %% z < 0で終了
+            if obj.self.estimator.result.state < 0
+                warning("墜落しました")
+            end
+            
+        end
+        function show(obj,calT,rt,fval,exitflag)
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
-                    state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
-                    state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
+                    obj.state.x(1), obj.state.x(2), obj.state.x(3),...
+                    obj.state.x(7), obj.state.x(8), obj.state.x(9),...
+                    obj.state.x(4), obj.state.x(5), obj.state.x(6), ...
+                    obj.state.x(10), obj.state.x(11), obj.state.x(12));       % s:state 現在状態
             fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
                     obj.reference.xr(1,1), obj.reference.xr(2,1), obj.reference.xr(3,1),...
                     obj.reference.xr(7,1), obj.reference.xr(8,1), obj.reference.xr(9,1),...
@@ -187,16 +228,6 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             fprintf("t: %f \t calT: %f \t fval: %f \t flag: %d \n", rt, calT, fval, exitflag);
             % fprintf("u: %f %f %f %f \t diff_u: %f %f %f %f", obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), var(1,1), var(2,1), var(3,1), var(4,1));
             fprintf("\n");
-            % profile viewer
-
-            %% z < 0で終了
-            if obj.self.estimator.result.state < 0
-                warning("墜落しました")
-            end
-            
-        end
-        function show(obj)
-            obj.result
         end
 
         function result = controller_HL(obj,varargin)
@@ -238,7 +269,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.input.u_HL_pre = result;
         end
 
-        function [xr, xr_HL] = Reference(obj, T)
+        function [xr, xr_HL] = generate_reference(obj, T)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;

@@ -15,6 +15,7 @@ function state = input_state(param,mode)
     % Z = quaternions_all(X);
 
     % Z = quaternions_all(param{7}); % ある区間の始めの状態
+    z0 = [param{7}; [0.5844*9.81;0;0;0]];
     if mode == 0
         Z = quaternions_all(param{7});
     elseif mode == 1
@@ -22,9 +23,9 @@ function state = input_state(param,mode)
     elseif mode == 2
         Z = obs2(param{7});
     elseif mode == 3
-        Z = quaternions_all([param{7}; [0.5844*9.81;0;0;0]]);
+        Z = quaternions_all(z0);
     elseif mode == 14
-        Z = hermite_code14([param{7}; [0.5844*9.81;0;0;0]]);
+        Z = hermite_code14(z0);
     end
 
     try
@@ -38,19 +39,23 @@ function state = input_state(param,mode)
     end
 end
 
+function [P1,P2,P3,Q1,Q2,Q3,V1,V2,V3,W1,W2,W3] = common(x)
+    P1 = x(1,1);
+    P2 = x(2,1);
+    P3 = x(3,1);
+    Q1 = x(4,1); % roll
+    Q2 = x(5,1); % pitch
+    Q3 = x(6,1); % yaw
+    V1 = x(7,1);
+    V2 = x(8,1);
+    V3 = x(9,1);
+    W1 = x(10,1);
+    W2 = x(11,1);
+    W3 = x(12,1);
+end
+
 function z1 = obs1(x)
-P1 = x(1,1);
-P2 = x(2,1);
-P3 = x(3,1);
-Q1 = x(4,1); % roll
-Q2 = x(5,1); % pitch
-Q3 = x(6,1); % yaw
-V1 = x(7,1);
-V2 = x(8,1);
-V3 = x(9,1);
-W1 = x(10,1);
-W2 = x(11,1);
-W3 = x(12,1);
+[P1,P2,P3,Q1,Q2,Q3,V1,V2,V3,W1,W2,W3] = common(x);
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
 R33 = (cos(Q2).*cos(Q1));
@@ -106,18 +111,7 @@ z2 = [common_except_pos_z; isobe_z];
 end
 
 function z3 = hermite_code14(x)
-P1 = x(1,1);
-P2 = x(2,1);
-P3 = x(3,1);
-Q1 = x(4,1); % roll
-Q2 = x(5,1); % pitch
-Q3 = x(6,1); % yaw
-V1 = x(7,1);
-V2 = x(8,1);
-V3 = x(9,1);
-W1 = x(10,1);
-W2 = x(11,1);
-W3 = x(12,1);
+[P1,P2,P3,Q1,Q2,Q3,V1,V2,V3,W1,W2,W3] = common(x);
 u1 = x(10,1);
 u2 = x(11,1);
 u3 = x(12,1);

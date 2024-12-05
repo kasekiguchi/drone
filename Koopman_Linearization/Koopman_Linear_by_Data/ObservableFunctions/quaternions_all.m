@@ -226,12 +226,16 @@ k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S
 
 d1 = [k1; k2; k3; k4];
 d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S) 
+d3 = [kron(k1,k2); kron(k3,k4)]; % 
+d4 = [kron(k1,k3); kron(k2,k4)]; % 
 du = [H(u1); H(u2); H(u3); H(u4)];
 
-z = [common_z; kron(d1, du)]; % 17 528
+% z = [common_z; kron(d1, du)]; % 17 528
 % z = [common_z; kron(d2, du)]; % 18 52万次元のため中断
 % z = [common_z; d1]; % 19 80
 % z = [common_z; d2]; % 20 6万5000次元のため中断
+% z = [common_z; d3]; % 21 kron(RxS, RxS) 528
+% z = [common_z; d4]; % 22 kron(RxS, S) 528
 
 %% まとめ
 z = [common_z; isobe_z]; % 00

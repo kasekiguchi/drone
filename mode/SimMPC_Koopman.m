@@ -36,6 +36,7 @@ model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_
 % model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-11-19_Exp_Kiyama_code15_saddle_3";
+% model_file = "2024-12-04_Exp_Kiyama_code22_saddle";
 load(model_file,'est'); % main
 [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 agent = DRONE;
@@ -71,13 +72,13 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation_hermite(agent,Controller_MPC_Koopman(dt, model_file, agent));
-% conmode = 2;
+conmode = 2;
 %% 誤差モデル
 % % 1コンのとき  100行目もコメントイン
-agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-conmode = 1;
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+% conmode = 1;
 % % 2つのコントローラの設定  101行目もコメントイン
 % agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
 % agent.controller.hlc = HLC(agent,Controller_HL(dt));
@@ -135,10 +136,10 @@ function dfunc(app)
 close all
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "w", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "w", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % Graphplot(app)
 % app.agent(1).animation(app.logger,"target",1,"opt_plot",[]);
@@ -150,8 +151,8 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
-fig.main_figure();
+% fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
+% fig.main_figure();
 % app = app.logger, app.fExp の構造体を作ればよい
 end
 

@@ -130,6 +130,9 @@ flg.bilinear = 0;
 flg.normalize = 0;
 flg.without_pos = 0;
 flg.hermite = 1;
+flg.weight = 1; % 重み付き最小二乗法
+flg.weight_Qp = eye(3); flg.weight_Qq = eye(3) * 1.1; flg.weight_Qv = eye(3); flg.weight_Qw = eye(3) * 1.1;
+
 F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
@@ -141,7 +144,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 % exp_data = 'Exp_Kiyama_XY_20data';
 % exp_data = 'Exp_Kiyama_Error';
-FileName = strcat(FileName_common, exp_data, '_', 'code20_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code22_', Exp_tra, '_qw1-1'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -181,9 +184,10 @@ if size(Data.X,1)==13 %特に気にしなくていい
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-disp(FileName);
+disp(FileName); 
+fprintf('pause: '); for i = 1:5; pause(1); fprintf('%d, ', i); end; fprintf('\n'); % 5秒待機タイマー
 
-%% Koopman linearization
+% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 fprintf('\n＜クープマン線形化を実行＞\n')
 tic

@@ -76,6 +76,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.result.setting.A = obj.param.A;
             obj.result.setting.B = obj.param.B;
             obj.result.setting.C = obj.param.C;
+
+            % obj.param.filename = param.controller_model;
         end
 
         %-- main()的な
@@ -89,18 +91,26 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             rt = obj.param.t; %時間
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            obj.reference.xr = obj.Reference(rt); %リファレンスの更新
+            
+            if strcmp(varargin{2}, 'f')
+                obj.reference.xr = obj.Reference(rt); %リファレンスの更新
+            else
+                obj.reference.xr = repmat([0;0;1;zeros(9,1);obj.param.ref_input],1,obj.H);
+            end
  
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
       
             %% ------------------------------------------------------------
             % 最適化部分の関数化とmex化
-            obj.current_state = [obj.current_state; obj.input.u];
+            % if strcmp(obj.param.filename, 'hermite')
+            % obj.current_state = [obj.current_state; obj.input.u]; % hermite
+            % end
+            
             Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
             % [var, fval, exitflag] = quad_drone_mex(Param); %code00用 自PCでcontroller:0.6ms, 全体:2.7ms
             % [var, fval, exitflag] = quad_drone_code08_mex(Param); %code08用
-            [var, fval, exitflag] = quad_drone(Param);
-            % [var, fval, exitflag] = obj.param.quad_drone(Param);
+            % [var, fval, exitflag] = quad_drone(Param);
+            [var, fval, exitflag] = obj.param.quad_drone(Param);
                  
             %%
             obj.previous_input = var;
@@ -119,9 +129,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             result = obj.result; % controllerの値の保存
 
             %% 情報表示
-            % state_monte = obj.self.estimator.result.state;
-            if idx == 1; state_monte = obj.self.estimator.result.state;
-            else; state_monte = obj.self.plant.result; end
+            state_monte = obj.self.estimator.result.state;
+            % if idx == 1; state_monte = obj.self.estimator.result.state;
+            % else; state_monte = obj.self.plant.result; end
             
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
@@ -150,7 +160,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.result
         end
 
-        function [xr] = Reference(obj, T)
+        function [xr] = Reference(obj, varargin)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
@@ -158,7 +168,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
             for h = 0:obj.H-1
-                t = T + obj.param.dt * h; % reference生成の時刻をずらす
+                t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3);
                 xr(7:9, h+1) = ref(5:7);
