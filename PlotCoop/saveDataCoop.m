@@ -10,7 +10,7 @@ run("makeSavePath")
     simpleLoggerContents = strcat('simple_',loggerContents);
     simpleSaveTitle=strcat(date,'_',simpleLoggerContents);
 
-    if ~exist("logger","var")
+    if exist("logger","var")
     % multiple var : save logger, simple logger and agent
         eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
         eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更
@@ -20,11 +20,17 @@ run("makeSavePath")
         eval([simpleLoggerContents,'= loggers;']);
     else
     % single var : save logger, simple logger and agent
-        agentNum = length(gui.logger.Data.agent);
         eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
         eval([loggerContents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
-        eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger,agentNum );']);
-        eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
+        for i = 1:length(gui.logger.Data.agent)
+            loggers{i,1} = simplifyLoggerForSingle(gui.logger,i );
+        end
+        eval([simpleLoggerContents,'= loggers;']);
+        % for i = 1:length(logger.target)
+        %     loggers{i,1} = simplifyLoggerForCoop(logger,i);
+        % end
+        % eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger,agentNum );']);
+        % eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
         
         %Dataフォルダから読み込んだ場合agentはなし
         % agentNum = length(log.Data.agent);

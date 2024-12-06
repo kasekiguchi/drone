@@ -7,8 +7,8 @@ classdef FOR_LOAD < SENSOR_CLASS
         fpLXY=0;
         tt0
         tl0
-        tte = 10;%センサー値を何秒で100%使うか
-        tle = 25;%センサー値を何秒で0%使うか
+        tte = 5;%センサー値を何秒で100%使うか
+        tle = 30;%センサー値を何秒で0%使うか
         ratet
         ratel
     end

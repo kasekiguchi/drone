@@ -19,7 +19,7 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
-COMs = [5,4];%割り当てる順番に設定
+COMs = [3,5];%割り当てる順番に設定
 % COMs = [3];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
@@ -27,7 +27,7 @@ refName = {
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 {struct("f",[0;0;0.5],"g",[0.5;0;0.5],"h",[1;0;0.5],"j",[0.5;0;0.5],"k",[0;0;0.5]),0}
+                 {struct("f",[0;0;0.5],"g",[0.5;0;0.5],"h",[1;0;0.5],"j",[0.5;0;0.5],"k",[0;0;0.5]),15}
                  % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
                  % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
                  % {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
@@ -68,8 +68,8 @@ if isCoop == 1
     
     agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
 end
-% cableL=[0.61,0.91];
-cableL =[0.8,0.8];
+cableL=[0.9,0.9];
+% cableL =[0.77,0.77];
 length=cableL;
 for i = firstId:N
 sstate = motive.result.rigid(2*i-firstId); %なんか使われていない
@@ -136,7 +136,7 @@ function result = controller_do(varargin)
 end
 
 function post(app)
-app.logger.plot({2, "p", "esr"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({2, "p", "r"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({2, "sensor.result.state.pL", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({2, "estimator.result.state.pL", "esr"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({2, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);

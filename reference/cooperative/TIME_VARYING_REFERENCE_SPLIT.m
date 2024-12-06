@@ -98,7 +98,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
                     obj.k_yaw=lqrd(0,1,1,1,0.025);
-                    obj.yawRef = obj.generate_yawReference(obj.k_yaw*0.1);
+                    obj.yawRef = obj.generate_yawReference(obj.k_yaw);
 
                     obj.com = args{3};
                     % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
@@ -216,7 +216,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 yaw*180/pi
-                if abs(yaw)>5*pi/180 %&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>10*pi/180 %&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
