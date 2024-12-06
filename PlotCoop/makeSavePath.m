@@ -2,6 +2,7 @@
     %変更しない
     % ExportFolder='A:\Work2024\momose';%実験用pcのパス
     ExportFolder='C:\きょうゆう';
+    % ExportFolder='\\Desktop-2pivavv\きょうゆう';
     % % ExportFolder='C:\Users\acsl_students\Documents\students\workspace2024\momose';%実験用pcのパス
     % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
@@ -14,7 +15,7 @@
     subfolder='exp';%sim or exp
     ExpSimName='drone2Load1AntiRot_free';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='ptopx0y0z05_yaw5';%実験,シミュレーション内容64文字以内
+    contents='ptopx01210_1_2y0000000z05_yaw10';%実験,シミュレーション内容64文字以内
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内
