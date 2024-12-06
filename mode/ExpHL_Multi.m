@@ -9,8 +9,8 @@ post_func = @(app) post(app); %35行目にある
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
-N = 2;
+% N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
+N = 1;
 COMs = string([3,5]);%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
