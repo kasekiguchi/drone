@@ -4,26 +4,33 @@ te = 10000; % termina time　終了時間
 time = TIME(ts,dt,te); %上の3つの時間をまとめる．
 in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
-% N = 2;
+PCId = 2;
+numberOFpc = 2;
+addId = numberOFpc*PCId-numberOFpc;
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
-COMs = [3,5];%割り当てる順番に設定
+N = N/numberOFpc;
+N=1;
+COMs = [3,8];%割り当てる順番に設定
+% COMs = 4;
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 {struct("f",[1;1;1],"g",[0;1;1],"h",[-1;1;1],"j",[-1;0;1],"k",[-1;-1;1]),8},...
-                 {struct("f",[-1;-1;1],"g",[0;-1;1],"h",[1;-1;1],"j",[1;0;1],"k",[1;1;1]),8}
+                 % {struct("f",[1;1;1],"g",[0;1;1],"h",[-1;1;1],"j",[-1;0;1],"k",[-1;-1;1]),8},...
+                 % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),8}
+                 {struct("f",[-1.5;-1.5;0.5],"g",[0;-1.5;0.5],"h",[1.5;-1.5;0.5],"j",[1.5;0;0.5],"k",[1.5;1.5;0.5]),8},...
+                 {struct("f",[1.5;-1.5;0.5],"g",[1.5;0;0.5],"h",[1.5;1.5;0.5],"j",[0;1.5;0.5],"k",[-1.5;1.5;0.5]),8}
                  };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
 for i = 1:N
-sstate = motive.result.rigid(i); %状態の取得？
+sstate = motive.result.rigid(i+addId); %状態の取得？
 initial_state.p = sstate.p; %初期位置の取得
 initial_state.q = sstate.q; %初期角度の取得
 eul = Quat2Eul(initial_state.q);
@@ -34,7 +41,7 @@ agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
 agent(i).parameter = DRONE_PARAM("DIATONE");
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state, i)), ["p", "q"]));
-agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,eul(3), motive));
+agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i+addId,eul(3), motive));
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});

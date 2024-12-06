@@ -6,6 +6,9 @@ end
 %     takeoff_ref{i} = TAKEOFF_REFERENCE(agent(i),[]);
 %     landing_ref{i} = LANDING_REFERENCE(agent(i),dt,0.1);
 % end
+if ~exist("firstId","var")
+    firstId=1;
+end
 if firstId == 2
     takeoff_ref{1}.do = @(varargin)[];
     takeoff_ref{1}.result.state = STATE_CLASS(struct('state_list',"xd",'num_list',28));

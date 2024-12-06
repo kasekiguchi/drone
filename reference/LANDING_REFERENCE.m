@@ -7,7 +7,7 @@ classdef LANDING_REFERENCE < handle
     result
     base_state
     base_time
-    te = 20
+    te = 10
     th_offset
     th_offset0 = 260;%勝手に+20ぐらいされる
   end

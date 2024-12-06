@@ -5,7 +5,7 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
-    te = 20;%10;%15;%15は1.5m用
+    te = 10;%10;%15;%15は1.5m用
     % zd = 1.35; % goal altitude
     zd = 0.5;%質量推定用
     result
