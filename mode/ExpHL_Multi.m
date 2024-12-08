@@ -18,14 +18,16 @@ refName = {
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 {struct("f",[1.5;1.5;0.5],"g",[0;1.5;0.5],"h",[-1.5;1.5;0.5],"j",[-1.5;0;0.5],"k",[-1.5;-1.5;0.5]),8},...
-                 {struct("f",[-1.5;1.5;0.5],"g",[-1.5;0;0.5],"h",[-1.5;-1.5;0.5],"j",[0;-1.5;0.5],"k",[1.5;-1.5;0.5]),8}
+                 % {struct("f",[1.5;1.5;0.5],"g",[0;1.5;0.5],"h",[-1.5;1.5;0.5],"j",[-1.5;0;0.5],"k",[-1.5;-1.5;0.5]),8},...
+                 % {struct("f",[-1.5;1.5;0.5],"g",[-1.5;0;0.5],"h",[-1.5;-1.5;0.5],"j",[0;-1.5;0.5],"k",[1.5;-1.5;0.5]),8}
+                 {struct("f",[-1.5;-1.5;0.5],"g",[0;-1.5;0.5],"h",[1.5;-1.5;0.5],"j",[1.5;0;0.5],"k",[1.5;1.5;0.5]),8},...
+                 {struct("f",[1.5;-1.5;0.5],"g",[1.5;0;0.5],"h",[1.5;1.5;0.5],"j",[0;1.5;0.5],"k",[-1.5;1.5;0.5]),8}
                  };
 logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
 for i = 1:N
-% sstate = motive.result.rigid(i+2); %状態の取得？
-sstate = motive.result.rigid(i); %状態の取得？
+sstate = motive.result.rigid(i+2); %状態の取得？
+% sstate = motive.result.rigid(i); %状態の取得？
 initial_state.p = sstate.p; %初期位置の取得
 initial_state.q = sstate.q; %初期角度の取得
 eul = Quat2Eul(initial_state.q);
@@ -36,8 +38,8 @@ agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
 agent(i).parameter = DRONE_PARAM("DIATONE");
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state, i)), ["p", "q"]));
-% agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i+2,eul(3)*0, motive));
-agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,eul(3)*0, motive));
+agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i+2,eul(3)*0, motive));
+% agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,eul(3)*0, motive));
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
