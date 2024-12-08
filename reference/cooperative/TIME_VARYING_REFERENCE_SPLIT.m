@@ -97,7 +97,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % B6 = [0;0;0;0;0;1];
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
-                    obj.k_yaw=lqrd(0,1,1,1,0.025);
+                    obj.k_yaw=lqrd(0,1,1,10,0.025);
+                    % obj.k_yaw=0.9;
                     obj.yawRef = obj.generate_yawReference(obj.k_yaw);
 
                     obj.com = args{3};
@@ -241,17 +242,17 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     %yaw修正中の目標軌道
                     x0dForCorrection = x0d(1:2) + obj.errorVector;
                     refi(1:2) = alpi + x0dForCorrection;
-                    %new version
-                    thetaAlp = acos(alpiUnit'*[1;0]);
-                    fsign = sign(cross([1;0;0],[rhoiUnit;0]));
-                    if fsign(3) < 0
-                        thetaAlp = 2*pi - thetaAlp; 
-                    end
 
-                    newRef = obj.yawRef(norm(rhoi(1:2)),yaw,thetaAlp,0);
-                    refi4_ = reshape(refi,4,[]);
-                    refi4_(1:2,1:6) = [newRef(:,1) + x0dForCorrection,newRef(:,2:6)];
-                    refi = reshape(refi4_,[],1);
+                    % %new version
+                    % thetaAlp = acos(alpiUnit'*[1;0]);
+                    % fsign = sign(cross([1;0;0],[alpiUnit;0]));
+                    % if fsign(3) < 0
+                    %     thetaAlp = 2*pi - thetaAlp; 
+                    % end
+                    % newRef = obj.yawRef(norm(rhoi(1:2)),yaw,thetaAlp,0);
+                    % refi4_ = reshape(refi,4,[]);
+                    % refi4_(1:2,1:6) = [newRef(:,1) + x0dForCorrection,newRef(:,2:6)];
+                    % refi = reshape(refi4_,[],1);
 
                 else
                     obj.errorVector=[];
