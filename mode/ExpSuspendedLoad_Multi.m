@@ -19,8 +19,13 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
-COMs = [3,5];%割り当てる順番に設定
-% COMs = [3];%割り当てる順番に設定
+numberOFpc = 2;
+PCId = 2;
+addId = numberOFpc*PCId-numberOFpc;
+% N = N/numberOFpc;
+N = 2;
+% COMs = [3,5];%割り当てる順番に設定
+COMs = [3];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
@@ -62,8 +67,8 @@ if isCoop == 1
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
-    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.5],"size",[0.7,0.7,0]},"HL"});
-    % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
+    % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.5],"size",[0.7,0.7,0]},"HL"});
+    agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
     agent(1).controller.do = @(varargin)[];
     agent(1).controller.result.input=[];
@@ -74,7 +79,7 @@ cableL=[0.9,0.9];
 % cableL =[0.77,0.77];
 length=cableL;
 for i = firstId:N
-sstate = motive.result.rigid(2*i-firstId); %なんか使われていない
+sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
 initial_state.p = sstate.p; %初期位置の取得
 initial_state.q = sstate.q; %初期角度の取得
 eul = Quat2Eul(initial_state.q);
@@ -91,8 +96,8 @@ agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i
 
 %sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
 %各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
-agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-firstId,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)));%牽引物の情報のクラス，牽引物のidを入れる
+agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-firstId +addId,eul(3), motive));%機体の情報のクラス，機体のidを入れる
+agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)+addId));%牽引物の情報のクラス，牽引物のidを入れる
 agent(i).sensor.do = @sensor_do;
 
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
