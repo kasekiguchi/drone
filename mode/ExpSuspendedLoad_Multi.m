@@ -19,7 +19,7 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
-COMs = [12,3];%割り当てる順番に設定
+COMs = [3,5];%割り当てる順番に設定
 % COMs = [3];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
@@ -27,7 +27,8 @@ refName = {
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[2;0;0.5],"j",[1;0;0.5],"k",[0;0;0.5],"m",[-1;0;0.5],"n",[-2;0;0.5]),10}
+                 % {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[2;0;0.5],"j",[1;0;0.5],"k",[0;0;0.5],"m",[-1;0;0.5],"n",[0;0;0.5]),10}
+                 {struct("f",[0;0;0.5],"g",[0;0.7;0.5],"h",[0;0;0.5],"j",[0;0.7;0.5],"k",[0;0;0.5]),10}
                  % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
                  % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
                  % {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
@@ -61,7 +62,8 @@ if isCoop == 1
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
-    agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
+    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.5],"size",[0.7,0.7,0]},"HL"});
+    % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
     agent(1).controller.do = @(varargin)[];
     agent(1).controller.result.input=[];

@@ -24,18 +24,28 @@ function newLog = simplifyLoggerForSingle(log,agentNum)
                     S = states(i3);%State
                     reult = agenti.(F).result{1, i2}.state.(S);
                     if ~isempty(reult)
-                        if (F)+(S) ~= "referenceq"
-                            if F + S == "referencexd"
+                        if (F)== "reference"
+                            if S == "xd"%||S == "yaw"
                                 xd = agenti.(F).result{1, i2}.state.(S);
                                 newLog.(F).(S)(:,i2) = [xd;zeros(28-length(xd),1)];
-                            else
-                                newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                            % elseif S == "yaw"
+                            %     newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
                             end
                         else
-                            newLog.(F).(S)(:,i2) = zeros(28,1);
+                            newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
                         end
-                    else
-                        newLog.(F).(S)(:,i2) = zeros(28,1);
+                        % if (F)+(S) ~= "referenceq"
+                        %     if F + S == "referencexd"
+                        %         xd = agenti.(F).result{1, i2}.state.(S);
+                        %         newLog.(F).(S)(:,i2) = [xd;zeros(28-length(xd),1)];
+                        %     else
+                        %         newLog.(F).(S)(:,i2) = agenti.(F).result{1, i2}.state.(S);
+                        %     end
+                        % else
+                        %     newLog.(F).(S)(:,i2) = zeros(28,1);
+                        % end
+                    % else
+                    %     newLog.(F).(S)(:,i2) = zeros(28,1);
                     end
                 end
             end

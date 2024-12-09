@@ -97,16 +97,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % B6 = [0;0;0;0;0;1];
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
-                    obj.k_yaw=lqrd(0,1,1,10,0.025);
+                    obj.k_yaw=lqrd(0,1,10,1,0.025);
                     % obj.k_yaw=0.9;
                     obj.yawRef = obj.generate_yawReference(obj.k_yaw);
 
                     obj.com = args{3};
                     % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q","yaw"], 'num_list', [28, 3, 3, 1]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "yaw"], 'num_list', [28, 3, 1]));  
                     obj.result.state.set_state("xd",zeros(28,1));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                    % obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
                     obj.result.state.yaw=0;
 
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],obj.agent1.parameter.rho));
@@ -195,7 +195,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                % dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
-               xid  = x0d + rhoi;       %分割後のペイロードの位置目標軌道
+               xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
                % xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
                % dxid = dx0d; %+ dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
@@ -217,7 +217,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 yaw*180/pi
-                if abs(yaw)>10*pi/180 %&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>35*pi/180 %&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
