@@ -107,6 +107,7 @@ function [] = Graphplot(app)
     ylabel('y');
     xlim([-3.0,3.0]);
     ylim([-3.0,3.0]);
+    daspect([1,1,1]);
     hold on
     grid on
     lgdtmp = {'$Estimator$','$Reference$'};
@@ -122,7 +123,7 @@ function [] = Graphplot(app)
     ylabel('Input_{thrust}');
     hold on
     grid on
-    yline(0.5884*9.81,'Color','red','LineWidth',1.2)
+    yline(0.612*9.81,'Color','red','LineWidth',1.2)
     lgdtmp = {'$thrust$','$thrust_theory$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
