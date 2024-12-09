@@ -21,19 +21,19 @@ rigid_num = motive.result.rigid_num;%剛体数
 N = round(rigid_num/2);%機体と牽引物の組数
 numberOFpc = 2;
 PCId = 2;
-addId = numberOFpc*PCId-numberOFpc;
+addId = 4;
 % N = N/numberOFpc;
 N = 2;
 % COMs = [3,5];%割り当てる順番に設定
-COMs = [3];%割り当てる順番に設定
+COMs = [5];%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 % {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[2;0;0.5],"j",[1;0;0.5],"k",[0;0;0.5],"m",[-1;0;0.5],"n",[0;0;0.5]),10}
-                 {struct("f",[0;0;0.5],"g",[0;0.7;0.5],"h",[0;0;0.5],"j",[0;0.7;0.5],"k",[0;0;0.5]),10}
+                 {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[0;0;0.5],"j",[-1;0;0.5],"k",[0;0;0.5],"m",[0;1;0.5],"n",[0;0;0.5]),10}
+                 % {struct("f",[0;0;0.5],"g",[0;0.7;0.5],"h",[0;0;0.5],"j",[0;0.7;0.5],"k",[0;0;0.5]),10}
                  % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
                  % {struct("f",[1;1;0.5],"g",[0;1;0.5],"h",[-1;1;0.5],"j",[-1;0;0.5],"k",[-1;-1;0.5]),10}
                  % {struct("f",[1;1-1.4674;0.5],"g",[0;1-1.4674;0.5],"h",[-1;1-1.4674;0.5],"j",[0;1-1.4674;0.5],"k",[1;1-1.4674;0.5]),10},...
@@ -52,7 +52,7 @@ if isCoop == 1
     %fot 文でrhoを計算
     rho = zeros(3,N-1);
     for i = 1:N-1
-        rho(:,i) = motive.result.rigid(1+2*i).p - motive.result.rigid(1).p;
+        rho(:,i) = motive.result.rigid(1+2*i+addId).p - motive.result.rigid(1).p;
     end
     rho
     agent(1) = DRONE; %DRONE.m
@@ -75,7 +75,7 @@ if isCoop == 1
     
     agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
 end
-cableL=[0.9,0.9];
+cableL=[0.77,0.77];
 % cableL =[0.77,0.77];
 length=cableL;
 for i = firstId:N
