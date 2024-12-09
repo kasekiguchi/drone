@@ -36,10 +36,10 @@ syms t real
 % z = 1;
 %%
 % 円旋回 KMPC
-% T = 15;
-% x = sin(2*pi*t/T);
-% y = cos(2*pi*t/T);
-% z = 1;
+T = 15;
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
+z = 1;
 %% 
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
@@ -78,9 +78,9 @@ syms t real
 % z = 1;
 %%
 % P2P y=1
-x = 0;
-y = 1;
-z = 1;
+% x = 0;
+% y = 1;
+% z = 1;
 %%
 % ref=@(t)[x;y;z;yaw];
 ref=@(t)[x;y;z;0];

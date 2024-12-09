@@ -53,7 +53,8 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
-        cha = varargin{1,1}{1,2}; 
+       % cha = varargin{1,3}; %HL
+        cha = varargin{1,1}{1,2}; %KMPC
 
         if strcmp(cha,'t')
             if obj.flag_anti_spike < 10
@@ -61,7 +62,6 @@ classdef HLC < handle
                 obj.flag_anti_spike = obj.flag_anti_spike + 1
             end
         end
-
 
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
