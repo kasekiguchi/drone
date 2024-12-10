@@ -18,12 +18,18 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
-N = round(rigid_num/2);%機体と牽引物の組数
-numberOFpc = 2;
-PCId = 2;
-addId = 4;
-% N = N/numberOFpc;
-N = 2;
+
+numberOFpc = 2;%pcの総数
+PCId = 2;%pcの番号
+N = round(rigid_num/2);%機体と分割後の牽引物の組数
+s = N-1*mod(N,2);%牽引物の分を引く(複数牽引出なかったら引かない)
+r = mod(s,numberOFpc);
+sParPc = (s-r)/numberOFpc;%各PCでいくつの組を制御するか
+Ns = ones(1,numberOFpc)*sParPc + [ones(1,r),zeros(1,numberOFpc-r)];%各PCで制御する組を決定
+N = Ns(PCId)+1*mod(N,2);%(複数牽引出なかったら足さない)
+addIds = [0,Ns(1:end-1)*2+1*mod(N,2)];%機体と分割後の牽引物分+牽引物分ずらしていく
+addId = addIds(PCId);%このpcで加算するrigidのid
+
 % COMs = [3,5];%割り当てる順番に設定
 COMs = [5];%割り当てる順番に設定
 refName = {
