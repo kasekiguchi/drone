@@ -27,11 +27,17 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         m
         toR
         Muid_method
-        base_time
-        base_state
+        base_time_takeoff
+        base_time_landing
+        base_state_takeoff
+        base_state_landing
+        th_offset
+        th_offset_takeoff
+        th_offset_landing = 260
         ts
-        te % goal time
-        zd % goal altitude
+        te_takeoff = 10% goal time
+        zd_takeoff = 0.5 % goal altitude
+        te_landing = 20% goal time
         k_yaw
         rotForYaw
         errorVector
@@ -81,8 +87,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 elseif strcmp(args{3}, "TakeOff")%ペイロードの目標軌道takeoff用
                     obj.ref_set.method = args{1};
                     obj.com = args{3};
-                    obj.te = 10;
-                    obj.zd = 1;
+                    obj.te_takeoff = 10;
+                    obj.zd_takeoff = 1;
                     
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3])); 
 
@@ -194,17 +200,34 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
-               % dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
-               xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
-               % xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
-               % dxid = dx0d; %+ dR0d*rhoi;     %分割後のペイロードの速度目標軌道
-               % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
-               %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
-               refi         = zeros(28,1);  %機体のreference
-               refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
-               drefi    = [reshape(ref0(4:21),3,[]);zeros(1,6)];%目標軌道微分
-               refi(5:end)   = reshape(drefi,[],1);
+               if obj.cha == 'f'
+                   xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
+                   %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
+                   refi         = zeros(28,1);  %機体のreference
+                   refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
+                   drefi    = [reshape(ref0(4:21),3,[]);zeros(1,6)];%目標軌道微分
+                   refi(5:end)   = reshape(drefi,[],1);
 
+               elseif obj.cha =='t'
+                   if isempty( obj.base_state_takeoff )
+                       pL = obj.self.sensor.state.real_pL; 
+                       obj.base_time_takeoff =varargin{1}.t;
+                       obj.base_state_takeoff = [pL(1:2);pL-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
+                       obj.th_offset = obj.self.input_transform.param.th_offset;
+                   end
+                       refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
+                       obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,varargin{1}.t-obj.base_time_takeoff)/obj.te_takeoff;
+                       x0d = refi(1:3) - rhoi;
+               elseif obj.cha =='l'
+                   if isempty(obj.base_state_landing) 
+                       obj.base_time_landing =varargin{1}.t;
+                       obj.base_state_landing = obj.self.sensor.result.state.pL;
+                       obj.th_offset = obj.self.input_transform.param.th_offset;
+                   end
+                       refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
+                       obj.self.input_transform.param.th_offset_tl = obj.th_offset - (obj.th_offset-obj.th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
+                       x0d = refi(1:3) - rhoi;
+                end
                %牽引物yaw角補正================================================================================
                % agenti = varargin{5};
                % agenti = obj.self;
@@ -292,45 +315,45 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.result.state.dwi     = dwi;
                % obj.result.state.mLi     = mLi;
 
-           elseif strcmp(obj.com, "TakeOff")
-               if isempty( obj.base_state )
-                   obj.base_time=varargin{1}.t;
-                   obj.base_state = obj.self.estimator.result.state.p;
-                   obj.result.state.xd(1:18) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
-                   obj.result.state.xd(3) = obj.result.state.xd(3) + 1e-5;
-               else
-                   obj.result.state.xd(1:18) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
-               end
-               obj.result.state.p = obj.result.state.xd(1:3,1);
-               obj.result.state.v = obj.result.state.xd(4:7,1);
-               % 牽引物の加速度と角加速度を求める
-                   x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
-                   R0 = RodriguesQuaternion(x(4:7));
-                   Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
-                   u = obj.self.controller.result.input;
-                   ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
-                   obj.self.estimator.result.state.a   = ddX0(1:3);
-                   obj.self.estimator.result.state.dO  = ddX0(4:6);
-           else
-               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-               refi = obj.result.state.xd;
-               obj.result.state.p = refi(1:3);
-               %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
-               obj.result.state.v = refi(4:6);
-               %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
-               % R0d = reshape(xd(end-8:end),3,3);
-               % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
-               % obj.result.state.o = xd(13:15);
-               % 牽引物の加速度と角加速度を求める
-               if 0
-                   x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
-                   R0 = RodriguesQuaternion(x(4:7));
-                   Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
-                   u = obj.self.controller.result.input;
-                   ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
-                   obj.self.estimator.result.state.a   = ddX0(1:3);
-                   obj.self.estimator.result.state.dO  = ddX0(4:6);
-               end
+           % elseif strcmp(obj.com, "TakeOff")
+           %     if isempty( obj.base_state )
+           %         obj.base_time=varargin{1}.t;
+           %         obj.base_state = obj.self.estimator.result.state.p;
+           %         obj.result.state.xd(1:18) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+           %         obj.result.state.xd(3) = obj.result.state.xd(3) + 1e-5;
+           %     else
+           %         obj.result.state.xd(1:18) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+           %     end
+           %     obj.result.state.p = obj.result.state.xd(1:3,1);
+           %     obj.result.state.v = obj.result.state.xd(4:7,1);
+           %     % 牽引物の加速度と角加速度を求める
+           %         x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
+           %         R0 = RodriguesQuaternion(x(4:7));
+           %         Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
+           %         u = obj.self.controller.result.input;
+           %         ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
+           %         obj.self.estimator.result.state.a   = ddX0(1:3);
+           %         obj.self.estimator.result.state.dO  = ddX0(4:6);
+           % else
+           %     obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           %     refi = obj.result.state.xd;
+           %     obj.result.state.p = refi(1:3);
+           %     %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
+           %     obj.result.state.v = refi(4:6);
+           %     %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
+           %     % R0d = reshape(xd(end-8:end),3,3);
+           %     % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
+           %     % obj.result.state.o = xd(13:15);
+           %     % 牽引物の加速度と角加速度を求める
+           %     if 0
+           %         x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
+           %         R0 = RodriguesQuaternion(x(4:7));
+           %         Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
+           %         u = obj.self.controller.result.input;
+           %         ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
+           %         obj.self.estimator.result.state.a   = ddX0(1:3);
+           %         obj.self.estimator.result.state.dO  = ddX0(4:6);
+           %     end
            end
            result = obj.result;
         end
@@ -397,9 +420,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
           % Xd : reference [p; p^(1);p^(2); p^(3);p^(4);p^(5)] as column vector
     
           %% Variable set
-          Xd  = zeros(18, 1);
-          d = obj.zd - obj.base_state(3,1); % goal altitude : relative value
-          te = obj.te; % terminal time to reach zd
+          Xd  = zeros(28, 1);
+          d = obj.zd_takeoff - obj.base_state_takeoff(3,1); % goal altitude : relative value
+          te = obj.te_takeoff; % terminal time to reach zd
           %% Set Xd
           if t<=te
             tra=(126*d*t^5)/te^5 - (420*d*t^6)/te^6 + (540*d*t^7)/te^7 - (315*d*t^8)/te^8 + (70*d*t^9)/te^9;
@@ -416,13 +439,40 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
             d4tra = 0;
             d5tra = 0;
           end
-          Xd(1:3,1) = obj.base_state(1:3);
+          Xd(1:3,1) = obj.base_state_takeoff(1:3);
           Xd(3,1) = tra + Xd(3,1);
           Xd(6,1) = dtra;
           Xd(9,1) = ddtra;
           Xd(12,1) = d3tra;
           Xd(15,1) = d4tra;
           Xd(18,1) = d5tra;
+        end
+         function Xd = gen_ref_for_landing(obj,t)
+              %% Setting
+              % calc reference position and its higher time derivatives
+              % reference designed as a 9-degree polynomial function of time
+              % [Inputs]
+              % t : current time
+              %
+              % [Output]
+              % Xd : reference [[p;yd], [p^(1);0], [p^(2);0], [p^(3);0], [p^(4);0]] as column vector
+              %    : Xd in R^20
+              %    : yd is a yaw angle reference
+        
+              %% Variable set
+              Xd  = zeros( 28, 1);
+                %% Set Xd
+          if t<=obj.te_landing
+                Zd = curve_interpolation_9order(t,obj.te_landing,obj.base_state_landing(3),0,-obj.self.parameter.get("cableL"),0);
+          elseif t> obj.te_landing
+            Zd = zeros(1,5);
+          end
+          Xd(1:3,1) = obj.base_state_landing(1:3);
+          Xd(3,1) = Zd(1);
+          Xd(7,1) = Zd(2);
+          Xd(11,1) = Zd(3);
+          Xd(15,1) = Zd(4);
+          Xd(19,1) = Zd(5);
         end
 
         function q = generate_quaternion(obj,theta_alpi,rot_axis)

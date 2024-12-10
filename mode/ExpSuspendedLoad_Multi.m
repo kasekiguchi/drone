@@ -19,6 +19,7 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 
+
 numberOFpc = 2;%pcの総数
 PCId = 2;%pcの番号
 N = round(rigid_num/2);%機体と分割後の牽引物の組数
@@ -32,6 +33,9 @@ addId = addIds(PCId);%このpcで加算するrigidのid
 
 % COMs = [3,5];%割り当てる順番に設定
 COMs = [5];%割り当てる順番に設定
+cableL=[0.77,0.77];
+length=cableL;
+
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
@@ -68,8 +72,9 @@ if isCoop == 1
 
     agent(1).estimator.do = @(varargin)[];
     agent(1).estimator.result.state = STATE_CLASS(struct('state_list', ["p", "q"], "num_list", [3, 3]));
-    agent(1).estimator.result.state.p = motive.result.rigid(1).p;
+    agent(1).estimator.result.state.p = motive.result.rigid(1).p ;
     agent(1).estimator.result.state.q = eul;
+    agent(1).estimator.model.name=[];
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
@@ -81,9 +86,7 @@ if isCoop == 1
     
     agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
 end
-cableL=[0.77,0.77];
-% cableL =[0.77,0.77];
-length=cableL;
+
 for i = firstId:N
 sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
 initial_state.p = sstate.p; %初期位置の取得

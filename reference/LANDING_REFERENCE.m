@@ -8,7 +8,7 @@ classdef LANDING_REFERENCE < handle
     base_state
     base_time
     te = 20
-    th_offset
+    th_offset =250
     th_offset0 = 260;%勝手に+20ぐらいされる
   end
 
@@ -34,7 +34,7 @@ classdef LANDING_REFERENCE < handle
       obj.result.state.xd = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);
-      obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+      obj.self.input_transform.param.th_offset_tl = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
       result = obj.result;
     end
     function Xd = gen_ref_for_landing(obj,t)
