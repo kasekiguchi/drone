@@ -787,6 +787,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
                 end
             end
             time{i} = ts{i}-t0(i);
+            rp{i} = rxd{i}(1:3,:);
             err{i} = ep{i}-rp{i};%誤差
             errL{i} = epL{i}-rp{i};%誤差
 
@@ -840,9 +841,9 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         %                                 {'$xleg$','$yleg$','$zleg$'},...
         %                                 add_option(["aspect","camposition"],option,addingContents)};
         %=====================================================
-        refx = rp{1}(1,:);
-        refy = rp{1}(2,:);
-        refz = rp{1}(3,:);
+        refx = rxd{i}(1,:);
+        refy = rxd{i}(2,:);%
+        refz = rxd{i}(3,:);
         if isempty(c)
             c = string(1:logNum);
         end

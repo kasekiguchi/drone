@@ -16,8 +16,8 @@ fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
-endTime = 1e3;%1E3;
-fnowdata = 1;
+endTime = 10;%1E3;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -38,7 +38,9 @@ if fnowdata==1
 else 
     % loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
     % loggers = simple_log_expandSysEKF;
-    loggers = simple_log_ptopx01210_1_2y0000000z05_yaw10;
+    % loggers = simple_log_ptopx01210_1_2y0000000z05_yaw10;
+    loggers = simple_log_drone3Load1_pc1;
+    loggers{4} = simple_log_drone3Load1{2}; 
     droneID = 1:length(loggers)-1;
 end
 lgnd.payload=["payload","split payload" + droneID];
@@ -100,16 +102,16 @@ for i = 1:length(nM)
        tile = [1, factor(nMiLength +1)];
    end
    while 1
-       sortedTile = sort(Tile);
+       sortedTile = sort(tile);
        lnSortedTile = length(sortedTile);
        if lnSortedTile > 2
-        Tile = [sortedTile(1)*sortedTile(2),sortedTile(3:end)];
+        tile = [sortedTile(1)*sortedTile(2),sortedTile(3:end)];
        else
-        Tile = sortedTile;
+        tile = sortedTile;
            break
        end
    end
-   multiFigure.layout{i} = Tile;
+   multiFigure.layout{i} = tile;
    multiFigure.title(i) = join(nM{i},"_");
 end
 % multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
@@ -303,8 +305,8 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             inner_input{i} = loggers{i}.inner_input;
             pp{i} = zero3;pv{i} = zero3;pq{i} = zero3;pw{i} = zero3; ppL{i}=zero3;
             pvL{i}=zero3;pwL{i}=zero3;
-            qroll0{1}=zero1;qpitch0{1}=zero1;qyaw0{1} =zero1;
-            wroll0{1}=zero1;wpitch0{1}=zero1;wyaw0{1} =zero1;epL{1}=zero3;
+            qroll0{i}=zero1;qpitch0{i}=zero1;qyaw0{i} =zero1;
+            wroll0{i}=zero1;wpitch0{i}=zero1;wyaw0{i} =zero1;epL{i}=zero3;
             rai{i}=zero3;rmui{i}=zero3;rdwi{i}=zero3;raidrn{i}=zero3;
              cQeul{i}=zero3;cQeul{i}=zero3;cQeul{i}=zero3;eO{i}=zero3;eO{i}=zero3;eO{i}=zero3;ep{i}=zero3;
              eQ{i} = zero3;pQ{i} = zero3;eO{i} = zero3;pO{i} = zero3;edO{i} = zero3;ea{i} = zero3;
@@ -363,6 +365,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             errx0{1} = err{1}(1,:);
             erry0{1} = err{1}(2,:);
             errz0{1} = err{1}(3,:);
+            epL{i} = ep{i};
             if ~fExp
                 ev0{1} = ev{i};
                 vx0{1} = ev{i}(1,:);
@@ -374,7 +377,6 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 wroll0{1} = eO{i}(1,:);
                 wpitch0{1} = eO{i}(2,:);
                 wyaw0{1} = eO{i}(3,:);
-                epL{i} = ep{i};
             else
                 %sensor
                 sx0{1} = sp{i}(1,:);
@@ -453,8 +455,57 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             aidrn{j} = raidrn{i};
         end
     end
-        for i = 1:logNum-1
-            tmpM(i,:) = mLi{i};
+        % for i = 1:logNum-1
+        %     tmpM(i,:) = mLi{i};
+        % end
+        % mAll{logNum} = sum(tmpM);
+        timeL = lt(2:end);
+        tmpM(1,:) = mLi{1};
+        for i = 2:logNum-1
+            if timeL(i-1)<timeL(i)
+                tmpM(i,:) = zeros(1,timeL(i-1));
+                kNow = 1;
+                for j = 1:timeL(i-1)
+                    tBase = time{i-1}(j);
+                    % flag=0;
+                    for k = kNow:timeL(i-1)
+                            tNow =  time{i-1}(k);
+                        if tBase<tNow %&& ~flag
+                            % flag = 1;
+                            if abs(tBase-time{i-1}(k))<abs(tBase-time{i-1}(k-1))
+                                tmpM(i,j) = mLi{i}(k);
+                                kNow = k+1;
+                            else
+                                tmpM(i,j) = mLi{i}(k-1);
+                                kNow = k;
+                            end
+                            break
+                        end
+                        
+                    end
+                end
+                mLi{i}=tmpM(i,:);
+                mAll{i}=tmpM(i,:);
+            elseif timeL(i-1)>timeL(i)
+                tmpM(i,:) = zeros(1,timeL(i-1));
+                kNow = 1;
+                for j = 1:timeL(i)
+                    tBase = time{i}(j);
+                    for k = kNow:timeL(i-1)
+                            tNow =  time{i-1}(k);
+                        if tBase>tNow
+                            tmpM(i,k) = mLi{i}(j);
+                        else
+                            kNow = k;
+                            break
+                        end
+                    end
+                end
+                mLi{i}=tmpM(i,:);
+                mAll{i}=tmpM(i,:);
+            else
+                tmpM(i,:) = mLi{i};
+            end
         end
         mAll{logNum} = sum(tmpM);
         %plotする為の構造体を作成する
@@ -514,7 +565,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.pv0 = {struct('x',{time(1)},'y',{[ev(1),pv(1)]}), struct('x','time (s)','y','velocity (m/s)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],C0),add_option([],option,addingContents)};
         allData.pq0 = {struct('x',{time(1)},'y',{[eQ,pQ]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],C0),add_option([],option,addingContents)};
         allData.pw0 = {struct('x',{time(1)},'y',{[eO,pO]}), struct('x','time (s)','y','angular velocity (rad/s)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],C0),add_option([],option,addingContents)};
-        allData.mAll = {struct('x',{time},'y',{mAll}), struct('x','time (s)','y','mass (kg)'), [Ci,C0],add_option([],option,addingContents)};
+        allData.mAll = {struct('x',{time(1)},'y',{mAll}), struct('x','time (s)','y','mass (kg)'), [Ci,C0],add_option([],option,addingContents)};
         allData.dO = {struct('x',{time(1)},'y',{edO}), struct('x','time (s)','y','angular acceleration (rad/$\mathrm{s^2}$)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
         allData.a = {struct('x',{time(1)},'y',{ea}), struct('x','time (s)','y','acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
 
@@ -558,7 +609,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.inputRoll = {struct('x',{time2},'y',{cinputR}), struct('x','time (s)','y','$T_{roll}$ (Nm)'), CDi,add_option([],option,addingContents)};
         allData.inputPitch = {struct('x',{time2},'y',{cinputP}), struct('x','time (s)','y','$T_{pitch}$ (Nm)'), CDi,add_option([],option,addingContents)};
         allData.inputYaw = {struct('x',{time2},'y',{cinputY}), struct('x','time (s)','y','$T_{yaw}$ (Nm)'), CDi,add_option([],option,addingContents)};
-        allData.mL = {struct('x',{time2},'y',{mLi}), struct('x','time (s)','y','mass (kg)'), Ci,add_option([],option,addingContents)};
+        allData.mL = {struct('x',{time2(1)},'y',{mLi}), struct('x','time (s)','y','mass (kg)'), Ci,add_option([],option,addingContents)};
         % allData.ai = {struct('x',{time2},'y',{ai}), struct('x','time (s)','y','accele (m/s^2)'), Ci,add_option([],option,addingContents)};
         % allData.mui = {struct('x',{time2},'y',{mui}), struct('x','time (s)','y','tension (N)'), Ci,add_option([],option,addingContents)};
         for i = 1:logNum-1
