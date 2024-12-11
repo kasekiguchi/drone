@@ -99,16 +99,17 @@ for i = 1:length(nM)
    if length(tile) == 2  && tile(2) > 3
        tile = [1, factor(nMiLength +1)];
    end
-   sortedTile = sort(tile);
    while 1
+       sortedTile = sort(Tile);
        lnSortedTile = length(sortedTile);
        if lnSortedTile > 2
-        sortedTile = [sortedTile(1)*sortedTile(2),sortedTile(3:end)];
+        Tile = [sortedTile(1)*sortedTile(2),sortedTile(3:end)];
        else
+        Tile = sortedTile;
            break
        end
    end
-   multiFigure.layout{i} = sortedTile;
+   multiFigure.layout{i} = Tile;
    multiFigure.title(i) = join(nM{i},"_");
 end
 % multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
@@ -352,7 +353,6 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             %     linki(:,:,j) = -eqi{i}(3*j-2:3*j,:);
             % end
             ref0=rxd{i}(1:3,:);
-
             refx0{1} = rxd{i}(1,:);
             refy0{1} = rxd{i}(2,:);
             refz0{1} = rxd{i}(3,:);

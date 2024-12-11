@@ -27,6 +27,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         m
         toR
         Muid_method
+        ftakeoff = []
+        flanding = []
         base_time_takeoff
         base_time_landing
         base_state_takeoff
@@ -201,6 +203,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                if obj.cha == 'f'
+                   obj.ftakeoff = [];
+                   obj.flanding = [];
                    xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
                    %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                    refi         = zeros(28,1);  %機体のreference
@@ -209,23 +213,35 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    refi(5:end)   = reshape(drefi,[],1);
 
                elseif obj.cha =='t'
+                   obj.flanding = [];
                    if isempty( obj.base_state_takeoff )
-                       pL = obj.self.sensor.state.real_pL; 
+                       p = obj.self.sensor.state.p; 
                        obj.base_time_takeoff =varargin{1}.t;
-                       obj.base_state_takeoff = [pL(1:2);pL-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
+                       obj.base_state_takeoff = [p(1:2);p-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
                        obj.th_offset = obj.self.input_transform.param.th_offset;
+                   end
+                   if obj.self.sensor.state.p(3)>=0.3&& obj.ftakeoff == []
+                       obj.ftakeoff =1;
+                       obj.base_state_takeoff(1:2) = obj.self.sensor.state.real_pL(1:2);
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
                        obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,varargin{1}.t-obj.base_time_takeoff)/obj.te_takeoff;
                        x0d = refi(1:3) - rhoi;
                elseif obj.cha =='l'
+                   obj.ftakeoff = [];
                    if isempty(obj.base_state_landing) 
                        obj.base_time_landing =varargin{1}.t;
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
                        obj.th_offset = obj.self.input_transform.param.th_offset;
                    end
+                   if obj.self.sensor.state.p(3)<=0.3&& obj.flanding == []
+                       obj.flanding  =1;
+                       alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                       alpiUnit = alpi/norm(alpi);
+                       obj.base_state_landing(1:2) = obj.self.sensor.state.pL(1:2) + 0.2*alpiUnit;
+                   end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
-                       obj.self.input_transform.param.th_offset_tl = obj.th_offset - (obj.th_offset-obj.th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
+                       obj.self.input_transform.param.th_offset_tl_tmp = obj.th_offset - (obj.th_offset-obj.th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                        x0d = refi(1:3) - rhoi;
                 end
                %牽引物yaw角補正================================================================================
@@ -240,7 +256,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 yaw*180/pi
-                if abs(yaw)>35*pi/180 %&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>35*pi/180 && obj.agent1.sensor.result.state.p(3)>0.2%&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
