@@ -17,6 +17,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         model
         result
         self
+        flag_anti_spike_f
     end
 
     methods
@@ -32,6 +33,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
+            obj.flag_anti_spike_f=0;
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
@@ -95,6 +97,16 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             else
                 obj.result.input = var(1:4, 1); % 印加する入力 4入力
             end
+
+            %%
+            cha = vara{2}; %KMPC
+
+        if strcmp(cha,'f')
+            if obj.flag_anti_spike_f < 5
+                obj.result.input = [obj.result.input(1);0;0;0];
+                obj.flag_anti_spike_f = obj.flag_anti_spike_f + 1;
+            end
+        end
 
             %% データ表示用
             obj.input.u = obj.result.input; 
