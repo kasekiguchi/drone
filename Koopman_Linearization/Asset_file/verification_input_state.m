@@ -18,19 +18,14 @@ mode.training_data = 'Kiyama';
 
 % filename = WhichLoadFile(tra, script, mode);
 % mode.training_data = 'Kiyama_change';
-% filename = 'EstimationResult_2024-06-10_Exp_KiyamaX20_code00_saddle_again';
-% filename = 'EstimationResult_2024-06-11_Exp_Kiyama_fromVel_code00_saddle';
-% filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_normalize_code00_saddle';
-% filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_code07_saddle';
-% filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
-% filename = '2024-07-14_Exp_KiyamaX20_code00_saddle';
-% filename = '2024-08-06_Exp_KiyamaY20_code00_saddle';
-% filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
-% filename = '2024-09-11_Exp_Kiyama_code10_saddle';
+filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename = '2024-11-14_Exp_Kato_code00_saddle';
 % filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
-% filename = '2024-11-21_Exp_Kiyama_code16_saddle_new'; % hermite [1; x]
-% filename = '2024-12-05_Exp_Kiyama_code22_saddle_qw1-1';
-filename = '2024-12-04_Exp_Kiyama_code22_saddle';
+% filename = '2024-12-04_Exp_Kiyama_code22_saddle'; % hermite [1; x]
+% filename = '2024-12-06_Exp_Kato_code23_saddle';
+% filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
+% filename = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001';
+% filename = '2024-12-06_Exp_Kato_Kiyama_code24_saddle';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -48,7 +43,7 @@ Est_file = 'Est_Kiyama_result.mat';
 load(Input_file);
 load(Est_file);
 
-%% 普通に使いたいとき
+% 普通に使いたいとき
 % thrust，torqueの値を設定する
 % thrust = ones(1, xx);
 % torque = zeros(3, xx);
@@ -81,7 +76,7 @@ set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
-ylimsetting = [-0.1 0.1; -0.1 0.1; -0.1 0.1];
+
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
 
 figure(1);
@@ -91,21 +86,29 @@ sgtitle(strrep(filename, '_', '-'));
 % plot(0:10,X(1:3,:)); grid on;
 % xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
 
-subplot(1,3,1);
-plot(0:step_num,X(1,:)); grid on; ylim(ylimsetting(1,:)); xlim([-inf inf]);
-text(0.2, 0.1, num2str(round(max(abs(X(1,:))), 5)), 'Units', 'normalized', 'FontSize', 10);
-xlabel('Step'); ylabel('$$x$$', 'Interpreter', 'latex');
+label_x = {'x', 'y', 'z', 'q.roll', 'q.pitch', 'q.yaw', 'vx', 'vy', 'vz', 'vq.roll', 'vq.pitch', 'vq.yaw'};
+ylimsetting = [-0.1 0.1; -0.05 0.05; -0.1 0.1; -0.05 0.05];
 
-subplot(1,3,2);
-plot(0:step_num,X(2,:)); grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
-text(0.2, 0.1, num2str(round(max(abs(X(2,:))),5)), 'Units', 'normalized', 'FontSize', 10);
-xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex');
-
-subplot(1,3,3);
-plot(0:step_num,X(3,:)); grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
-text(0.2, 0.1, num2str(round(max(abs(X(3,:))),5)), 'Units', 'normalized', 'FontSize', 10);
-xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
-
+ii = 4; jj = 3; arr = 1:ii*jj; idx = 0;
+for i = 1:ii
+    for j = 1:jj
+        idx = idx + 1;
+        subplot(ii,jj,idx);
+        plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
+        text(0.2, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', 10);
+        xlabel('Step'); ylabel(label_x{idx});
+        
+        % subplot(ii,jj,i*j-1);
+        % plot(0:step_num,X(2,:)); grid on; ylim(ylimsetting(2,:)); xlim([-inf inf]);
+        % text(0.2, 0.1, num2str(round(max(abs(X(2,:))),5)), 'Units', 'normalized', 'FontSize', 10);
+        % xlabel('Step'); ylabel('$$y$$', 'Interpreter', 'latex');
+        % 
+        % subplot(ii,jj,i*);
+        % plot(0:step_num,X(3,:)); grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
+        % text(0.2, 0.1, num2str(round(max(abs(X(3,:))),5)), 'Units', 'normalized', 'FontSize', 10);
+        % xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
+    end
+end
 %input_state({A, B, C, step数, thrust, torque, 初期状態に使う配列, 初期状態のインデックス});
 
 %% A行列にxyzの位置を加えた拡張係数行列とする

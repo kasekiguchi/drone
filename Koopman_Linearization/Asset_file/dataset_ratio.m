@@ -77,22 +77,33 @@ Data.U = U(:,idx);
 % data.U = U(:,find(Dx <= 0.0001));
 
 %% データセットがどういう割合のデータなのか算出する
-% close all
-% T = 1:size(X,2);
+close all; clear;
+load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
+%%
+X = Data.X;
+U = Data.U;
+T = 1:size(X,2);
+xrange = [0.6e5, 1.2e5];
 
-% figure(1);
-% subplot(2,2,1); plot(T, X(1:3,:), 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
-% legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
-% 
-% subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
-% subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
-% subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
+figure(1);
+subplot(2,2,1); plot(T, U(1:4,:), 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Input", 'FontSize', 15)
+legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15); xlim(xrange);
 
+subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5]); xlim(xrange);
+subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15); xlim(xrange);
+subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15); xlim(xrange);
+%% データセットに上下限を設定
+Data.X(3,:) = max(0, min(3, Data.X(3,:))); % 0 <= z <= 3
 
+%% データセットを縮小
+Data.X = Data.X(30001:end);
+Data.Y = Data.Y(30001:end);
+Data.U = Data.U(30001:end);
+%%
 % figure(2);
 % sgtitle('Kiyama Exp Dataset')
 % subplot(2,2,1); plot(T, Data2.X(1:3,:), 'LineWidth', 1.5); 
