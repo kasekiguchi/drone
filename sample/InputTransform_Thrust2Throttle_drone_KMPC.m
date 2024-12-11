@@ -12,7 +12,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_KMPC(varargin)
 
     % iflight 6cell
     u_trans_param.gain2 =[1500;1500;1500;200]; %hov,p2p[800,800,800,500]
-   % u_trans_param.th_offset2 = 335; %hov,olddata,[1000,1000,1000,100]のとき 
+   % u_trans_param.th_offset2 = 331; %hov,olddata,[1500,1500,1500,200]のとき 
     u_trans_param.th_offset2 = 331;
 
     % u_trans_param.gain_SuspendedLoad =[500;500;500;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
