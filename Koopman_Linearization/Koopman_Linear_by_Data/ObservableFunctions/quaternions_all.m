@@ -235,8 +235,8 @@ du = [H(u1); H(u2); H(u3); H(u4)];
 % z = [common_z; d1]; % 19 80
 % z = [common_z; d2]; % 20 6万5000次元のため中断
 % z = [common_z; d3]; % 21 kron(RxS, RxS) 528
-z = [common_z; d4]; % 22 kron(RxS, S) 528
-% z = [common_z; isobe_z; d4]; % 23
+% z = [common_z; d4]; % 22 kron(RxS, S) 528
+z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d3; d4]; % 24
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
 

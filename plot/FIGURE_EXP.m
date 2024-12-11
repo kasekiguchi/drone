@@ -36,7 +36,11 @@ classdef FIGURE_EXP
             obj.data.fignum = 1;
             obj.data.time_idx = varargin{1}.time_idx;
             obj.data.yrange = varargin{1}.yrange;
+            obj.data.name = varargin{2}.model;
 
+            if app.fExp ~= 1
+                obj.flg.plotmode = 2;
+            end
 
             obj = obj.decide_phase();
             obj = obj.store_data();
@@ -51,7 +55,7 @@ classdef FIGURE_EXP
             % obj = obj.store_data();
             calt = obj.data.logt;
             % plot_title = strcat(strrep(obj.filename,'_','-'));
-            plot_title = '';
+            plot_title = strcat(strrep(obj.data.name,'_','-'));
             xrange_max = obj.data.logt(end);
             % xrange_max = obj.data.logt(end);
             set(0,'defaultAxesFontSize', 20)
@@ -264,7 +268,7 @@ classdef FIGURE_EXP
             logger.r = obj.data.Ref(1:3,:)';
             logger.t = obj.data.logt';
             drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
-            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"realtime",1,"gif",obj.flg.animation_save);
+            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"realtime",1,"mp4",obj.flg.animation_save);
             else;                      anipara = struct("target",1,"opt_plot",[],"realtime",1);
             end
             drone.animation(logger, anipara);

@@ -91,7 +91,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % 実質制約なし
     % Controller_param.input.lb = [0; -10; -10; -10];
     % Controller_param.input.ub = [100;10;  10;  10];
-    
+    % 
     
 %     Controller_param.torque_TH = 0;
 

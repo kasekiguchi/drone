@@ -28,15 +28,17 @@ initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+% model_file = "EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-% model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-% model_file = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001';
+model_file = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001.mat';
+% model_file = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001.mat';
+% model_file = '2024-12-11_Exp_Kiyama_code23_saddle_weight_1-00001.mat';
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
 % model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
-% model_file = "2024-11-19_Exp_Kiyama_code15_saddle_3";
-model_file = "2024-12-04_Exp_Kiyama_code22_saddle";
+% model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
+% model_file = "2024-12-04_Exp_Kiyama_code22_saddle";
 load(model_file,'est'); % main
 [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 agent = DRONE;
@@ -109,27 +111,16 @@ for i = 1:te/dt
     toc
 
     est = agent(1).estimator.result.state.p;
-    if est(3) < 0
+    if est(3) < 0 || est(3) > 2
         break
     end
 end
 %%
 app.logger = logger;
-result_plot(app);
+result_plot(app, model_file);
 % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 % logger.save("10_hokukai");
-% log = logger;
-% save(strcat('Data\KMPC_sim_test_1008_sigmoid', '.mat'), 'log');
-%%
-% clear
-% logger = LOGGER("10_hokukai.mat");
-% app.logger = logger;
-% result_plot(app);
-
-%%
-% i1 = find(logger.Data.phase == 102, 1, "first");
-% i2 = find(logger.Data.phase == 102, 1, "last");
 
 %% function 2コンとき
 function result = controller_do(varargin)
@@ -140,40 +131,15 @@ function result = controller_do(varargin)
     varargin{5}.controller.result = result;
 end
 
-%%
-function dfunc(app)
-close all
-% app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "w", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
-% app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-Graphplot(app)
-% app.agent(1).animation(app.logger,"target",1,"opt_plot",[]);
-
-flg.figtype = 1; % 0:subplot
-flg.savefig = 0;
-flg.animation_save = 0;
-flg.animation = 0;
-flg.timerange = 1;
-flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
-filename = string(datetime('now'), 'yyyy-MM-dd');
-% fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
-% fig.main_figure();
-% app = app.logger, app.fExp の構造体を作ればよい
-end
-
-function result_plot(app)
+function result_plot(app, model)
     app.fExp = 0;
     flg.figtype = 0; % 0:subplot
     flg.savefig = 0;
-    flg.animation_save = 0;
-    flg.animation = 0;
+    flg.animation_save = 1;
+    flg.animation = 1;
     flg.timerange = 0;
-    flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
+    flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');
-    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
+    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]), struct('model', model));
     fig.main_figure();
 end

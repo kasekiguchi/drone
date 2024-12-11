@@ -18,13 +18,13 @@ mode.training_data = 'Kiyama';
 
 % filename = WhichLoadFile(tra, script, mode);
 % mode.training_data = 'Kiyama_change';
-filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename = '2024-11-14_Exp_Kato_code00_saddle';
 % filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
 % filename = '2024-12-04_Exp_Kiyama_code22_saddle'; % hermite [1; x]
 % filename = '2024-12-06_Exp_Kato_code23_saddle';
 % filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
-% filename = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001';
+filename = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001';
 % filename = '2024-12-06_Exp_Kato_Kiyama_code24_saddle';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
@@ -58,7 +58,7 @@ torque = zeros(3, step_num);
 % torque = input_result(2:4,start_num:step_num);
 
 Est = zeros(12,1);
-% Est = Est_result(:, start_num);
+Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
 mode = 3; % 1:00, 2:10, 3:hermite, 0:free
 X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
 

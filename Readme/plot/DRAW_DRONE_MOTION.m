@@ -238,6 +238,7 @@ classdef DRAW_DRONE_MOTION
         delaytime = 0;
         filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
         v = VideoWriter(filename,"MPEG-4");
+        v.FrameRate = 40;
         if param.mp4
           open(v);
           writeAnimation(v);
