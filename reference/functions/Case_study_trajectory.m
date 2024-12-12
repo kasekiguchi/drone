@@ -36,7 +36,7 @@ syms t real
 % z = 1;
 %%
 % 円旋回 KMPC
-T = 25;
+T = 20;
 x = sin(2*pi*t/T);
 y = cos(2*pi*t/T);
 z = 1;
