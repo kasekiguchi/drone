@@ -4,16 +4,27 @@ te = 10000; % termina time　終了時間
 time = TIME(ts,dt,te); %上の3つの時間をまとめる．
 in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
-PCId = 2;
-numberOFpc = 2;
-addId = numberOFpc*PCId-numberOFpc;
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-N = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
-N = N/numberOFpc;
-N=1;
+rigid_num = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
+
+%各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
+numberOFpc = 4;%pcの総数
+PCId = 3;%pcの番号
+NdroneAndLoad = round(rigid_num/2);%機体と分割後の牽引物の組数
+s = NdroneAndLoad -1*mod(rigid_num,2);%牽引物の分を引く(複数牽引でなかったら引かない)
+r = mod(s,numberOFpc);
+sParPc = (s-r)/numberOFpc;%各PCでいくつの組を制御するか
+Ns = ones(1,numberOFpc)*sParPc + [ones(1,r),zeros(1,numberOFpc-r)];%各PCで制御する組を決定
+N = Ns(PCId)+1*mod(rigid_num,2);%(複数牽引でなかったら足さない)
+addIds = zeros(1,length(Ns));%機体と分割後の牽引物分+牽引物分ずらしていく
+for i = 1:length(Ns)-1
+    addIds(i+1) = sum(Ns(1:i),2)+1*mod(rigid_num,2);
+end
+addId = addIds(PCId);%このpcで加算するrigidのid
+
 COMs = [3,8];%割り当てる順番に設定
 % COMs = 4;
 refName = {

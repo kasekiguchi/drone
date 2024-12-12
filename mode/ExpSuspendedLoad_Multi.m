@@ -19,16 +19,19 @@ motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モー�
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num = motive.result.rigid_num;%剛体数
 
-
-numberOFpc = 2;%pcの総数
-PCId = 2;%pcの番号
-N = round(rigid_num/2);%機体と分割後の牽引物の組数
-s = N-1*mod(N,2);%牽引物の分を引く(複数牽引出なかったら引かない)
+%各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
+numberOFpc = 4;%pcの総数
+PCId = 3;%pcの番号
+NdroneAndLoad = round(rigid_num/2);%機体と分割後の牽引物の組数
+s = NdroneAndLoad -1*mod(rigid_num,2);%牽引物の分を引く(複数牽引でなかったら引かない)
 r = mod(s,numberOFpc);
 sParPc = (s-r)/numberOFpc;%各PCでいくつの組を制御するか
 Ns = ones(1,numberOFpc)*sParPc + [ones(1,r),zeros(1,numberOFpc-r)];%各PCで制御する組を決定
-N = Ns(PCId)+1*mod(N,2);%(複数牽引出なかったら足さない)
-addIds = [0,Ns(1:end-1)*2+1*mod(N,2)];%機体と分割後の牽引物分+牽引物分ずらしていく
+N = Ns(PCId)+1*mod(rigid_num,2);%(複数牽引でなかったら足さない)
+addIds = zeros(1,length(Ns));%機体と分割後の牽引物分+牽引物分ずらしていく
+for i = 1:length(Ns)-1
+    addIds(i+1) = sum(Ns(1:i),2)+1*mod(rigid_num,2);
+end
 addId = addIds(PCId);%このpcで加算するrigidのid
 
 % COMs = [3,5];%割り当てる順番に設定

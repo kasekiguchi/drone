@@ -459,55 +459,8 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         %     tmpM(i,:) = mLi{i};
         % end
         % mAll{logNum} = sum(tmpM);
-        timeL = lt(2:end);
-        tmpM(1,:) = mLi{1};
-        for i = 2:logNum-1
-            if timeL(i-1)<timeL(i)
-                tmpM(i,:) = zeros(1,timeL(i-1));
-                kNow = 1;
-                for j = 1:timeL(i-1)
-                    tBase = time{i-1}(j);
-                    % flag=0;
-                    for k = kNow:timeL(i-1)
-                            tNow =  time{i-1}(k);
-                        if tBase<tNow %&& ~flag
-                            % flag = 1;
-                            if abs(tBase-time{i-1}(k))<abs(tBase-time{i-1}(k-1))
-                                tmpM(i,j) = mLi{i}(k);
-                                kNow = k+1;
-                            else
-                                tmpM(i,j) = mLi{i}(k-1);
-                                kNow = k;
-                            end
-                            break
-                        end
-                        
-                    end
-                end
-                mLi{i}=tmpM(i,:);
-                mAll{i}=tmpM(i,:);
-            elseif timeL(i-1)>timeL(i)
-                tmpM(i,:) = zeros(1,timeL(i-1));
-                kNow = 1;
-                for j = 1:timeL(i)
-                    tBase = time{i}(j);
-                    for k = kNow:timeL(i-1)
-                            tNow =  time{i-1}(k);
-                        if tBase>tNow
-                            tmpM(i,k) = mLi{i}(j);
-                        else
-                            kNow = k;
-                            break
-                        end
-                    end
-                end
-                mLi{i}=tmpM(i,:);
-                mAll{i}=tmpM(i,:);
-            else
-                tmpM(i,:) = mLi{i};
-            end
-        end
-        mAll{logNum} = sum(tmpM);
+        [mLi,mAll] = sum_mLi(time,logNum,lt,mLi,mAll);
+        
         %plotする為の構造体を作成する
         % allData.figName : (data, label, legendLabels, option)   
         %option : titleName, lineWidth, fontSize, legend, aspect, campositon
@@ -851,4 +804,53 @@ function plot_data_single(~, ~, branchData)
             newlog.Data.agent.input{1, i} = log.Data.agent.controller.result{1, i}.(controllerName).input;
         end
         newlog.Data.agent.inner_input = log.Data.agent.inner_input;  
+    end
+    function [mLi,mAll] =sum_mLi(time,logNum,lt,mLi,mAll)
+        timeL = lt(2:end);
+        tmpM(1,:) = mLi{1};
+        for i = 2:logNum-1
+            if timeL(i-1)<timeL(i)%短い制御周期を長い物に合わせる
+                tmpM(i,:) = zeros(1,timeL(i-1));
+                kNow = 1;
+                for j = 1:timeL(i-1)
+                    tBase = time{i-1}(j);
+                    for k = kNow:timeL(i-1)
+                            tNow =  time{i-1}(k);
+                        if tBase<tNow 
+                            if abs(tBase-time{i-1}(k))<abs(tBase-time{i-1}(k-1))
+                                tmpM(i,j) = mLi{i}(k);
+                                kNow = k+1;
+                            else
+                                tmpM(i,j) = mLi{i}(k-1);
+                                kNow = k;
+                            end
+                            break
+                        end
+                        
+                    end
+                end
+                mLi{i}=tmpM(i,:);
+                mAll{i}=tmpM(i,:);
+            elseif timeL(i-1)>timeL(i)%長い制御周期を短い物に合わせる
+                tmpM(i,:) = zeros(1,timeL(i-1));
+                kNow = 1;
+                for j = 1:timeL(i)
+                    tBase = time{i}(j);
+                    for k = kNow:timeL(i-1)
+                            tNow =  time{i-1}(k);
+                        if tBase>tNow
+                            tmpM(i,k) = mLi{i}(j);
+                        else
+                            kNow = k;
+                            break
+                        end
+                    end
+                end
+                mLi{i}=tmpM(i,:);
+                mAll{i}=tmpM(i,:);
+            else
+                tmpM(i,:) = mLi{i};
+            end
+        end
+        mAll{logNum} = sum(tmpM);
     end
