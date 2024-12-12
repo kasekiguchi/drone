@@ -26,7 +26,7 @@ for i = 1:length(Ns)-1
 end
 addId = addIds(PCId);%このpcで加算するrigidのid
 
-COMs = string([3,8]);%割り当てる順番に設定
+COMs = string([9,10]);%割り当てる順番に設定
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
