@@ -43,13 +43,6 @@ hold on
 plot(pL0(1,:),pL0(2,:),"Marker","+","LineStyle","none","MarkerSize",1)
 grid minor
 i = i+1;
-% m1=allData.mAll{1, 1}.y{1,1};
-% m2=allData.mAll{1, 1}.y{1,2};
-% m3=allData.mAll{1, 1}.y{1,3};
-% mAll=allData.mAll{1, 1}.y{1,4};
-% a1 = loggers{2, 1}.estimator.pL.*loggers{2, 1}.estimator.mL;
-% a2 = loggers{3, 1}.estimator.pL.*loggers{3, 1}.estimator.mL;
-% a3 = loggers{4, 1}.estimator.pL.*loggers{4, 1}.estimator.mL;
 
 
 function vars =ajust_index(time,logNum,tl,vars)
