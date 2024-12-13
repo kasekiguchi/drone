@@ -241,7 +241,7 @@ z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
 
 %% まとめ
-% z = [common_z; isobe_z]; % 00
+z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
