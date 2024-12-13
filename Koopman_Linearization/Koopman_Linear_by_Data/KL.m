@@ -31,7 +31,12 @@ end
 
 %% A,Bをまとめて計算するデータ数が多い場合のやりかた
 if flg.weight 
-    Q = blkdiag(flg.weight_Qp, flg.weight_Qq, flg.weight_Qv, flg.weight_Qw, eye(numX-12)); % 状態以外の観測量部分は1とする
+    % 磯部とエルミートで重みわける
+    Q_isobe = blkdiag(flg.weight_Qisobe, eye(26-12));
+    Q_hermite = eye(numX-26); % 状態以外の観測量部分は1とする
+    Q = blkdiag(Q_isobe, Q_hermite);
+
+    % Q = blkdiag(flg.weight_Qp, flg.weight_Qq, flg.weight_Qv, flg.weight_Qw, eye(numX-12)); 
     % 汎用性のためにflgにweightを格納
     G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
     V = (Q*Ylift)*[(Q*Xlift) ; U]';       % size(V) = (numX,      numX+numU)
