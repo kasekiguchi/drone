@@ -1,4 +1,4 @@
-//UART を利用して ESPWROOM にプロポ信号を送信し
+// Wi-Fi または UART を利用して ESPWROOM にプロポ信号を送信し
 // ESPWROOM から　FUTABA T10J にトレーナーコード経由でPPMを送るためのプログラム
 // arduino の設定は
 // http://trac.switch-science.com/wiki/esp_dev_arduino_ide
@@ -6,11 +6,13 @@
 // Arduino IDEの環境設定のほうもCPU Frequency を 160 MHz
 // PPM は　Down pulse
 #include <Arduino.h>
+// #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
+// #include <WiFiUDP.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
 uint8_t i;
-unsigned int droneNumber = 252; //機体番号を入力
 #define SIGNAL_TIMEOUT 200000 //[us] Matlabと通信が切断されてから信号がリセットされるまでの時間
+
 boolean connected = false;
 volatile unsigned long last_received_time; // 最後に信号を受信した時間[us]を格納
 /////////////////// PPM関係 ////////////////////
@@ -27,8 +29,7 @@ char packetBuffer[255];
 #define CH_NEUTRAL 500 // PPM幅の中間 [us]
 #define CH_MAX 1000    // PPM幅の最大 [us]
 
-// #define CH_OFFSET 1600 // 共通オフセット値
-#define CH_OFFSET 1617 // 共通オフセット値
+#define CH_OFFSET 610 // 共通オフセット値
 
 
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
@@ -47,18 +48,18 @@ unsigned long t_now;
 // マイクロ秒をクロック数に換算 (@CPU_FREMHz)
 #define USEC2CLOCK(us) (us * CPU_FRE * 1L)
 
-//*********** local functions  *************************//
+
 // 信号値をデフォルトに戻す関数
 void setDefaultPulseWidth(){
-  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
-  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
-  pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
-  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
-  pw[4] = CH_OFFSET;              // AUX1 1620
-  pw[5] = CH_OFFSET;              // AUX2 1620
-  pw[6] = CH_OFFSET;              // AUX3 1620
-  pw[7] = CH_OFFSET;              // AUX4 1620
-  start_H = PPM_PERIOD - (8 * CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+  pw[0] = CH_NEUTRAL; // roll
+  pw[1] = CH_NEUTRAL; // pitch
+  pw[2] = CH_MIN;     // throttle
+  pw[3] = CH_NEUTRAL; // yaw
+  pw[4] = CH_MIN;     // AUX1
+  pw[5] = CH_MIN;     // AUX2
+  pw[6] = CH_MIN;     // AUX3
+  pw[7] = CH_MIN;     // AUX4
+  start_H = PPM_PERIOD - 8 * CH_OFFSET - 3 * CH_NEUTRAL - 9 * TIME_LOW;
 }
 
 void setupPPM() // ---------- setup ppm signal configuration
@@ -79,7 +80,6 @@ void receive() // ---------- loop function : receive signal by UDP
 {
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
   int len = 0;
-  /////////////////// for UART ////////////////////
   if (Serial.available() >= 2 * TOTAL_CH) 
   { 
     len = Serial.readBytes(packetBuffer, 2 * TOTAL_CH);
@@ -87,7 +87,7 @@ void receive() // ---------- loop function : receive signal by UDP
   /////////////////// COMMON 信号値の格納 ////////////////////
   if (len > 0){
     last_received_time = micros();
-    TOTAL_CH_W = PPM_PERIOD;
+    TOTAL_CH_W = 0;
     for (i = 0; i < TOTAL_CH; i++)
     {
       pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
@@ -100,10 +100,14 @@ void receive() // ---------- loop function : receive signal by UDP
         pw[i] = CH_MAX;
       }
 
-      pw[i] = CH_OFFSET - pw[i];
-      TOTAL_CH_W -= pw[i];
+      TOTAL_CH_W += pw[i];
+      /*Serial.print("pw[ ");
+      Serial.print(i);
+      Serial.print(" ]");
+      Serial.println(pw[i]);*/
     }
-    start_H = TOTAL_CH_W - 9 * TIME_LOW;
+
+    start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
   /////////////////// for Failsafe ////////////////////
   }else if (micros() - last_received_time >= SIGNAL_TIMEOUT){
     setDefaultPulseWidth();
@@ -117,6 +121,7 @@ void Pulse_control()
   {
     digitalWrite(OUTPUT_PIN, LOW);              // PPM -> LOW
     timer0_write(t_now + USEC2CLOCK(TIME_LOW)); // 次の割込み時間を指定
+    // Serial.println(TIME_LOW);
   }
   else if (n_ch == TOTAL_CH)
   {
@@ -128,11 +133,15 @@ void Pulse_control()
     }
     digitalWrite(OUTPUT_PIN, HIGH);             // PPM -> HIGH
     timer0_write(t_now + USEC2CLOCK(start_Hh)); // start 判定の H 時間待つ
+    // Serial.println(start_Hh);
   }
   else
   {
     digitalWrite(OUTPUT_PIN, HIGH);                            // PPM -> HIGH
-    timer0_write(t_now + USEC2CLOCK((phw[n_ch]))); // 時間を指定
+    timer0_write(t_now + USEC2CLOCK((phw[n_ch] + CH_OFFSET))); // 時間を指定
+    // Serial.print(phw[n_ch]);
+    // Serial.print(" + ");
+    // Serial.println(CH_OFFSET);
     n_ch++;
   }
 }
