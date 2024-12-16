@@ -27,17 +27,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         m
         toR
         Muid_method
-        ftakeoff = []
-        flanding = []
+        ftakeoff = 0
+        flanding = 0
         base_time_takeoff
         base_time_landing
         base_state_takeoff
         base_state_landing
-        th_offset
-        th_offset_takeoff
-        th_offset_landing = 260
         ts
-        te_takeoff = 10% goal time
+        te_takeoff = 15% goal time
         zd_takeoff = 0.5 % goal altitude
         te_landing = 20% goal time
         k_yaw
@@ -45,6 +42,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         errorVector
         agent1
         yawRef
+        yawSum = 0
 
     end
 
@@ -105,13 +103,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % B6 = [0;0;0;0;0;1];
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
-                    obj.k_yaw=lqrd(0,1,10,1,0.025);
-                    % obj.k_yaw=0.9;
+                    obj.k_yaw=lqrd(0,1,1,1,0.025);
+                    obj.k_yaw=0.5;
                     obj.yawRef = obj.generate_yawReference(obj.k_yaw);
 
                     obj.com = args{3};
                     % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "yaw"], 'num_list', [28, 3, 1]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "yaw","aaa"], 'num_list', [28, 3, 1,1]));  
                     obj.result.state.set_state("xd",zeros(28,1));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                     % obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
@@ -203,8 +201,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                if obj.cha == 'f'
-                   obj.ftakeoff = [];
-                   obj.flanding = [];
+                   obj.ftakeoff = 0;
+                   obj.flanding = 0;
                    xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
                    %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                    refi         = zeros(28,1);  %機体のreference
@@ -213,36 +211,42 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    refi(5:end)   = reshape(drefi,[],1);
 
                elseif obj.cha =='t'
-                   obj.flanding = [];
+                   obj.flanding = 0;
                    if isempty( obj.base_state_takeoff )
-                       p = obj.self.sensor.state.p; 
+                       p = obj.self.sensor.result.state.p; 
                        obj.base_time_takeoff =varargin{1}.t;
-                       obj.base_state_takeoff = [p(1:2);p-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
-                       obj.th_offset = obj.self.input_transform.param.th_offset;
+                       obj.base_state_takeoff = [p(1:2);p(3)-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
                    end
-                   if obj.self.sensor.state.p(3)>=0.3&& obj.ftakeoff == []
+                   if obj.self.sensor.result.state.p(3)>=0.3&& obj.ftakeoff == 0
                        obj.ftakeoff =1;
-                       obj.base_state_takeoff(1:2) = obj.self.sensor.state.real_pL(1:2);
+                       obj.base_state_takeoff(1:2) = obj.self.sensor.result.state.real_pL(1:2);
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
-                       obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,varargin{1}.t-obj.base_time_takeoff)/obj.te_takeoff;
+                       th_offset = obj.self.input_transform.param.th_offset;
+                       % th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
+                       th_offset_takeoff = 260;
+                       obj.self.input_transform.param.th_offset_tl = th_offset_takeoff + (th_offset-th_offset_takeoff)*min(obj.te_takeoff,varargin{1}.t-obj.base_time_takeoff)/obj.te_takeoff;
                        x0d = refi(1:3) - rhoi;
                elseif obj.cha =='l'
-                   obj.ftakeoff = [];
+                   obj.ftakeoff = 0;
                    if isempty(obj.base_state_landing) 
                        obj.base_time_landing =varargin{1}.t;
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
-                       obj.th_offset = obj.self.input_transform.param.th_offset;
                    end
-                   if obj.self.sensor.state.p(3)<=0.3&& obj.flanding == []
+                   if obj.self.sensor.result.state.p(3)<=0.4&& obj.flanding==0
                        obj.flanding  =1;
                        alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                        alpiUnit = alpi/norm(alpi);
-                       obj.base_state_landing(1:2) = obj.self.sensor.state.pL(1:2) + 0.2*alpiUnit;
+                       obj.base_state_landing(1:2) = obj.self.sensor.result.state.real_pL(1:2) + 0.4*alpiUnit;
                    end
+                       th_offset = obj.self.input_transform.param.th_offset;
+                       % th_offset_landing = obj.self.input_transform.param.th_offset_tl;
+                       th_offset_landing = 260;
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
-                       obj.self.input_transform.param.th_offset_tl_tmp = obj.th_offset - (obj.th_offset-obj.th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
+                       obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                        x0d = refi(1:3) - rhoi;
+               else
+                   refi = zeros(28,1);
                 end
                %牽引物yaw角補正================================================================================
                % agenti = varargin{5};
@@ -255,8 +259,18 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 rhoiUnit = rhoi(1:2)/norm(rhoi(1:2));
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
+                %誤差を加算していきyaw補正をするための目標位置を生成
+                obj.yawSum = obj.yawSum + yaw;
+                aaa = obj.yawSum
+                k=0.01;
+                if obj.self.sensor.result.state.real_pL(3)>=0.3
+                    refi(1:2) = [cos(-k*obj.yawSum),-sin(-k*obj.yawSum);sin(-k*obj.yawSum),cos(-k*obj.yawSum)]*refi(1:2);
+                end
+                %yaw補正をするための目標速度と高次微分を計算
                 yaw*180/pi
-                if abs(yaw)>35*pi/180 && obj.agent1.sensor.result.state.p(3)>0.2%&& abs(yaw) < 170*pi/180 %pi
+                if abs(obj.yawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>0.2%&& abs(yaw) < 170*pi/180 %pi
+                % if abs(yaw)>20*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
+                yaw = obj.yawSum;
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
@@ -276,11 +290,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
                     Vxyz = cross(W,[alpi;0]+zeros(3,5));
                     refi4_ = reshape(refi,4,[]);
-                    refi4_(1:2,2:6) = Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                    refi4_(1:2,2:6) = refi4_(1:2,2:6)*0 + Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
                     refi = reshape(refi4_,[],1);
                     %yaw修正中の目標軌道
-                    x0dForCorrection = x0d(1:2) + obj.errorVector;
-                    refi(1:2) = alpi + x0dForCorrection;
+                    % x0dForCorrection = x0d(1:2) + obj.errorVector;
+                    % refi(1:2) = alpi + x0dForCorrection;
 
                     % %new version
                     % thetaAlp = acos(alpiUnit'*[1;0]);
@@ -322,6 +336,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.result.R0d     = R0d;
                obj.result.state.xd      = refi;
                obj.result.state.yaw      = yaw;
+               obj.result.state.aaa      = aaa*180/pi;
                % obj.result.state.p       = xid;
                % obj.result.state.v       = dxid;
                % obj.result.state.mui     = mui';
@@ -350,17 +365,17 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %         ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
            %         obj.self.estimator.result.state.a   = ddX0(1:3);
            %         obj.self.estimator.result.state.dO  = ddX0(4:6);
-           % else
-           %     obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-           %     refi = obj.result.state.xd;
-           %     obj.result.state.p = refi(1:3);
-           %     %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
-           %     obj.result.state.v = refi(4:6);
-           %     %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
-           %     % R0d = reshape(xd(end-8:end),3,3);
-           %     % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
-           %     % obj.result.state.o = xd(13:15);
-           %     % 牽引物の加速度と角加速度を求める
+           else
+               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+               % refi = obj.result.state.xd;
+               % obj.result.state.p = refi(1:3);
+               % %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
+               % obj.result.state.v = refi(4:6);
+               %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
+               % R0d = reshape(xd(end-8:end),3,3);
+               % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
+               % obj.result.state.o = xd(13:15);
+               % 牽引物の加速度と角加速度を求める
            %     if 0
            %         x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
            %         R0 = RodriguesQuaternion(x(4:7));
@@ -369,7 +384,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %         ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
            %         obj.self.estimator.result.state.a   = ddX0(1:3);
            %         obj.self.estimator.result.state.dO  = ddX0(4:6);
-           %     end
+           % %     end
            end
            result = obj.result;
         end

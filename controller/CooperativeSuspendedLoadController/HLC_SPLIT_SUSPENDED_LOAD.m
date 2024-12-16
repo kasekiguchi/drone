@@ -37,7 +37,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             Param = obj.param;
 %             P = Param.P;
             P     = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
-            P(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
+            
             
             %拡張質量システムのekfで牽引物の質量を求める場合
             if isprop(model.state,"mL")

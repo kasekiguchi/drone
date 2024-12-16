@@ -2,10 +2,12 @@
 clear time tl mL pL
 close all
 % ============================================
-delta = 500;
+delta = 100;
 phase = 102;
-loggers = simple_log_drone3Load1_pc1;
-loggers{4} = simple_log_drone3Load1{2};
+Msize = 4;
+loggers = simple_log_circle07;
+% loggers = simple_log_drone3Load1_pc1;
+% loggers{4} = simple_log_drone3Load1{2};
 % ============================================
 logNum = length(loggers);
 phaseId = find(loggers{1, 1}.phase==phase );
@@ -33,6 +35,7 @@ for i = 1:logNum-1
     G = G + pLAjust{i}.*mLAjust{i}./M;
 end
 % G = G - pL0;
+
 X = zeros(logNum-1,tl{1});
 Y = zeros(logNum-1,tl{1});
 Z = zeros(logNum-1,tl{1});
@@ -51,17 +54,17 @@ grid minor
 i = i+1;
 
 f(i) = figure;
-plot3(G(1,:),G(2,:),G(3,:),"Marker","+","LineStyle","none","MarkerSize",0.5)
+plot3(G(1,:),G(2,:),G(3,:),"Marker","*","LineStyle","none","MarkerSize",Msize)
 hold on
-plot3(pL0(1,:),pL0(2,:),pL0(3,:),"Marker","+","LineStyle","none","MarkerSize",1)
+plot3(pL0(1,:),pL0(2,:),pL0(3,:),"Marker","+","LineStyle","none","MarkerSize",Msize)
 fill3(X,Y,Z,"w","facecolor","none")
 grid minor
 i = i+1;
 
 f(i) = figure;
-plot(G(1,:),G(2,:),"Marker","+","LineStyle","none","MarkerSize",0.5)
+plot(G(1,:),G(2,:),"Marker","*","LineStyle","none","MarkerSize",Msize)
 hold on
-plot(pL0(1,:),pL0(2,:),"Marker","+","LineStyle","none","MarkerSize",1)
+plot(pL0(1,:),pL0(2,:),"Marker","+","LineStyle","none","MarkerSize",Msize)
 fill3(X,Y,zeros(size(Z)),"w","facecolor","none")
 grid minor
 i = i+1;

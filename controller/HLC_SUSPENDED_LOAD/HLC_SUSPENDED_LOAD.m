@@ -66,7 +66,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             %      %EKFで質量推定
             if obj.self.estimator.model.name == "load_mL_HL"
                 P(15) = model.state.mL;
-                obj.result.mLi=P(15);
+                obj.result.mLi=max(P(15),0);
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             end
             

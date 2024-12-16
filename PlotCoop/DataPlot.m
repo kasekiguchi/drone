@@ -14,10 +14,10 @@ clear multiFigure option addingContents f
 %選択
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 startTime = 0;
-endTime = 10;%1E3;
-fnowdata = 10;
+endTime = 60;%1E3;
+fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -314,6 +314,10 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             fieldLog = fieldLog(find(fieldLog=="sensor"):end);
             sx0{1} = zero1;sy0{1} = zero1;sz0{1} = zero1;
             sq0{1} = zero1;sq0{1} = zero1;sq0{1} = zero1;
+            sq{i}=zero3;
+            rai{i}=zero3;rmui{i}=zero3;rdwi{i}=zero3;raidrn{i}=zero3;
+             cQeul{i}=zero3;cQeul{i}=zero3;cQeul{i}=zero3;eO{i}=zero3;eO{i}=zero3;eO{i}=zero3;ep{i}=zero3;
+             eQ{i} = zero3;pQ{i} = zero3;eO{i} = zero3;pO{i} = zero3;edO{i} = zero3;ea{i} = zero3;
         end
         for j = 1:length(fieldLog)
             fieldVar = fieldnames(loggers{i}.(fieldLog{j}));
@@ -382,10 +386,11 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 sx0{1} = sp{i}(1,:);
                 sy0{1} = sp{i}(2,:);
                 sz0{1} = sp{i}(3,:);
+            end
                 sqroll0{1} = sq{i}(1,:);
                 sqpitch0{1} = sq{i}(2,:);
                 sqyaw0{1} = sq{i}(3,:);
-            end
+            % end
         else
             j = i - 1;
             %sensor
@@ -449,10 +454,10 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             inputsum(:,j) = sqrt(sum((cinput{i}(1:4,:)).^2,2)/lt(i));
             mAll{j} =  cmLi{i};
             mLi{j} = cmLi{i};
-            ai{j} = rai{i};
-            mui{j} = rmui{i};
-            dwi{j} = rdwi{i};
-            aidrn{j} = raidrn{i};
+            % ai{j} = rai{i};
+            % mui{j} = rmui{i};
+            % dwi{j} = rdwi{i};
+            % aidrn{j} = raidrn{i};
         end
     end
         % for i = 1:logNum-1
@@ -572,7 +577,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             t2 = {ones(lt(i+1),3).*time2{i}'};
             % allData.("linkDir"+string(i)) = {struct('x',{t2},'y',{{linki(:,:,i)'}}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~Link$","$y~Link$","$z~Link$"] ,i),add_option([],option,addingContents)};
             % allData.("linkDir"+string(i)) = {struct('x',{[t2,t2,t2]},'y',{[{muid_units(:,:,i)'},{linki(:,:,i)'},{epTi{i}'}]}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~\mu d$","$y~\mu d$","$z~\mu d$","$x~Link$","$y~Link$","$z~Link$","$x~pT$","$y~pT$","$z~pT$"] ,i),add_option([],option,addingContents)};
-            allData.("mui"+string(i)) = {struct('x',{t2},'y',{{mui{i}'}}), struct('x','time (s)','y','payload'+string(i)+' tension (N)'),["$x$","$y$","$z$"],add_option([],option,addingContents)};
+            % allData.("mui"+string(i)) = {struct('x',{t2},'y',{{mui{i}'}}), struct('x','time (s)','y','payload'+string(i)+' tension (N)'),["$x$","$y$","$z$"],add_option([],option,addingContents)};
             %plant
             allData.("pvi"+string(i)) = {struct('x',{t2},'y',{[{pvi{i}'},evi{i}']}), struct('x','time (s)','y','drone'+string(i) +' velocity (m/s)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("pvLi"+string(i)) = {struct('x',{t2},'y',{{pvLi{i}'}}), struct('x','time (s)','y','payload'+string(i) +' velocity (m/s)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};            
@@ -593,9 +598,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             allData.("attitude"+string(i)) = {struct('x',{t2},'y',{{eqi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' attitude (rad)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             allData.("wi"+string(i)) = {struct('x',{t2},'y',{{ewi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' angular velocity (rad/s)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             allData.("wLi"+string(i)) = {struct('x',{t2},'y',{{ewLi{i}'}}), struct('x','time (s)','y','link'+string(i) +' angular velocity (rad/s)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
-            allData.("ai"+string(i)) = {struct('x',{t2},'y',{{ai{i}'}}), struct('x','time (s)','y','payload'+string(i) +' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
-            allData.("aidrn"+string(i)) = {struct('x',{t2},'y',{{aidrn{i}'}}), struct('x','time (s)','y','drone'+string(i)+' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
-            allData.("dwi"+string(i)) = {struct('x',{{time2{i}'}},'y',{{dwi{i}'}}), struct('x','time (s)','y','link'+string(i)+' angular acceleration (rad/$\mathrm{s^2}$)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
+            % allData.("ai"+string(i)) = {struct('x',{t2},'y',{{ai{i}'}}), struct('x','time (s)','y','payload'+string(i) +' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
+            % allData.("aidrn"+string(i)) = {struct('x',{t2},'y',{{aidrn{i}'}}), struct('x','time (s)','y','drone'+string(i)+' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
+            % allData.("dwi"+string(i)) = {struct('x',{{time2{i}'}},'y',{{dwi{i}'}}), struct('x','time (s)','y','link'+string(i)+' angular acceleration (rad/$\mathrm{s^2}$)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             % allData.("inputsum"+string(i)) = {struct('x',{{["Thrust","roll","pitch","yaw"]}},'y',{{inputsum}}), struct('x',[],'y','Value'), CDi,add_option([],option,addingContents)};
         end
         %二乗誤差平均
