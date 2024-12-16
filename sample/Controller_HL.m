@@ -6,6 +6,12 @@ Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),0.0001,d
 Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,10000,2000,10]),0.0001,dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
 
+%事例研究
+% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
+% Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,600,150,1]),0.001,dt); % xdiag([100,10,10,1])
+% Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,600,150,1]),0.001,dt); % ydiag([100,10,10,1])
+% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt); 
+
 % % dt = 0.2 くらいの時用
 % Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
 % Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([1,1,1,1]),[1],dt); % xdiag([100,10,10,1])
