@@ -250,7 +250,7 @@ y_ref_sel1 = [];
 z_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_1(aa,1) == 102
         x_est_sel1 = [x_est_sel1,x_est1(1,aa)];
         y_est_sel1 = [y_est_sel1,y_est1(1,aa)];
         z_est_sel1 = [z_est_sel1,z_est1(1,aa)];
@@ -272,7 +272,7 @@ pitch_ref_sel1 = [];
 yaw_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_1(aa,1) == 102
         roll_est_sel1 = [roll_est_sel1,roll_est1(1,aa)];
         pitch_est_sel1 = [pitch_est_sel1,pitch_est1(1,aa)];
         yaw_est_sel1 = [yaw_est_sel1,yaw_est1(1,aa)];
@@ -300,7 +300,7 @@ ininput_AUX3_sel1 = [];
 ininput_AUX4_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_1(aa,1) == 102
         input_roll_sel1 = [input_roll_sel1,inproll_1(1,aa)];
         input_pitch_sel1 = [input_pitch_sel1,inppitch_1(1,aa)];
         input_throttle_sel1 = [input_throttle_sel1,inpthrottle_1(1,aa)];
@@ -328,14 +328,14 @@ vy_ref_sel1 = [];
 vz_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_1(aa,1) == 102
         vx_est_sel1 = [vx_est_sel1,vx_est1(1,aa)];
         vy_est_sel1 = [vy_est_sel1,vy_est1(1,aa)];
         vz_est_sel1 = [vz_est_sel1,vz_est1(1,aa)];
         vx_ref_sel1 = [vx_ref_sel1,vx_ref1(1,aa)];
         vy_ref_sel1 = [vy_ref_sel1,vy_ref1(1,aa)];
         vz_ref_sel1 = [vz_ref_sel1,vz_ref1(1,aa)];
-        t_sel = [t_sel1,t_1(aa,1)];
+        t_sel1 = [t_sel1,t_1(aa,1)];
     end
     aa = aa + 1;
 end
@@ -351,7 +351,7 @@ y_ref_sel2 = [];
 z_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_2(aa,1) == 102
         x_est_sel2 = [x_est_sel2,x_est2(1,aa)];
         y_est_sel2 = [y_est_sel2,y_est2(1,aa)];
         z_est_sel2 = [z_est_sel2,z_est2(1,aa)];
@@ -373,7 +373,7 @@ pitch_ref_sel2 = [];
 yaw_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_2(aa,1) == 102
         roll_est_sel2 = [roll_est_sel2,roll_est2(1,aa)];
         pitch_est_sel2 = [pitch_est_sel2,pitch_est2(1,aa)];
         yaw_est_sel2 = [yaw_est_sel2,yaw_est2(1,aa)];
@@ -401,15 +401,15 @@ ininput_AUX3_sel2 = [];
 ininput_AUX4_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase(aa,1) == 102
-        input_roll_sel1 = [input_roll_sel2,inproll_2(1,aa)];
-        input_pitch_sel1 = [input_pitch_sel2,inppitch_2(1,aa)];
-        input_throttle_sel1 = [input_throttle_sel2,inpthrottle_2(1,aa)];
-        input_yaw_sel1 = [input_yaw_sel2,inpyaw_2(1,aa)];
-        ininput_roll_sel1 = [ininput_roll_sel2,in_inproll_2(1,aa)];
-        ininput_pitch_sel1 = [ininput_pitch_sel2,in_inppitch_2(1,aa)];
-        ininput_throttle_sel1 = [ininput_throttle_sel2,in_inpthrottle_2(1,aa)];
-        ininput_yaw_sel = [ininput_yaw_sel2,in_inpyaw_2(1,aa)];
+    if phase_2(aa,1) == 102
+        input_roll_sel2 = [input_roll_sel2,inproll_2(1,aa)];
+        input_pitch_sel2 = [input_pitch_sel2,inppitch_2(1,aa)];
+        input_throttle_sel2 = [input_throttle_sel2,inpthrottle_2(1,aa)];
+        input_yaw_sel2 = [input_yaw_sel2,inpyaw_2(1,aa)];
+        ininput_roll_sel2 = [ininput_roll_sel2,in_inproll_2(1,aa)];
+        ininput_pitch_sel2 = [ininput_pitch_sel2,in_inppitch_2(1,aa)];
+        ininput_throttle_sel2 = [ininput_throttle_sel2,in_inpthrottle_2(1,aa)];
+        ininput_yaw_sel2 = [ininput_yaw_sel2,in_inpyaw_2(1,aa)];
         ininput_AUX1_sel2 = [ininput_AUX1_sel2,in_AUX1_2(1,aa)];
         ininput_AUX2_sel2 = [ininput_AUX2_sel2,in_AUX2_2(1,aa)];
         ininput_AUX3_sel2 = [ininput_AUX3_sel2,in_AUX3_2(1,aa)];
@@ -429,14 +429,14 @@ vy_ref_sel2 = [];
 vz_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_2(aa,1) == 102
         vx_est_sel2 = [vx_est_sel2,vx_est2(1,aa)];
         vy_est_sel2 = [vy_est_sel2,vy_est2(1,aa)];
         vz_est_sel2 = [vz_est_sel2,vz_est2(1,aa)];
         vx_ref_sel2 = [vx_ref_sel2,vx_ref2(1,aa)];
         vy_ref_sel2 = [vy_ref_sel2,vy_ref2(1,aa)];
         vz_ref_sel2 = [vz_ref_sel2,vz_ref2(1,aa)];
-        t_sel = [t_sel2,t_2(aa,1)];
+        t_sel2 = [t_sel2,t_2(aa,1)];
     end
     aa = aa + 1;
 end
@@ -454,7 +454,7 @@ y_ref_sel3 = [];
 z_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_3(aa,1) == 102
         x_est_sel3 = [x_est_sel3,x_est3(1,aa)];
         y_est_sel3 = [y_est_sel3,y_est3(1,aa)];
         z_est_sel3 = [z_est_sel3,z_est3(1,aa)];
@@ -476,7 +476,7 @@ pitch_ref_sel3 = [];
 yaw_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_3(aa,1) == 102
         roll_est_sel3 = [roll_est_sel3,roll_est3(1,aa)];
         pitch_est_sel3 = [pitch_est_sel3,pitch_est3(1,aa)];
         yaw_est_sel3 = [yaw_est_sel3,yaw_est3(1,aa)];
@@ -504,7 +504,7 @@ ininput_AUX3_sel3 = [];
 ininput_AUX4_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_3(aa,1) == 102
         input_roll_sel3 = [input_roll_sel3,inproll_3(1,aa)];
         input_pitch_sel3 = [input_pitch_sel3,inppitch_3(1,aa)];
         input_throttle_sel3 = [input_throttle_sel3,inpthrottle_3(1,aa)];
@@ -532,19 +532,19 @@ vy_ref_sel3 = [];
 vz_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_3(aa,1) == 102
         vx_est_sel3 = [vx_est_sel3,vx_est3(1,aa)];
         vy_est_sel3 = [vy_est_sel3,vy_est3(1,aa)];
         vz_est_sel3 = [vz_est_sel3,vz_est3(1,aa)];
         vx_ref_sel3 = [vx_ref_sel3,vx_ref3(1,aa)];
         vy_ref_sel3 = [vy_ref_sel3,vy_ref3(1,aa)];
         vz_ref_sel3 = [vz_ref_sel3,vz_ref3(1,aa)];
-        t_sel = [t_sel3,t_3(aa,1)];
+        t_sel3 = [t_sel3,t_3(aa,1)];
     end
     aa = aa + 1;
 end
 
-%2p
+%4p
 aa = 1;
 ba = height(t_4);
 x_est_sel4 = [];
@@ -555,7 +555,7 @@ y_ref_sel4 = [];
 z_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_4(aa,1) == 102
         x_est_sel4 = [x_est_sel4,x_est4(1,aa)];
         y_est_sel4 = [y_est_sel4,y_est4(1,aa)];
         z_est_sel4 = [z_est_sel4,z_est4(1,aa)];
@@ -577,7 +577,7 @@ pitch_ref_sel4 = [];
 yaw_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_4(aa,1) == 102
         roll_est_sel4 = [roll_est_sel4,roll_est4(1,aa)];
         pitch_est_sel4 = [pitch_est_sel4,pitch_est4(1,aa)];
         yaw_est_sel4 = [yaw_est_sel4,yaw_est4(1,aa)];
@@ -605,15 +605,15 @@ ininput_AUX3_sel4 = [];
 ininput_AUX4_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase(aa,1) == 102
-        input_roll_sel3 = [input_roll_sel4,inproll_4(1,aa)];
-        input_pitch_sel3 = [input_pitch_sel4,inppitch_4(1,aa)];
-        input_throttle_sel3 = [input_throttle_sel4,inpthrottle_4(1,aa)];
-        input_yaw_sel3 = [input_yaw_sel4,inpyaw_4(1,aa)];
-        ininput_roll_sel3 = [ininput_roll_sel4,in_inproll_4(1,aa)];
-        ininput_pitch_sel3 = [ininput_pitch_sel4,in_inppitch_4(1,aa)];
-        ininput_throttle_sel3 = [ininput_throttle_sel4,in_inpthrottle_4(1,aa)];
-        ininput_yaw_sel = [ininput_yaw_sel4,in_inpyaw_4(1,aa)];
+    if phase_4(aa,1) == 102
+        input_roll_sel4 = [input_roll_sel4,inproll_4(1,aa)];
+        input_pitch_sel4 = [input_pitch_sel4,inppitch_4(1,aa)];
+        input_throttle_sel4 = [input_throttle_sel4,inpthrottle_4(1,aa)];
+        input_yaw_sel4 = [input_yaw_sel4,inpyaw_4(1,aa)];
+        ininput_roll_sel4 = [ininput_roll_sel4,in_inproll_4(1,aa)];
+        ininput_pitch_sel4 = [ininput_pitch_sel4,in_inppitch_4(1,aa)];
+        ininput_throttle_sel4 = [ininput_throttle_sel4,in_inpthrottle_4(1,aa)];
+        ininput_yaw_sel4 = [ininput_yaw_sel4,in_inpyaw_4(1,aa)];
         ininput_AUX1_sel4 = [ininput_AUX1_sel4,in_AUX1_4(1,aa)];
         ininput_AUX2_sel4 = [ininput_AUX2_sel4,in_AUX2_4(1,aa)];
         ininput_AUX3_sel4 = [ininput_AUX3_sel4,in_AUX3_4(1,aa)];
@@ -633,17 +633,146 @@ vy_ref_sel4 = [];
 vz_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase(aa,1) == 102
+    if phase_4(aa,1) == 102
         vx_est_sel4 = [vx_est_sel4,vx_est4(1,aa)];
         vy_est_sel4 = [vy_est_sel4,vy_est4(1,aa)];
         vz_est_sel4 = [vz_est_sel4,vz_est4(1,aa)];
         vx_ref_sel4 = [vx_ref_sel4,vx_ref4(1,aa)];
         vy_ref_sel4 = [vy_ref_sel4,vy_ref4(1,aa)];
         vz_ref_sel4 = [vz_ref_sel4,vz_ref4(1,aa)];
-        t_sel = [t_sel4,t_4(aa,1)];
+        t_sel4 = [t_sel4,t_4(aa,1)];
     end
     aa = aa + 1;
 end
+
+% %データをそろえる
+% minLength = min(length(t_sel1), length(t_sel3));
+% t_sel1 = t_sel1(1:minLength);
+% t_sel2 = t_sel2(1:minLength);
+% t_sel3 = t_sel3(1:minLength);
+% t_sel4 = t_sel4(1:minLength);
+% x_est_sel1 = x_est_sel1(1:minLength);
+% y_est_sel1 = y_est_sel1(1:minLength);
+% z_est_sel1 = z_est_sel1(1:minLength);
+% x_ref_sel1 = x_ref_sel1(1:minLength);
+% y_ref_sel1 = y_ref_sel1(1:minLength);
+% z_ref_sel1 = z_ref_sel1(1:minLength);
+% roll_est_sel1 = roll_est_sel1(1:minLength);
+% pitch_est_sel1 = pitch_est_sel1(1:minLength);
+% yaw_est_sel1 = yaw_est_sel1(1:minLength);
+% roll_ref_sel1 = roll_ref_sel1(1:minLength);
+% pitch_ref_sel1 = pitch_ref_sel1(1:minLength);
+% yaw_ref_sel1 = yaw_ref_sel1(1:minLength);
+% input_roll_sel1 = input_roll_sel1(1:minLength);
+% input_pitch_sel1 = input_pitch_sel1(1:minLength);
+% input_throttle_sel1 = input_throttle_sel1(1:minLength);
+% input_yaw_sel1 = input_yaw_sel1(1:minLength);
+% ininput_roll_sel1 = ininput_roll_sel1(1:minLength);
+% ininput_pitch_sel1 = ininput_pitch_sel1(1:minLength);
+% ininput_throttle_sel1 = ininput_throttle_sel1(1:minLength);
+% ininput_yaw_sel1 = ininput_yaw_sel1(1:minLength);
+% ininput_AUX1_sel1 = ininput_AUX1_sel1(1:minLength);
+% ininput_AUX2_sel1 = ininput_AUX2_sel1(1:minLength);
+% ininput_AUX3_sel1 = ininput_AUX3_sel1(1:minLength);
+% ininput_AUX4_sel1 = ininput_AUX4_sel1(1:minLength);
+% vx_est_sel1 = vx_est_sel1(1:minLength);
+% vy_est_sel1 = vy_est_sel1(1:minLength);
+% vz_est_sel1 = vz_est_sel1(1:minLength);
+% vx_ref_sel1 = vx_ref_sel1(1:minLength);
+% vy_ref_sel1 = vy_ref_sel1(1:minLength);
+% vz_ref_sel1 = vz_ref_sel1(1:minLength);
+% x_est_sel2 = x_est_sel2(1:minLength);
+% y_est_sel2 = y_est_sel2(1:minLength);
+% z_est_sel2 = z_est_sel2(1:minLength);
+% x_ref_sel2 = x_ref_sel2(1:minLength);
+% y_ref_sel2 = y_ref_sel2(1:minLength);
+% z_ref_sel2 = z_ref_sel2(1:minLength);
+% roll_est_sel2 = roll_est_sel2(1:minLength);
+% pitch_est_sel2 = pitch_est_sel2(1:minLength);
+% yaw_est_sel2 = yaw_est_sel2(1:minLength);
+% roll_ref_sel2 = roll_ref_sel2(1:minLength);
+% pitch_ref_sel2 = pitch_ref_sel2(1:minLength);
+% yaw_ref_sel2 = yaw_ref_sel2(1:minLength);
+% input_roll_sel2 = input_roll_sel2(1:minLength);
+% input_pitch_sel2 = input_pitch_sel2(1:minLength);
+% input_throttle_sel2 = input_throttle_sel2(1:minLength);
+% input_yaw_sel2 = input_yaw_sel2(1:minLength);
+% ininput_roll_sel2 = ininput_roll_sel2(1:minLength);
+% ininput_pitch_sel2 = ininput_pitch_sel2(1:minLength);
+% ininput_throttle_sel2 = ininput_throttle_sel2(1:minLength);
+% ininput_yaw_sel = ininput_yaw_sel2(1:minLength);
+% ininput_AUX1_sel2 = ininput_AUX1_sel2(1:minLength);
+% ininput_AUX2_sel2 = ininput_AUX2_sel2(1:minLength);
+% ininput_AUX3_sel2 = ininput_AUX3_sel2(1:minLength);
+% ininput_AUX4_sel2 = ininput_AUX4_sel2(1:minLength);
+% vx_est_sel2 = vx_est_sel2(1:minLength);
+% vy_est_sel2 = vy_est_sel2(1:minLength);
+% vz_est_sel2 = vz_est_sel2(1:minLength);
+% vx_ref_sel2 = vx_ref_sel2(1:minLength);
+% vy_ref_sel2 = vy_ref_sel2(1:minLength);
+% vz_ref_sel2 = vz_ref_sel2(1:minLength);
+% 
+% x_est_sel3 = x_est_sel3(1:minLength);
+% y_est_sel3 = y_est_sel3(1:minLength);
+% z_est_sel3 = z_est_sel3(1:minLength);
+% x_ref_sel3 = x_ref_sel3(1:minLength);
+% y_ref_sel3 = y_ref_sel3(1:minLength);
+% z_ref_sel3 = z_ref_sel3(1:minLength);
+% roll_est_sel3 = roll_est_sel3(1:minLength);
+% pitch_est_sel3 = pitch_est_sel3(1:minLength);
+% yaw_est_sel3 = yaw_est_sel3(1:minLength);
+% roll_ref_sel3 = roll_ref_sel3(1:minLength);
+% pitch_ref_sel3 = pitch_ref_sel3(1:minLength);
+% yaw_ref_sel3 = yaw_ref_sel3(1:minLength);
+% input_roll_sel3 = input_roll_sel3(1:minLength);
+% input_pitch_sel3 = input_pitch_sel3(1:minLength);
+% input_throttle_sel3 = input_throttle_sel3(1:minLength);
+% input_yaw_sel3 = input_yaw_sel3(1:minLength);
+% ininput_roll_sel3 = ininput_roll_sel3(1:minLength);
+% ininput_pitch_sel3 = ininput_pitch_sel3(1:minLength);
+% ininput_throttle_sel3 = ininput_throttle_sel3(1:minLength);
+% ininput_yaw_sel3 = ininput_yaw_sel3(1:minLength);
+% ininput_AUX1_sel3 = ininput_AUX1_sel3(1:minLength);
+% ininput_AUX2_sel3 = ininput_AUX2_sel3(1:minLength);
+% ininput_AUX3_sel3 = ininput_AUX3_sel3(1:minLength);
+% ininput_AUX4_sel3 = ininput_AUX4_sel3(1:minLength);
+% vx_est_sel3 = vx_est_sel3(1:minLength);
+% vy_est_sel3 = vy_est_sel3(1:minLength);
+% vz_est_sel3 = vz_est_sel3(1:minLength);
+% vx_ref_sel3 = vx_ref_sel3(1:minLength);
+% vy_ref_sel3 = vy_ref_sel3(1:minLength);
+% vz_ref_sel3 = vz_ref_sel3(1:minLength);
+% x_est_sel4 = x_est_sel4(1:minLength);
+% y_est_sel4 = y_est_sel4(1:minLength);
+% z_est_sel4 = z_est_sel4(1:minLength);
+% x_ref_sel4 = x_ref_sel4(1:minLength);
+% y_ref_sel4 = y_ref_sel4(1:minLength);
+% z_ref_sel4 = z_ref_sel4(1:minLength);
+% roll_est_sel4 = roll_est_sel4(1:minLength);
+% pitch_est_sel4 = pitch_est_sel4(1:minLength);
+% yaw_est_sel4 = yaw_est_sel4(1:minLength);
+% roll_ref_sel4 = roll_ref_sel4(1:minLength);
+% pitch_ref_sel4 = pitch_ref_sel4(1:minLength);
+% yaw_ref_sel4 = yaw_ref_sel4(1:minLength);
+% input_roll_sel4 = input_roll_sel4(1:minLength);
+% input_pitch_sel4 = input_pitch_sel4(1:minLength);
+% input_throttle_sel4 = input_throttle_sel4(1:minLength);
+% input_yaw_sel4 = input_yaw_sel4(1:minLength);
+% ininput_roll_sel4 = ininput_roll_sel4(1:minLength);
+% ininput_pitch_sel4 = ininput_pitch_sel4(1:minLength);
+% ininput_throttle_sel4 = ininput_throttle_sel4(1:minLength);
+% ininput_yaw_sel4 = ininput_yaw_sel4(1:minLength);
+% ininput_AUX1_sel4 = ininput_AUX1_sel4(1:minLength);
+% ininput_AUX2_sel4 = ininput_AUX2_sel4(1:minLength);
+% ininput_AUX3_sel4 = ininput_AUX3_sel4(1:minLength);
+% ininput_AUX4_sel4 = ininput_AUX4_sel4(1:minLength);
+% vx_est_sel4 = vx_est_sel4(1:minLength);
+% vy_est_sel4 = vy_est_sel4(1:minLength);
+% vz_est_sel4 = vz_est_sel4(1:minLength);
+% vx_ref_sel4 = vx_ref_sel4(1:minLength);
+% vy_ref_sel4 = vy_ref_sel4(1:minLength);
+% vz_ref_sel4 = vz_ref_sel4(1:minLength);
+
 %% 収束後　位置
 
 % 誤差の計算
@@ -787,8 +916,8 @@ ylabel('y[m]')
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 daspect([1 1 1])
-xlim([-2 2])
-ylim([-2 2])
+xlim([-2.5 2.5])
+ylim([-2.5 2.5])
 hold on
 plot(x_est_sel2, y_est_sel2, '-','LineWidth',2);
 plot(x_est_sel3, y_est_sel3, '-','LineWidth',2);
@@ -798,7 +927,7 @@ plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
 plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
 plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
 legend('D1.EST','D2.EST','D3.EST','D4.EST', ...
-    'D1.REF','D2.REF','D3.REF','D4.REF','fontsize',12,'NumColumns',2)
+    'D1.REF','D2.REF','D3.REF','D4.REF','fontsize',9,'NumColumns',2)
 hold off
 
 % % % xyz
@@ -834,7 +963,7 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
+% xlim([t_sel1(1,1) t_sel1(1,end)])
 ylim([-2 2])
 hold on
 plot(t_sel1,y_est_sel1, '-','LineWidth',2);
@@ -859,7 +988,7 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
+xlim([t_sel1(1,1) t_sel1(1,end)])
 ylim([-2 2])
 hold on
 plot(t_sel3,y_est_sel3, '-','LineWidth',2);
@@ -886,8 +1015,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-2 2])
 hold on
 plot(t_sel1,er_y_1_fig, '-','LineWidth',2);
 plot(t_sel1,er_z_1_fig, '-','LineWidth',2);
@@ -904,8 +1033,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-2 2])
 hold on
 plot(t_sel3,er_y_3_fig, '-','LineWidth',2);
 plot(t_sel3,er_z_3_fig, '-','LineWidth',2);
@@ -924,8 +1053,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-0.5 2])
 hold on
 plot(t_sel1,rmse_y_1_fig, '-','LineWidth',2);
 plot(t_sel1,rmse_z_1_fig, '-','LineWidth',2);
@@ -942,8 +1071,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-0.5 2])
 hold on
 plot(t_sel3,rmse_y_3_fig, '-','LineWidth',2);
 plot(t_sel3,rmse_z_3_fig, '-','LineWidth',2);
