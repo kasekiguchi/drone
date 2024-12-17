@@ -6,7 +6,7 @@
 % data = return_state_prop(newLog1)
 % newLog1 = simplifyLogger(log);
 %機体1と機体2
-[newLog1,newLog2] = simplifyLogger(log);
+[newLog1,newLog2] = simplifyLogger4(log);
 t_1 = newLog1.t; %t:時間
 phase_1 = newLog1.phase;%phase:アーミングやフライトなどの状態
 k_1 = newLog1.k;%データ数
@@ -927,7 +927,7 @@ plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
 plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
 plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
 legend('D1.EST','D2.EST','D3.EST','D4.EST', ...
-    'D1.REF','D2.REF','D3.REF','D4.REF','fontsize',9,'NumColumns',2)
+    'D1.REF','D2.REF','D3.REF','D4.REF','fontsize',8,'NumColumns',2)
 hold off
 
 % % % xyz
@@ -947,7 +947,6 @@ hold off
 % plot3(x_est_sel2, y_est_sel2, z_est_sel2,  '-','LineWidth', 2);
 % plot3(x_est_sel3, y_est_sel3, z_est_sel3,  '-','LineWidth', 2);
 % plot3(x_est_sel4, y_est_sel4, z_est_sel4,  '-','LineWidth', 2);
-% plot3(x_ref_sel1, y_ref_sel1, z_ref_sel1, '--', 'LineWidth', 2);
 % plot3(x_ref_sel2, y_ref_sel2, z_ref_sel2, '--', 'LineWidth', 2);
 % plot3(x_ref_sel1, y_ref_sel1, z_ref_sel1, '--', 'LineWidth', 2);
 % plot3(x_ref_sel2, y_ref_sel2, z_ref_sel2, '--', 'LineWidth', 2);
@@ -963,8 +962,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-% xlim([t_sel1(1,1) t_sel1(1,end)])
-ylim([-2 2])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-2.5 2.5])
 hold on
 plot(t_sel1,y_est_sel1, '-','LineWidth',2);
 plot(t_sel1,z_est_sel1, '-','LineWidth',2);
@@ -979,7 +978,7 @@ plot(t_sel2,y_ref_sel2, '--','LineWidth',2);
 plot(t_sel2,z_ref_sel2, '--','LineWidth',2);
 legend('x_1.EST','y_1.EST','z_1.EST','x_2.EST','y_2.EST','z_2.EST', ...
     'x_1.REF','y_1.REF','z_1.REF','x_2.REF','y_2.REF','z_2.REF','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',8,'NumColumns',4)
 hold off
 figure;
 plot(t_sel3,x_est_sel3, '-','LineWidth',2);
@@ -989,7 +988,7 @@ ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
-ylim([-2 2])
+ylim([-2.5 2.5])
 hold on
 plot(t_sel3,y_est_sel3, '-','LineWidth',2);
 plot(t_sel3,z_est_sel3, '-','LineWidth',2);
@@ -1004,7 +1003,7 @@ plot(t_sel4,y_ref_sel4, '--','LineWidth',2);
 plot(t_sel4,z_ref_sel4, '--','LineWidth',2);
 legend('x_3.EST','y_3.EST','z_3.EST','x_4.EST','y_4.EST','z_4.EST', ...
     'x_3.REF','y_3.REF','z_3.REF','x_4.REF','y_4.REF','z_4.REF','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northeast','fontsize',8,'NumColumns',4)
 hold off
 
 %誤差
@@ -1042,7 +1041,7 @@ plot(t_sel4,er_x_4_fig, '-','LineWidth',2);
 plot(t_sel4,er_y_4_fig, '-','LineWidth',2);
 plot(t_sel4,er_z_4_fig, '-','LineWidth',2);
 legend('x_3.error','y_3.error','z_3.error','x_4.error','y_4.error','z_4.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northwest','fontsize',8,'NumColumns',2)
 hold off
 
 %RMSE
@@ -1061,7 +1060,7 @@ plot(t_sel1,rmse_z_1_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_x_2_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_y_2_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_z_2_fig, '-','LineWidth',2);
-legend('x_1.RMSE','y_1.RMSE','z_1.RMSE','x_2.RMSE','y_2.RMSE','z_2.error','Location', ...
+legend('x_1.RMSE','y_1.RMSE','z_1.RMSE','x_2.RMSE','y_2.RMSE','z_2.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 figure;
@@ -1079,7 +1078,7 @@ plot(t_sel3,rmse_z_3_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_x_4_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_y_4_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_z_4_fig, '-','LineWidth',2);
-legend('x_3.RMSE','y_3.RMSE','z_3.RMSE','x_4.RMSE','y_4.RMSE','z_4.error','Location', ...
+legend('x_3.RMSE','y_3.RMSE','z_3.RMSE','x_4.RMSE','y_4.RMSE','z_4.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
@@ -1194,7 +1193,7 @@ fprintf('軌道z_4の収束後の速度誤差: %f\n', er_vz_4);
 fprintf('軌道x_1の収束後の速度RMSE: %f\n', rmse_vx_1);
 fprintf('軌道y_1の収束後の速度RMSE: %f\n', rmse_vy_1);
 fprintf('軌道z_1の収束後の速度RMSE: %f\n', rmse_vz_1);
-fprintf('軌道x_2の収束後の速度MSE: %f\n', rmse_vx_2);
+fprintf('軌道x_2の収束後の速度RMSE: %f\n', rmse_vx_2);
 fprintf('軌道y_2の収束後の速度RMSE: %f\n', rmse_vy_2);
 fprintf('軌道z_2の収束後の速度RMSE: %f\n', rmse_vz_2);
 fprintf('軌道x_3の収束後の速度RMSE: %f\n', rmse_vx_3);
@@ -1225,8 +1224,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-2 2])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-1.5 1.5])
 hold on
 plot(t_sel1,vy_est_sel1, '-','LineWidth',2);
 plot(t_sel1,vz_est_sel1, '-','LineWidth',2);
@@ -1241,7 +1240,7 @@ plot(t_sel2,vy_ref_sel2, '--','LineWidth',2);
 plot(t_sel2,vz_ref_sel2, '--','LineWidth',2);
 legend('vx_1.EST','vy_1.EST','vz_1.EST','vx_2.EST','vy_2.EST','vz_2.EST', ...
     'vx_1.REF','vy_1.REF','vz_1.REF','vx_2.REF','vy_2.REF','vz_2.REF','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northwest','fontsize',8,'NumColumns',4)
 hold off
 figure;
 plot(t_sel3,vx_est_sel3, '-','LineWidth',2);
@@ -1250,8 +1249,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-2 2])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-1.5 1.5])
 hold on
 plot(t_sel3,vy_est_sel3, '-','LineWidth',2);
 plot(t_sel3,vz_est_sel3, '-','LineWidth',2);
@@ -1266,7 +1265,7 @@ plot(t_sel4,vy_ref_sel4, '--','LineWidth',2);
 plot(t_sel4,vz_ref_sel4, '--','LineWidth',2);
 legend('vx_3.EST','vy_3.EST','vz_3.EST','vx_4.EST','vy_4.EST','vz_4.EST', ...
     'vx_3.REF','vy_3.REF','vz_3.REF','vx_4.REF','vy_4.REF','vz_4.REF','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'southwest','fontsize',8,'NumColumns',4)
 hold off
 
 %誤差
@@ -1277,8 +1276,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-1 1])
 hold on
 plot(t_sel1,er_vy_1_fig, '-','LineWidth',2);
 plot(t_sel1,er_vz_1_fig, '-','LineWidth',2);
@@ -1286,7 +1285,7 @@ plot(t_sel2,er_vx_2_fig, '-','LineWidth',2);
 plot(t_sel2,er_vy_2_fig, '-','LineWidth',2);
 plot(t_sel2,er_vz_2_fig, '-','LineWidth',2);
 legend('vx_1.error','vy_1.error','vz_1.error','vx_2.error','vy_2.error','vz_2.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
+    'northwest','fontsize',8,'NumColumns',2)
 hold off
 figure;
 plot(t_sel3,er_vx_3_fig, '-','LineWidth',2);
@@ -1295,8 +1294,8 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-1 1])
 hold on
 plot(t_sel3,er_vy_3_fig, '-','LineWidth',2);
 plot(t_sel3,er_vz_3_fig, '-','LineWidth',2);
@@ -1315,15 +1314,15 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-0.5 1])
 hold on
 plot(t_sel1,rmse_vy_1_fig, '-','LineWidth',2);
 plot(t_sel1,rmse_vz_1_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_vx_2_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_vy_2_fig, '-','LineWidth',2);
 plot(t_sel2,rmse_vz_2_fig, '-','LineWidth',2);
-legend('vx_1.RMSE','vy_1.RMSE','vz_1.RMSE','vx_2.RMSE','vy_2.RMSE','vz_2.error','Location', ...
+legend('vx_1.RMSE','vy_1.RMSE','vz_1.RMSE','vx_2.RMSE','vy_2.RMSE','vz_2.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 figure;
@@ -1333,14 +1332,14 @@ xlabel('Time[s]','FontSize',12)
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel(1,1) t_sel(1,end)])
-ylim([-1.5 1.5])
+xlim([t_sel1(1,1) t_sel1(1,end)])
+ylim([-0.5 1])
 hold on
 plot(t_sel3,rmse_vy_3_fig, '-','LineWidth',2);
 plot(t_sel3,rmse_vz_3_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_vx_4_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_vy_4_fig, '-','LineWidth',2);
 plot(t_sel4,rmse_vz_4_fig, '-','LineWidth',2);
-legend('vx_3.RMSE','vy_3.RMSE','vz_3.RMSE','vx_4.RMSE','vy_4.RMSE','vz_4.error','Location', ...
+legend('vx_3.RMSE','vy_3.RMSE','vz_3.RMSE','vx_4.RMSE','vy_4.RMSE','vz_4.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
