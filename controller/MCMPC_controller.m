@@ -17,6 +17,7 @@ classdef MCMPC_controller < handle
       modelp
       N % 現時刻のパーティクル数
       flag
+      modelchangeflag
     end
     
     methods
@@ -49,7 +50,7 @@ classdef MCMPC_controller < handle
         function result = do(obj,varargin)
 %           profile on
             obj.param.t = varargin{1,1}.t;
-
+    
             %% horizonごとではないリファレンス
 %             ref_p = obj.self.reference.result.state.p;
 %             ref_q = [0;0;0];

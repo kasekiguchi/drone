@@ -8,6 +8,7 @@ classdef DRONE < handle
     estimator
     reference
     controller
+    stl
     input_transform
     id = 1
   end
