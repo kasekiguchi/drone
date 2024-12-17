@@ -104,7 +104,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % obj.k_yaw=lqrd(A6,B6,diag([1,1,10,10,10,10]),1,0.025);
 
                     obj.k_yaw=lqrd(0,1,1,1,0.025);
-                    obj.k_yaw=0.5;
+                    % obj.k_yaw=0.5;
                     obj.yawRef = obj.generate_yawReference(obj.k_yaw);
 
                     obj.com = args{3};
@@ -200,6 +200,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
+               if isfield(obj.self.sensor.result.state,"real_pL")
+                   real_pL = obj.self.sensor.result.state.real_pL;
+               else
+                   real_pL = obj.self.sensor.result.state.pL;%simのため
+               end
                if obj.cha == 'f'
                    obj.ftakeoff = 0;
                    obj.flanding = 0;
@@ -219,7 +224,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    end
                    if obj.self.sensor.result.state.p(3)>=0.3&& obj.ftakeoff == 0
                        obj.ftakeoff =1;
-                       obj.base_state_takeoff(1:2) = obj.self.sensor.result.state.real_pL(1:2);
+                       obj.base_state_takeoff(1:2) = real_pL(1:2);
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
                        th_offset = obj.self.input_transform.param.th_offset;
@@ -237,7 +242,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.flanding  =1;
                        alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                        alpiUnit = alpi/norm(alpi);
-                       obj.base_state_landing(1:2) = obj.self.sensor.result.state.real_pL(1:2) + 0.4*alpiUnit;
+                       obj.base_state_landing(1:2) = real_pL(1:2) + 0.4*alpiUnit;
                    end
                        th_offset = obj.self.input_transform.param.th_offset;
                        % th_offset_landing = obj.self.input_transform.param.th_offset_tl;
@@ -260,17 +265,20 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 yaw = sign(rhoiUnit'*[alpiUnit(2);-alpiUnit(1)])*real(acos(alpiUnit'*rhoiUnit));%rhoiUnit'*[alpiUnit(2);-alpiUnit(1)] : cross([rhoiUnit;0],[alpiUnit;0]の3つめ
                 %誤差を加算していきyaw補正をするための目標位置を生成
+                yawLimit = 30*pi/180;
                 obj.yawSum = obj.yawSum + yaw;
-                aaa = obj.yawSum
+                % aaa = obj.yawSum
                 k=0.01;
-                if obj.self.sensor.result.state.real_pL(3)>=0.3
-                    refi(1:2) = [cos(-k*obj.yawSum),-sin(-k*obj.yawSum);sin(-k*obj.yawSum),cos(-k*obj.yawSum)]*refi(1:2);
+                kYawSum = min(max(-k*obj.yawSum,-yawLimit),yawLimit);
+                aaa = kYawSum*180/pi
+                
+                if real_pL(3)>-0.3
+                    % refi(1:2) = [cos(kYawSum),-sin(kYawSum);sin(kYawSum),cos(kYawSum)]*refi(1:2);
                 end
                 %yaw補正をするための目標速度と高次微分を計算
                 yaw*180/pi
-                if abs(obj.yawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>0.2%&& abs(yaw) < 170*pi/180 %pi
-                % if abs(yaw)>20*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
-                yaw = obj.yawSum;
+                % if abs(kYawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>20*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
@@ -290,7 +298,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     % A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
                     Vxyz = cross(W,[alpi;0]+zeros(3,5));
                     refi4_ = reshape(refi,4,[]);
-                    refi4_(1:2,2:6) = refi4_(1:2,2:6)*0 + Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                    refi4_(1:2,2:6) = refi4_(1:2,2:6) + Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                    % refi4_(1:2,2:6) =  Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
                     refi = reshape(refi4_,[],1);
                     %yaw修正中の目標軌道
                     % x0dForCorrection = x0d(1:2) + obj.errorVector;

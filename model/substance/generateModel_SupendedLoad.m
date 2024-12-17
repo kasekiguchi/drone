@@ -84,7 +84,7 @@ f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];
 matlabFunction(f,'file','with_load_model_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% 質量推定も可能
 % a*mL = mL*g + mu
-syms mLDummy
+syms mLDummy real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mLDummy, cableL};
 dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
 dpT  = cross(ol,pT);
@@ -95,6 +95,20 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
 % matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% 質量推定+推力外乱推定も可能
+% a*mL = mL*g + mu
+syms mLDummy real
+syms fdst real
+physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mLDummy, cableL};
+dOL = cross(-pT,(u1+fdst)*ERb0*e3)/(m*cableL);
+dpT  = cross(ol,pT);
+ddPT = cross(dOL,pT)+cross(ol,dpT);
+ddPL = [0;0;-gravity]+(dot(pT,(u1+fdst)*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
+ddP  = ddPL-cableL*ddPT;
+dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+x=[p;er;dp;ob;pl;dpl;pT;ol;mL;fdst];
+f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
+matlabFunction(f,'file','with_load_model_mL_fdst_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% With load model (Extend & Euler)
 syms Length real
 syms ex ey ez real

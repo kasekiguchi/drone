@@ -29,6 +29,8 @@ end
             model_full_name = "with_load_model_euler_for_HL";
         case "Load_mL_HL"
             model_full_name = "with_load_model_mL_euler_for_HL";
+        case "Load_mL_fdst_HL"
+            model_full_name = "with_load_model_mL_fdst_euler_for_HL";
         case "Cooperative_Load"
             model_full_name = "cable_suspended_rigid_body_with_" + N + "_drones";
       case "Cooperative_Load_eul"

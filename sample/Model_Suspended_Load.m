@@ -29,15 +29,23 @@ Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
 Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];%22~24
 
 if ~isempty(agent.plant) && isEstLoadMass
-  Model.name="load_mL_HL"; % print name
-  Setting.method = get_model_name("Load_mL_HL"); % model dynamicsの実体名
-  Setting.dim=[25,4,21];
-  Setting.num_list = [3,3,3,3,3,3,3,3,1];
-  Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-  Setting.initial.mL = agent.parameter.loadmass*0+0;
+  if isEstLoadMass == 1
+      Model.name="load_mL_HL"; % print name
+      Setting.method = get_model_name("Load_mL_HL"); % model dynamicsの実体名
+      Setting.dim=[25,4,21];
+      Setting.num_list = [3,3,3,3,3,3,3,3,1];
+      Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
+      Setting.initial.mL = agent.parameter.loadmass*0+0;
+  else
+      Model.name="load_mL_fdst_HL"; % print name
+      Setting.method = get_model_name("Load_mL_fdst_HL"); % model dynamicsの実体名
+      Setting.dim=[26,4,21];
+      Setting.num_list = [3,3,3,3,3,3,3,3,1,1];
+      Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL","fdst"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
+      Setting.initial.mL = agent.parameter.loadmass*0+0;
+  end
 end
 
 Model.param = Setting;
 Model.parameter_name = ["m","Lx","Ly", "lx", "ly", "lz", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "rotor_r","Length","mL", "cableL","ex","ey","ez"];
 end
-

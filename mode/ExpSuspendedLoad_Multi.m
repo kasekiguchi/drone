@@ -95,47 +95,40 @@ if isCoop == 1
 end
 
 for i = firstId:N
-sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
-initial_state.p = sstate.p; %初期位置の取得
-initial_state.q = sstate.q; %初期角度の取得
-eul = Quat2Eul(initial_state.q);
-initial_state.v = [0; 0; 0]; %初期速度の取得
-initial_state.w = [0; 0; 0]; %初期角加速度の取得
-
-agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
-agent(i).id = i;
-agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
-agent(i).parameter.set("cableL",cableL(i - firstId + 1));
-agent(i).parameter.set("Length",length(i - firstId + 1));
-agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
-agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
-
-%sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
-%各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
-agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-firstId +addId,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)+addId));%牽引物の情報のクラス，牽引物のidを入れる
-agent(i).sensor.do = @sensor_do;
-
-agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-
-if isCoop
-    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));
-else
-    % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
-    % agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
-    agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
-    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
-    % agent(i).reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
-end
-%=======================================================
-%通常
-% agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
-% agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-% % agent(i).controller.do = @controller_do;
-%質量推定
-agent(i).controller = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-%=======================================================
-agent(i).controller.result.input = [(agent(i).parameter.loadmass*0+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+    sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
+    initial_state.p = sstate.p; %初期位置の取得
+    initial_state.q = sstate.q; %初期角度の取得
+    eul = Quat2Eul(initial_state.q);
+    initial_state.v = [0; 0; 0]; %初期速度の取得
+    initial_state.w = [0; 0; 0]; %初期角加速度の取得
+    
+    agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
+    agent(i).id = i;
+    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
+    agent(i).parameter.set("cableL",cableL(i - firstId + 1));
+    agent(i).parameter.set("Length",length(i - firstId + 1));
+    agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
+    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
+    
+    %sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
+    %各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
+    agent(i).sensor.motive = MOTIVE(agent(i), Sensor_Motive(2*i-firstId +addId,eul(3), motive));%機体の情報のクラス，機体のidを入れる
+    agent(i).sensor.forload = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)+addId));%牽引物の情報のクラス，牽引物のidを入れる
+    agent(i).sensor.do = @sensor_do;
+    
+    agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+    
+    if isCoop
+        agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));
+    else
+        % agent(i).reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
+        % agent(i).reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
+        agent(i).reference = MY_POINT_REFERENCE(agent(i),refPointName{i});%縦ベクトルで書く,
+        % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
+        % agent(i).reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
+    end
+    agent(i).controller = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
+    agent(i).controller.result.input = [(agent(i).parameter.loadmass*0+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]);%logger
