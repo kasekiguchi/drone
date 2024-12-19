@@ -38,7 +38,8 @@ classdef MPC_CONTROLLER_HLMC_full_version < handle
       n = 12; % 状態数
       obj.input = param.input; %入力関連のみ
       
-      obj.F1 = lqrd([0 1;0 0],[0;1],diag([400,1]),0.1,param.dt); % 100
+      % obj.F1 = lqrd([0 1;0 0],[0;1],diag([400,1]),0.1,param.dt); % 100
+      obj.F1 = param.F1;
       obj.N = param.particle_num; 
       
       % 重みの配列サイズ変換
@@ -240,15 +241,6 @@ classdef MPC_CONTROLLER_HLMC_full_version < handle
       obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
     end
 
-    % function predict(obj)
-    %   obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
-    %   for i = 1:obj.param.H-1
-    %     obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),obj.input.u(:,i,1:obj.N));
-    %   end
-    % end
-
-    %------------------------------------------------------
-    %======================================================
     function [MCeval] = objective(obj, ~)   % obj.~とする
       U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
       Z = obj.state.error_data;

@@ -4,14 +4,18 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_HLMCHL(varargin)
 
     %% transmitter system
     % eachine
-    u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    u_trans_param.th_offset = 325;        % 325 HL gain z=200 10
+    % u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.th_offset = 325;        % 325 HL gain z=200 10
     % 600 600 600 20
     % 340
 
-    g2 = 550;
+    % iFlight
+    u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
+    u_trans_param.th_offset = 340; %350  
+
+    g2 = 650;
     u_trans_param.gain2 = [ones(3,1)*g2;40];
-    u_trans_param.th_offset2 = 330;
+    u_trans_param.th_offset2 = 337; %340
     
     % u_trans_param.gain =[500;500;500;50];
     % u_trans_param.th_offset = 340;

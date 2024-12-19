@@ -42,7 +42,7 @@ syms t real
 %% hovering
 x = 0;
 y = 0;
-z = 1;
+z = 0.6;
 
 %% 縦円旋回
 % x = 0.5*sin(2*pi*t/T);
