@@ -101,12 +101,19 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %%
             cha = vara{2}; %KMPC
 
+<<<<<<< Updated upstream
         if strcmp(cha,'f')
             if obj.flag_anti_spike_f < 10
                 obj.result.input = [obj.result.input(1);0;0;0];
                 obj.flag_anti_spike_f = obj.flag_anti_spike_f + 1;
+=======
+            if strcmp(cha,'f')
+                if obj.flag_anti_spike_f < 5
+                   obj.result.input = [obj.result.input(1);0;0;0];
+                   obj.flag_anti_spike_f = obj.flag_anti_spike_f + 1;
+                end
+>>>>>>> Stashed changes
             end
-        end
 
             %% データ表示用
             obj.input.u = obj.result.input; 
