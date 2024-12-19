@@ -11,7 +11,7 @@
 %%
 close all
 clear multiFigure option addingContents f
-%選択
+%選択    
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１

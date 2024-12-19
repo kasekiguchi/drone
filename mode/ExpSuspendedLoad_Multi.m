@@ -20,7 +20,7 @@ motive.getData([], []); % get data from Motive モーションキャプチャか
 rigid_num = motive.result.rigid_num;%剛体数
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-numberOFpc = 1;%pcの総数
+numberOFpc = 2;%pcの総数
 PCId = 1;%pcの番号
 NdroneAndLoad = round(rigid_num/2);%機体と分割後の牽引物の組数
 s = NdroneAndLoad -1*mod(rigid_num,2);%牽引物の分を引く(複数牽引でなかったら引かない)
@@ -29,16 +29,17 @@ sParPc = (s-r)/numberOFpc;%各PCでいくつの組を制御するか
 Ns = ones(1,numberOFpc)*sParPc + [ones(1,r),zeros(1,numberOFpc-r)];%各PCで制御する組を決定
 N = Ns(PCId)+1*mod(rigid_num,2);%(複数牽引でなかったら足さない)
 addIds = zeros(1,length(Ns));%機体と分割後の牽引物分+牽引物分ずらしていく
-for i = 1:length(Ns)-1
-    addIds(i+1) = sum(Ns(1:i),2)+1*mod(rigid_num,2);
+for i = 1:length(Ns) - 1 
+    addIds(i+1) = sum(Ns(1:i+1),2);%pcごとに機体ずらす
 end
 addId = addIds(PCId);%このpcで加算するrigidのid
 
 %COMの番号指定
-COMs = [4,5];%割り当てる順番に設定
+COMs = [5,3];%割り当てる順番に設定
 % COMs = [5];%割り当てる順番に設定
 % cableL=[0.77,0.77];
-cableL=[0.91,0.91];
+% cableL=[0.91,0.91];
+cableL=[0.75,0.75];
 length=cableL;
 
 refName = {
@@ -47,8 +48,8 @@ refName = {
             % {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
             };
 refPointName= {
-                 % {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[0;0;0.5],"j",[-1;0;0.5],"k",[0;0;0.5],"m",[0;1;0.5],"n",[0;0;0.5]),10}
-                 {struct("f",[0;0;0.5],"g",[1;1;0.5],"h",[0;0;0.5],"j",[-1;-1;0.5],"k",[0;0;0.5],"m",[1;-1;0.5],"n",[0;0;0.5]),10}
+                 {struct("f",[0;0;0.5],"g",[1;0;0.5],"h",[0;0;0.5],"j",[-1;0;0.5],"k",[0;0;0.5],"m",[0;1;0.5],"n",[0;0;0.5]),10}
+                 % {struct("f",[0;0;0.5],"g",[1;1;0.5],"h",[0;0;0.5],"j",[-1;-1;0.5],"k",[0;0;0.5],"m",[1;-1;0.5],"n",[0;0;0.5]),10}
                  % {struct("f",[0;0;0.5]),10}
                  % {struct("f",[0;0;0.5],"g",[0;0.7;0.5],"h",[0;0;0.5],"j",[0;0.7;0.5],"k",[0;0;0.5]),10}
                  % {struct("f",[-1;-1;0.5],"g",[0;-1;0.5],"h",[1;-1;0.5],"j",[1;0;0.5],"k",[1;1;0.5]),10},...
@@ -95,6 +96,7 @@ if isCoop == 1
 end
 
 for i = firstId:N
+    agentNumber = 2*i-firstId +addId
     sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
     initial_state.p = sstate.p; %初期位置の取得
     initial_state.q = sstate.q; %初期角度の取得

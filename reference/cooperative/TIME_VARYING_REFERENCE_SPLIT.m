@@ -278,7 +278,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 %yaw補正をするための目標速度と高次微分を計算
                 yaw*180/pi
                 % if abs(kYawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
-                if abs(yaw)>20*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
+                if abs(yaw)>2000000*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
                         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
                     end
