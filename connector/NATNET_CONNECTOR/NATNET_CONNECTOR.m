@@ -6,8 +6,8 @@ classdef NATNET_CONNECTOR < handle
     end
     properties (NonCopyable = true, SetAccess = private )
         init_time  % first getData time
-        max_in_marker_num = 50; % max number of markers in field
-        max_rigid_num = 10;     % max number of rigid bodies
+        max_in_marker_num = 100; % max number of markers in field
+        max_rigid_num = 14;     % max number of rigid bodies
         %getFrame  % all data from motive
     end
     properties%(Access = private)
