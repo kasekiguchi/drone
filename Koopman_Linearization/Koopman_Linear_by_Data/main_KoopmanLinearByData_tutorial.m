@@ -131,9 +131,10 @@ flg.normalize = 0;
 flg.without_pos = 0;
 flg.hermite = 1;
 flg.weight = 1; % 重み付き最小二乗法
-QQ = 1;
+QQ = 1.00001;
 flg.weight_Qp = eye(3); flg.weight_Qq = eye(3) * QQ; flg.weight_Qv = eye(3); flg.weight_Qw = eye(3) * QQ;
 flg.weight_Qisobe = blkdiag(eye(3), eye(3)*1.00001, eye(3), eye(3)*1.00001); % for isobe
+flg.weight_Qhermite = 1;
 
 F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
@@ -142,7 +143,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato';
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kiyama_Error';
-FileName = strcat(FileName_common, exp_data, '_', 'code23_', Exp_tra, '_test1_weight_1-00001'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code22_', Exp_tra , '_weight2'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);

@@ -7,7 +7,7 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% model load
-clear
+clear;
 tra = 'saddle';
 script = [];
 mode.code = '00';
@@ -22,10 +22,10 @@ mode.training_data = 'Kiyama';
 % filename = '2024-11-14_Exp_Kato_code00_saddle';
 % filename = '2024-11-19_Exp_Kiyama_code15_saddle'; % hermite 1118=12-14, 1119=15
 % filename = '2024-12-04_Exp_Kiyama_code22_saddle'; % hermite [1; x]
-% filename = '2024-12-13_Exp_Kiyama_code23_saddle_test1_weight_1-00001';
+% filename = '2024-12-18_Exp_Kiyama_code23_saddle_weight4';
 % filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
-filename = '2024-12-11_Exp_Kiyama_code23_saddle_weight_1-00001';
-% filename = '2024-12-06_Exp_Kato_Kiyama_code24_saddle';
+% filename = '2024-12-11_Exp_Kiyama_code23_saddle_weight_1-00001';
+filename = '2024-12-20_Exp_Kiyama_code22_saddle_weight2';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -79,7 +79,7 @@ set(0,'defaultLineMarkerSize',15);
 
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
 
-figure(1);
+f = figure(1);
 sgtitle(strrep(filename, '_', '-'));
 % sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
 % subplot(2,3,1);
@@ -89,6 +89,7 @@ sgtitle(strrep(filename, '_', '-'));
 label_x = {'x', 'y', 'z', 'q.roll', 'q.pitch', 'q.yaw', 'vx', 'vy', 'vz', 'vq.roll', 'vq.pitch', 'vq.yaw'};
 ylimsetting = [-0.1 0.1; -0.05 0.05; -0.1 0.1; -0.05 0.05];
 
+format long
 ii = 4; jj = 3; arr = 1:ii*jj; idx = 0;
 for i = 1:ii
     for j = 1:jj
@@ -107,9 +108,18 @@ for i = 1:ii
         % plot(0:step_num,X(3,:)); grid on; ylim(ylimsetting(3,:)); xlim([-inf inf]);
         % text(0.2, 0.1, num2str(round(max(abs(X(3,:))),5)), 'Units', 'normalized', 'FontSize', 10);
         % xlabel('Step'); ylabel('$$z$$', 'Interpreter', 'latex');
+        
+        % fprintf(strcat(label_x{idx}, ':', num2str(round(max(abs(X(idx,:))), 5)), ','));
+        fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
     end
+    % fprintf('\n')
 end
+fprintf('\n')
 %input_state({A, B, C, step数, thrust, torque, 初期状態に使う配列, 初期状態のインデックス});
+
+% たくさんの結果を出して画像保存
+% f.WindowState = 'maximized';
+% saveas(1, strcat('Data/EstimationResult_fig/', filename{k}), 'jpg');
 
 %% A行列にxyzの位置を加えた拡張係数行列とする
 % if strcmp(filename, '2024-09-11_Exp_Kiyama_code10_saddle') == 1

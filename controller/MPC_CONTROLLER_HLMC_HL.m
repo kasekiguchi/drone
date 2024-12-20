@@ -259,7 +259,14 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       % toc
     end
     function show(obj)
-        obj.result
+        % obj.result
+        clc;
+        est = obj.self.estimator.result.state.get('p');
+        ref = obj.self.reference.result.state.get('p');
+        fprintf('===========================================\n');
+        fprintf('t: %f\n', obj.param.t);
+        fprintf('est: %f, %f, %f \n', est(1), est(2), est(3));
+        fprintf('ref: %f, %f, %f \n', ref(1), ref(2), ref(3));
     end
 
     %%-- 離散：階層型線形化

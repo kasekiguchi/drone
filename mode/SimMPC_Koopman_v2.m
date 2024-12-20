@@ -15,6 +15,7 @@ initial_state.w = [0; 0; 0];
 %% クープマンモデルの設定
 model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = "2024-12-04_Exp_Kiyama_code22_saddle";
+% model_file = "2024-12-19_Exp_Kiyama_code26_saddle";
 load(model_file,'est'); % main
 [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 agent = DRONE;

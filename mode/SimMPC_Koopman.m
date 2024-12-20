@@ -21,26 +21,27 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 機数，1, z (初期位置)
 initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
-% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = "EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-model_file = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001.mat';
+% model_file = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001.mat';
 % model_file = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001.mat';
 % model_file = '2024-12-11_Exp_Kiyama_code23_saddle_weight_1-00001.mat';
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
 % model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
-% model_file = "2024-12-04_Exp_Kiyama_code22_saddle";
+% model_file = "2024-12-19_Exp_Kiyama_code26_saddle";
 load(model_file,'est'); % main
-[A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
+% [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
+A=est.A; B=est.B; C=est.C;
 agent = DRONE;
 %% 位置を含まないモデルの場合，速度から算出する行列に変更 controller内で変更するようにした
 % なんか上手くいかない部分ができちゃったから封印
@@ -135,7 +136,7 @@ function result_plot(app, model)
     app.fExp = 0;
     flg.figtype = 0; % 0:subplot
     flg.savefig = 0;
-    flg.animation_save = 1;
+    flg.animation_save = 0;
     flg.animation = 1;
     flg.timerange = 0;
     flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
