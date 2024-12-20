@@ -212,7 +212,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                    refi         = zeros(28,1);  %機体のreference
                    refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
-                   drefi    = [reshape(ref0(4:21),3,[]);zeros(1,6)];%目標軌道微分
+                   drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
+                   drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
                    refi(5:end)   = reshape(drefi,[],1);
 
                elseif obj.cha =='t'

@@ -13,9 +13,9 @@
 %変更==============================================================================
     % date2 = "2024_1020";%日付が変わってしまった場合は自分で変更
     subfolder='exp';%sim or exp
-    ExpSimName='drone2Load1_1209';%実験,シミュレーション名
+    ExpSimName='drone4Load1';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='drone3Load1_pc1';%実験,シミュレーション内容64文字以内
+    contents='circle_success_PC1';%実験,シミュレーション内容64文字以内
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内

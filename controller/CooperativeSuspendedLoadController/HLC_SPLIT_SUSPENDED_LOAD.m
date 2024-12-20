@@ -46,7 +46,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             
             %拡張質量システムのekfで牽引物の質量を求める場合
             if contains(obj.self.estimator.model.name,"load_mL")
-                P(15) = max(model.state.mL,0);
+                
+                if model.state.pL(3)< 0.1 && varargin{2} == "l"
+                    p(15) = 0;
+                else 
+                    P(15) = max(model.state.mL,0);
+                end
                 obj.result.mLi= P(15);
                 if isfield(model.state,"fdst")
                     fdst = model.state.fdst;
