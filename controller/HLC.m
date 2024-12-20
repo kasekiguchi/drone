@@ -53,7 +53,7 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
-       % cha = varargin{1,3}; %HL 
+        % cha = varargin{1,3}; %HL 
         cha = varargin{1,1}{1,2}; %KMPC
 
         if strcmp(cha,'t')

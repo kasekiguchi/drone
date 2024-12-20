@@ -36,16 +36,12 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 10倍× 1/10×
    % Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み 木山
-    Controller_param.weight.V = diag([300; 2; 10]);    % 速度  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
+    Controller_param.weight.V = diag([300; 2; 1]);    % 速度  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山
     Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み　調整用 速度 vx10倍xの位置が-方向にゆっくり発散 vy10倍yの位置が-方向に発散 vz10倍landingみたいになる vxvy1/10× vz1/10悪くはないが…
                                                                % 角速度10倍xyだめ　z10倍x良いyだめ　1/10×
-    %Controller_param.weight.QW = diag([10; 1; 1.1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み yawちょっと改善    
-    %Controller_param.weight.QW = diag([10; 1; 0.9; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み よくない
-    %Controller_param.weight.QW = diag([5; 0.5; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    %Controller_param.weight.QW = diag([10; 1; 1.5; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
     Controller_param.weight.QWf = Controller_param.weight.QW;
