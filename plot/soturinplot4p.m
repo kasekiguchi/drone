@@ -6,7 +6,7 @@
 % data = return_state_prop(newLog1)
 % newLog1 = simplifyLogger(log);
 %機体1と機体2
-[newLog1,newLog2] = simplifyLogger4(log);
+[newLog1,newLog2] = simplifyLogger(log);
 t_1 = newLog1.t; %t:時間
 phase_1 = newLog1.phase;%phase:アーミングやフライトなどの状態
 k_1 = newLog1.k;%データ数
@@ -906,6 +906,24 @@ fprintf('軌道z_3の収束後の位置最大誤差: %f\n', max_error_z_3);
 fprintf('軌道x_4の収束後の位置最大誤差: %f\n', max_error_x_4);
 fprintf('軌道y_4の収束後の位置最大誤差: %f\n', max_error_y_4);
 fprintf('軌道z_4の収束後の位置最大誤差: %f\n', max_error_z_4);
+
+% xy目標軌道
+figure;
+plot(x_ref_sel1, y_ref_sel1, '--','LineWidth',2);
+grid on
+xlabel('x[m]') 
+ylabel('y[m]')
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+daspect([1 1 1])
+xlim([-2.5 2.5])
+ylim([-2.5 2.5])
+hold on
+plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
+plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
+plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
+legend('D1.REF','D2.REF','D3.REF','D4.REF','fontsize',8,'NumColumns',2)
+hold off
 
 % xy
 figure;
