@@ -39,10 +39,10 @@ if flg.weight
     % Q = blkdiag(Q_isobe, Q_hermite);
 
     % code22
-    Q = blkdiag(flg.weight_Qisobe, eye(4), eye(256), eye(256)*flg.weight_Qhermite);
+    % Q = blkdiag(flg.weight_Qisobe, eye(4), eye(256), eye(256)*flg.weight_Qhermite);
 
     % code26, code27
-    % Q = blkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
+    Q = blkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
     % 
 
     % 磯部のうち、[回転行列,1]以外は重み

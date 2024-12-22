@@ -25,7 +25,7 @@ mode.training_data = 'Kiyama';
 % filename = '2024-12-18_Exp_Kiyama_code23_saddle_weight4';
 % filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
 % filename = '2024-12-11_Exp_Kiyama_code23_saddle_weight_1-00001';
-filename = '2024-12-20_Exp_Kiyama_code22_saddle_weight2';
+filename = '2024-12-18_Exp_Kiyama_code23_saddle_weight2';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -170,7 +170,7 @@ clear; close all;
 init = [0;0;0];
 P = [0.5884 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
 % filename{1} = '2024-11-14_Exp_Kato_code00_saddle';
-filename{1} = '2024-12-04_Exp_Kiyama_code22_saddle';
+filename{1} = '2024-12-22_Exp_Kiyama_code26_saddle_weight1';
 % filename{2} = '2024-11-19_Exp_Kiyama_code15_saddle_4';
 filename{2} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % filename{3} = '2024-10-31_Exp_Kiyama_code10_normalize_saddle';
