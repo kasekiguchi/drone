@@ -227,8 +227,8 @@ k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S
 
 d1 = [k1; k2; k3; k4];
 d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S) 
-d3 = [kron(k1,k2); kron(k3,k4)]; % 
-d4 = [kron(k1,k3); kron(k2,k4)]; % 
+d3 = [kron(k1,k2); kron(k3,k4)]; % kron(RxS,RxS)
+d4 = [kron(k1,k3); kron(k2,k4)]; % kron(RxS,S)
 du = [H(u1); H(u2); H(u3); H(u4)];
 
 % z = [common_z; kron(d1, du)]; % 17 528
@@ -242,6 +242,7 @@ z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
 % z = [common_z; isobe_z; kron(k1,k2)]; % 26
 % z = [common_z; isobe_z; kron(k3,k4)]; % 27
+% z = [common_z; isobe_z; k3; k4]; % 28
 
 %% まとめ
 % z = [common_z; isobe_z]; % 00
@@ -260,13 +261,5 @@ z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; hermite_WheeledRobot_z]; % 14
 % z = [common_z; hermite_total_z]; % 15
 % z = [common_z; isobe_z; hermite_WheeledRobot_z]; % 16
-
-%% 観測量に重み付け
-% z_isobe = [common_z; isobe_z];
-% z_hermite = z;
-% 
-% z_isobe_weight = blkdiag(Q, eye(length(z_isobe)-12)) * z_isobe;
-% z_hermite_weight = 
-
 end
 

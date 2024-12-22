@@ -15,14 +15,14 @@ flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 1; % コマンドウィンドウに表示
+flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 12; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -41,9 +41,9 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 % loadfilename{1} = '2024-12-04_Exp_Kiyama_code22_saddle';
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
-% % loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
-% loadfilename{1} = '2024-09-03_Exp_Kiyama_XY_20data_code00_saddle';
-loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+% loadfilename{1} = '2024-12-06_Exp_Kiyama_code23_saddle.mat';
+% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code08_optim_2_saddle'; %90万回
@@ -56,10 +56,10 @@ loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_i
 % file2 : 別のリファレンス
 % ref_tra = 'P2Py';
 % loadfilename{2} = WhichLoadFile(ref_tra, 1, []);
-% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
-% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code01_hovering';
-loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
+% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
@@ -136,9 +136,9 @@ file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2st
 file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
 file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
 
-if ~isfield(file{i}.simResult,'initTindex')
+% if ~isfield(file{i}.simResult,'initTindex')
     file{i}.simResult.initTindex = 1;
-end
+% end
 
 if i == 1
     indexcheck = file{i}.simResult.initTindex
@@ -172,17 +172,17 @@ end
 % simResult.Xhat = file{1}.est.C * simResult.Z;
 
 % 読み込んだ情報(file{i}.simResult.state)の書き換え 
-if size(file{1}.Data.X,1)==13
-    file{1}.simResult.state.p = simResult.Xhat(1:3,:);
-    file{1}.simResult.state.q = simResult.Xhat(4:7,:);
-    file{1}.simResult.state.v = simResult.Xhat(8:10,:);
-    file{1}.simResult.state.w = simResult.Xhat(11:13,:);
-else
+% if size(file{1}.Data.X,1)==13
+    % file{1}.simResult.state.p = simResult.Xhat(1:3,:);
+    % file{1}.simResult.state.q = simResult.Xhat(4:7,:);
+    % file{1}.simResult.state.v = simResult.Xhat(8:10,:);
+    % file{1}.simResult.state.w = simResult.Xhat(11:13,:);
+% else
     file{1}.simResult.state.p = simResult.Xhat(1:3,:);
     file{1}.simResult.state.q = simResult.Xhat(4:6,:);
     file{1}.simResult.state.v = simResult.Xhat(7:9,:);
     file{1}.simResult.state.w = simResult.Xhat(10:12,:);
-end
+% end
 catch
     open("quaternions_all.m");
     error('Number of observales is different.');

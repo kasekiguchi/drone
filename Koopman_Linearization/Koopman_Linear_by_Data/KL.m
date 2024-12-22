@@ -32,18 +32,23 @@ end
 %% A,Bをまとめて計算するデータ数が多い場合のやりかた
 if flg.weight 
     % 磯部とエルミートで重みわける code23
-    % Q_isobe = blkdiag(flg.weight_Qisobe, eye(26-12));
-    % Q_hermite_k1_k2 = eye(256); % 状態以外の観測量部分は1とする
-    % Q_hermite_k3_k4 = eye(256) * flg.weight_Qhermite;
-    % Q_hermite = blkdiag(Q_hermite_k1_k2, Q_hermite_k3_k4);
-    % Q = blkdiag(Q_isobe, Q_hermite);
+    Q_isobe = blkdiag(flg.weight_Qisobe, eye(26-12));
+    Q_hermite_k1_k2 = eye(256); % 状態以外の観測量部分は1とする
+    Q_hermite_k3_k4 = eye(256) * flg.weight_Qhermite;
+    Q_hermite = blkdiag(Q_hermite_k1_k2, Q_hermite_k3_k4);
+    Q = blkdiag(Q_isobe, Q_hermite);
+
+    % code00
+    % Q = blkdiag(flg.weight_Qisobe, eye(26-12));
 
     % code22
     % Q = blkdiag(flg.weight_Qisobe, eye(4), eye(256), eye(256)*flg.weight_Qhermite);
 
     % code26, code27
-    Q = blkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
-    % 
+    % Q = blkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
+    
+    % code28
+    % Q = blkdiag(flg.weight_Qisobe, eye(14), eye(32)*flg.weight_Qhermite);
 
     % 磯部のうち、[回転行列,1]以外は重み
     % Q = blkdiag(flg.weight_Qisobe, eye(4), eye(10)*1.00001);

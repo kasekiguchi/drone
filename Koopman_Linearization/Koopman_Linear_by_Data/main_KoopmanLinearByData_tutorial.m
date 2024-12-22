@@ -130,10 +130,12 @@ flg.bilinear = 0;
 flg.normalize = 0;
 flg.without_pos = 0;
 flg.hermite = 1;
-flg.weight = 1; % 重み付き最小二乗法
-QQ = 1.00001;
-flg.weight_Qp = eye(3); flg.weight_Qq = eye(3) * QQ; flg.weight_Qv = eye(3); flg.weight_Qw = eye(3) * QQ;
-flg.weight_Qisobe = blkdiag(eye(3), eye(3)*1.00001, eye(3), eye(3)*1.00001); % for isobe
+flg.weight = 1 % 重み付き最小二乗法
+A = diag([1 1.00001 1]); % pitchのみに重み
+Qp = eye(3); Qq = A; Qv = eye(3); Qw = A;
+flg.weight_Qisobe = blkdiag(Qp, Qq, Qv, Qw);
+
+% flg.weight_Qisobe = blkdiag(eye(3), eye(3)*1.00001, eye(3), eye(3)*1.00001); % for isobe
 flg.weight_Qhermite = 1;
 
 F = @quaternions_all; % 改造用
@@ -143,7 +145,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato';
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kiyama_Error';
-FileName = strcat(FileName_common, exp_data, '_', 'code26_', Exp_tra , '_weight1'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code23_', Exp_tra, '_increased_weight10'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -159,7 +161,10 @@ if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
 end
 
 % データのかさまし
-% Data = data_increased(Data, 0.001, 20);
+flg.increased = 1;
+if flg.increased
+    Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
+end
 
 % 正規化
 % flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
@@ -292,7 +297,11 @@ simResult.state.N = simResult.reference.N-1;
 if strcmp(exp_data, 'Exp_Kato')
     save(targetpath,'est')
 else
-    save(targetpath,'est','Data','simResult','F')
+    if flg.increased
+        save(targetpath,'est')
+    else
+        save(targetpath,'est','Data','simResult','F')
+    end
 end
 disp('Saved to')
 disp(targetpath)

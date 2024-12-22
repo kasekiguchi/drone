@@ -76,6 +76,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.result.setting.A = obj.param.A;
             obj.result.setting.B = obj.param.B;
             obj.result.setting.C = obj.param.C;
+            obj.result.setting.H = obj.qpparam.H;
+            obj.result.setting.f = obj.qpparam.F;
 
             % obj.param.filename = param.controller_model;
         end

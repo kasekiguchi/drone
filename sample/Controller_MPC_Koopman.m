@@ -6,7 +6,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     % Controller_param.m = agent.parameter.mass;
-    Controller_param.dt = 0.08; % MPCステップ幅 0.07
+    Controller_param.dt = 0.08; % MPCステップ幅 1222:0.08 0.07
     Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
@@ -59,11 +59,18 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     end
     
 
-    %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
+    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
+    Controller_param.weight.P = 1 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.W =10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
@@ -85,12 +92,12 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     else
         Controller_param.input.u = Controller_param.m * 9.81 / 4 * [1;1;1;1]; % 4入力
     end
-    % Controller_param.input.lb = [0; -1; -1; -1];
-    % Controller_param.input.ub = [10; 1;  1;  1];
+    Controller_param.input.lb = [0; -1; -1; -1];
+    Controller_param.input.ub = [10; 1;  1;  1];
 
     % 実質制約なし
-    Controller_param.input.lb = [0; -10; -10; -10];
-    Controller_param.input.ub = [100;10;  10;  10];
+    % Controller_param.input.lb = [0; -10; -10; -10];
+    % Controller_param.input.ub = [100;10;  10;  10];
     % 
     
 %     Controller_param.torque_TH = 0;
