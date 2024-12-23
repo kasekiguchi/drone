@@ -31,7 +31,13 @@ classdef STL < handle
             end
             obj.self = self;
             obj.modechangeflag=modechangeflag;   %0=keep the mode/mode has been changed   1= the mode is changing
-            obj.automodeflag=1;     %1=automode 2=semiautoflag
+            obj.automodeflag=1;
+            syms t real
+            obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));%1=automode 2=semiautoflag
+            obj.result.state.set_state("xd",LANDING_REFERENCE_KYOREF(obj,t));
+            obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+            obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));       
         end
 
 
@@ -61,7 +67,7 @@ classdef STL < handle
                     end
                 end
                 obj.mode=modeExecution(1,obj.currentmodecount);
-                obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
+               
                 switch obj.mode %mode change for % 1: landing 2:circle movement 3:hoving 4:take off  etc...
                     case 1
                         obj.result.state.xd=obj.LANDING_REFERENCE_KYOREF(varargin{1}.t);
@@ -79,7 +85,7 @@ classdef STL < handle
                 end
 
                 obj.modechangeflag=0;
-
+                
                 obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                 %              obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
                 obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
@@ -127,22 +133,9 @@ classdef STL < handle
         function Xd = CIRCLEMOVING_REFERENCE_KYOREF(obj,t)
             %UNTITLED2 Summary of this class goes here
             %   Detailed explanation goes here
-
-            
-           if ~isempty(obj.t)    %flightからreferenceの時間を開始
-                ttemp =t-obj.t; % 目標重心位置（絶対座標）
-           else
-                ttemp = obj.t;
-           end 
-           obj.result.state.xd = obj.func(ttemp); % 目標重心位置（絶対座標）
-           obj.result.state.p = obj.result.state.xd(1:3);
-           if length(obj.result.state.xd)>4
-            obj.result.state.v = obj.result.state.xd(5:7);
-           else
-            obj.result.state.v = [0;0;0];
-           end
-           obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
-           result = obj.result;
+            Xd  = zeros( 20, 1);
+            Xd= @(t) [cos(t)/5, sin(t)/5, z0];
+          
         end
         function Xd = HOVERING_REFERENCE_KYOREF(obj,t)
             %UNTITLED2 Summary of this class goes here
@@ -154,7 +147,32 @@ classdef STL < handle
         function Xd = TAKINGOFF_REFERENCE_KYOREF(obj,t)
             %UNTITLED2 Summary of this class goes here
             %   Detailed explanation goes here
-
+            Xd  = zeros( 20, 1);
+            %% Set Xd
+            Xd( 1, 1)   = Xd_old( 1);% ref x
+            Xd( 2, 1)   = Xd_old( 2);% ref y
+            Xd( 4, 1)   = Xd_old( 4);% ref yaw angle
+            if t<=te
+                tra=(126*d*t^5)/te^5 - (420*d*t^6)/te^6 + (540*d*t^7)/te^7 - (315*d*t^8)/te^8 + (70*d*t^9)/te^9;
+                dtra = (630*d*t^4)/te^5 - (2520*d*t^5)/te^6 + (3780*d*t^6)/te^7 - (2520*d*t^7)/te^8 + (630*d*t^8)/te^9;
+                ddtra = (2520*d*t^3)/te^5 - (12600*d*t^4)/te^6 + (22680*d*t^5)/te^7 - (17640*d*t^6)/te^8 + (5040*d*t^7)/te^9;
+                d3tra = (7560*d*t^2)/te^5 - (50400*d*t^3)/te^6 + (113400*d*t^4)/te^7 - (105840*d*t^5)/te^8 + (35280*d*t^6)/te^9;
+                d4tra = (15120*d*t)/te^5 - (151200*d*t^2)/te^6 + (453600*d*t^3)/te^7 - (529200*d*t^4)/te^8 + (211680*d*t^5)/te^9;
+            elseif t> te
+                t= te;
+                tra=d;
+                dtra = 0;
+                ddtra = 0;
+                d3tra = 0;
+                d4tra = 0;
+            end
+            Xd( 3, 1) = tra + sp(3);
+            Xd(7,1) = dtra;
+            Xd(11,1) = ddtra;
+            Xd(15,1)=d3tra;
+            Xd(19,1)=d4tra;
+            vd = [0;0;dtra;0];
+        
           
         end
     end
