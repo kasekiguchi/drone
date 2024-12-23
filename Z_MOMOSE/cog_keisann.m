@@ -2,12 +2,16 @@
 clear time tl mL pL
 close all
 % ============================================
-delta = 100;
-phase = 102;
+delta = 1;
+phase = 102;%takeoff:116,flight:102
 Msize = 4;
-loggers = simple_log_circle07;
+isOrigin=0;
+% loggers = simple_log_circle07;
 % loggers = simple_log_drone3Load1_pc1;
 % loggers{4} = simple_log_drone3Load1{2};
+ loggers = [simple_log_circle_success_PC1;...
+                    simple_log_circle_success_PC2(2:end)
+                    ];
 % ============================================
 logNum = length(loggers);
 phaseId = find(loggers{1, 1}.phase==phase );
@@ -16,12 +20,14 @@ idDelta = mod(idL,delta);
 idEnd= phaseId(end)- idDelta;
 idStart = phaseId(1);
 
-pL0 = loggers{1, 1}.sensor.p(:,idStart:delta:idEnd);  
+pL0 = loggers{1, 1}.sensor.p(:,idStart:delta:idEnd);
+ref0 = loggers{1, 1}.reference.xd(1:3,idStart:delta:idEnd);
 for i = 2:logNum
     time{i-1} = loggers{i, 1}.t(idStart:delta:idEnd,:);
     tl{i-1} = length(time{i-1});
     mL{i-1} = loggers{i, 1}.estimator.mL(:,idStart:delta:idEnd);
-    pL{i-1} = loggers{i, 1}.estimator.pL(:,idStart:delta:idEnd);
+    % pL{i-1} = loggers{i, 1}.estimator.pL(:,idStart:delta:idEnd);
+    pL{i-1} = loggers{i, 1}.sensor.real_pL(:,idStart:delta:idEnd);
 end
 mLAjust = ajust_index(time,logNum,tl,mL);
 pLAjust = ajust_index(time,logNum,tl,pL);
@@ -34,7 +40,9 @@ G = zeros(3,tl{1});
 for i = 1:logNum-1
     G = G + pLAjust{i}.*mLAjust{i}./M;
 end
-% G = G - pL0;
+if isOrigin
+    G = G - pL0;
+end
 
 X = zeros(logNum-1,tl{1});
 Y = zeros(logNum-1,tl{1});
@@ -49,24 +57,36 @@ i = 1;
 f(i) = figure;
 plot(time{1},G)
 hold on
-plot(time{1},pL0)
+plot(time{1},pL0,"LineStyle","--")
+plot(time{1},ref0,"LineStyle",":")
 grid minor
+legend("x_G","y_G","z_G","x_{load}","y_{load}","z_{load}")
+xlabel("x (m)")
+ylabel("y (m)")
+zlabel("z (m)")
 i = i+1;
 
 f(i) = figure;
 plot3(G(1,:),G(2,:),G(3,:),"Marker","*","LineStyle","none","MarkerSize",Msize)
 hold on
 plot3(pL0(1,:),pL0(2,:),pL0(3,:),"Marker","+","LineStyle","none","MarkerSize",Msize)
-fill3(X,Y,Z,"w","facecolor","none")
+% fill3(X,Y,Z,"w","facecolor","none")
 grid minor
+legend("COG","Payload")
+xlabel("x (m)")
+ylabel("y (m)")
+zlabel("z (m)")
 i = i+1;
 
 f(i) = figure;
 plot(G(1,:),G(2,:),"Marker","*","LineStyle","none","MarkerSize",Msize)
 hold on
 plot(pL0(1,:),pL0(2,:),"Marker","+","LineStyle","none","MarkerSize",Msize)
-fill3(X,Y,zeros(size(Z)),"w","facecolor","none")
+% fill3(X,Y,zeros(size(Z)),"w","facecolor","none")
 grid minor
+legend("COG","Payload")
+xlabel("x (m)")
+ylabel("y (m)")
 i = i+1;
 
 
@@ -77,10 +97,10 @@ function vars =ajust_index(time,logNum,tl,vars)
                 kNow = 1;
                 for j = 1:tl{i-1}
                     tBase = time{i-1}(j);
-                    for k = kNow:tl{i-1}
-                            tNow =  time{i-1}(k);
+                    for k = kNow:tl{i}
+                            tNow =  time{i}(k);
                         if tBase<tNow 
-                            if abs(tBase-time{i-1}(k))<abs(tBase-time{i-1}(k-1))
+                            if abs(tBase-time{i}(k))<abs(tBase-time{i}(k-1))
                                 tmp{i}(:,j) = vars{i}(:,k);
                                 kNow = k+1;
                             else

@@ -3,6 +3,7 @@
     % ExportFolder='A:\Work2024\momose';%実験用pcのパス
     ExportFolder='C:\きょうゆう';
     ExportFolder='\\Desktop-2pivavv\きょうゆう';
+    ExportFolder='X:\Work2024\momose';
     % % ExportFolder='C:\Users\acsl_students\Documents\students\workspace2024\momose';%実験用pcのパス
     % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';

@@ -12,12 +12,12 @@
 close all
 clear multiFigure option addingContents f
 %選択    
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 startTime = 0;
-endTime = 600;%1E3;
-fnowdata = 1;
+endTime = 1000;%1E3;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -39,8 +39,11 @@ else
     % loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
     % loggers = simple_log_expandSysEKF;
     % loggers = simple_log_ptopx01210_1_2y0000000z05_yaw10;
-    loggers = simple_log_drone3Load1_pc1;
-    loggers{4} = simple_log_drone3Load1{2}; 
+    if 1
+        loggers = [simple_log_circle_success_PC1;...
+                    simple_log_circle_success_PC2(2:end)
+                    ];
+    end
     droneID = 1:length(loggers)-1;
 end
 lgnd.payload=["payload","split payload" + droneID];
@@ -74,6 +77,7 @@ lgnd.drone="drone" + droneID;
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
      n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      n = ["t_errx0","t_erry0","t_errz0"];
+     n = ["t_sx0" "t_sy0" "t_sz0","t_p","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw"];%比較するとき複数まとめる
      % n = ["mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      % n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
@@ -202,12 +206,12 @@ if isSaved
     %RMSEの保存
     run("makeSavePath")
     RMSE(1,1)="";
-    filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
+    filenameRMSE=strcat(fullfile(FolderNamer, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
     if fExist
         writematrix([strings(1,4);"<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
     else
-        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
+        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNamer, 'RMSEs'),'.txt'),'Delimiter','tab')
     end
     
     %% single save
@@ -362,15 +366,13 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             refx0{1} = rxd{i}(1,:);
             refy0{1} = rxd{i}(2,:);
             refz0{1} = rxd{i}(3,:);
-            ex0{1} = ep{i}(1,:);
-            ey0{1} = ep{i}(2,:);
-            ez0{1} = ep{i}(3,:);
-            err{1} = ep{1}-rxd{1}(1:3,:);%誤差
-            errx0{1} = err{1}(1,:);
-            erry0{1} = err{1}(2,:);
-            errz0{1} = err{1}(3,:);
-            epL{i} = ep{i};
+            
             if ~fExp
+                ex0{1} = ep{i}(1,:);
+                ey0{1} = ep{i}(2,:);
+                ez0{1} = ep{i}(3,:);
+                epL{1} = ep{i};
+                err{1} = ep{1}-ref0;%誤差
                 ev0{1} = ev{i};
                 vx0{1} = ev{i}(1,:);
                 vy0{1} = ev{i}(2,:);
@@ -386,7 +388,15 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 sx0{1} = sp{i}(1,:);
                 sy0{1} = sp{i}(2,:);
                 sz0{1} = sp{i}(3,:);
+                ex0{1} = sp{i}(1,:);
+                ey0{1} = sp{i}(2,:);
+                ez0{1} = sp{i}(3,:);
+                err{1} = sp{1}-ref0;%誤差
+                epL{1} = sp{1};
             end
+            errx0{1} = err{1}(1,:);
+            erry0{1} = err{1}(2,:);
+            errz0{1} = err{1}(3,:);
                 sqroll0{1} = sq{i}(1,:);
                 sqpitch0{1} = sq{i}(2,:);
                 sqyaw0{1} = sq{i}(3,:);
@@ -479,6 +489,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         %     c = string(1:logNum);
         % end
         C = lgnd.payload;
+        Cref = C + " ref.";
         Rc = [C,"Reference"];
         Rc0 = num2cell([Rc(1),Rc(end)]);
         C0 = num2cell(C(1));
@@ -486,7 +497,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         Ci = num2cell(C(2:end));
         CDi = num2cell(lgnd.drone);
         t1 = {ones(lt(1),3).*time{1}'};
-        allData.t_p0 = {struct('x',{[t1,t1]},'y',{[{rxd{1}(1:3,:)'},{ep{1}'}]}), struct('x','time (s)','y','payload position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
+        allData.t_p0 = {struct('x',{[t1,t1]},'y',{[{ref0},{epL{1}'}]}), struct('x','time (s)','y','payload position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
         allData.x_y0 = {struct('x',{[ex0,refx0]},'y',{[ey0,refy0]}), struct('x','$x$ (m)','y','$y$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
         allData.x_z0 = {struct('x',{[ex0,refx0]},'y',{[ez0,refz0]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
         allData.y_z0 = {struct('x',{[ey0,refy0]},'y',{[ez0,refz0]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
@@ -529,7 +540,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
 
         time2 = time(2:end);
         allData.t_p = {struct('x',{[time2,time2]},'y',{[ref,ep(2:end)]}), struct('x','time (s)','y','position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
-        allData.x_y = {struct('x',{[epLx,refx]},'y',{[epLy,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
+        allData.x_y = {struct('x',{[epLx,refx]},'y',{[epLy,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),[C(2:end),Cref(2:end)],add_option(["aspect"],option,addingContents)};
         allData.x_z = {struct('x',{[epLx,refx]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
         allData.y_z = {struct('x',{[epLy,refy]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
         allData.t_x = {struct('x',{[time2,time2]},'y',{[epLx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rci,add_option([],option,addingContents)};
@@ -555,7 +566,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.t_wyaw = {struct('x',{time2},'y',{wyaw}), struct('x','time (s)','y','$w_{yaw}$ (rad)/s'),Ci,add_option([],option,addingContents)};
         %ペイロード位置も3D入れる
         allData.three_D = {struct('x',{[ex0,epLx,refx0]},'y',{[ey0,epLy,refy0]},'z',{[ez0,epLz,refz0]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), [C0,Rci],add_option(["aspect","camposition"],option,addingContents)};
-        allData.expThree_D = {struct('x',{[sx0,epLx,refx0,refx]},'y',{[sy0,epLy,refy0,refy]},'z',{[sz0,epLz,refz0,refz]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), [C0,Rci],add_option(["aspect","camposition"],option,addingContents)};
+        allData.expThree_D = {struct('x',{[sx0,epLx,refx0,refx]},'y',{[sy0,epLy,refy0,refy]},'z',{[sz0,epLz,refz0,refz]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), [C,Cref],add_option(["aspect","camposition"],option,addingContents)};
         allData.pp = {struct('x',{time2},'y',{[ep(2:end),pp(2:end)]}), struct('x','time (s)','y','position (m)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],Ci),add_option([],option,addingContents)};
         allData.pv = {struct('x',{time2},'y',{[ev(2:end),pv(2:end)]}), struct('x','time (s)','y','velocity (m/s)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],Ci),add_option([],option,addingContents)};
         allData.pq = {struct('x',{time2},'y',{[eq,pq]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],Ci),add_option([],option,addingContents)};
@@ -810,7 +821,8 @@ function plot_data_single(~, ~, branchData)
         end
         newlog.Data.agent.inner_input = log.Data.agent.inner_input;  
     end
-    function [mLi,mAll] =sum_mLi(time,logNum,lt,mLi,mAll)
+    function [mLi,mAll] =sum_mLi(timeAll,logNum,lt,mLi,mAll)
+        time = timeAll(2:end);
         timeL = lt(2:end);
         tmpM(1,:) = mLi{1};
         for i = 2:logNum-1
@@ -819,15 +831,19 @@ function plot_data_single(~, ~, branchData)
                 kNow = 1;
                 for j = 1:timeL(i-1)
                     tBase = time{i-1}(j);
-                    for k = kNow:timeL(i-1)
-                            tNow =  time{i-1}(k);
-                        if tBase<tNow 
-                            if abs(tBase-time{i-1}(k))<abs(tBase-time{i-1}(k-1))
-                                tmpM(i,j) = mLi{i}(k);
-                                kNow = k+1;
+                    for k = kNow:timeL(i)
+                            tNow =  time{i}(k);
+                        if tBase<tNow
+                            if k>1
+                                if abs(tBase-time{i}(k))<abs(tBase-time{i}(k-1))
+                                    tmpM(i,j) = mLi{i}(k);
+                                    kNow = k+1;
+                                else
+                                    tmpM(i,j) = mLi{i}(k-1);
+                                    kNow = k;
+                                end
                             else
-                                tmpM(i,j) = mLi{i}(k-1);
-                                kNow = k;
+                                tmpM(i,j) = mLi{i}(k);
                             end
                             break
                         end
@@ -836,6 +852,7 @@ function plot_data_single(~, ~, branchData)
                 end
                 mLi{i}=tmpM(i,:);
                 mAll{i}=tmpM(i,:);
+                timeL(i) = timeL(i-1);
             elseif timeL(i-1)>timeL(i)%長い制御周期を短い物に合わせる
                 tmpM(i,:) = zeros(1,timeL(i-1));
                 kNow = 1;
@@ -853,6 +870,7 @@ function plot_data_single(~, ~, branchData)
                 end
                 mLi{i}=tmpM(i,:);
                 mAll{i}=tmpM(i,:);
+                timeL(i) = timeL(i-1);
             else
                 tmpM(i,:) = mLi{i};
             end

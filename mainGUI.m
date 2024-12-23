@@ -1,6 +1,5 @@
 %% Initialize settings
 % set path
-clear 
 cf = pwd;
 
 if contains(mfilename('fullpath'), "mainGUI")
