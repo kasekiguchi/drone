@@ -4,7 +4,8 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     % Controller_param.controller_model = 'hermite';
 
-    Controller_param.m = 0.5884; %ドローンの質量、質量は統一
+    % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
+    Controller_param.m = 0.595;
     % Controller_param.m = agent.parameter.mass;
     Controller_param.dt = 0.08; % MPCステップ幅 1222:0.08 0.07
     Controller_param.H = 10; %ホライズン数

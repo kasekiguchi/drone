@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = '1023_KMPC_HL_error_model_good';
+filename = '1223_KMPC_hovering_code23_weight_1720';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる

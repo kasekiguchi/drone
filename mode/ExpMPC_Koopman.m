@@ -18,7 +18,7 @@ initial_state.w = [0; 0; 0];
 
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM1")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -28,7 +28,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
 %% ##############################################################
-model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = "2024-08-06_Exp_KiyamaY20_code00_saddle.mat"; % y方向増加
@@ -36,6 +36,7 @@ model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_
 % model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
 % model_file = "2024-09-11_Exp_Kiyama_code10_saddle.mat";
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
+model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
 
 %% controllerでHL, KMPCをphaseで判別して動かす
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent));
@@ -48,6 +49,10 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controlle
 
 % disp(['Select model confirmation: ' + model_file]); % dispはダブルクォーテーションのみ対応
 run("ExpBase");
+
+%% save log
+% logger = gui.logger;
+% save("Data/1223_KMPC_hovering_code23_weight_1720.mat", "logger", "-v7.3");
 
 %% function
 % function result = controller_do(varargin)

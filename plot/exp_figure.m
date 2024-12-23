@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '0731_KMPC_saigen_hovering_code00';
 
-filename = '0731_KMPC_saigen_hovering_code00';
+filename = '1223_KMPC_hovering_code00_1636';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
@@ -30,6 +30,7 @@ loadfile = strcat("Data/", filename, ".mat");
 % loadfile = "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2024\2012035_木山康平\第5章\結果\2_8_Exp_KMPC_P2Py_成功.mat";
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
+% load(loadfile);
 
 % 115:start
 % 97 :arming
@@ -54,7 +55,7 @@ flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
-fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange));
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange),struct('model',filename));
 % fig.main_animation();
 fig = fig.main_figure();
 % fig = fig.make_mpc_plot();

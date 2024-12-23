@@ -3,13 +3,13 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_Koopman(varargin)
     % drone Prop. input
 
     %% transmitter system
-    % gain_tl
-    % u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    % u_trans_param.th_offset = 325;         % 325のほうがちょうどいい
+    % Kato iFlight
+    u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    u_trans_param.th_offset = 340;         % 325のほうがちょうどいい
 
     % iFlight
-    u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
-    u_trans_param.th_offset = 350; %350 
+    % u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
+    % u_trans_param.th_offset = 340; %350 
     
     % u_trans_param.gain2 = [1000;1000;1000;500]; % 650 650 650 500 割といい
 
@@ -19,8 +19,13 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_Koopman(varargin)
     % hovering H=20 : 800 800 800 400
     % hovering H=10~15 : 800 800 800 500 くらい
 
-    u_trans_param.gain2 =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    u_trans_param.th_offset2 = 325
+    %% Komatsu
+    % u_trans_param.gain2 =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.th_offset2 = 335;
+
+    %% Kato Kiyama Dataset -> iFlight
+    u_trans_param.gain2 = [1600;1600;1600;170];
+    u_trans_param.th_offset2 = 342;
 
 
 
