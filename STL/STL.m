@@ -32,9 +32,8 @@ classdef STL < handle
             obj.self = self;
             obj.modechangeflag=modechangeflag;   %0=keep the mode/mode has been changed   1= the mode is changing
             obj.automodeflag=1;
-            syms t real
-            obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));%1=automode 2=semiautoflag
-            obj.result.state.set_state("xd",LANDING_REFERENCE_KYOREF(obj,t));
+            obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));%1=automode 2=semiautoflag
+            obj.result.state.set_state("xd",[0;0;0;0]);
             obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
             obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
             obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));       
@@ -67,7 +66,8 @@ classdef STL < handle
                     end
                 end
                 obj.mode=modeExecution(1,obj.currentmodecount);
-               
+                obj.modechangeflag=0;
+            end
                 switch obj.mode %mode change for % 1: landing 2:circle movement 3:hoving 4:take off  etc...
                     case 1
                         obj.result.state.xd=obj.LANDING_REFERENCE_KYOREF(varargin{1}.t);
@@ -84,14 +84,14 @@ classdef STL < handle
                     otherwise
                 end
 
-                obj.modechangeflag=0;
+               
                 
                 obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                 %              obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
                 obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
                 % obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
                 result = obj.result;
-            end
+            
 
 
         end
@@ -134,7 +134,7 @@ classdef STL < handle
             %UNTITLED2 Summary of this class goes here
             %   Detailed explanation goes here
             Xd  = zeros( 20, 1);
-            Xd= @(t) [cos(t)/5, sin(t)/5, z0];
+            Xd= @(t) [cos(t)/5, sin(t)/5];
           
         end
         function Xd = HOVERING_REFERENCE_KYOREF(obj,t)
@@ -171,7 +171,7 @@ classdef STL < handle
             Xd(11,1) = ddtra;
             Xd(15,1)=d3tra;
             Xd(19,1)=d4tra;
-            vd = [0;0;dtra;0];
+            
         
           
         end

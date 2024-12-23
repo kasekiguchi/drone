@@ -14,7 +14,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 1, 1, z
+initial_state.p = arranged_position([10, 10], 1, 1, 10); % [x, y], 1, 1, z
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -25,7 +25,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[10;10;10]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
 agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 %STL関連 Initialize  and send the object into the classdef to change the parament
@@ -50,8 +50,8 @@ for i = 1:400
     all = toc
 end
 %% 途中で止めた時もセクション実行でグラフ出せる
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-
+%logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1,"p","er"},{1, "q", "e"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
