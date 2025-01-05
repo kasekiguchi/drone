@@ -1239,7 +1239,7 @@ figure;
 plot(t_sel1,vx_est_sel1, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -1264,7 +1264,7 @@ figure;
 plot(t_sel3,vx_est_sel3, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -1291,7 +1291,7 @@ figure;
 plot(t_sel1,er_vx_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -1309,7 +1309,7 @@ figure;
 plot(t_sel3,er_vx_3_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -1329,7 +1329,7 @@ figure;
 plot(t_sel1,rmse_vx_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -1347,7 +1347,7 @@ figure;
 plot(t_sel3,rmse_vx_3_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
