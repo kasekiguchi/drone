@@ -70,7 +70,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     temp = gen_func_name(param_for_gen_func{:});
                     if ~field(temp,"rotm")
                         syms t
-                        temp.q       = [roll;pitch;yaw];%roll,pitch,yaw
+                        roll   = 0;
+                        pitch  = 0;
+                        yaw    = 0;
+                        temp.q = [roll;pitch;yaw];%roll,pitch,yaw
                         clear t
                     end
                     obj.func = gen_ref_for_HL_Cooperative_Load(temp);
@@ -161,7 +164,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
                %reference
-               ref0 = obj.agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
+               ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
                rotm0 = obj.agent1.reference.result.rotms;     %回転行列
                x0d  = ref0(1:3);
                % dx0d = ref0(4:6);
@@ -208,9 +211,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
                    % drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
                    % refi(5:end)   = reshape(drefi,[],1);
-
-                   refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%6階微分までの回転行列とrhoをまとめて計算
-                   refi(1:3) = refi(1:3) + 0.0*rhoi/norm(rhoi);%目標位置を変更させる
+                   rhoi = rhoi + 0*rhoi/norm(rhoi);%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'
                    obj.flanding = 0;
@@ -372,9 +374,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %         obj.self.estimator.result.state.a   = ddX0(1:3);
            %         obj.self.estimator.result.state.dO  = ddX0(4:6);
            else
-               % obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-               obj.result.state.xd = obj.func(t);%牽引物の目標軌道
-               obj.result.rotms = obj.funcRotms(t);%回転行列と高次微分
+               xd = obj.func(t);%牽引物の目標軌道
+               rotms = obj.funcRotms(t);%回転行列と高次微分
+               obj.result.state.xd = [xd;rotm2eul(rotms(1:3,1:3))];%xd+[roll;pitch;yaw]
+               obj.result.rotms = rotms;
 
                % refi = obj.result.state.xd;
                % obj.result.state.p = refi(1:3);

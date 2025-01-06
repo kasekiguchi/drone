@@ -238,8 +238,8 @@ disp(time.t)
 % agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
-mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",1);
+mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
+% mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",1);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
