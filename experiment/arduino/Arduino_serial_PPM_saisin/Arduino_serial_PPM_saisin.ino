@@ -13,7 +13,7 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 #define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
 #define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
 #define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
-#define LAND_PIN 4    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
+#define LAND_PIN 5    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 volatile boolean isLanding = false;
