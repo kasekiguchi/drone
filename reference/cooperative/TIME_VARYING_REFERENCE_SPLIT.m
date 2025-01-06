@@ -4,6 +4,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
     properties
         param
         func % 時間関数のハンドル
+        funcRotms
         self
 %         agent1 % cooprative情報
         ref_set
@@ -67,33 +68,24 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     temp = gen_func_name(param_for_gen_func{:});
-                    obj.func = gen_ref_for_HL(temp);
+                    if ~field(temp,"rotm")
+                        syms t
+                        temp.q       = [roll;pitch;yaw];%roll,pitch,yaw
+                        clear t
+                    end
+                    obj.func = gen_ref_for_HL_Cooperative_Load(temp);
+                    % obj.func = gen_ref_for_HL(temp);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
                 
                 elseif strcmp(args{3}, "Cooperative")%ペイロードの目標軌道
                     obj.ref_set.method = args{1};
                     obj.ref_set.orig = param_for_gen_func;
                     temp = gen_func_name(param_for_gen_func{:});
-                    obj.func = gen_ref_for_HL_Cooperative_Load(temp);
+                    [obj.func,obj.funcRotms] = gen_ref_for_HL_Cooperative_Load(temp);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));
 
                     obj.result.state.set_state("xd",obj.func(0));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));%!!!!!!
-                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
-
-
-                elseif strcmp(args{3}, "TakeOff")%ペイロードの目標軌道takeoff用
-                    obj.ref_set.method = args{1};
-                    obj.com = args{3};
-                    obj.te_takeoff = 10;
-                    obj.zd_takeoff = 1;
-                    
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3])); 
-
-                    obj.result.state.set_state("xd",[obj.self.estimator.result.state.get("p");zeros(21,1);reshape(eye(3),[],1)]);%[xd;dxd;d2xd;d3xd;d4xd;d5xd;o0d;do0d;reshape(R0d,[],1)]
-                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                     obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
                     obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
                     obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
@@ -170,6 +162,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
                %reference
                ref0 = obj.agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
+               rotm0 = obj.agent1.reference.result.rotms;     %回転行列
                x0d  = ref0(1:3);
                % dx0d = ref0(4:6);
                % o0d  = ref0(22:24);                          %分割前目標角速度
@@ -208,13 +201,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                if obj.cha == 'f'
                    obj.ftakeoff = 0;
                    obj.flanding = 0;
-                   xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
-                   %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
-                   refi         = zeros(28,1);  %機体のreference
-                   refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
-                   drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
-                   drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
-                   refi(5:end)   = reshape(drefi,[],1);
+                   % xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
+                   % %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
+                   % refi         = zeros(28,1);  %機体のreference
+                   % refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
+                   % drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
+                   % drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
+                   % refi(5:end)   = reshape(drefi,[],1);
+
+                   refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%6階微分までの回転行列とrhoをまとめて計算
+                   refi(1:3) = refi(1:3) + 0.0*rhoi/norm(rhoi);%目標位置を変更させる
 
                elseif obj.cha =='t'
                    obj.flanding = 0;
@@ -223,7 +219,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_time_takeoff =varargin{1}.t;
                        obj.base_state_takeoff = [p(1:2);p(3)-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
                    end
-                   if obj.self.sensor.result.state.p(3)>=0.3&& obj.ftakeoff == 0
+                   if obj.self.sensor.result.state.p(3) - real_pL(3)>=0.3&& obj.ftakeoff == 0
                        obj.ftakeoff =1;
                        obj.base_state_takeoff(1:2) = real_pL(1:2);
                    end
@@ -239,7 +235,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_time_landing =varargin{1}.t;
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
                    end
-                   if obj.self.sensor.result.state.p(3)<=0.4&& obj.flanding==0
+                   if obj.self.sensor.result.state.p(3) - real_pL(3)<=0.4&& obj.flanding==0
                        obj.flanding  =1;
                        alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                        alpiUnit = alpi/norm(alpi);
@@ -253,7 +249,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        x0d = refi(1:3) - rhoi;
                else
                    refi = zeros(28,1);
-                end
+               end
                %牽引物yaw角補正================================================================================
                % agenti = varargin{5};
                % agenti = obj.self;
@@ -376,7 +372,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %         obj.self.estimator.result.state.a   = ddX0(1:3);
            %         obj.self.estimator.result.state.dO  = ddX0(4:6);
            else
-               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+               % obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+               obj.result.state.xd = obj.func(t);%牽引物の目標軌道
+               obj.result.rotms = obj.funcRotms(t);%回転行列と高次微分
+
                % refi = obj.result.state.xd;
                % obj.result.state.p = refi(1:3);
                % %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!

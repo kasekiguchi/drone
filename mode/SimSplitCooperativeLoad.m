@@ -52,7 +52,7 @@ if contains(qtype, "eul")
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
     % initial_state(1).Q = [1; 0; 0; 0];
-    initial_state(1).Q = Eul2Quat([0;0;-90*pi/180]);
+    initial_state(1).Q = Eul2Quat([0;0;0*pi/180]);
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end

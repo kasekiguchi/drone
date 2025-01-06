@@ -15,8 +15,8 @@ clear multiFigure option addingContents f
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 0;
-endTime = 1000;%1E3;
+startTime = 70;
+endTime = 100;%1E3;
 fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
@@ -77,7 +77,9 @@ lgnd.drone="drone" + droneID;
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
      n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      n = ["t_errx0","t_erry0","t_errz0"];
-     n = ["t_sx0" "t_sy0" "t_sz0","t_p","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw"];%比較するとき複数まとめる
+     n = ["t_sx0" "t_sy0" "t_sz0","t_p","t_sqyaw0","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw"];%比較するとき複数まとめる
+     n = "inputTrust";
+     % n = ["t_sx0" "t_sy0" "t_sz0","t_p","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","inputTrust" "inputRoll"	"inputPitch"	"inputYaw"];%比較するとき複数まとめる
      % n = ["mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
      % n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
@@ -206,12 +208,12 @@ if isSaved
     %RMSEの保存
     run("makeSavePath")
     RMSE(1,1)="";
-    filenameRMSE=strcat(fullfile(FolderNamer, 'RMSEs'),'.txt');
+    filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
     if fExist
         writematrix([strings(1,4);"<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
     else
-        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNamer, 'RMSEs'),'.txt'),'Delimiter','tab')
+        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
     end
     
     %% single save
@@ -475,7 +477,6 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         % end
         % mAll{logNum} = sum(tmpM);
         [mLi,mAll] = sum_mLi(time,logNum,lt,mLi,mAll);
-        
         %plotする為の構造体を作成する
         % allData.figName : (data, label, legendLabels, option)   
         %option : titleName, lineWidth, fontSize, legend, aspect, campositon
@@ -543,9 +544,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.x_y = {struct('x',{[epLx,refx]},'y',{[epLy,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),[C(2:end),Cref(2:end)],add_option(["aspect"],option,addingContents)};
         allData.x_z = {struct('x',{[epLx,refx]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
         allData.y_z = {struct('x',{[epLy,refy]},'y',{[epLz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rci,add_option(["aspect"],option,addingContents)};
-        allData.t_x = {struct('x',{[time2,time2]},'y',{[epLx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rci,add_option([],option,addingContents)};
-        allData.t_y = {struct('x',{[time2,time2]},'y',{[epLy,refy]}), struct('x','time (s)','y','$y$ (m)'),Rci,add_option([],option,addingContents)};
-        allData.t_z = {struct('x',{[time2,time2]},'y',{[epLz,refz]}), struct('x','time (s)','y','$z$ (m)'),Rci,add_option([],option,addingContents)};
+        allData.t_x = {struct('x',{[time2,time2]},'y',{[epLx,refx]}), struct('x','time (s)','y','$x$ (m)'),[C(2:end),Cref(2:end)],add_option([],option,addingContents)};
+        allData.t_y = {struct('x',{[time2,time2]},'y',{[epLy,refy]}), struct('x','time (s)','y','$y$ (m)'),[C(2:end),Cref(2:end)],add_option([],option,addingContents)};
+        allData.t_z = {struct('x',{[time2,time2]},'y',{[epLz,refz]}), struct('x','time (s)','y','$z$ (m)'),[C(2:end),Cref(2:end)],add_option([],option,addingContents)};
         allData.error = { struct('x',{time2},'y',{err}), struct('x','time (s)','y','error (m)'), LgndCrt(["$x$","$y$","$z$"],Ci),add_option([],option,addingContents)};
         allData.t_errx = {struct('x',{time2},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),Ci,add_option([],option,addingContents)};
         allData.t_erry = {struct('x',{time2},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),Ci,add_option([],option,addingContents)};

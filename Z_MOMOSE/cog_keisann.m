@@ -1,6 +1,6 @@
 %G
-clear time tl mL pL
-close all
+% clear time tl mL pL
+% close all
 % ============================================
 delta = 1;
 phase = 102;%takeoff:116,flight:102
@@ -28,13 +28,17 @@ for i = 2:logNum
     mL{i-1} = loggers{i, 1}.estimator.mL(:,idStart:delta:idEnd);
     % pL{i-1} = loggers{i, 1}.estimator.pL(:,idStart:delta:idEnd);
     pL{i-1} = loggers{i, 1}.sensor.real_pL(:,idStart:delta:idEnd);
+    th{i-1} = loggers{i,1}.controller.input(1,idStart:delta:idEnd);
 end
 mLAjust = ajust_index(time,logNum,tl,mL);
 pLAjust = ajust_index(time,logNum,tl,pL);
+ThuAjust = ajust_index(time,logNum,tl,th);
 
 M = zeros(1,tl{1});
+thAll = zeros(1,tl{1});
 for i = 1:logNum-1
     M = M + mLAjust{i};
+    thAll = thAll +ThuAjust{i};
 end
 G = zeros(3,tl{1});
 for i = 1:logNum-1
@@ -52,6 +56,13 @@ for i = 1:logNum-1
     Y(i,:) = pL{i}(2,:);
     Z(i,:) = pL{i}(3,:);
 end
+
+hold on
+for i = 1:logNum-1
+    plot(time{1},ThuAjust{i});
+end
+plot(time{1},thAll)
+hold off
 
 i = 1;
 f(i) = figure;
@@ -88,8 +99,12 @@ legend("COG","Payload")
 xlabel("x (m)")
 ylabel("y (m)")
 i = i+1;
-
-
+%%
+mAll = allData.mAll{1, 1}.y{1, 5};
+mTrue = 3.9;
+mLength = length(mAll);
+mAllRMSE = sqrt(sum(((mAll-ones(1,mLength)*mTrue).^2)/mLength))
+%%
 function vars =ajust_index(time,logNum,tl,vars)
         for i = 2:logNum-1
             if tl{i-1}<tl{i}%短い制御周期を長い物に合わせる
