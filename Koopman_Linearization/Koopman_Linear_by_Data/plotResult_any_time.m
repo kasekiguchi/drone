@@ -21,7 +21,7 @@ flg.without_pos = 0; % 観測量に位置が含まれているかどうか
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 12; % flight後何秒からの推定精度検証を行うか saddle:3.39
+startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
@@ -41,8 +41,8 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 % loadfilename{1} = '2024-12-04_Exp_Kiyama_code22_saddle';
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
-loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
-% loadfilename{1} = '2024-12-06_Exp_Kiyama_code23_saddle.mat';
+% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+loadfilename{1} = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
 % loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回

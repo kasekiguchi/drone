@@ -20,12 +20,13 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '0731_KMPC_saigen_hovering_code00';
 
-filename = '1223_KMPC_hovering_code00_1636';
+filename = '1223_KMPC_hovering_code23_weight_1720';
+loadfile = 'Z:\Work2024\ykomatsu\1223_exp\1223_KMPC_hovering_code23_weight_1720.mat';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
 % filename = '2_8_Exp_KMPC_P2Py_成功';
-loadfile = strcat("Data/", filename, ".mat");
+% loadfile = strcat("Data/", filename, ".mat");
 % filename = "2_8_Exp_KMPC_P2Py_成功";
 % loadfile = "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2024\2012035_木山康平\第5章\結果\2_8_Exp_KMPC_P2Py_成功.mat";
 % load(loadfile);

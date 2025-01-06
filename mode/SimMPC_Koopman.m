@@ -33,12 +33,13 @@ initial_state.w = [0; 0; 0];
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001.mat';
 % model_file = '2024-12-10_Exp_Kiyama_code22_saddle_weight_1-00001.mat';
-model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle"; % 誤差モデル
 % model_file = "2024-11-14_Exp_Kato_code00_saddle"; % 加藤君モデル
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
-% model_file = "2024-12-19_Exp_Kiyama_code26_saddle";
+
+model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 A=est.A; B=est.B; C=est.C;
@@ -137,7 +138,7 @@ function result_plot(app, model)
     flg.figtype = 0; % 0:subplot
     flg.savefig = 0;
     flg.animation_save = 0;
-    flg.animation = 1;
+    flg.animation = 0;
     flg.timerange = 0;
     flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');

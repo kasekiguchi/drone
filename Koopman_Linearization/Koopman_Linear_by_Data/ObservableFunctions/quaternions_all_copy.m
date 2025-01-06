@@ -17,27 +17,31 @@ jz = 0.00480374;
 gravity = 9.81;
 km = 0.03010685884691849; % ロータ定数
 k = 0.000008048;          % 推力定数
+  
+% Q = [1 1 1, 1 1 1, 1 1 1, 1 1 1]; % default
+Qp = eye(3); Qq = eye(3) * 1.00001; Qv = eye(3); Qw = eye(3) * 1.00001;
+Q = blkdiag(Qp, Qq, Qv, Qw);
 
 % 状態がクォータニオンを用いた13次元の場合
-% if size(x,1) == 9+4
-%     % P1 = 0;
-%     % P2 = 0;
-%     % P3 = 0;
-%     Q1 = x(1,1); % roll
-%     Q2 = x(2,1); % pitch
-%     Q3 = x(3,1); % yaw
-%     V1 = x(4,1);
-%     V2 = x(5,1);
-%     V3 = x(6,1);
-%     W1 = x(7,1);
-%     W2 = x(8,1);
-%     W3 = x(9,1);
-%     u1 = x(10,1);
-%     u2 = x(11,1);
-%     u3 = x(12,1);
-%     u4 = x(13,1);
+if size(x,1) == 9+4
+    % P1 = 0;
+    % P2 = 0;
+    % P3 = 0;
+    Q1 = x(1,1); % roll
+    Q2 = x(2,1); % pitch
+    Q3 = Q(6) * x(3,1); % yaw
+    V1 = Q(7) * x(4,1);
+    V2 = Q(8) * x(5,1);
+    V3 = Q(9) * x(6,1);
+    W1 = Q(10) * x(7,1);
+    W2 = Q(11) * x(8,1);
+    W3 = Q(12) * x(9,1);
+    u1 = Q(1) * x(10,1);
+    u2 = Q(1) * x(11,1);
+    u3 = Q(1) * x(12,1);
+    u4 = Q(1) * x(13,1);
 %状態がオイラー角を用いた12次元の場合
-% elseif size(x,1) == 12+4
+elseif size(x,1) == 12+4
     P1 = x(1,1);
     P2 = x(2,1);
     P3 = x(3,1);
@@ -50,31 +54,30 @@ k = 0.000008048;          % 推力定数
     W1 = x(10,1);
     W2 = x(11,1);
     W3 = x(12,1);
-    u1 = 0; %x(13,1);
-    u2 = 0; %x(14,1);
-    u3 = 0; %x(15,1);
-    u4 = 0; %x(16,1);
-
+    u1 = x(13,1);
+    u2 = x(14,1);
+    u3 = x(15,1);
+    u4 = x(16,1);
     % q0-q3 : 与えたオイラー角から求めたクォータニオン
     % eul2quat,quaternion はsingleかdouble型にしか使え無くて関数ハンドルを設定した時にエラーをはいた 残念
     q0 = cos(Q1/2)*cos(Q2/2)*cos(Q3/2)+sin(Q1/2)*sin(Q2/2)*sin(Q3/2);
     q1 = sin(Q1/2)*cos(Q2/2)*cos(Q3/2)-cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
     q2 = cos(Q1/2)*sin(Q2/2)*cos(Q3/2)+sin(Q1/2)*cos(Q2/2)*sin(Q3/2);
     q3 = cos(Q1/2)*cos(Q2/2)*sin(Q3/2)-sin(Q1/2)*sin(Q2/2)*cos(Q3/2);
-% end
+end
 
 %回転行列の一部
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
 R33 = (cos(Q2).*cos(Q1));
-% if size(x,1) == 12+4
+if size(x,1) == 12+4
 common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
             R33;
             1];
 common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
-% end
+end
 common_except_pos_z = [Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
@@ -176,7 +179,7 @@ partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 
 %% Hermite polynomial & kronecker product code=12
 X = x(1:12,1);
-U = [u1;u2;u3;u4];
+U = x(13:16,1);
 H0 = 1;
 H1x = 2.*X;
 H1u = 2.*U;
@@ -222,13 +225,13 @@ hermite_total_z = kron([hermite_total; hermite_original_z], hermite_u);
 H = @(x) [1; x];
 k1 = kron(kron(H(P1), H(P2)), kron(H(sin(Q3)), H(cos(Q3)))); % RxS
 k2 = kron(kron(H(V1), H(V2)), kron(H(sin(W3)), H(cos(W3)))); % RxS
-k3 = kron(kron(H(sin(Q1)), H(cos(Q1))), kron(H(sin(Q2)), H(cos(Q2)))); % S^2
-k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S^2
+k3 = kron(kron(H(sin(Q1)), H(cos(Q1))), kron(H(sin(Q2)), H(cos(Q2)))); % S
+k4 = kron(kron(H(sin(W1)), H(cos(W1))), kron(H(sin(W2)), H(cos(W2)))); % S
 
 d1 = [k1; k2; k3; k4];
 d2 = kron(kron(k1,k2), kron(k3,k4)); % kron(RxS, S) 
-d3 = [kron(k1,k2); kron(k3,k4)]; % kron(RxS,RxS)
-d4 = [kron(k1,k3); kron(k2,k4)]; % kron(RxS,S)
+d3 = [kron(k1,k2); kron(k3,k4)]; % 
+d4 = [kron(k1,k3); kron(k2,k4)]; % 
 du = [H(u1); H(u2); H(u3); H(u4)];
 
 % z = [common_z; kron(d1, du)]; % 17 528
@@ -237,12 +240,9 @@ du = [H(u1); H(u2); H(u3); H(u4)];
 % z = [common_z; d2]; % 20 6万5000次元のため中断
 % z = [common_z; d3]; % 21 kron(RxS, RxS) 528
 % z = [common_z; d4]; % 22 kron(RxS, S) 528
-% z = [common_z; isobe_z; d4]; % 23
+z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d3; d4]; % 24
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
-z = [common_z; isobe_z; kron(k1,k2)]; % 26
-% z = [common_z; isobe_z; kron(k3,k4)]; % 27
-% z = [common_z; isobe_z; k3; k4]; % 28
 
 %% まとめ
 % z = [common_z; isobe_z]; % 00
@@ -261,5 +261,13 @@ z = [common_z; isobe_z; kron(k1,k2)]; % 26
 % z = [common_z; hermite_WheeledRobot_z]; % 14
 % z = [common_z; hermite_total_z]; % 15
 % z = [common_z; isobe_z; hermite_WheeledRobot_z]; % 16
+
+%% 観測量に重み付け
+z_isobe = [common_z; isobe_z];
+z_hermite = z;
+
+z_isobe_weight = blkdiag(Q, eye(length(z_isobe)-12)) * z_isobe;
+z_hermite_weight = 
+
 end
 

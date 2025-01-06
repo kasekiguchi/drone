@@ -24,8 +24,8 @@ mode.training_data = 'Kiyama';
 % filename = '2024-12-04_Exp_Kiyama_code22_saddle'; % hermite [1; x]
 % filename = '2024-12-18_Exp_Kiyama_code23_saddle_weight4';
 % filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
-filename = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
-% filename = '2024-12-22_Exp_Kiyama_code23_saddle_increased';
+% filename = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+filename = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -87,10 +87,10 @@ sgtitle(strrep(filename, '_', '-'));
 % xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
 
 label_x = {'x', 'y', 'z', 'q.roll', 'q.pitch', 'q.yaw', 'vx', 'vy', 'vz', 'vq.roll', 'vq.pitch', 'vq.yaw'};
-ylimsetting = [-0.1 0.1; -0.05 0.05; -0.1 0.1; -0.05 0.05];
+ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05];
 
 format long
-ii = 4; jj = 3; arr = 1:ii*jj; idx = 0;
+ii = 2; jj = 3; arr = 1:ii*jj; idx = 0;
 for i = 1:ii
     for j = 1:jj
         idx = idx + 1;
