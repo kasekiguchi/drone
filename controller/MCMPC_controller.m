@@ -11,6 +11,7 @@ classdef MCMPC_controller < handle
         reference
         result
         self
+        stlflag= 0;
     end
     properties
       modelf
@@ -18,6 +19,7 @@ classdef MCMPC_controller < handle
       N % 現時刻のパーティクル数
       flag
       modelchangeflag
+      
     end
     
     methods
@@ -48,9 +50,14 @@ classdef MCMPC_controller < handle
         
         %-- main()的な
         function result = do(obj,varargin)
+            
 %           profile on
             obj.param.t = varargin{1,1}.t;
-    
+            if obj.param.t>=3.0 && obj.param.t<=10.0
+                obj.stlflag = 1;
+            else
+                obj.stlflag = 0;
+            end
             %% horizonごとではないリファレンス
 %             ref_p = obj.self.reference.result.state.p;
 %             ref_q = [0;0;0];
