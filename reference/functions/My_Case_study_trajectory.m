@@ -18,10 +18,14 @@ syms t real
 
 
 % 円旋回
-T=12;
-x=sin(2*pi*t/T);
-y=cos(2*pi*t/T);
-z=0.4;
+T=10;
+% x=sin(2*pi*t/T);
+% y=cos(2*pi*t/T);
+% z=0.4;
+
+x=0.8*cos(2*pi*t/T);
+y=0;
+z=0.8*sin(2*pi*t/T)+1.2;
 
 % h = 0.3;
 % k = 0.3;
