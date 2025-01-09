@@ -32,6 +32,7 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 #define CH_MIN 0         // PPM幅の最小 [us] MATLABから送信される信号の最小を定義　オフセットにも関係
 #define CH_NEUTRAL 500   // PPM幅の中間 [us] MATLABから送信される信号の中間を定義　オフセットにも関係
 #define CH_MAX 1000      // PPM幅の最大 [us] MATLABから送信される信号の最大を定義　オフセットにも関係
+#define CH_LAND 1000
 // PPM Channelの基本構造
 // TIME_LOW + CH_OFFSET = 2000 = 2 [ms]　
 // TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]　計算が合わないこの計算式では3[ms]となるはずである．　400 + 1000 + 1620 = 3020　もしくは，CH_MAXが-となっていることが正しいと考えられる
@@ -52,6 +53,7 @@ volatile uint16_t start_H = PPM_PERIOD; //16bit整数型(-32768~32767)start_Hに
 volatile uint16_t start_Hh = PPM_PERIOD; //16bit整数型(-32768~32767)start_HhにPPM_PERIOD(22500)を代入
 volatile uint16_t REMAINING_W; //16bit整数型(-32768~32767)REMAINING_Wを定義
 volatile uint16_t plus = 0;
+volatile uint16_t LAND_stop = 0;
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
 
@@ -85,7 +87,7 @@ void setup()
 void loop()
 {
   //receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
-    if (!isEmergency)
+    if (!isEmergency && !isLanding)
     {
       receive_serial();
     }
@@ -109,13 +111,6 @@ void loop()
       {
         software_reset();
       }
-    }
-    if (!isLanding)
-    {
-      receive_serial();
-    }
-    else
-    {
       if (digitalRead(LAND_PIN) == HIGH && fReset == false)
       {
         delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
@@ -135,7 +130,6 @@ void loop()
         software_reset();
       }
     }
-    
 }
 //*********** local functions  *************************//
 void receive_serial() // ---------- loop function : receive signal by UDP 信号を受信したら実行
@@ -315,13 +309,21 @@ void landing_stop()
     pw[4] = CH_OFFSET;              // AUX1
     pw[5] = CH_OFFSET;              // AUX2
     pw[6] = CH_OFFSET;              // AUX3
-    pw[7] = CH_MAX;              // AUX4
+    if(LAND_stop < 280)//40=1秒
+    {
+      pw[7] = CH_OFFSET - CH_LAND;
+    }
+    else
+    {
+      pw[7] = CH_OFFSET;
+    }
     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     isLanding = true;
     digitalWrite(LED_PIN, LOW);
     digitalWrite(RLED_PIN, LOW);
     digitalWrite(GLED_PIN, HIGH);
     Serial.println("LANDING !! ");
+    LAND_stop++;
   }
 }
 void software_reset()
