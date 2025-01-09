@@ -47,15 +47,12 @@ z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 
 roll = 15*pi/180;
 pitch = 20*pi/180;
-yaw = 10*pi/180;
-% Rx = [1 0 0; 0 cos(roll) -sin(roll); 0 sin(roll) cos(roll)];
-% Ry = [cos(pitch) 0 sin(pitch); 0 1 0; -sin(pitch) 0 cos(pitch)];
-% Rz = [cos(yaw) -sin(yaw) 0; sin(yaw) cos(yaw) 0; 0 0 1];
-% rotm = Rx*Ry*Rz;
+yaw = 2*pi*t/(T);
+% yaw = acos(cos(2*pi*t/T));
 
 ref.pYaw    = [x;y;z;yaw];%x,y,z,roll,pitch,yaw
 % rotm = eul2rotm([roll,pitch,yaw]);
-ref.q       =  [roll,pitch,yaw];%x,y,z,roll,pitch,yaw
+ref.q       =  [roll;pitch;yaw];%x,y,z,roll,pitch,yaw
 % ref.pYaw    = @(t)[x;y;z;yaw];%x,y,z,roll,pitch,yaw
 % rotm = eul2rotm([roll,pitch,yaw]);
 % ref.rotm       = @(t) rotm;%x,y,z,roll,pitch,yaw

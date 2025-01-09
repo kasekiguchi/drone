@@ -174,9 +174,9 @@ clc
     %以下二つはとても重い
     matlabFunction(subs(inv(beta2), [xdRef vInput1], [XD V1v]),'file','inv_beta2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'inv_beta2'});
     % matlabFunction(subs((-alpha2+[v2(t);v3(t);v4(t)]), [flip(xdRef) flip(vInput1) v2(t) v3(t) v4(t)], [flip(XD) flip(V1v) V2 V3 V4]),'file','vs_alpha2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'vs_alpha2'});
-    matlabFunction(subs(alpha2(1), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha21_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha21'});
-    matlabFunction(subs(alpha2(2), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha22_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha22'});
-    matlabFunction(subs(alpha2(3), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha23_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha23'});
+    % matlabFunction(subs(alpha2(1), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha21_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha21'});
+    % matlabFunction(subs(alpha2(2), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha22_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha22'});
+    % matlabFunction(subs(alpha2(3), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha23_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha23'});
 
     a2_v2 = subs((-alpha2+[v2(t);v3(t);v4(t)]), [flip(xdRef) flip(vInput1) v2(t) v3(t) v4(t)], [flip(XD) flip(V1v) V2 V3 V4]);
     matlabFunction(a2_v2,'file','vs_alpha2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'vs_alpha2'});

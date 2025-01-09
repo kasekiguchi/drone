@@ -10,6 +10,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         fmc_options 
         estimate_load_mass 
         flag_anti_spike=0
+        preW
     end
     
     methods
@@ -20,6 +21,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
             obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
+            obj.preW =zeros(3,1);
         end
         
         function result=do(obj,varargin)
@@ -35,12 +37,25 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             ref   = obj.self.reference.result;
             x     = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             % xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            % x(7) = max(min(x(7),-10),10);
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応する用
             else
                 xd = ref.state.get();
             end
-%             P = Param.P;
+            % fixPi = fix(model.state.q(3)/pi);
+            % if mod(fixPi,2) == 0 
+            %     yaw = min(model.state.q(3) - pi*fixPi, pi);%y軸正
+            % else
+            %     yaw = max(model.state.q(3) - pi*fixPi - pi, -pi);%y軸負
+            % end
+            % if abs(yaw-xd(4)) > 2*pi - 0.2
+            %     %前時刻と現在時刻でqのあたいが飛ぶ
+            %     x(1:4) = Eul2Quat([model.state.q(1:2);xd(4)]);
+            %     x(5:7) = obj.preW;
+            % else
+            %     obj.preW = model.state.w;
+            % end
             P  = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
             
             

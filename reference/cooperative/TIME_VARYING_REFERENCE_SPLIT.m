@@ -375,8 +375,21 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            %         obj.self.estimator.result.state.dO  = ddX0(4:6);
            else
                xd = obj.func(t);%牽引物の目標軌道
-               rotms = obj.funcRotms(t);%回転行列と高次微分
-               obj.result.state.xd = [xd;rotm2eul(rotms(1:3,1:3))];%xd+[roll;pitch;yaw]
+               [q,rotms] = obj.funcRotms(t);%回転行列と高次微分
+               % q = rotm2eul(rotms(1:3,1:3))';%角度を求める
+               % q = q - 2*pi*fix(q/2/pi);%[-2pi,2pi]の範囲に直す
+               % q = q - 0.5*(sign(pi-q) + 1)*2*pi;% 
+               %[-pi,pi]の範囲に直す
+               fixPi = fix(q(3)/pi);
+               if mod(fixPi,2) == 0 
+                   yaw = min(q(3) - pi*fixPi, pi);%2*n*pi
+               else
+                   yaw = max(q(3) - pi*fixPi - sign(q(3))*pi, -pi);%(2*n-1)*pi
+               end
+               xd(4) = yaw;%修正したyaw目標角
+               % q(3) = unwrap(q(3));
+               obj.result.state.xd = [xd;q];%角度を最後に追加
+               % obj.result.state.xd = [xd;rotm2eul(rotms(1:3,1:3))'];%rotm2eul(rotms(1:3,1:3)) = [roll;pitch;yaw]
                obj.result.rotms = rotms;
 
                % refi = obj.result.state.xd;

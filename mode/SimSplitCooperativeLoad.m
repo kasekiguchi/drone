@@ -110,8 +110,8 @@ for i = 2:N+1
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
-    % agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-    agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
+    agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
+    % agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
     agent(i).controller.do = @controller_do;
     agent(i).controller.result.input = [(agent(i).parameter.loadmass*0 + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
@@ -231,15 +231,15 @@ end
 disp(time.t)
 %%
 % close all
-% run("DataPlot.m")
+run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
 % agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
-% mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",1);
+% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 5],"ntimes",10);
+mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 5],"ntimes",1);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
