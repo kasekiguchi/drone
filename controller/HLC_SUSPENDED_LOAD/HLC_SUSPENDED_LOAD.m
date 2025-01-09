@@ -34,7 +34,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         end
         
         function result=do(obj,varargin)
-            tStart = tic;
+            % tStart = tic;
             if isscalar(varargin)
                 agent = varargin{1};
             else
@@ -59,10 +59,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
            
-
-            % if model.state.pL(3)<-10000
-            %     P(15) = 0;
-            % else
             %      %EKFで質量推定
             if obj.self.estimator.model.name == "load_mL_HL"
                 P(15) = model.state.mL;
@@ -89,13 +85,13 @@ classdef HLC_SUSPENDED_LOAD < handle
             
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            toc(tStart)
+            % toc(tStart)
             %usの計算
                 % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
                 invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-                toc(tStart)
+                % toc(tStart)
                 vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
-                toc(tStart)
+                % toc(tStart)
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
             % cha = agent{2};
             % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす

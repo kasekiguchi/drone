@@ -28,10 +28,10 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
    　%単純HL用↑
     
     %単機けん引
-    u_trans_param.th_offset_tl =346;%346;%252  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
-    u_trans_param.gain_f =[400;400;400;20];%　　なぶ600
-     u_trans_param.gain_tl =[400;400;400;20];%　　なぶ
-    u_trans_param.th_offset_f = 346;
+    u_trans_param.th_offset_tl =340;%346;%252  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
+    u_trans_param.gain_f =[340;340;340;20];%　　なぶ600
+     u_trans_param.gain_tl =[340;340;340;20];%　　なぶ
+    u_trans_param.th_offset_f = 340;
      %6 cells(EL)バッテリーとの兼ね合いで調整が必要
     u_trans_param.gain =[600;600;600;20];%[600;600;600;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
     u_trans_param.gain =[600;600;600;20];%EL

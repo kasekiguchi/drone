@@ -10,7 +10,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         fmc_options 
         estimate_load_mass 
         flag_anti_spike=0
-        preW
+        % preW
     end
     
     methods
@@ -21,11 +21,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
             obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
-            obj.preW =zeros(3,1);
+            % obj.preW =zeros(3,1);
         end
         
         function result=do(obj,varargin)
-            tStart = tic;
+            % tStart = tic;
             if isscalar(varargin)
                 agent = varargin{1};
             else
@@ -94,13 +94,13 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            toc(tStart)
+            % toc(tStart)
             %usの計算
                 % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
                 invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-                toc(tStart)
+                % toc(tStart)
                 vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
-                toc(tStart)
+                % toc(tStart)
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
 
                 %invbeta2(vs - alhpa2)の計算の試行錯誤

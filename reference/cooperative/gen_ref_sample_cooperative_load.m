@@ -51,10 +51,6 @@ yaw = 2*pi*t/(T);
 % yaw = acos(cos(2*pi*t/T));
 
 ref.pYaw    = [x;y;z;yaw];%x,y,z,roll,pitch,yaw
-% rotm = eul2rotm([roll,pitch,yaw]);
 ref.q       =  [roll;pitch;yaw];%x,y,z,roll,pitch,yaw
-% ref.pYaw    = @(t)[x;y;z;yaw];%x,y,z,roll,pitch,yaw
-% rotm = eul2rotm([roll,pitch,yaw]);
-% ref.rotm       = @(t) rotm;%x,y,z,roll,pitch,yaw
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 end
