@@ -37,9 +37,9 @@ run("makeSavePath")
         % eval([loggerContents '= log;']);%loggerの名前をlogger_contentsに変更
         % eval([simpleLoggerContents,'= simplifyLoggerForSingle(log,agentNum );']);
     % end
-save(fullfile(FolderNamed, SaveTitle2),agentContents);
-save(fullfile(FolderNamed, SaveTitle),loggerContents);
-save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
+save(fullfile(FolderNameD, SaveTitle2),agentContents);
+save(fullfile(FolderNameD, SaveTitle),loggerContents);
+save(fullfile(FolderNameL, simpleSaveTitle),simpleLoggerContents);
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);
 %         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');

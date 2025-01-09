@@ -36,7 +36,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_state_landing
         ts
         te_takeoff = 15% goal time
-        zd_takeoff = 0.5 % goal altitude
+        zd_takeoff = 0.8 % goal altitude
         te_landing = 20% goal time
         k_yaw
         rotForYaw
@@ -67,8 +67,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
             param_for_gen_func = args{2};
             if length(args) > 2
                 if strcmp(args{3}, "HL")
-                    temp = gen_func_name(param_for_gen_func{:});
-                    if ~field(temp,"rotm")
+                    temp.pYaw = gen_func_name(param_for_gen_func{:});
+                    if ~isfield(temp,"q")
                         syms t
                         roll   = 0;
                         pitch  = 0;
@@ -76,7 +76,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                         temp.q = [roll;pitch;yaw];%roll,pitch,yaw
                         clear t
                     end
-                    obj.func = gen_ref_for_HL_Cooperative_Load(temp);
+                     [obj.func,obj.funcRotms] = gen_ref_for_HL_Cooperative_Load(temp);
                     % obj.func = gen_ref_for_HL(temp);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
                 
@@ -89,9 +89,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                     obj.result.state.set_state("xd",obj.func(0));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));%!!!!!!
-                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+                    % obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                    % obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                    % obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
 
                 elseif strcmp(args{3}, "Split")%分割後の目標軌道
                     % A6 = [0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0];
@@ -165,7 +165,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
                %reference
                ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
-               rotm0 = obj.agent1.reference.result.rotms;     %回転行列
+
                x0d  = ref0(1:3);
                % dx0d = ref0(4:6);
                % o0d  = ref0(22:24);                          %分割前目標角速度
@@ -201,9 +201,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                else
                    real_pL = obj.self.sensor.result.state.pL;%simのため
                end
+               ks = 0.6;%衝突回避するためのゲイン
                if obj.cha == 'f'
                    obj.ftakeoff = 0;
                    obj.flanding = 0;
+                   rotm0 = obj.agent1.reference.result.rotms;     %回転行列
                    % xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
                    % %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
                    % refi         = zeros(28,1);  %機体のreference
@@ -211,19 +213,25 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
                    % drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
                    % refi(5:end)   = reshape(drefi,[],1);
-                   rhoi = rhoi + 0*rhoi/norm(rhoi);%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));
+                   rhoi = rhoi + ks*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'
                    obj.flanding = 0;
+                   alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                   alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                    if isempty( obj.base_state_takeoff )
                        p = obj.self.sensor.result.state.p; 
                        obj.base_time_takeoff =varargin{1}.t;
-                       obj.base_state_takeoff = [p(1:2);p(3)-obj.self.parameter.get("cableL")];%obj.self.estimator.result.state.p;
+
+                       % obj.base_state_takeoff = [p(1:2);p(3)-obj.self.parameter.get("cableL")]+ 0.5*[alpiUnit12;0];%rhoi/norm(rhoi);%obj.self.estimator.result.state.p;
+                       obj.base_state_takeoff = [real_pL(1:2);p(3)-obj.self.parameter.get("cableL")]+ 0.5*[alpiUnit12;0];
                    end
-                   if obj.self.sensor.result.state.p(3) - real_pL(3)>=0.3&& obj.ftakeoff == 0
+                   if obj.self.sensor.result.state.p(3)>=0.3&& obj.ftakeoff == 0
+                   % if obj.self.sensor.result.state.p(3) - real_pL(3)>=0.3&& obj.ftakeoff == 0
                        obj.ftakeoff =1;
-                       obj.base_state_takeoff(1:2) = real_pL(1:2);
+                       obj.base_state_takeoff(1:2) = real_pL(1:2) + ks*alpiUnit12;
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
                        th_offset = obj.self.input_transform.param.th_offset;
@@ -235,13 +243,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.ftakeoff = 0;
                    if isempty(obj.base_state_landing) 
                        obj.base_time_landing =varargin{1}.t;
-                       obj.base_state_landing = obj.self.sensor.result.state.pL;
+                       alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                       alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
+                       obj.base_state_landing = obj.self.sensor.result.state.pL + ks*[alpiUnit12;0];
                    end
                    if obj.self.sensor.result.state.p(3) - real_pL(3)<=0.4&& obj.flanding==0
                        obj.flanding  =1;
-                       alpi = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                       alpiUnit = alpi/norm(alpi);
-                       obj.base_state_landing(1:2) = real_pL(1:2) + 0.4*alpiUnit;
+                       alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                       alpiUnit12 = alpi12/norm(alpi12);
+                       obj.base_state_landing(1:2) = real_pL(1:2) + 0.5*alpiUnit12;
                    end
                        th_offset = obj.self.input_transform.param.th_offset;
                        % th_offset_landing = obj.self.input_transform.param.th_offset_tl;

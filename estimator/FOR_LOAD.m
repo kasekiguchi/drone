@@ -11,6 +11,8 @@ classdef FOR_LOAD < SENSOR_CLASS
         tle = 15;%センサー値を何秒で0%使うか
         ratet
         ratel
+        ilength %実際のxy位置を使い始めるか
+        inispL
     end
     
     methods
@@ -24,6 +26,8 @@ classdef FOR_LOAD < SENSOR_CLASS
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT","real_pL"],"num_list",[3,4,3,3]));
             obj.ratet = 1/obj.tte^2;%二次関数で0-1の間で変化する
             obj.ratel = 1/obj.tle^2;%二次関数で0-1の間で変化する
+            % obj.ilength=obj.self.sensor.motive.result.rigid(varargin{1,1}.rigid_num).p(3) + 0.1;
+            obj.ilength=0.32 + 0.1;
         end
         
         function [result]=do(obj,varargin)
@@ -40,14 +44,14 @@ classdef FOR_LOAD < SENSOR_CLASS
             % % elseif strcmp(varargin{1}{2},'t')&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
             %     obj.result.state.pL(1:2) = spL(1:2);
             %     obj.fpLXY=1;
-            elseif strcmp(varargin{1}{2},'t')&&ipL(3)>0.15%take off
+            elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
                 if isempty(obj.tt0)
                     obj.tt0 = varargin{1}{1}.t;
                 end
                 t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
                 k = obj.ratet*t^2;%反映割合
                 spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-            elseif strcmp(varargin{1}{2},'l')&&ipL(3)>0.15%landing
+            elseif strcmp(varargin{1}{2},'l')&&ipL(3)> obj.ilength%landing
                 if isempty(obj.tl0)
                     obj.tl0 = varargin{1}{1}.t;
                 end

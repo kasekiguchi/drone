@@ -16,7 +16,7 @@ fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 startTime = 0;
-endTime = 100;%1E3;
+endTime = 1000;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
@@ -30,8 +30,8 @@ if fnowdata==1
     end
     if ~exist("loggers","var")
         for i = 1:length(logger.target)
-            loggers{i,1} = simplifyLoggerForCoop(logger,i);
-            % loggers{i,1} = simplifyLoggerForSingle(logger,i);
+            % loggers{i,1} = simplifyLoggerForCoop(logger,i);
+            loggers{i,1} = simplifyLoggerForSingle(logger,i);
         end
     end
     droneID = logger.target(1:end-1);
@@ -95,8 +95,8 @@ nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"
 % nM = {"mui"+droneID};%比較するとき複数まとめる
 if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
-    nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
-    % nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
+    % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
+    nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
 

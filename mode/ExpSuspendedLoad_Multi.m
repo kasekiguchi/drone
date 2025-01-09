@@ -36,7 +36,7 @@ end
 addId = addIds(PCId);%このpcで加算するrigidのid
 
 %COMの番号指定
-COMs = [5,3];%pc1 lenovo割り当てる順番に設定
+COMs = [3,5];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
 % cableL=[0.91,0.91];
@@ -87,9 +87,8 @@ if isCoop == 1
     agent(1).estimator.model.name=[];
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-    % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
-    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"HL"});
-    % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",0.5*[2,2,0.5]},"Cooperative",N},agent(1));
+    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"Cooperative",N},agent(1));
+    % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"HL",N},agent(1));
     % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
     agent(1).controller.do = @(varargin)[];

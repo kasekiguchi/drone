@@ -7,7 +7,7 @@ classdef TAKEOFF_REFERENCE < handle
     ts
     te = 15;%10;%15;%15は1.5m用
     % zd = 1.35; % goal altitude
-    zd = 0.5;%質量推定用
+    zd = 0.7;%質量推定用
     % zd = 1.2;%質量推定用
     result
     th_offset
