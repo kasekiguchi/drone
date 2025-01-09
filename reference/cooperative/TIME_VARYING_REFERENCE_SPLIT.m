@@ -382,9 +382,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %[-pi,pi]の範囲に直す
                fixPi = fix(q(3)/pi);
                if mod(fixPi,2) == 0 
-                   yaw = min(q(3) - pi*fixPi, pi);%y軸正
+                   yaw = min(q(3) - pi*fixPi, pi);%2*n*pi
                else
-                   yaw = max(q(3) - pi*fixPi - pi, -pi);%y軸負
+                   yaw = max(q(3) - pi*fixPi - sign(q(3))*pi, -pi);%(2*n-1)*pi
                end
                xd(4) = yaw;%修正したyaw目標角
                % q(3) = unwrap(q(3));
