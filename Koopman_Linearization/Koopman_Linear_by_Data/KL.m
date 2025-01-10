@@ -8,6 +8,7 @@ function output = KL(X,U,Y,F,flg)
 %   F             観測量 関数ハンドル
 
 %Xlift,Yliftを計算する
+remi = round(size(X,2) / 5); j = 0;
 for i = 1:size(X,2)%1:Data.num
     if flg.hermite
         dx = [X(:,i);U(:,i)]; % hermite
@@ -18,6 +19,10 @@ for i = 1:size(X,2)%1:Data.num
     end
     Xlift(:,i) = F(dx); 
     Ylift(:,i) = F(dy);
+    if rem(i, remi) == 0
+        j = j+1;
+        fprintf('convert %d times observables \n', remi*j);
+    end
 end
 
 [numX, ~] = size(Xlift); %[numX, ~]=size(Xlift): Xliftのサイズ=(A行,B列)のとき，A行の値をnumXに入れ，B列の値は使わない(~:notの意味)
@@ -55,12 +60,12 @@ if flg.weight
 
     % Q = blkdiag(flg.weight_Qp, flg.weight_Qq, flg.weight_Qv, flg.weight_Qw, eye(numX-12)); 
     % 汎用性のためにflgにweightを格納
-    G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
-    V = (Q*Ylift)*[(Q*Xlift) ; U]';       % size(V) = (numX,      numX+numU)
-    M = V * pinv(G);              % size(M) = (numX,      numX+numU)
-    output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
-    output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
-    output.C = (Q(1:12,1:12)*X)*pinv(Q*Xlift);
+    G = [Xlift ; U]*[Xlift ; U]'; fprintf('finished get G\n');           % size(G) = (numX+numU, numX+numU)
+    V = (Q*Ylift)*[(Q*Xlift) ; U]'; fprintf('finished get V\n');         % size(V) = (numX,      numX+numU)
+    M = V * pinv(G); fprintf('finished get V*pinv(G) \n');               % size(M) = (numX,      numX+numU)
+    output.A = M(1:numX, 1:numX); fprintf('finished get A \n');          % size(.A) = (numX, numX)
+    output.B = M(1:numX, numX+1:numX+numU); fprintf('finished get B \n');% size(.B) = (numX, numU)
+    output.C = (Q(1:12,1:12)*X)*pinv(Q*Xlift); fprintf('finished get C\n');
 else
     G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
     V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)

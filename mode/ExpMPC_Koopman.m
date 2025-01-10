@@ -36,7 +36,10 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 % model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
 % model_file = "2024-09-11_Exp_Kiyama_code10_saddle.mat";
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
-model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
+
+% model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
+model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10";
 
 %% controllerでHL, KMPCをphaseで判別して動かす
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent));

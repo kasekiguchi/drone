@@ -15,14 +15,14 @@ clear gui
 clc; close all;
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
-te = 30; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 機数，1, z (初期位置)
-initial_state.q = [0; 0; 0];
+initial_state.q = [0; 0.01; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
@@ -38,8 +38,15 @@ initial_state.w = [0; 0; 0];
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
 
-model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
 % model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
+
+% 0110
+% model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
+% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10";
+model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1";
+% 
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 A=est.A; B=est.B; C=est.C;
@@ -138,12 +145,13 @@ function result_plot(app, model)
     flg.figtype = 0; % 0:subplot
     flg.savefig = 0;
     flg.animation_save = 0;
-    flg.animation = 0;
+    flg.animation = 1;
     flg.timerange = 0;
     flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');
     fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]), struct('model', model));
     fig.main_figure();
+    % fig.main_animation();
 end
 
 function dfunc(app)
