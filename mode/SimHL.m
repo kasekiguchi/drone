@@ -1,13 +1,13 @@
 %% Initialize
-% tmp = matlab.desktop.editor.getActive;
-% dir = fileparts(tmp.Filename);
-% if ~contains(path,dir)
-%     cd(erase(dir,'\mode'));
-% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-% close all hidden; clear ; clc;
-% userpath('clear');
-% end
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
 
 %% 20回まとめてシミュレーションする
 % clear; close all; clc;
@@ -81,7 +81,7 @@ in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 0);
+initial_state.p = arranged_position([0, 0], 1, 1, 1);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -91,18 +91,19 @@ agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+j = 'z';
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
 
 % reference_file = "Exp_2_4_108";
-% agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,1,te});
+% agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
 
 agent.controller = HLC(agent,Controller_HL(dt)); % HL
 % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt)); %FHL
@@ -135,28 +136,28 @@ run("SimBase"); % simulation
 % end
 
 %% default
-% for i = 1:te/dt
-%     if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     agent(1).controller.do(time, 'f');
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc;
-%     disp([num2str(time.t)])
-% end
+for i = 1:te/dt
+    if i < 20 || rem(i, 10) == 0 end
+    tic
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
+    agent(1).controller.do(time, 'f');
+    agent(1).plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc;
+    disp([num2str(time.t)])
+end
 
 %%
 % set(0,'defaultAxesFontSize', 10)
 % set(0, 'DefaultLineLineWidth', 1.5);
 % logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
 % % logger.save('HL_sim_test_1008_sigmoid');
-% app.logger = logger;
-% result_plot(app)
+app.logger = logger;
+result_plot(app)
 % 
 % % 仮想入力の描画
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
@@ -185,9 +186,9 @@ function result_plot(app)
     flg.animation_save = 0;
     flg.animation = 0;
     flg.timerange = 0;
-    flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+    flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');
-    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]));
+    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[3, 3]), struct('model', ""));
     fig.main_figure();
 end
 

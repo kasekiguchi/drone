@@ -34,7 +34,7 @@ run("ExpBase");
 
 %% 保存 v7.3
 log = gui.logger;
-save("Data\1209_HLMC_hovering_z_weight_good.mat", "log", "-v7.3");
+% save("Data\1209_HLMC_hovering_z_weight_good.mat", "log", "-v7.3");
 %%
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
