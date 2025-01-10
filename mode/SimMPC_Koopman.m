@@ -43,9 +43,10 @@ initial_state.w = [0; 0; 0];
 
 % 0110
 % model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
-% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10";
-model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1";
+% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10.mat";
+% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10.mat"; % pitch
+model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1.mat"; %roll, pitch, yaw
+% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased";
 % 
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);

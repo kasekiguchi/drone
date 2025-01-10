@@ -13,7 +13,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
 
     % iFlight
     u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
-    u_trans_param.th_offset = 350; %350  
+    u_trans_param.th_offset = 345; %350  
     
     u_trans_param.gain2 =u_trans_param.gain;
     u_trans_param.th_offset2 = u_trans_param.th_offset;

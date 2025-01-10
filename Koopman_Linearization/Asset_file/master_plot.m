@@ -6,15 +6,16 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
+%%
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
 loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 load(strcat(loadfilename{1}, '.mat'), 'est'); 
-cd('./Koopman_Linearization/Figure_output/');
+cd('Koopman_Linearization/Figure_output/');
 
 % 0入力検証
 % ii:状態数
@@ -44,12 +45,10 @@ if args.save_fig && flg.figtype
     savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
     if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
     cd(strcat('./', loadfilename{1}, '/'));
-    if ~isfolder('jpg'); mkdir('jpg'); mkdir('eps'); mkdir('pdf'); end
+    if ~isfolder('jpg'); mkdir('jpg'); mkdir('pdf'); end
     for i = 1:4; saveas(i, strcat('./jpg/',savefile, '-', type(i),'.jpg')); end; fprintf('saved jpg\n');
-    for i = 1:4; saveas(i, strcat('./eps/',savefile, '-', type(i)),'epsc'); end; fprintf('saved eps\n');
     for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '-', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
     saveas(5, strcat('./jpg/', 'Experiment_verify_', loadfilename{1},'.jpg'));
-    saveas(5, strcat('./eps/', 'Experiment_verify_', loadfilename{1}),'epsc');
     savename = strcat('pdf/Experiment_verify_', loadfilename{1},'.pdf'); exportgraphics(g, savename, 'ContentType', 'vector', 'Resolution', 300);
     cd('../../');
 end

@@ -18,7 +18,7 @@ initial_state.w = [0; 0; 0];
 
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -38,8 +38,9 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 % model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
 
 % model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
-model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10";
+% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10"; % pitch
+model_file = "2025-01-10_Exp_Kiyama_code26_saqsddle_increased_weight_1.mat"; %roll, pitch, yaw
 
 %% controllerでHL, KMPCをphaseで判別して動かす
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent));
@@ -54,8 +55,8 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controlle
 run("ExpBase");
 
 %% save log
-% logger = gui.logger;
-% save("Data/1223_KMPC_hovering_code23_weight_1720.mat", "logger", "-v7.3");
+% log = gui.logger;
+% save("Data/110_KMPC_hovering_codeo26_weight_1_fall.mat", "log", "-v7.3");
 
 %% function
 % function result = controller_do(varargin)
@@ -109,9 +110,9 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-% fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]), struct('model', filename));
 % struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange)
-% fig.main_figure();
+fig.main_figure();
 % fig.make_mpc_plot();
 % fig.main_animation();
 % fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);

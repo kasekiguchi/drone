@@ -17,7 +17,7 @@ initial_state.w = [0; 0; 0];
 % delete(gui.agent.plant.connector.serial);
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 % COM3:黄色、COM5:No.2
 % agent.platn = DRONE_EXP_MODEL(agent,)
 agent.parameter = DRONE_PARAM("DIATONE");
@@ -25,9 +25,9 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
- % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, fshowfig, num)
