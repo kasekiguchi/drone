@@ -6,6 +6,7 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
+% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
@@ -28,29 +29,33 @@ flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
-args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
+args.startTime = 11; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
 
-input_0_verify(args, est, loadfilename{1});
+g = input_0_verify(args, est, loadfilename{1});
 experiment_fitting(args, flg, loadfilename)
 
 if args.save_fig && flg.figtype
+    % figure -> hundle
+    for i = 1:4; f(i) = figure(i); end
     type = ['p', 'q', 'v', 'w'];
     filetmp = strrep(loadfilename{1},'-','_');
     savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
     if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
     cd(strcat('./', loadfilename{1}, '/'));
-    if ~isfolder('jpg'); mkdir('jpg'); mkdir('eps'); end
-    for i = 1:4; saveas(i, strcat('./jpg/',savefile, '-', type(i),'.jpg')); end
-    for i = 1:4; saveas(i, strcat('./eps/',savefile, '-', type(i)),'epsc'); end
-    saveas(100, strcat('./jpg/', 'Experiment_verify_', loadfilename{1},'.jpg'));
-    saveas(100, strcat('./eps/', 'Experiment_verify_', loadfilename{1}),'epsc');
+    if ~isfolder('jpg'); mkdir('jpg'); mkdir('eps'); mkdir('pdf'); end
+    for i = 1:4; saveas(i, strcat('./jpg/',savefile, '-', type(i),'.jpg')); end; fprintf('saved jpg\n');
+    for i = 1:4; saveas(i, strcat('./eps/',savefile, '-', type(i)),'epsc'); end; fprintf('saved eps\n');
+    for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '-', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
+    saveas(5, strcat('./jpg/', 'Experiment_verify_', loadfilename{1},'.jpg'));
+    saveas(5, strcat('./eps/', 'Experiment_verify_', loadfilename{1}),'epsc');
+    savename = strcat('pdf/Experiment_verify_', loadfilename{1},'.pdf'); exportgraphics(g, savename, 'ContentType', 'vector', 'Resolution', 300);
     cd('../../');
 end
 
 
-function input_0_verify(args, est, filename)
+function f = input_0_verify(args, est, filename)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
@@ -72,8 +77,7 @@ set(0,'defaultLineLineWidth',Fontsize*0.1);
 set(0,'defaultLineMarkerSize',Fontsize);
 
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
-
-f = figure(100);
+if args.save_fig; f = figure(5); else; f = figure(100); end
 sgtitle(strrep(filename, '_', '-'));
 % sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
 % subplot(2,3,1);
@@ -466,7 +470,7 @@ lgd.NumColumns = columnomber;
 hold off
 
 %% referenceの確認
-if flg.confirm_ref
+if flg.confirm_ref && ~args.save_fig
     if flg.figtype; figure(5);
     else; subplot(m, n, 5); end
     plot(file{WhichRef}.simResult.reference.T, file{WhichRef}.simResult.reference.X(1:3,:), 'LineWidth', 2); hold on;
