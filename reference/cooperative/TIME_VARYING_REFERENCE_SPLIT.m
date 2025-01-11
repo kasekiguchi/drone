@@ -201,7 +201,22 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                else
                    real_pL = obj.self.sensor.result.state.pL;%simのため
                end
-               ks = 0.6;%衝突回避するためのゲイン
+               %衝突回避reference生成用ゲイン
+               if isa( obj.self.sensor,"MOTIVE")
+                   rigid = obj.agent1.sensor.result.rigid;
+                   droneNum = (length(rigid)-1)/2;
+                   droneDistance = zeros(droneNum,1);
+                   for i = 1:droneNum
+                        droneDistance(i) = norm(rigid(2*i).p - obj.self.estimator.result.state.p);
+                   end
+               else
+                    droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);%direct sensor用
+               end
+               sortedDroneDistance = sort(droneDistance);
+               minDroneDistance = sortedDroneDistance(2);%1が自分の位置との差のため2番目が相手との最小値
+               ks = 0.5/(minDroneDistance-1.1)^2;%衝突回避するためのゲイン
+               % ks = 0.6;%衝突回避するためのゲイン
+
                if obj.cha == 'f'
                    obj.ftakeoff = 0;
                    obj.flanding = 0;
@@ -401,6 +416,24 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.state.xd = [xd;q];%角度を最後に追加
                % obj.result.state.xd = [xd;rotm2eul(rotms(1:3,1:3))'];%rotm2eul(rotms(1:3,1:3)) = [roll;pitch;yaw]
                obj.result.rotms = rotms;
+                
+               %全てのドローンの位置を取得
+               if ~isa( obj.self.sensor,"MOTIVE")
+                    sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
+                    %分割前ペイロード
+                    sp = sensor1.p;
+                    sR = RodriguesQuaternion(sensor1.Q);%回転行列
+                    %分割後ペイロード
+                    rho = obj.self.parameter.rho;
+                    spDrone = zeros(size(rho));
+                    for i = 1:size(rho,2)
+                        spL = sp + sR * rho(:,i);%分割後の質量重心位置
+                        spT = sensor1.qi(3*i-2:3*i,1);%分割後の紐の方向ベクトル
+                        %ドローン
+                        spDrone(:,i) = spL - obj.self.parameter.li(i)*spT;
+                    end
+                    obj.result.spDrone = spDrone;
+               end
 
                % refi = obj.result.state.xd;
                % obj.result.state.p = refi(1:3);
