@@ -10,107 +10,107 @@ userpath('clear');
 end
 
 %% 20回まとめてシミュレーションする
-% clear; close all; clc;
-% for j = 1:150
-%     fprintf('Initializing... N:%d \n', j);
-%     clear data
-%     ts = 0; % initial time
-%     dt = 0.025; % sampling period
-%     te = 60; % terminal time
-%     time = TIME(ts,dt,te); % instance of time class
-%     in_prog_func = @(app) dfunc(app); % in progress plot
-%     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
-%     motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
-%     logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-%     initial_state.p = arranged_position([0, 0], 1, 1, 1);
-%     initial_state.q = [1; 0; 0; 0];
-%     initial_state.v = [0; 0; 0];
-%     initial_state.w = [0; 0; 0];
-% 
-%     agent = DRONE;
-%     agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
-%     agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); % Model_Quat13
-%     agent.parameter.set("mass",struct("mass",0.5))
-%     agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-%     agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-% 
-%     num = j;
-%     reference_file = strcat("Exp_2_4_", num2str(num));
-%     agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,1,te});
-%     agent.controller = HLC(agent,Controller_HL(dt));
-%     run("ExpBase");
-% 
-%     % load(strcat(reference_file, '.mat'));
-%     startIDX = agent.reference.t.startidx;
-%     endIDX = agent.reference.t.endidx;
-%     timeidx = endIDX - startIDX + 1;
-% 
-%     for i = 1:timeidx
-%         % if i < 20 || rem(i, 10) == 0 end
-%         tic
-%         agent(1).sensor.do(time, 'f');
-%         agent(1).estimator.do(time, 'f');
-% 
-%         tmpvalue = agent.reference.est(:,i); % 読み込んだ時刻iの状態（初期値みたいな感じ）
-%         agent(1).estimator.result.state.set_state(tmpvalue);
-%         agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
-% 
-%         agent(1).reference.do(time, 'f');
-%         agent(1).controller.do(time, 'f');
-%         agent(1).plant.do(time, 'f');
-%         logger.logging(time, 'f', agent);
-%         time.t = time.t + time.dt;
-%         % disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
-%         %pause(1)
-%         all = toc;
-%         % 値の保存
-%         data.plant(:,i) = agent(1).plant.state.get();
-%         data.input(:,i) = agent(1).controller.result.input;
-%     end
-%     % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-%     % log = logger;
-%     save(strcat('Data\HLsim\HL_exp_1007_', num2str(j), '.mat'), 'data');
-% end
+clear; close all; clc;
+for j = 1:1
+    fprintf('Initializing... N:%d \n', j);
+    clear data
+    ts = 0; % initial time
+    dt = 0.025; % sampling period
+    te = 60; % terminal time
+    time = TIME(ts,dt,te); % instance of time class
+    in_prog_func = @(app) dfunc(app); % in progress plot
+    post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
+    motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
+    logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
+    initial_state.p = arranged_position([0, 0], 1, 1, 1);
+    initial_state.q = [1; 0; 0; 0];
+    initial_state.v = [0; 0; 0];
+    initial_state.w = [0; 0; 0];
+
+    agent = DRONE;
+    agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+    agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); % Model_Quat13
+    agent.parameter.set("mass",struct("mass",0.5))
+    agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+    agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+
+    num = j;
+    reference_file = strcat("Exp_2_4_", num2str(num));
+    agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,1,te});
+    agent.controller = HLC(agent,Controller_HL(dt));
+    run("ExpBase");
+
+    % load(strcat(reference_file, '.mat'));
+    startIDX = agent.reference.t.startidx;
+    endIDX = agent.reference.t.endidx;
+    timeidx = endIDX - startIDX + 1;
+
+    for i = 1:timeidx
+        % if i < 20 || rem(i, 10) == 0 end
+        tic
+        agent(1).sensor.do(time, 'f');
+        agent(1).estimator.do(time, 'f');
+
+        tmpvalue = agent.reference.est(:,i); % 読み込んだ時刻iの状態（初期値みたいな感じ）
+        agent(1).estimator.result.state.set_state(tmpvalue);
+        agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
+
+        agent(1).reference.do(time, 'f');
+        agent(1).controller.do(time, 'f');
+        agent(1).plant.do(time, 'f');
+        logger.logging(time, 'f', agent);
+        time.t = time.t + time.dt;
+        % disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
+        %pause(1)
+        all = toc;
+        % 値の保存
+        data.plant(:,i) = agent(1).plant.state.get();
+        data.input(:,i) = agent(1).controller.result.input;
+    end
+    % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+    % log = logger;
+    save(strcat('Data\HLsim\HL_exp_1007_', num2str(j), '.mat'), 'data');
+end
 
 %%
-ts = 0; % initial time
-dt = 0.025; % sampling period
-te = 20; % terminal time
-time = TIME(ts,dt,te); % instance of time class
-in_prog_func = @(app) in_prog(app); % in progress plot
-post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
-motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
-logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1);
-initial_state.q = [1; 0; 0; 0];
-initial_state.v = [0; 0; 0];
-initial_state.w = [0; 0; 0];
-
-agent = DRONE;
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
-agent.parameter.set("mass",struct("mass",0.5))
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
-
-% (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-j = 'z';
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
-
-% reference_file = "Exp_2_4_108";
-% agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
-
-agent.controller = HLC(agent,Controller_HL(dt)); % HL
-% agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt)); %FHL
-run("SimBase"); % simulation
+% ts = 0; % initial time
+% dt = 0.025; % sampling period
+% te = 20; % terminal time
+% time = TIME(ts,dt,te); % instance of time class
+% in_prog_func = @(app) in_prog(app); % in progress plot
+% post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
+% motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
+% logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
+% initial_state.p = arranged_position([0, 0], 1, 1, 1);
+% initial_state.q = [1; 0; 0; 0];
+% initial_state.v = [0; 0; 0];
+% initial_state.w = [0; 0; 0];
 % 
-% %% 毎時刻実機データの状態からのHLを計算する
-% % reference_file = strcat("Exp_2_4_", num2str(1));
+% agent = DRONE;
+% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+% agent.parameter.set("mass",struct("mass",0.5))
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+% % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
+% 
+% % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
+% j = 'z';
+% % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+% 
+% % reference_file = "Exp_2_4_108";
+% % agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
+% 
+% agent.controller = HLC(agent,Controller_HL(dt)); % HL
+% % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt)); %FHL
+% run("SimBase"); % simulation
+% % 
+%% 毎時刻実機データの状態からのHLを計算する
+% reference_file = strcat("Exp_2_4_", num2str(1));
 % load(strcat(reference_file, '.mat'));
 % startIDX = find(log.Data.phase == 102, 1, "first");
 % endIDX = find(log.Data.phase == 102, 1, "last");
@@ -136,20 +136,20 @@ run("SimBase"); % simulation
 % end
 
 %% default
-for i = 1:te/dt
-    if i < 20 || rem(i, 10) == 0 end
-    tic
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f');
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    %pause(1)
-    all = toc;
-    disp([num2str(time.t)])
-end
+% for i = 1:te/dt
+%     if i < 20 || rem(i, 10) == 0 end
+%     tic
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f');
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+%     all = toc;
+%     disp([num2str(time.t)])
+% end
 
 %%
 % set(0,'defaultAxesFontSize', 10)
@@ -162,6 +162,12 @@ result_plot(app)
 % % 仮想入力の描画
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
+%%
+% f(1) = figure(3); f(2) = figure(7);
+% savename1 = 'dataset_spline_z_pos.pdf';
+% savename2 = 'dataset_spline_z_3d.pdf';
+% exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
+% exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

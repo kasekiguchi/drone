@@ -7,15 +7,15 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
-% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1';
+loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
+% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
 loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 load(strcat(loadfilename{1}, '.mat'), 'est'); 
-cd('Koopman_Linearization/Figure_output/');
+% cd('Koopman_Linearization/Figure_output/');
 
 % 0入力検証
 % ii:状態数
@@ -53,7 +53,12 @@ if args.save_fig && flg.figtype
     cd('../../');
 end
 
+%% 単発の保存
+h = hermite_plot(1.5);
+savename = strcat('hermite_plot.pdf'); 
+exportgraphics(h, savename, 'ContentType', 'vector', 'Resolution', 300);
 
+%%
 function f = input_0_verify(args, est, filename)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
@@ -714,4 +719,16 @@ end
 end % flg.divisionのif
 
 end % flg.only_rmse
+end
+
+function h = hermite_plot(w)
+syms x
+h = figure(200);
+fplot(hermiteH(0:4,x), 'LineWidth', w);
+axis([-2 2 -30 30])
+grid on
+
+ylabel('H_n(x)')
+legend('H_0(x)', 'H_1(x)', 'H_2(x)', 'H_3(x)', 'H_4(x)', 'Location', 'southeast')
+% title('Hermite polynomials')
 end

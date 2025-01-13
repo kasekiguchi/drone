@@ -20,8 +20,8 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '0731_KMPC_saigen_hovering_code00';
 
-filename = '1223_KMPC_hovering_code23_weight_1720';
-loadfile = 'Z:\Work2024\ykomatsu\1223_exp\1223_KMPC_hovering_code23_weight_1720.mat';
+% filename = '1223_KMPC_hovering_code23_weight_1720';
+% loadfile = '1223_KMPC_hovering_code23_weight_1720.mat';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
@@ -30,8 +30,10 @@ loadfile = 'Z:\Work2024\ykomatsu\1223_exp\1223_KMPC_hovering_code23_weight_1720.
 % filename = "2_8_Exp_KMPC_P2Py_成功";
 % loadfile = "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2024\2012035_木山康平\第5章\結果\2_8_Exp_KMPC_P2Py_成功.mat";
 % load(loadfile);
-log = LOGGER(loadfile); % loggerの形で収納できる
+% log = LOGGER(loadfile); % loggerの形で収納できる
 % load(loadfile);
+
+logger = load("Data/1223_KMPC_hovering_code23_weight_1720.mat");
 
 % 115:start
 % 97 :arming
@@ -43,6 +45,8 @@ log = LOGGER(loadfile); % loggerの形で収納できる
 %% save setting
 % savename = strcat(filename, '_all');
 % savefolder = '\Data\Exp_figure_image\';
+
+
 %%
 close all
 clear fig
@@ -56,7 +60,7 @@ flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
-fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange),struct('model',filename));
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2,3]),struct('model',filename));
 % fig.main_animation();
 fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
@@ -126,3 +130,18 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % 
 % comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma) * 
 % (cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
+
+
+%% 抽出
+log = logger.logger;
+%% agent
+est = log.Data.agent.estimator;
+con = log.Data.agent.controller;
+ref = log.Data.agent.reference;
+sen = log.Data.agent.sensor;
+input = log.Data.agent.input;
+innner_input = log.Data.agent.inner_input;
+% param
+param.t = log.Data.t;
+param.phase = log.Data.phase;
+param.k = log.k;
