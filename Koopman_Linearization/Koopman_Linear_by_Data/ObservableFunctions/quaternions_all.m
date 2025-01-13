@@ -240,13 +240,13 @@ du = [H(u1); H(u2); H(u3); H(u4)];
 % z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d3; d4]; % 24
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
-z = [common_z; isobe_z; kron(k1,k2)]; % 26
+% z = [common_z; isobe_z; kron(k1,k2)]; % 26
 % z = [common_z; isobe_z; kron(k3,k4)]; % 27
 % z = [common_z; isobe_z; k3; k4]; % 28
 
 %% まとめ
 % z = [common_z; isobe_z]; % 00
-% z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
+z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
 % z = [common_z; diff_param_z]; % 05

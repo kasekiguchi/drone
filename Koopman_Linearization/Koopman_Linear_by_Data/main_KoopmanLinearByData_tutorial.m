@@ -130,7 +130,7 @@ flg.bilinear = 0;
 flg.normalize = 0;
 flg.without_pos = 0;
 flg.hermite = 1;
-flg.weight = 1 % 重み付き最小二乗法
+flg.weight = 0 % 重み付き最小二乗法
 % A = diag([1 1.00001 1]); % pitchのみに重み
 A = diag([1.00001 1.00001 1.00001]); % qに重み
 Qp = eye(3); Qq = A; Qv = eye(3); Qw = A;
@@ -146,7 +146,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato';
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kiyama_Error';
-FileName = strcat(FileName_common, exp_data, '_', 'code26_', Exp_tra, '_increased_weight_1'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code02_', Exp_tra, '_increased'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
