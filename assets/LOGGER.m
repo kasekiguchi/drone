@@ -17,7 +17,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
     fExp
     overwrite_target = ["all"];
   end
-%194行目消す
+
   methods
 
     function obj = LOGGER(target, number, fExp, items, agent_items, option)
@@ -190,8 +190,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       if isempty(name)
         tmpname = strrep(strrep(strcat('Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
       else
-%         tmpname = strrep(strrep(strcat('', name, '_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
-        tmpname = strcat('', name);
+        tmpname = strrep(strrep(strcat('', name, '_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
       end
 
       if opt.separate
@@ -528,11 +527,10 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               else
                 xlim(ax,[min(tmpx), max(tmpx)]);
               end
-                ylim(ax,[min(tmpy,[],'all'), max(tmpy,[],'all')+0.01]);
+              ylim(ax,[min(tmpy,[],'all'), max(tmpy,[],'all')+0.01]);
             end
 
             hold(ax, "on");
-            grid(ax, "on");
 
             switch length(ps)
               case 3
@@ -593,9 +591,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
 
             ylabel(ax, ps(2));
-            if length(ps) == 3
-                zlabel(ax, ps(3)); 
-            end
+            if length(ps) == 3; zlabel(ps(3)); end
           end
 
         end

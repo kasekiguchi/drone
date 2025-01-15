@@ -1,6 +1,5 @@
 %% Initialize
 % do initialize first in main.m
-clear all
 %clc
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));
@@ -37,24 +36,24 @@ T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
 % motor configuration 
 % T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
 % T2, T3 の回転方向は軸 zb,  T1, T4 : -zb      [1,0,0,1] で 正のyaw回転
-%tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
+tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 % IT=inv([1, 1, 1, 1;simplify(mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4))]);
 %% Translational model
 ddpf = [0;0;-gravity];
-%ddpg = Rb0*[0;0;(T1+T2+T3+T4)/m];
-ddpg = Rb0*[0;0;u1/m];
-ddpG = [Rb0*[0;0;1/m],zeros(3)];
+ddpg = Rb0*[0;0;(T1+T2+T3+T4)/m];
+ddpG = simplify(Mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),ddpg,'UniformOutput',false)),1:3,1:4));%*IT;
+% ddpg=ddpG*T
 %% Rotational model
 Ib = diag([jx,jy,jz]);
 dq = L'*ob/2;
-%T2T = simplify(Mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4));
-%simplify(tau - T2T*T)
+T2T = simplify(Mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4));
+simplify(tau - T2T*T)
 dobf = inv(Ib)*(-Skew(ob)*Ib*ob);
-dobg = simplify([zeros(3,1),inv(Ib)]);
+dobg = simplify(inv(Ib)*T2T);
 %% SS equation
 % % Usage: dx=f+g*u
 x = [q;p;dp;ob];            % 13 states
-u = [u1;u2;u3;u4]; % thrust, torques
+u = [u1;u2;u3;u4]; % 各ローターで発生する推力
 f = [dq;dp;ddpf;dobf];
 g = [zeros(4,4);zeros(3,4);ddpG;dobg];
  %% Linearization
@@ -101,19 +100,18 @@ u = [u1;u2;u3;u4];
 % matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Calculate Jacobian matrix
-%jacobianA = jacobian(nonlinearModel,x);
+jacobianA = jacobian(nonlinearModel,x);
 % matlabFunction(jacobianA,'file','JacobiA.m','vars',{x u},'outputs',{'a'});
 
 %% With load model
-syms Lx Ly lx ly lz rotor_r cableL real
-physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mL, cableL};
-
+syms Length real
+physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, mL, Length};
 e3=[0;0;1];
-dol  = cross(-pT,u1*Rb0*e3)/(m*cableL); % ケーブル角加速度
+dol  = cross(-pT,u1*Rb0*e3)/(m*Length); % ケーブル角加速度
 dpT  = cross(ol,pT); % 機体から見たケーブル上の単位長さの位置の速度
 ddpT = cross(dol,pT)+cross(ol,dpT); % 単位長さの位置の加速度
-ddpl  = [0;0;-gravity]+(dot(pT,u1*Rb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL); % 牽引物体の加速度
-ddp  = ddpl-cableL*ddpT;
+ddpl  = [0;0;-gravity]+(dot(pT,u1*Rb0*e3)-m*Length*dot(dpT,dpT))*pT/(m+mL); % 牽引物体の加速度
+ddp  = ddpl-Length*ddpT;
 dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 dq   = L'*ob/2;
 x=[q;ob;pl;dpl;pT;ol];
@@ -124,26 +122,18 @@ Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0])
 simplify(f - (Fl+Gl*U))
 matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
-matlabFunction(f,'file','with_load_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
+% matlabFunction(f,'file','with_load_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 %%
-dol  = cross(-pT,u1*Rb0*e3)/(m*cableL);
+dol  = cross(-pT,(T1+T2+T3+T4)*Rb0*e3)/(m*Length);
 dpT  = cross(ol,pT);
 ddpT = cross(dol,pT)+cross(ol,dpT);
-ddpl  = [0;0;-gravity]+(dot(pT,u1*Rb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
-ddp  = ddpl-cableL*ddpT;
-dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+ddpl  = [0;0;-gravity]+(dot(pT,(T1+T2+T3+T4)*Rb0*e3)-m*Length*dot(dpT,dpT))*pT/(m+mL);
+ddp  = ddpl-Length*ddpT;
+dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*tau;
 dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
-matlabFunction(f,'file','with_load_model_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%%
-ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
-dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
-ddPT = cross(dOL,pT)+cross(ol,dpT);
-ddP  = ddPL-cableL*ddPT;
-x=[p;er;dp;ob;pl;dpl;pT;ol];
-f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];
-matlabFunction(f,'file','with_load_model_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(f,'file','with_load_model_for_HL','vars',{x T cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Local functions
 function m = Mtake(mat,m,n)

@@ -1,5 +1,6 @@
 clc
 ts = 0; % initial time
+% dt = 0.025; % sampling period
 dt = 0.025; % sampling period
 te = 500; % termina time
 time = TIME(ts,dt,te);
@@ -15,12 +16,14 @@ initial_state.w = [0; 0; 0];
 initial_state.vL = [0; 0; 0];
 initial_state.pT = [0; 0; -1];
 initial_state.wL = [0; 0; 0];
-initial_state.p = [1;0;1.46];
+ initial_state.p = [0;0.7;1.46];
+
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state,1,agent));%id,dt,type,initial,varargin
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+%agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q", "pL", "pT"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5)));%expの流用
 agent.sensor = DIRECT_SENSOR(agent, 0.0);
 agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
@@ -30,21 +33,21 @@ agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass)
 
 run("ExpBase");
 %%
-clc
-for i = 1:time.te
-    if i < 20 || rem(i, 10) == 0, i, end
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f',0,0,agent,1);
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    %pause(1)
-end
+% clc
+% for i = 1:time.te
+%     if i < 20 || rem(i, 10) == 0, i, end
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f',0,0,agent,1);
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+% end
 
 %%
-logger.plot({1,"plant.result.state.pL","p"})
+% logger.plot({1,"plant.result.state.pL","p"})
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;

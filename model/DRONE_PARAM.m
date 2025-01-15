@@ -38,11 +38,17 @@ classdef DRONE_PARAM < PARAMETER_CLASS
             arguments
                 name % DIATONE
                 type = "row";
-                % param.mass = 0.540; %KMPC下限 sim30s
-                 % param.mass = 0.5884;
-                 param.mass = 0.595; % 0.595 iflight
-                % param.mass = 0.669; %KMPC上限 sim30s
-                % param.mass = 0.640; %2024/1/15計量、機体+battery
+                % param.mass = 0.256;
+                % param.Lx = 0.09;
+                % param.Ly = 0.09;
+                % param.lx = 0.09/2;%0.05;
+                % param.ly = 0.09/2;%0.05;
+                % param.jx = 0.03;
+                % param.jy = 0.03;
+                % param.jz = 0.03;
+                % param.mass = 0.699;
+                % param.mass = 0.810;
+                param.mass = 0.730; %iflight
                 % param.Lx = 0.16;
                 % param.Ly = 0.16;
                 % param.lx = 0.16/2;%0.05;
@@ -68,6 +74,8 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
                 param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.model_error = [];
+             
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
         end

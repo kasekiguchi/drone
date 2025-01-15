@@ -3,26 +3,22 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % drone Prop. input
 
     %% transmitter system
-
-    % eachine
-    % u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    % u_trans_param.th_offset = 350;         % offset 3s[1021] 4s[900]　発掘[926]
-
-    % iflight 6cell
-    % u_trans_param.gain =[650;650;650;30]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    % u_trans_param.th_offset = 450;         % offset 3s[1021] 4s[900]　発掘[926]
-
-    % iflight 6cell 
-    u_trans_param.gain =[300;300;300;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    u_trans_param.th_offset = 335;  
-
-    % 事例研究
-    % u_trans_param.gain =[1000;1000;1000;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    % u_trans_param.th_offset = 335;  
-    
-    u_trans_param.gain2 =u_trans_param.gain;
-    u_trans_param.th_offset2 = u_trans_param.th_offset;
-
+    %4 cells
+    % u_trans_param.gain =[600;600;600;20];%[600;600;600;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.th_offset = 500;         % offset 3s[1021] 4s[900]　発掘[926]
+    %6 cells
+    % u_trans_param.gain =[500;500;500;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.th_offset = 230;
+    %牽引物体ドローン用
     % u_trans_param.gain_SuspendedLoad =[500;500;500;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
     % u_trans_param.th_offset_SuspendedLoad = 450;         % offset 3s[1021] 4s[900]　発掘[926]
+
+     %6 cells(EL)バッテリーとの兼ね合いで調整が必要
+    % u_trans_param.gain =[600;600;600;20];%[600;600;600;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.gain =[600;600;600;20];%EL
+    u_trans_param.gain =[710;710;710;20]; %iflight
+    % u_trans_param.th_offset = 230;         % offset 3s[1021] 4s[900]　発掘[926]
+    u_trans_param.th_offset = 338; %iflight
+    % u_trans_param.th_offset = 0; %iflight
+    % u_trans_param.th_offset = 360;   
 end

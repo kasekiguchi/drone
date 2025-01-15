@@ -20,6 +20,7 @@ classdef FOREST_FIRE_MAP_SIM < ENV_CLASS
     %         Color_Map %描画用のカラーマップ
     %         Color_Map_Agent %各エージェントが持つ描画用のカラーマップ
 properties
+        name % 例：bldg1
         id % 例：
         param
 %         result
@@ -28,6 +29,7 @@ properties
         function obj = FOREST_FIRE_MAP_SIM(~,param)
             obj.param=param;
             % このクラスのインスタンスを作成
+            obj.name = param.name;
             obj.id = obj.param.id;
             obj.param.Nx=(numel(obj.param.map_min(1):obj.param.D:obj.param.map_max(1)));
             obj.param.Ny=(numel(obj.param.map_min(2):obj.param.D:obj.param.map_max(2)));

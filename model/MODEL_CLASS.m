@@ -25,6 +25,7 @@ classdef MODEL_CLASS < dynamicprops & handle
     noise
     fig
     self
+    fmodelError
   end
 
   properties %(Access=private)
@@ -33,16 +34,19 @@ classdef MODEL_CLASS < dynamicprops & handle
 
   methods
 
-    function obj = MODEL_CLASS(self,args) % constructor
+    function obj = MODEL_CLASS(self,args,fmE) % constructor
 
       arguments
         self
         args
+        fmE=0;
       end
+      obj.fmodelError=fmE;
       obj.self = self;
-      if ~isempty(self.parameter)
+       if ~isempty(self.parameter)
          obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
-      end
+       end
+
       if isempty(regexp(args.type, "EXP", 'once'))
         param = args.param;
         name = args.name;
@@ -103,10 +107,13 @@ classdef MODEL_CLASS < dynamicprops & handle
       if (cha == 'q' || cha == 's' || cha == 'a')
         return
       end
-      u = obj.self.controller.result.input;
-      if isempty(obj.param)
-        obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
+
+      if obj.fmodelError && isprop(obj.self,"input_transform")
+                u= obj.self.input_transform.result;
+      else
+                u = obj.self.controller.result.input;
       end
+
       % if isfield(opts, 'param')
       %     obj.param = opts.param;
       % end
@@ -121,7 +128,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       %
       %     u = u + obj.noise.value .* randn(size(u));
       %            end
-
+        
       % 状態更新
       if contains(obj.time_scale, 'discrete')
         obj.set_state(obj.projection(obj.method(obj.state.get(), u, obj.param)));

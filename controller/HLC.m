@@ -5,7 +5,6 @@ classdef HLC < handle
     result
     param
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
-    flag_anti_spike
   end
 
   methods
@@ -14,11 +13,9 @@ classdef HLC < handle
       obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
-      obj.flag_anti_spike=0;
     end
 
     function result = do(obj,varargin)
-      
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
       xd = ref.state.xd;
@@ -52,30 +49,8 @@ classdef HLC < handle
         vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-
-         cha = varargin{1,3}; %HL 
-       % cha = varargin{1,1}{1,2}; %KMPC
-
-        if strcmp(cha,'t')
-            if obj.flag_anti_spike < 10
-                tmp = [tmp(1);0;0;0];
-                obj.flag_anti_spike = obj.flag_anti_spike + 1
-            end
-        end
-
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-%       state_monte = obj.self.estimator.result.state;
-% %             % state_monte = obj.self.plant.state;
-%             fprintf("==================================================================\n")
-%             fprintf("==================================================================\n")
-%             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
-%                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-%                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-%                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi, ...
-%                     state_monte.w(1)*180/pi, state_monte.w(2)*180/pi, state_monte.w(3)*180/pi);       % s:state 現在状態
-% %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-%             fprintf("\n");
       result = obj.result;
     end
   end

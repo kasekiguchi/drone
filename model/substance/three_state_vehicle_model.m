@@ -7,5 +7,5 @@ function dx = three_state_vehicle_model(in1,in2,P)
 
 q3 = in1(6,:);
 u1 = in2(1,:);
-u6 = in2(2,:);
+u6 = in2(6,:);
 dx = [u1.*cos(q3);u1.*sin(q3);0.0;0.0;0.0;u6];
