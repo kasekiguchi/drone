@@ -8,7 +8,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         tt0
         tl0
         tte = 5;%センサー値を何秒で100%使うか
-        tle = 15;%センサー値を何秒で0%使うか
+        tle = 5;%センサー値を何秒で0%使うか
         ratet
         ratel
         ilength %実際のxy位置を使い始めるか
@@ -26,12 +26,13 @@ classdef FOR_LOAD < SENSOR_CLASS
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT","real_pL"],"num_list",[3,4,3,3]));
             obj.ratet = 1/obj.tte^2;%二次関数で0-1の間で変化する
             obj.ratel = 1/obj.tle^2;%二次関数で0-1の間で変化する
-            % obj.ilength=obj.self.sensor.motive.result.rigid(varargin{1,1}.rigid_num).p(3) + 0.1;
-            obj.ilength=0.32 + 0.1;
         end
         
         function [result]=do(obj,varargin)
             %   param : optional
+            if isempty(obj.ilength)
+                obj.self.sensor.motive.result.rigid(1).p(3) + 0.1;%牽引物の高さ+定数
+            end
             sp = obj.self.sensor.motive.result.state.p;
             sq = obj.self.sensor.motive.result.state.q;
             spL=obj.self.sensor.motive.result.rigid(obj.rigid_num).p;
@@ -40,28 +41,28 @@ classdef FOR_LOAD < SENSOR_CLASS
                 obj.result.state.pL = spL;
                 obj.tt0=[];
                 obj.tl0=[];
-            % elseif strcmp(varargin{1}{2},'t')&&spL(3)>0.35&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
-            % % elseif strcmp(varargin{1}{2},'t')&&(norm(spL(1:2) - obj.result.state.p(1:2))<0.01||obj.fpLXY==1)
-            %     obj.result.state.pL(1:2) = spL(1:2);
-            %     obj.fpLXY=1;
-            elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
+            % elseif strcmp(varargin{1}{2},'t')&& norm(sp - spL) > 0.8*obj.self.parameter.get("cableL") %take off
+            elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*obj.self.parameter.get("cableL")%take off
+            % elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
                 if isempty(obj.tt0)
                     obj.tt0 = varargin{1}{1}.t;
                 end
                 t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
                 k = obj.ratet*t^2;%反映割合
-                spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-            elseif strcmp(varargin{1}{2},'l')&&ipL(3)> obj.ilength%landing
+                % spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
+                spL = spL + k*(spL - sp);
+            elseif strcmp(varargin{1}{2},'l')&& norm(sp - spL) < 0.8*obj.self.parameter.get("cableL")%landing
+            % elseif strcmp(varargin{1}{2},'l')&&ipL(3) < obj.ilength%landing
                 if isempty(obj.tl0)
                     obj.tl0 = varargin{1}{1}.t;
                 end
                 t = min(varargin{1}{1}.t - obj.tl0, obj.tle);
                 k = -obj.ratel*t^2 + 1;%反映割合
-                % spL = spL + k*(spL - sp);
-                spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
+                spL = spL + k*(spL - sp);
+                % spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
                 % spL(3) = ipL(3);
             else
-                spL = ipL;% For:PE-Model
+                spL = ipL;
                 obj.tt0=[];
                 obj.tl0=[];
             end

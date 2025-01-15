@@ -34,6 +34,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_time_landing
         base_state_takeoff
         base_state_landing
+        base_state12_takeoff
+        base_state12_landing
         ts
         te_takeoff = 15% goal time
         zd_takeoff = 0.8 % goal altitude
@@ -201,79 +203,78 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                else
                    real_pL = obj.self.sensor.result.state.pL;%simのため
                end
+               alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+               alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                %衝突回避reference生成用ゲイン
-               if isa( obj.self.sensor,"MOTIVE")
-                   rigid = obj.agent1.sensor.result.rigid;
-                   droneNum = (length(rigid)-1)/2;
-                   droneDistance = zeros(droneNum,1);
-                   for i = 1:droneNum
-                        droneDistance(i) = norm(rigid(2*i).p - obj.self.estimator.result.state.p);
-                   end
-               else
+               % if isa( obj.self.sensor,"MOTIVE")
+               %     rigid = obj.agent1.sensor.result.rigid;
+               %     droneNum = (length(rigid)-1)/2;
+               %     droneDistance = zeros(droneNum,1);
+               %     for i = 1:droneNum
+               %          droneDistance(i) = norm(rigid(2*i).p - obj.self.estimator.result.state.p);
+               %     end
+               % else
                     droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);%direct sensor用
-               end
+               % end
                sortedDroneDistance = sort(droneDistance);
                minDroneDistance = sortedDroneDistance(2);%1が自分の位置との差のため2番目が相手との最小値
                ks = 0.5/(minDroneDistance-1.1)^2;%衝突回避するためのゲイン
                % ks = 0.6;%衝突回避するためのゲイン
 
                if obj.cha == 'f'
-                   obj.ftakeoff = 0;
-                   obj.flanding = 0;
+                   obj.ftakeoff = 0;%take off条件分岐用フラグ
+                   obj.flanding = 0;%landing条件分岐用フラグ
                    rotm0 = obj.agent1.reference.result.rotms;     %回転行列
-                   % xid  = x0d + rhoi + 0.0*rhoi/norm(rhoi);       %分割後のペイロードの位置目標軌道
-                   % %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
-                   % refi         = zeros(28,1);  %機体のreference
-                   % refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
-                   % drefi    = reshape(ref0(5:end),4,[]);%目標軌道微分
-                   % drefi    = [drefi(1:3,:);zeros(1,6)];%目標軌道微分
-                   % refi(5:end)   = reshape(drefi,[],1);
-                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));
+                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
                    rhoi = rhoi + ks*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'
-                   obj.flanding = 0;
-                   alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                   alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
+                   obj.flanding = 0;%landing条件分岐用フラグ
+                   % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                   % alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                    if isempty( obj.base_state_takeoff )
                        p = obj.self.sensor.result.state.p; 
                        obj.base_time_takeoff =varargin{1}.t;
-
-                       % obj.base_state_takeoff = [p(1:2);p(3)-obj.self.parameter.get("cableL")]+ 0.5*[alpiUnit12;0];%rhoi/norm(rhoi);%obj.self.estimator.result.state.p;
-                       obj.base_state_takeoff = [real_pL(1:2);p(3)-obj.self.parameter.get("cableL")]+ 0.5*[alpiUnit12;0];
+                       obj.base_state_takeoff = [real_pL(1:2);p(3)-obj.self.parameter.get("cableL")]+ max(0.5*obj.self.parameter.get("cableL"),ks)*[alpiUnit12;0];
+                       obj.base_state12_takeoff = real_pL(1:2);
                    end
-                   if obj.self.sensor.result.state.p(3)>=0.3&& obj.ftakeoff == 0
-                   % if obj.self.sensor.result.state.p(3) - real_pL(3)>=0.3&& obj.ftakeoff == 0
-                       obj.ftakeoff =1;
-                       obj.base_state_takeoff(1:2) = real_pL(1:2) + ks*alpiUnit12;
+                   if obj.self.sensor.result.state.p(3) - real_pL(3) >=0.3 || obj.ftakeoff == 1
+                       obj.ftakeoff =1;%take off条件分岐用フラグ
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + ks*alpiUnit12;
+                   else
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*obj.self.parameter.get("cableL"),ks)*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
+                       x0d = refi(1:3) - rhoi;
+
                        th_offset = obj.self.input_transform.param.th_offset;
                        % th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
                        th_offset_takeoff = 260;
                        obj.self.input_transform.param.th_offset_tl = th_offset_takeoff + (th_offset-th_offset_takeoff)*min(obj.te_takeoff,varargin{1}.t-obj.base_time_takeoff)/obj.te_takeoff;
-                       x0d = refi(1:3) - rhoi;
                elseif obj.cha =='l'
-                   obj.ftakeoff = 0;
+                   obj.ftakeoff = 0;%take off条件分岐用フラグ
                    if isempty(obj.base_state_landing) 
                        obj.base_time_landing =varargin{1}.t;
-                       alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                       alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
-                       obj.base_state_landing = obj.self.sensor.result.state.pL + ks*[alpiUnit12;0];
+                       % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                       % alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
+                       obj.base_state_landing = obj.self.sensor.result.state.pL;
+                       obj.base_state12_landing = obj.self.sensor.result.state.pL(1:2);
                    end
-                   if obj.self.sensor.result.state.p(3) - real_pL(3)<=0.4&& obj.flanding==0
-                       obj.flanding  =1;
-                       alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                       alpiUnit12 = alpi12/norm(alpi12);
-                       obj.base_state_landing(1:2) = real_pL(1:2) + 0.5*alpiUnit12;
+                   if obj.self.sensor.result.state.p(3) - real_pL(3)<=0.3&& obj.flanding==0
+                       obj.flanding  =1;%landing条件分岐用フラグ
+                       % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+                       % alpiUnit12 = alpi12/norm(alpi12);
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*obj.self.parameter.get("cableL"),ks)*alpiUnit12;
+                   else 
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + ks*[alpiUnit12;0];%紐がたわんでいる場合を含む
                    end
-                       th_offset = obj.self.input_transform.param.th_offset;
-                       % th_offset_landing = obj.self.input_transform.param.th_offset_tl;
-                       th_offset_landing = 260;
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
-                       obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                        x0d = refi(1:3) - rhoi;
+
+                       th_offset = obj.self.input_transform.param.th_offset;
+                       th_offset_landing = 260;
+                       obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                else
                    refi = zeros(28,1);
                end
@@ -418,7 +419,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.rotms = rotms;
                 
                %全てのドローンの位置を取得
-               if ~isa( obj.self.sensor,"MOTIVE")
+               if isa( obj.self.sensor,"MOTIVE")
+                   rigid = obj.self.sensor.result.rigid;%剛体情報を全て取得
+                   rho = obj.self.parameter.rho;
+                   spDrone = zeros(size(rho));
+                   for i = 1:size(rho,2)
+                        spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
+                   end
+               else
                     sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
                     %分割前ペイロード
                     sp = sensor1.p;
@@ -432,8 +440,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                         %ドローン
                         spDrone(:,i) = spL - obj.self.parameter.li(i)*spT;
                     end
-                    obj.result.spDrone = spDrone;
                end
+               obj.result.spDrone = spDrone;
 
                % refi = obj.result.state.xd;
                % obj.result.state.p = refi(1:3);
