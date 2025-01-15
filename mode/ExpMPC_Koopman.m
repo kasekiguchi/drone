@@ -40,9 +40,9 @@ function result = controller_do(varargin)
     if varargin{2} == 'a'
         result = controller.mpc.do(varargin);
     elseif varargin{2} == 't'
-        result.hlc = controller.hlc.do(varargin);
+       % result.hlc = controller.hlc.do(varargin);
         result.mpc = controller.mpc.do(varargin); % 空で回るだけ
-        result = result.hlc; % hlc:hlcでcontrol
+        result = result.mpc; % hlc:hlcでcontrol
     elseif varargin{2} == 'f'
         result = controller.mpc.do(varargin);
     elseif varargin{2} == 'l'
