@@ -78,7 +78,9 @@ void setup()
 
   // 緊急停止
  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
- attachPinChangeInterrupt(digitalPinToInterrupt(LAND_PIN), landing_stop, CHANGE);
+ attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(LAND_PIN), landing_stop, RISING);
+//  attachPinChangeInterrupt(5, tock, FALLING);
+//  attachPCINT(digitalPinToPCINT(pinBlink), blinkLed, CHANGE);
   while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
   {
   }
