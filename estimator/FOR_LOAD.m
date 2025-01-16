@@ -42,7 +42,7 @@ classdef FOR_LOAD < SENSOR_CLASS
                 obj.tt0=[];
                 obj.tl0=[];
             % elseif strcmp(varargin{1}{2},'t')&& norm(sp - spL) > 0.8*obj.self.parameter.get("cableL") %take off
-            elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*obj.self.parameter.get("cableL")%take off
+            elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*1.73*obj.self.parameter.get("cableL")%take off,•¡”Œ¡ˆø‚Å•R‚ÌŠp“x‚ª60deg
             % elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
                 if isempty(obj.tt0)
                     obj.tt0 = varargin{1}{1}.t;

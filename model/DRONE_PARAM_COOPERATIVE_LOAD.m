@@ -18,6 +18,9 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
         li
         mi
         Ji
+        pUp
+        pDown
+        G
     end
 
     methods
@@ -35,7 +38,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
                 param.J0 = [0.35;0.47;0.45];%非対称牽引物
                 param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
-                param.li = 2*ones(N,1);%紐の長さ
+                param.li = 3*ones(N,1);%紐の長さ
                 param.mi = 0.800*ones(N,1)';%ドローンの重さ
 %                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
@@ -49,17 +52,50 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             if isempty(param.rho)&& 1
             %非対称牽引物
-                % x1 = [-1 -1 0 1 1 0];
-                % y1 = [-1 1/2 1 1/2 -1/2 -1];
-                x1 = [-2 -1.5 0 1.5 1 0];
-                y1 = [-1 0.5 1 0.5 -0.5 -1];
-                z1 = ones(1,6);
-                p = [x1;y1;z1];
-                polyin = polyshape(x1,y1);
+                %上面
+                xUp = [-2 -1.5 0 1.5 1 0];
+                yUp = [-1 0.5 1 0.5 -0.5 -1];
+                zUp = 0.5*ones(1,6);
+                pUp = [xUp;yUp;zUp]*0.4;
+                %下面
+                xDown = [-2 -1.5 0 1.5 1 0];
+                yDown = [-1 0.5 1 0.5 -0.5 -1];
+                zDown = -0.5*ones(1,6);
+                pDown = [xDown;yDown;zDown]*0.4;
+                %重心の計算
+                polyin = polyshape(xUp,yUp);
                 [x,y] = centroid(polyin);
-                G = [x;y;0.5];
-                rho = p-G;
+                G = [x;y;0];
+                % 重心から接続点までの距離
+                rho = pUp-G;
+
                 param.rho = rho(:,1:N);
+                param.pUp = pUp;
+                param.pDown = pDown;
+                param.G=G;
+
+                %plot payload shape
+                  xM = pUp(1,:) - G(1);
+                  yM = pUp(2,:) - G(2);
+                  zM = pUp(3,:) - G(3);
+                  xm = pDown(1,:) - G(1);
+                  ym = pDown(2,:) - G(2);
+                  zm = pDown(3,:) - G(3);
+                  
+                  % plot
+                  fill3(xm,ym,zm,"cyan");%上面
+                  hold on
+                  fill3(xM,yM,zM,"cyan");%下面
+                  surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)]);%側面
+                  hold off
+                  daspect([1,1,1])
+                  grid minor
+                  set(gca,"TickLabelInterpreter","latex","fontsize",10)
+                  xlabel('$x$ (m)','Interpreter','latex',"FontSize",18)
+                  ylabel('$y$ (m)','Interpreter','latex',"FontSize",18)
+                  zlabel('$z$ (m)','Interpreter','latex',"FontSize",18)
+                  input("Confirm the figure and press Enter.")
+                  close
             end
                 
             if isempty(param.rho)

@@ -12,12 +12,12 @@ run("makeSavePath")
 
     % if exist("logger","var")
     % % multiple var : save logger, simple logger and agent
-    %     eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
-    %     eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更
-    %     for i = 1:length(logger.target)
-    %         loggers{i,1} = simplifyLoggerForCoop(logger,i);
-    %     end
-    %     eval([simpleLoggerContents,'= loggers;']);
+        eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
+        eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更
+        for i = 1:length(logger.target)
+            loggers{i,1} = simplifyLoggerForCoop(logger,i);
+        end
+        eval([simpleLoggerContents,'= loggers;']);
     % else
     % single var : save logger, simple logger and agent
         eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更

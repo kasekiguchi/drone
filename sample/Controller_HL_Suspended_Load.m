@@ -12,7 +12,7 @@ if class(agent.plant)~="DRONE_EXP_MODEL"
 Controller.F1=lqrd(A2,B2,diag([100,10]),1,dt);
 Controller.F2=lqrd(A6,B6,diag([100000,1000,100,10,10,10]),0.01,dt);
 Controller.F3=lqrd(A6,B6,diag([100000,1000,100,10,10,10]),0.01,dt);
-Controller.F4=lqrd(A2,B2,diag([10,1]),0.1,dt);
+Controller.F4=lqrd(A2,B2,diag([100,1]),0.1,dt);
 %===========================================================================
 else
   Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);%位置z、速度z

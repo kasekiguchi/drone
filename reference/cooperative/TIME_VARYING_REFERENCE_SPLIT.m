@@ -106,11 +106,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                     obj.com = args{3};
                     % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "yaw","aaa"], 'num_list', [28, 3, 1,1]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance"], 'num_list', [28, 3, 1,1]));  
                     obj.result.state.set_state("xd",zeros(28,1));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                     % obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-                    obj.result.state.yaw=0;
+                    % obj.result.state.yaw=0;
 
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],obj.agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
@@ -162,8 +162,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                id     = obj.self.id - 1;                    %機体の番号
                %parameter
                % mi   = obj.P(1);                             %機体の質量
-               % li   = obj.P(end);                           %紐の長さ
-               g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
+               cablei   = obj.self.parameter.get("cableL");                           %紐の長さ
+               rli = sqrt(2)*obj.self.parameter.get("lx");                           %機体のロータまでの長さ
+               % g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
                %reference
                ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
@@ -193,33 +194,29 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % vi       = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
 
            %紐接合部の目標軌道を算出
-           %todo:ペイロードの姿勢も考慮する場合は角度の5階微分まで求める必要がある
+           %todo:機体と牽引物の位置などは推定したものを使った方がいい？相手の位置はセンサ情報のみしかわからないr
                %================================================================================
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
-               if isfield(obj.self.sensor.result.state,"real_pL")
-                   real_pL = obj.self.sensor.result.state.real_pL;
-               else
-                   real_pL = obj.self.sensor.result.state.pL;%simのため
-               end
+               p = obj.self.estimator.result.state.p;%機体位置
+               real_pL = obj.self.estimator.result.state.pL;%機体位置
+               % p = obj.self.sensor.result.state.p;%機体位置
+               % if isfield(obj.self.sensor.result.state,"real_pL")
+               %     real_pL = obj.self.sensor.result.state.real_pL;%牽引物位置
+               % else
+               %     real_pL = obj.self.sensor.result.state.pL;%simのため%牽引物位置
+               % end
                alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                %衝突回避reference生成用ゲイン
-               % if isa( obj.self.sensor,"MOTIVE")
-               %     rigid = obj.agent1.sensor.result.rigid;
-               %     droneNum = (length(rigid)-1)/2;
-               %     droneDistance = zeros(droneNum,1);
-               %     for i = 1:droneNum
-               %          droneDistance(i) = norm(rigid(2*i).p - obj.self.estimator.result.state.p);
-               %     end
-               % else
-                    droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);%direct sensor用
-               % end
-               sortedDroneDistance = sort(droneDistance);
-               minDroneDistance = sortedDroneDistance(2);%1が自分の位置との差のため2番目が相手との最小値
-               ks = 0.5/(minDroneDistance-1.1)^2;%衝突回避するためのゲイン
-               % ks = 0.6;%衝突回避するためのゲイン
+                   droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);
+                   sortedDroneDistance = sort(droneDistance);
+                   minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値
+                   ks = 0.5/(minDroneDistance - 0.4)^2;%衝突回避するためのゲイン(定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2)
+                   % ks = 0.6;%衝突回避するためのゲイン
+                   minDroneDistance
+                   ks
 
                if obj.cha == 'f'
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
@@ -231,19 +228,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                elseif obj.cha =='t'
                    obj.flanding = 0;%landing条件分岐用フラグ
-                   % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                   % alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                    if isempty( obj.base_state_takeoff )
-                       p = obj.self.sensor.result.state.p; 
                        obj.base_time_takeoff =varargin{1}.t;
-                       obj.base_state_takeoff = [real_pL(1:2);p(3)-obj.self.parameter.get("cableL")]+ max(0.5*obj.self.parameter.get("cableL"),ks)*[alpiUnit12;0];
+                       obj.base_state_takeoff = [real_pL(1:2);p(3)-cablei];
                        obj.base_state12_takeoff = real_pL(1:2);
                    end
-                   if obj.self.sensor.result.state.p(3) - real_pL(3) >=0.3 || obj.ftakeoff == 1
-                       obj.ftakeoff =1;%take off条件分岐用フラグ
+                   if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
+                       obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + ks*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*obj.self.parameter.get("cableL"),ks)*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*cablei,ks*0)*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
                        x0d = refi(1:3) - rhoi;
@@ -256,16 +250,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
                    if isempty(obj.base_state_landing) 
                        obj.base_time_landing =varargin{1}.t;
-                       % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                       % alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
                        obj.base_state12_landing = obj.self.sensor.result.state.pL(1:2);
                    end
-                   if obj.self.sensor.result.state.p(3) - real_pL(3)<=0.3&& obj.flanding==0
-                       obj.flanding  =1;%landing条件分岐用フラグ
-                       % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
-                       % alpiUnit12 = alpi12/norm(alpi12);
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*obj.self.parameter.get("cableL"),ks)*alpiUnit12;
+                   if norm(p - real_pL) >= 0.8*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
+                       % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
+                       obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei,ks*0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
                        obj.base_state_landing(1:2) = obj.base_state12_landing + ks*[alpiUnit12;0];%紐がたわんでいる場合を含む
                    end
@@ -295,13 +286,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 % aaa = obj.yawSum
                 k=0.01;
                 kYawSum = min(max(-k*obj.yawSum,-yawLimit),yawLimit);
-                aaa = kYawSum*180/pi
+                % aaa = kYawSum*180/pi
                 
                 if real_pL(3)>-0.3
                     % refi(1:2) = [cos(kYawSum),-sin(kYawSum);sin(kYawSum),cos(kYawSum)]*refi(1:2);
                 end
                 %yaw補正をするための目標速度と高次微分を計算
-                yaw*180/pi
+                % yaw*180/pi
                 % if abs(kYawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
                 if abs(yaw)>2000000*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
                     if isempty(obj.errorVector)
@@ -369,8 +360,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.result.x0d     = x0d;
                % obj.result.R0d     = R0d;
                obj.result.state.xd      = refi;
-               obj.result.state.yaw      = yaw;
-               obj.result.state.aaa      = aaa*180/pi;
+               % obj.result.state.yaw      = yaw;
+               obj.result.state.minDroneDistance      = minDroneDistance;
+               % obj.result.state.aaa      = aaa*180/pi;
                % obj.result.state.p       = xid;
                % obj.result.state.v       = dxid;
                % obj.result.state.mui     = mui';

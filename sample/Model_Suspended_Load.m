@@ -21,12 +21,14 @@ Setting.num_list = [3,3,3,3,3,3,3,3];
 
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial;
+if ~isfield(Setting.initial,"pT")
+    Setting.initial.pT = [0;0;-1];
+    Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];%22~24
+end
 Setting.initial.vL = [0;0;0];
-Setting.initial.pT = [0;0;-1];
 Setting.initial.wL = [0;0;0];
 Setting.dt = dt;
 Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
-Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];%22~24
 
 if ~isempty(agent.plant) && isEstLoadMass
   if isEstLoadMass == 1

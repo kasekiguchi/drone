@@ -45,9 +45,10 @@ z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 % y = ly_offset;  % y
 % z = lz_offset; % z
 
-roll = 5*pi/180;
-pitch = 5*pi/180;
-yaw = 0*2*pi*t/T/2;
+roll = 7*pi/180;
+pitch = -6*pi/180;
+yaw = 5*pi/180;
+% yaw = 0*2*pi*t/T/2;
 % yaw = acos(cos(2*pi*t/T));
 
 ref.pYaw    = [x;y;z;yaw];%x,y,z,roll,pitch,yaw

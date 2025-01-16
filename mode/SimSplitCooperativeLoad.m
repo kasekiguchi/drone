@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 15;
+te = 30;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -30,7 +30,7 @@ logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%分割前1,分割後N個
 agent(1) = DRONE;
 agent(1).id = 1;%元のシステム
 %Payload_Initial_State
-initial_state(1).p = [2; 1; 0];%ペイロード
+initial_state(1).p = [2; 0; 1];%ペイロード
 initial_state(1).v = [0; 0; 0];%ペイロード
 initial_state(1).O = [0; 0; 0];%ペイロードの角速度
 initial_state(1).wi = repmat([0; 0; 0], N, 1);%ドローンの角速度
@@ -58,11 +58,16 @@ else
 end
 
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
+rho12 = [agent(1).parameter.rho(1:2,:);zeros(1,N)];
+rho12Unit = rho12./vecnorm(rho12);
+pTpre = rho12Unit*tan(5*pi/180) + [0;0;1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）
+initial_state(1).qi = -reshape(pTpre./vecnorm(pTpre),[],1) ;%zup- zdown+
+
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;1],"size",1*[3,1,0.5]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;2],"size",1*[2,2,1]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
@@ -92,9 +97,13 @@ for i = 2:N+1
     initial_state(i).v = [0; 0; 0];
     initial_state(i).w = [0; 0; 0];
     initial_state(i).vL = [0; 0; 0];
-    initial_state(i).pT = [0; 0; -1];
+    %初期紐向き単位ベクトル
+    % rho12 = [agent(1).parameter.rho(1:2,i-1);0];
+    % rho12Unit = rho12/norm(rho12);
+    % pTpre = rho12Unit*tan(60*pi/180) + [0;0;-1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）
+    % initial_state(i).pT = pTpre/norm(pTpre) ;
+    initial_state(i).pT = initial_state(1).qi(3*(i - 1)-2:3*(i-1),1);
     initial_state(i).wL = [0; 0; 0];
-%     initial_state(i).p = [1;0;1.46];
     initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p + R_load*rho(:,i-1);
 %Generate instance
@@ -119,14 +128,14 @@ end
 
 % R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
 % rhos = [0;0;1/2]+[[-2;-1;0],double(cellmatfun(@(A,~) A*[-2;-1;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
-x1 = [-2 -1.5 0 1.5 1 0]*2;
-y1 = [-1 0.5 1 0.5 -0.5 -1]*2;%+[0 0 0.3 0.1 0 -0.5];
-z1 = ones(1,6);
-p = [x1;y1;z1];
-polyin = polyshape(x1,y1);
-[x,y] = centroid(polyin);
-G = [x;y;0.5];
-rhos = p-G;
+% x1 = [-2 -1.5 0 1.5 1 0]*2;
+% y1 = [-1 0.5 1 0.5 -0.5 -1]*2;%+[0 0 0.3 0.1 0 -0.5];
+% z1 = ones(1,6);
+% p = [x1;y1;z1];
+% polyin = polyshape(x1,y1);
+% [x,y] = centroid(polyin);
+% G = [x;y;0.5];
+% rhos = p-G;
 
 noize_sp = normrnd(0,0.0,[3,tn]);
 noize_spT = 1*normrnd(0,0.00,[3,tn]);
