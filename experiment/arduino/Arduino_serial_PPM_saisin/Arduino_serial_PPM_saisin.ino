@@ -4,6 +4,7 @@
 // PPM 1周期は start_H + TOTAL_CH_H + TIME_LOW からなる
 #include <TimerOne.h>
 #include <PinChangeInterrupt.h>
+// #include <EnableInterrupt.h>
 
 uint8_t i; //符号なし8bit整数型(0~255)のi
 #define LED_PIN 13 //13ピン(D10)をLED_PINと定義 現在結線されておらず，動作に関係していない．プログラム中には何度も登場するため確認が必要
@@ -79,7 +80,7 @@ void setup()
   // 緊急停止
  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(LAND_PIN), landing_stop, RISING);
-//  attachPinChangeInterrupt(5, tock, FALLING);
+  // attachPinChangeInterrupt(LAND_PIN, landing_stop, FALLING);
 //  attachPCINT(digitalPinToPCINT(pinBlink), blinkLed, CHANGE);
   while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
   {
@@ -96,6 +97,47 @@ void loop()
     }
     else
     {
+      // if ((digitalRead(EM_PIN) == HIGH || digitalRead(LAND_PIN) == HIGH) && fReset == false)
+      if (digitalRead(EM_PIN) == HIGH && fReset == false)
+      {
+        delay(2000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）500
+        // if (digitalRead(EM_PIN) == HIGH || digitalRead(LAND_PIN) == HIGH)
+        if (digitalRead(EM_PIN) == HIGH)
+        {
+          
+          Serial.println("Reset available.");
+          digitalWrite(LED_PIN, LOW);
+          digitalWrite(RLED_PIN, LOW);
+          digitalWrite(GLED_PIN, HIGH);
+          
+          fReset = true;
+        }
+      }
+      // else if (fReset == true && (digitalRead(EM_PIN) == false && digitalRead(EM_PIN) == false)) // reset可能の状態で非常停止ボタンを戻したらリセット
+      else if (fReset == true &&digitalRead(EM_PIN) == false)
+      {
+        software_reset();
+      }
+
+      // if (digitalRead(LAND_PIN) == HIGH && fReset == false)
+      // {
+      //   delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
+      //   if (digitalRead(LAND_PIN) == HIGH)
+      //   {
+          
+      //     Serial.println("Reset available.");
+      //     digitalWrite(LED_PIN, LOW);
+      //     digitalWrite(RLED_PIN, LOW);
+      //     digitalWrite(GLED_PIN, HIGH);
+          
+      //     fReset = true;
+      //   }
+      // }
+      // else if (fReset == true && digitalRead(LAND_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
+      // {
+      //   software_reset();
+      // }
+
       // if (digitalRead(EM_PIN) == HIGH && fReset == false)
       // {
       //   delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
@@ -133,44 +175,6 @@ void loop()
       // {
       //   software_reset();
       // }
-
-      if (digitalRead(EM_PIN) == HIGH && fReset == false)
-      {
-        delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-        if (digitalRead(EM_PIN) == HIGH)
-        {
-          
-          Serial.println("Reset available.");
-          digitalWrite(LED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-          digitalWrite(GLED_PIN, HIGH);
-          
-          fReset = true;
-        }
-      }
-      else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
-      {
-        software_reset();
-      }
-
-      if (digitalRead(LAND_PIN) == HIGH && fReset == false)
-      {
-        delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-        if (digitalRead(LAND_PIN) == HIGH)
-        {
-          
-          Serial.println("Reset available.");
-          digitalWrite(LED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-          digitalWrite(GLED_PIN, HIGH);
-          
-          fReset = true;
-        }
-      }
-      else if (fReset == true && digitalRead(LAND_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
-      {
-        software_reset();
-      }
     }
 }
 //*********** local functions  *************************//
