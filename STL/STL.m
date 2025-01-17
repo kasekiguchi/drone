@@ -15,7 +15,7 @@ classdef STL < handle
         cha='s';
         dfunc
         result
-        base_state=[0 0 0];
+        base_state=[10 10 10];
         th_offset
         th_offset0 = 200;
 
@@ -36,7 +36,8 @@ classdef STL < handle
             obj.result.state.set_state("xd",[0;0;0;0]);
             obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
             obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));       
+            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+            
         end
 
 
@@ -45,6 +46,7 @@ classdef STL < handle
         function result = do(obj,varargin)
             modeExecution=zeros(1,4);
             obj.t=varargin{1};
+             fprintf("mode : %d",obj.mode);
             if mod((obj.t.k),100)==0 && obj.t.t ~=0
                 obj.modechangeflag=1;
                 obj.currentmodecount=obj.currentmodecount+1;
@@ -66,6 +68,7 @@ classdef STL < handle
                     end
                 end
                 obj.mode=modeExecution(1,obj.currentmodecount);
+               
                 obj.modechangeflag=0;
             end
                 switch obj.mode %mode change for % 1: landing 2:circle movement 3:hoving 4:take off  etc...
@@ -85,11 +88,20 @@ classdef STL < handle
                 end
 
                
-                
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                %              obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                % obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+           %       obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           
+           obj.result.state.p = obj.result.state.xd(1:3);
+           if length(obj.result.state.xd)>4
+            obj.result.state.v = obj.result.state.xd(5:7);
+           else
+            obj.result.state.v = [0;0;0];
+           end
+           obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
+
+                % obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                % %              obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                % obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                % % obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
                 result = obj.result;
             
 
@@ -102,11 +114,11 @@ classdef STL < handle
             Xd  = zeros( 20, 1);
             %% Set Xd
             if t <= obj.t.te
-                Zd = curve_interpolation_9order(t,obj.t.te,obj.base_state(3),0,0,0);
+                Zd = curve_interpolation_9order(t,obj.t.te,obj.self.plant.result.p(3),0,0,0);
             elseif t> obj.t.te
                 Zd = zeros(1,5);
             end
-            Xd(1:3,1) = obj.base_state(1:3);
+            Xd(1:3,1) = obj.self.plant.result.p(1:3);
             Xd(3,1) = Zd(1);
             Xd(7,1) = Zd(2);
             Xd(11,1) = Zd(3);
@@ -134,14 +146,14 @@ classdef STL < handle
             %UNTITLED2 Summary of this class goes here
             %   Detailed explanation goes here
             Xd  = zeros( 20, 1);
-            Xd= @(t) [cos(t)/5, sin(t)/5];
+            Xd= @(t) [cos(t)/5-1, sin(t)/5,obj.self.plant.result.p(3)];
           
         end
         function Xd = HOVERING_REFERENCE_KYOREF(obj,t)
             %UNTITLED2 Summary of this class goes here
             %   Detailed explanation goes here
             Xd  = zeros( 20, 1);
-           Xd = obj.result.state.xd(1:3);
+           Xd = obj.self.plant.result.p(1:3);
            
         end
         function Xd = TAKINGOFF_REFERENCE_KYOREF(obj,t)

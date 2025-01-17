@@ -50,14 +50,12 @@ classdef MCMPC_controller < handle
         
         %-- main()的な
         function result = do(obj,varargin)
-            
+            rng default
+           % restart = 0;
 %           profile on
+            %while restart == 0 
             obj.param.t = varargin{1,1}.t;
-            if obj.param.t>=3.0 && obj.param.t<=10.0
-                obj.stlflag = 1;
-            else
-                obj.stlflag = 0;
-            end
+                % restart = 0;
             %% horizonごとではないリファレンス
 %             ref_p = obj.self.reference.result.state.p;
 %             ref_q = [0;0;0];
@@ -85,7 +83,7 @@ classdef MCMPC_controller < handle
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma;
             obj.N = obj.param.nextparticle_num;         
-
+            %obj.N = obj.param.Maxparticle_num;
             if obj.input.AllRemove == 1 % 全棄却回避用
                 mu(1) = 0.269*9.81;
                 mu(2) = mu(1);
@@ -105,13 +103,38 @@ classdef MCMPC_controller < handle
 
             obj.previous_state = obj.self.estimator.result.state.get();
 
-            %-- 状態予測
-            [obj.state.predict_state] = obj.predict();
-            if obj.state.predict_state(3, 1, :) < 0
-                obj.param.fRemove = 1;
+            if obj.param.t>=3.0 && obj.param.t<=10.0
+                obj.stlflag = 1;
+            else
+                obj.stlflag = 0;
             end
-
+            % if obj.stlflag == 1
+            %     if obj.state.predict_state(3, 1, :) > 20
+            %         obj.param.fRemove = 1;
+            %     end
+            % end
+            % %-- 状態予測
+            [obj.state.predict_state] = obj.predict();
+            % if obj.state.predict_state(3, 1, :) < 0
+            %     obj.param.fRemove = 1;
+            % end
+            %stl 条件判断
+            % removeX = find(any((abs(obj.state.predict_state(9, :, :)))> 10));
+            % if removeX ~= 0
+            %     restart =1;
+            %     obj.input.u1=obj.input.u1 * 0.9;
+            %     obj.input.u2=obj.input.u2 * 0.9;
+            %     obj.input.u3=obj.input.u3 * 0.9;
+            %     obj.input.u3=obj.input.u3 * 0.9;
+            % end
+            % obj.state.predict_state(:, :, removeX) = [];
+            %  obj.state.state_data =  obj.state.predict_state;
+            %  removeF=size(removeX,1);
+            %  obj.N = obj.N-removeF;
+            %  survive = obj.N;
+            %end
             %-- 評価値計算
+            
             obj.param.fin = 0;
             eachCost = zeros(obj.N, 3);
             for m = 1:obj.N
@@ -123,11 +146,14 @@ classdef MCMPC_controller < handle
             obj.input.normE = obj.Normalize(); % ほぼ使わない
 
             %-- 制約条件
-            removeF = 0; removeX = []; survive = obj.N; 
-%             [removeF, removeX, survive] = obj.constraints();
-%             if obj.self.estimator.result.state.p(3) < 0.3
-%                 [removeF, removeX, survive] = obj.constraints();
-%             end
+          removeF = 0; removeX = []; survive = obj.N; 
+            % [removeF, removeX, survive] = obj.constraints();
+            %     vx2=obj.self.estimator.result.state.v(1)^2;
+            %     vy2=obj.self.estimator.result.state.v(2)^2;
+            %     vz2=obj.self.estimator.result.state.v(3)^2;
+            % if vx2>400||vy2>400||vz2>400
+            %     [removeF, removeX, survive] = obj.constraints();
+            % end
             obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
             
@@ -140,7 +166,7 @@ classdef MCMPC_controller < handle
                 obj.input.Bestcost_now = Bestcost;
                 
                 % 棄却数がサンプル数の半分以上なら入力増やす
-                if removeF > obj.N /2
+                if removeF > obj.N
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
@@ -198,6 +224,7 @@ classdef MCMPC_controller < handle
             
             result = obj.result;  
 %             profile viewer
+            
         end
         function show(obj)
             obj.result
@@ -206,8 +233,10 @@ classdef MCMPC_controller < handle
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
-            removeX = find(obj.state.predict_state(1, 1, 1:obj.N) < -0.5);
+           removeX = find(obj.state.predict_state(3, 1, 1:obj.N) < -5);
 %             removeX = find(removeFe);
+           % removeX = find(vx2=obj.self.estimator.result.state.v(1)^2 > 400);
+           
             obj.input.Evaluationtra(1,removeX) = obj.param.ConstEval;
             removeF = size(removeX, 1);
             removeX = []; survive = obj.N;
@@ -241,6 +270,7 @@ classdef MCMPC_controller < handle
                 end
             end
             predict_state = obj.state.state_data;
+            
         end
 
         %------------------------------------------------------
