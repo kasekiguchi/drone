@@ -7,19 +7,22 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
-loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1';
-% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+% loadfilename{1} = '2025-01-14_Exp_Kiyama_code10_saddle_increased';
+loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
+loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
-loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 load(strcat(loadfilename{1}, '.mat'), 'est'); 
-% cd('Koopman_Linearization/Figure_output/');
+cd('Koopman_Linearization/Figure_output/');
+
+args.title = 0;
 
 % 0入力検証
 % ii:状態数
-args.ii = 4; args.jj = 3; args.Fontsize = 15; args.N = 20;
+args.ii = 4; args.jj = 3; args.Fontsize = 15; args.N = 31;
 % 実機フィッティング
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
@@ -30,7 +33,7 @@ flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
-args.startTime = 11; % flight後何秒からの推定精度検証を行うか saddle:3.39
+args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
 
@@ -54,9 +57,9 @@ if args.save_fig && flg.figtype
 end
 
 %% 単発の保存
-h = hermite_plot(1.5);
-savename = strcat('hermite_plot.pdf'); 
-exportgraphics(h, savename, 'ContentType', 'vector', 'Resolution', 300);
+% h = hermite_plot(1.5);
+% savename = strcat('hermite_plot.pdf'); 
+% exportgraphics(h, savename, 'ContentType', 'vector', 'Resolution', 300);
 
 %%
 function f = input_0_verify(args, est, filename)
@@ -73,6 +76,14 @@ Est = zeros(12,1);
 mode = 0; % 1:00, 2:10, 3:hermite, 0:free
 X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
 
+if mode == 2
+p = [0;0;0];
+for i = 2:step_num+1
+    p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
+end
+X = [p; X];
+end
+
 % plot
 % step_num = step_num-start_num+1;
 set(0,'defaultAxesFontSize',Fontsize);
@@ -82,11 +93,8 @@ set(0,'defaultLineMarkerSize',Fontsize);
 
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
 if args.save_fig; f = figure(5); else; f = figure(100); end
-sgtitle(strrep(filename, '_', '-'));
-% sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
-% subplot(2,3,1);
-% plot(0:10,X(1:3,:)); grid on;
-% xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
+if args.title; sgtitle(strrep(filename, '_', '-')); else; sgtitle(""); end
+
 
 label_x = {'x', 'y', 'z', 'q.roll', 'q.pitch', 'q.yaw', 'vx', 'vy', 'vz', 'vq.roll', 'vq.pitch', 'vq.yaw'};
 ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05];
@@ -98,7 +106,7 @@ for i = 1:ii
         idx = idx + 1;
         subplot(ii,jj,idx);
         plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
-        text(0.2, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', 10);
+        text(0.75, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', 20);
         xlabel('Step'); ylabel(label_x{idx});
         fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
     end
@@ -192,12 +200,15 @@ elseif indexcheck ~= file{i}.simResult.initTindex
 end
 end
 
+% クープマンモデルの時間変換
+% [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, 0.025);
+
 %% 任意の時間からの推定を行う
 try
 F = @quaternions_all; % 読み込んだデータと観測量を合わせる
 % 実験データがreferenceになっている場合、dtは時刻によって様々に変化する
 % dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-dt = diff(file{WhichRef}.simResult.reference.T);
+% dt = diff(file{WhichRef}.simResult.reference.T);
 % startTimeを超えたインデックスからstepNステップ
 startIdx = find(file{WhichRef}.simResult.reference.T>=startTime, 1, 'first');
 tlength = file{WhichRef}.simResult.initTindex + startIdx:file{WhichRef}.simResult.initTindex+stepN-1 + startIdx;
@@ -207,6 +218,7 @@ for j = startIdx:startIdx+stepN
     simResult.Z(:,j+1) = file{1}.est.A * simResult.Z(:,j) + file{1}.est.B * file{WhichRef}.simResult.U(:,j); 
     if flg.without_pos
         dt = file{WhichRef}.simResult.reference.T(j+1) - file{WhichRef}.simResult.reference.T(j);
+        [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, dt);
         simResult.Xhat(4:end,j+1) = file{1}.est.C * simResult.Z(:,j+1);
         simResult.Xhat(1:3,j+1) = simResult.Xhat(1:3,j) + dt * simResult.Xhat(7:9,j+1);
     else
@@ -227,6 +239,7 @@ end
     file{1}.simResult.state.v = simResult.Xhat(7:9,:);
     file{1}.simResult.state.w = simResult.Xhat(10:12,:);
 % end
+
 catch
     open("quaternions_all.m");
     error('Number of observales is different.');
@@ -291,9 +304,9 @@ fprintf("Number of Control rank: %d \n", rank(Co));
 fprintf("Estimation begin time: %.4f \n", startTime);
 fprintf("Estimation time: %.2f \n", xmax);
 fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
-fprintf("Velocity RMSE : vx=%.4f, vy=%.4f, vz=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
-fprintf("Attitude RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
-fprintf("Attitude angular vel. RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
+fprintf("Velocity RMSE : v_x=%.4f, v_y=%.4f, v_z=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
+fprintf("Attitude RMSE : q_roll=%.4f, q_pitch=%.4f, q_yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+fprintf("Attitude angular vel. RMSE : w_roll=%.4f, w_pitch=%.4f, w_yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
 
 fprintf("====================================\n");
 result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
