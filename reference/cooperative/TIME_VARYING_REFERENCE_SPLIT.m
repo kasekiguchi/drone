@@ -46,6 +46,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         agent1
         yawRef
         yawSum = 0
+        constPrep
+        constPrev
 
     end
 
@@ -106,7 +108,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                     obj.com = args{3};
                     % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi","aidrn","dwi","yaw"], 'num_list', [24, 3, 3, 3]));  
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance"], 'num_list', [28, 3, 1,1]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance", "constp","constTargetp"], 'num_list', [28, 3, 1, 1, 1]));  
                     obj.result.state.set_state("xd",zeros(28,1));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                     % obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
@@ -125,7 +127,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                             obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
                         end
                     end
-                    
+                    %衝突回避の初期値
+                    rhoi = obj.agent1.parameter.rho(:,obj.self.id-1);
+                    rhoi12Unit = [rhoi(1:2);0]/norm([rhoi(1:2);0]);
+                    p_pL = obj.self.estimator.result.state.p - obj.self.estimator.result.state.pL;
+                    obj.constPrep = p_pL'*rhoi12Unit*0;
+                    obj.constPrev = 0;
+
                     % obj.vi_pre = obj.result.state.xd(9:11);
                     % obj.vi_pre = zeros(3,1);
                     % obj.v0_pre = zeros(3,1);
@@ -210,20 +218,33 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                %衝突回避reference生成用ゲイン
-                   droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);
+                   droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
-                   minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値
-                   ks = 0.5/(minDroneDistance - 0.4)^2;%衝突回避するためのゲイン(定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2)
-                   % ks = 0.6;%衝突回避するためのゲイン
+                   minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
+                   constTargetp = 0.1/(minDroneDistance - 0.4)^2;%衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
+                   obj.constPrep = constp;
+                   kv = 0.05;%速度referenceのゲイン
+                   obj.constPrev = -kv*(constp - constTargetp);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
+                   constd = constp - constTargetp;
+                   % kv = 0.15;%速度referenceのゲイン
+                   % obj.constPrev = -kv*sign(constd)*abs(constd)^(1/2);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）-sing(x)*x^(1以下の正の数)
+                   % % obj.constPrev = -kv*tanh(0.5*constd)*sqrt(constd^2 + 0.1)^(1/2);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
+                   % if abs(constd)<0.3
+                       % constp = constTargetp;
+                   % end
+                   % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   ks
+                   constp
+                   constTargetp
+                   constd
 
                if obj.cha == 'f'
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
                    obj.flanding = 0;%landing条件分岐用フラグ
                    rotm0 = obj.agent1.reference.result.rotms;     %回転行列
                    rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   rhoi = rhoi + ks*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   rhoi = rhoi + constp*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'
@@ -235,9 +256,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    end
                    if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + ks*alpiUnit12;
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*cablei,ks*0)*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*cablei,constp*0)*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.constPrep = 0.5;
+                       obj.constPrev = 0;
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
                        x0d = refi(1:3) - rhoi;
@@ -256,9 +279,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if norm(p - real_pL) >= 0.8*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei,ks*0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei,constp*0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + ks*[alpiUnit12;0];%紐がたわんでいる場合を含む
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + constp*[alpiUnit12;0];%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
                        x0d = refi(1:3) - rhoi;
@@ -362,8 +385,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.state.xd      = refi;
                % obj.result.state.yaw      = yaw;
                obj.result.state.minDroneDistance      = minDroneDistance;
+               obj.result.state.constTargetp = constTargetp;
+               obj.result.state.constp = constp;
                % obj.result.state.aaa      = aaa*180/pi;
-               % obj.result.state.p       = xid;
+               obj.result.state.p       = refi(1:3);
                % obj.result.state.v       = dxid;
                % obj.result.state.mui     = mui';
                % obj.result.state.vi_pre  = vi;
@@ -434,6 +459,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     end
                end
                obj.result.spDrone = spDrone;
+               obj.result.state.p       = xd(1:3);
 
                % refi = obj.result.state.xd;
                % obj.result.state.p = refi(1:3);

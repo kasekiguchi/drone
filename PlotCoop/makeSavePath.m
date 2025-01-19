@@ -12,12 +12,12 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付ファイル
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付フォルダ
 %変更==============================================================================
-    % date2 = "2024_1220";%日付が変わってしまった場合は自分で変更
+    date2 = "2025_0116";%日付が変わってしまった場合は自分で変更
     % subfolder='exp';%sim or exp
     subfolder='sim';%sim or exp
     ExpSimName='drone4p_const';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='saddle_rot';%実験,シミュレーション内容64文字以内
+    contents='saddle_rot_updateRef_edit';%実験,シミュレーション内容64文字以内
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内

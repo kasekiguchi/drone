@@ -82,8 +82,8 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.mass = 0.745;%0.73
                 param.Lx = 0.175;
                 param.Ly = 0.175;
-                param.lx = 0.0175/2;%0.05;
-                param.ly = 0.0175/2;%0.05;
+                param.lx = 0.175/2;%0.05;
+                param.ly = 0.175/2;%0.05;
                 param.jx = 0.06;
                 param.jy = 0.06;
                 param.jz = 0.06;

@@ -260,12 +260,14 @@ classdef DRAW_COOPERATIVE_DRONES
       else
         skip = 1;
       end      
+      campos([-30,-30,20])
       for i = 1:skip:length(t)-1
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
           %plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
           plot3(ax,r(:,1),r(:,2),r(:,3),'k');
+          % plot3(ax,param.reft(1,:),param.reft(2,:),param.reft(3,:),'k')
         end
         if isfield(param,"opt_plot")
           param.self.show(param.opt_plot,"logger",logger,"k",i,varargin{:});
@@ -283,7 +285,7 @@ classdef DRAW_COOPERATIVE_DRONES
           obj.ax.YLim = obj.ylim;
           obj.ax.ZLim = obj.zlim;
         end
-        % campos([0,0,10])
+        % campos([45,45,10])
         pause(0.01);
         if isfield(param,'gif')
           im = frame2im(getframe(obj.ax));
