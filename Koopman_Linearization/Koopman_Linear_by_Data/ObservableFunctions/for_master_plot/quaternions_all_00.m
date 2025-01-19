@@ -1,4 +1,4 @@
-function z = quaternions_all(x)
+function z = quaternions_all_00(x)
 % F(x)およびG(x)の全ての項を観測量とする
 %   Z = quartanionParameter(X)
 %   X : [位置P; クォータニオンq or オイラー角 Q; 速度V; 角速度W]を持つ状態量

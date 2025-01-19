@@ -1,4 +1,4 @@
-function z = quaternions_all(x)
+function z = quaternions_all_02(x)
 % F(x)およびG(x)の全ての項を観測量とする
 %   Z = quartanionParameter(X)
 %   X : [位置P; クォータニオンq or オイラー角 Q; 速度V; 角速度W]を持つ状態量
@@ -246,8 +246,8 @@ du = [H(u1); H(u2); H(u3); H(u4)];
 % z = [common_z; isobe_z; k3; k4]; % 28
 
 %% まとめ
-z = [common_z; isobe_z]; % 00
-% z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
+% z = [common_z; isobe_z]; % 00
+z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
 % z = [common_z; diff_param_z]; % 05
