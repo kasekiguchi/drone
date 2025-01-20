@@ -34,13 +34,14 @@ for i = 1:length(Ns) - 1
     addIds(i+1) = sum(Ns(1:i+1),2);%pcごとに機体ずらす
 end
 addId = addIds(PCId);%このpcで加算するrigidのid
-
+addId=0;
+N=2;
 %COMの番号指定
-COMs = [3,5];%pc1 lenovo割り当てる順番に設定
+COMs = [3];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
 % cableL=[0.91,0.91];
-cableL=[0.75,0.75];
+cableL=[0.785,0.785];
 length=cableL;
 
 refName = {
@@ -87,7 +88,7 @@ if isCoop == 1
     agent(1).estimator.model.name=[];
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"Cooperative",N},agent(1));
+    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.8,0.8,0.2]},"Cooperative",N},agent(1));
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"HL",N},agent(1));
     % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
@@ -98,7 +99,7 @@ if isCoop == 1
 end
 
 for i = firstId:N
-    agentNumber = 2*i-firstId +addId
+    agentNumber = (2*i-firstId +addId)/2
     sstate = motive.result.rigid(2*i-firstId +addId); %なんか使われていない
     initial_state.p = sstate.p; %初期位置の取得
     initial_state.q = sstate.q; %初期角度の取得

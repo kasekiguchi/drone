@@ -210,21 +210,30 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                p = obj.self.estimator.result.state.p;%機体位置
                real_pL = obj.self.estimator.result.state.pL;%機体位置
                % p = obj.self.sensor.result.state.p;%機体位置
-               % if isfield(obj.self.sensor.result.state,"real_pL")
-               %     real_pL = obj.self.sensor.result.state.real_pL;%牽引物位置
-               % else
-               %     real_pL = obj.self.sensor.result.state.pL;%simのため%牽引物位置
-               % end
+               if isfield(obj.self.sensor.result.state,"real_pL")
+                   real_pL = obj.self.sensor.result.state.real_pL;%牽引物位置
+               else
+                   real_pL = obj.self.sensor.result.state.pL;%simのため%牽引物位置
+               end
                alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                %衝突回避reference生成用ゲイン
-                   droneDistance = vecnorm(obj.agent1.reference.result.spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
+                   if isa(obj.agent1.sensor,"MOTIVE")
+                       rigid = obj.agent1.sensor.result.rigid;%剛体情報を全て取得
+                           spDrone = zeros(3,(length(rigid)-1)/2);
+                           for i = 1:(length(rigid)-1)/2
+                                spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
+                           end 
+                   else 
+                           spDrone  = obj.agent1.sensor.reult.spDrone;
+                   end
+                   droneDistance = vecnorm(spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
                    minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
-                   constTargetp = 0.1/(minDroneDistance - 0.4)^2;%衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   constTargetp = 0.1/(minDroneDistance - 0.3)^2;%sim0.4衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
                    constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
                    obj.constPrep = constp;
-                   kv = 0.05;%速度referenceのゲイン
+                   kv = 0.02;%sim0.05速度referenceのゲイン
                    obj.constPrev = -kv*(constp - constTargetp);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
                    constd = constp - constTargetp;
                    % kv = 0.15;%速度referenceのゲイン
@@ -259,7 +268,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*cablei,constp*0)*alpiUnit12;%紐がたわんでいる場合を含む
-                       obj.constPrep = 0.5;
+                       obj.constPrep = 0.5*cablei;
                        obj.constPrev = 0;
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
@@ -437,12 +446,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 
                %全てのドローンの位置を取得
                if isa( obj.self.sensor,"MOTIVE")
-                   rigid = obj.self.sensor.result.rigid;%剛体情報を全て取得
-                   rho = obj.self.parameter.rho;
-                   spDrone = zeros(size(rho));
-                   for i = 1:size(rho,2)
-                        spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
-                   end
+                   % rigid = obj.self.sensor.result.rigid;%剛体情報を全て取得
+                   % rho = obj.self.parameter.rho;
+                   % spDrone = zeros(size(rho));
+                   % for i = 1:size(rho,2)
+                   %      spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
+                   % end
                else
                     sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
                     %分割前ペイロード
