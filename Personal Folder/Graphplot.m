@@ -122,7 +122,7 @@ function [] = Graphplot(app)
     ylabel('Input_{thrust}');
     hold on
     grid on
-    yline(0.5884*9.81,'Color','red','LineWidth',1.2)
+    yline(0.730*9.81,'Color','red','LineWidth',1.2)
     lgdtmp = {'$thrust$','$thrust_theory$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;

@@ -26,7 +26,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;1],"g",[0.8;0.7;1],"h",[0.2;0.2;1],"j",[-0.5;0;1],"k",[0.1;-0.2;1],"m",[0.3;-0.4;1]),6});%縦ベクトルで書く,
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
- agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
+ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",15,"orig",[0;0;1],"size",[1,1,0.2]},"HL"}); %freq:周期　orig:軌道中心xyz size：ｘｙｚの半径
 agent.controller = HLC(agent,Controller_HL(dt));
 
@@ -39,7 +39,10 @@ app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
+
+Graphplot(app)
 end
+
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
 end
