@@ -6,19 +6,25 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
+%%
+% loadfilename{1} = '2025-01-14_Exp_Kiyama_code10_saddle_increased';
+% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+% loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
 loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
-load(strcat(loadfilename{1}, '.mat'), 'est'); 
-cd('./Koopman_Linearization/Figure_output/');
+cd('Koopman_Linearization/Figure_output/');
+
+args.title = 0;
 
 % 0入力検証
 % ii:状態数
-args.ii = 4; args.jj = 3; args.Fontsize = 15; args.N = 20;
+args.ii = 4; args.jj = 3; args.Fontsize = 18; args.N = 31;
 % 実機フィッティング
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
@@ -28,34 +34,85 @@ flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
-flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
-args.startTime = 11; % flight後何秒からの推定精度検証を行うか saddle:3.39
+flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
+%% 個別
+load(strcat(loadfilename{1}, '.mat'), 'est'); 
+code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
+F = @quaternions_all;
+g = input_0_verify(args, flg, est, loadfilename{1}, F);
+experiment_fitting(args, flg, loadfilename, F)
+save_fig(args, flg, loadfilename, g, code);
 
-g = input_0_verify(args, est, loadfilename{1});
-experiment_fitting(args, flg, loadfilename)
+%% まとめて
+% file = {'2025-01-12_Exp_Kiyama_code00_saddle_increased';
+%     '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+%     '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+%     '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10'};
+% for m = 1:size(file,1)
+%     clear est
+%     loadfilename{1} = file{m};
+%     load(strcat(loadfilename{1}, '.mat'), 'est'); 
+%     code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
+%     switch code
+%         case '00'; F = @quaternions_all_00;
+%         case '02'; F = @quaternions_all_02;
+%         case '23'; F = @quaternions_all_23;
+%         case '26'; F = @quaternions_all_26;
+%         otherwise; error('Not found observables.');
+%     end
+%     g = input_0_verify(args, flg, est, loadfilename{1}, F);
+%     experiment_fitting(args, flg, loadfilename, F)
+%     save_fig(args, flg, loadfilename, g, code);
+%     fprintf(strcat('Saved ', code, '\n'));
+%     pause(1);
+% end
 
-if args.save_fig && flg.figtype
-    % figure -> hundle
-    for i = 1:4; f(i) = figure(i); end
-    type = ['p', 'q', 'v', 'w'];
-    filetmp = strrep(loadfilename{1},'-','_');
-    savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
-    if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
-    cd(strcat('./', loadfilename{1}, '/'));
-    if ~isfolder('jpg'); mkdir('jpg'); mkdir('eps'); mkdir('pdf'); end
-    for i = 1:4; saveas(i, strcat('./jpg/',savefile, '-', type(i),'.jpg')); end; fprintf('saved jpg\n');
-    for i = 1:4; saveas(i, strcat('./eps/',savefile, '-', type(i)),'epsc'); end; fprintf('saved eps\n');
-    for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '-', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
-    saveas(5, strcat('./jpg/', 'Experiment_verify_', loadfilename{1},'.jpg'));
-    saveas(5, strcat('./eps/', 'Experiment_verify_', loadfilename{1}),'epsc');
-    savename = strcat('pdf/Experiment_verify_', loadfilename{1},'.pdf'); exportgraphics(g, savename, 'ContentType', 'vector', 'Resolution', 300);
-    cd('../../');
+%% どれかだけ
+savename = strcat('saddle_shpaed_trajectory_pos', '.pdf'); 
+f(1) = figure(5);
+exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
+%%
+function save_fig(args, flg, loadfilename, g, code)
+    if args.save_fig && flg.figtype
+        % figure -> hundle
+        for i = 1:4; f(i) = figure(i); end
+        type = ['p', 'q', 'v', 'w'];
+        % filetmp = strrep(loadfilename{1},'-','_');
+        % savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
+
+        %-- make folder and move folder
+        if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
+        cd(strcat('./', loadfilename{1}, '/'));
+        if ~isfolder('jpg'); mkdir('jpg'); mkdir('pdf'); end
+        %-- save
+        savefile = strcat('code', code);
+        for i = 1:4; saveas(i, strcat('./jpg/',savefile, '_', type(i),'.jpg')); end; fprintf('saved jpg\n');
+        for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '_', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
+
+        if flg.figtype == 0
+            saveas(100, strcat('./jpg/', 'input0_', loadfilename{1},'.jpg'));
+        else
+            s = {'p1','p2','p3','q1','q2','q3','v1','v2','v3','w1','w2','w3'};
+            for i = 1:12
+                savename = strcat('pdf/code', num2str(code), '_0input_', s{i}, '.pdf'); exportgraphics(g(i), savename, 'ContentType', 'vector', 'Resolution', 300);
+            end
+        end
+        cd('../');
+    else
+        fprintf('Not saved\n');
+    end
 end
 
+%% 単発の保存
+% h = hermite_plot(1.5);
+% savename = strcat('hermite_plot.pdf'); 
+% exportgraphics(h, savename, 'ContentType', 'vector', 'Resolution', 300);
 
-function f = input_0_verify(args, est, filename)
+%%
+function f = input_0_verify(args, flg, est, filename, F)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
@@ -66,8 +123,16 @@ torque = zeros(3, step_num);
 
 Est = zeros(12,1);
 % Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
-mode = 0; % 1:00, 2:10, 3:hermite, 0:free
-X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
+mode = 100; % 1:00, 2:10, 3:hermite, 0:free, F:@quaternions_all
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode, F);
+
+if mode == 2
+p = [0;0;0];
+for i = 2:step_num+1
+    p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
+end
+X = [p; X];
+end
 
 % plot
 % step_num = step_num-start_num+1;
@@ -77,14 +142,12 @@ set(0,'defaultLineLineWidth',Fontsize*0.1);
 set(0,'defaultLineMarkerSize',Fontsize);
 
 % ylimsetting = [0 1.5; -0.15 0; -25 0];
-if args.save_fig; f = figure(5); else; f = figure(100); end
-sgtitle(strrep(filename, '_', '-'));
-% sgtitle(strcat(mode.training_data, ';;thrust:', num2str(thrust), ';;torque: [', num2str(torque(1)), ', ',num2str(torque(2)), ', ', num2str(torque(3)), ']'));
-% subplot(2,3,1);
-% plot(0:10,X(1:3,:)); grid on;
-% xlabel('Step'); ylabel('$$x, y, z$$', 'Interpreter', 'latex');
+% if args.save_fig; f = figure(5); else; f = figure(100); end
+if ~flg.figtype; f = figure(100); end 
+if args.title; sgtitle(strrep(filename, '_', '-')); else; sgtitle(""); end
 
-label_x = {'x', 'y', 'z', 'q.roll', 'q.pitch', 'q.yaw', 'vx', 'vy', 'vz', 'vq.roll', 'vq.pitch', 'vq.yaw'};
+
+label_x = {'$$p_x$$', '$$p_y$$', '$$p_z$$', '$$q_{\mathrm{roll}}$$', '$$q_{\mathrm{pitch}}$$', '$$q_{\mathrm{yaw}}$$', '$$v_x$$', '$$v_y$$', '$$v_z$$', '$$\omega_{\mathrm{roll}}$$', '$$\omega_{\mathrm{pitch}}$$', '$$\omega_{\mathrm{yaw}}$$'};
 ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05];
 fprintf('0input verification result. max value = \n');
 format long
@@ -92,19 +155,26 @@ arr = 1:ii*jj; idx = 0;
 for i = 1:ii
     for j = 1:jj
         idx = idx + 1;
-        subplot(ii,jj,idx);
-        plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
-        text(0.2, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', 10);
-        xlabel('Step'); ylabel(label_x{idx});
+        if flg.figtype == 0
+            subplot(ii,jj,idx);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
+            text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
+            xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+        else
+            f(idx) = figure(idx+100);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
+            text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
+            xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+        end
         fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
     end
     % fprintf('\n')
 end
 fprintf('\n')
-f.WindowState = 'maximized';
+% f.WindowState = 'maximized';
 end
 
-function experiment_fitting(args, flg, loadfilename)
+function experiment_fitting(args, flg, loadfilename, F)
 % % save_fig = args.save_fig;
 startTime = args.startTime;
 stepnum = args.stepnum;
@@ -188,12 +258,15 @@ elseif indexcheck ~= file{i}.simResult.initTindex
 end
 end
 
+% クープマンモデルの時間変換
+% [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, 0.025);
+
 %% 任意の時間からの推定を行う
-try
-F = @quaternions_all; % 読み込んだデータと観測量を合わせる
+% try
+% F = @quaternions_all; % 読み込んだデータと観測量を合わせる
 % 実験データがreferenceになっている場合、dtは時刻によって様々に変化する
 % dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-dt = diff(file{WhichRef}.simResult.reference.T);
+% dt = diff(file{WhichRef}.simResult.reference.T);
 % startTimeを超えたインデックスからstepNステップ
 startIdx = find(file{WhichRef}.simResult.reference.T>=startTime, 1, 'first');
 tlength = file{WhichRef}.simResult.initTindex + startIdx:file{WhichRef}.simResult.initTindex+stepN-1 + startIdx;
@@ -203,6 +276,7 @@ for j = startIdx:startIdx+stepN
     simResult.Z(:,j+1) = file{1}.est.A * simResult.Z(:,j) + file{1}.est.B * file{WhichRef}.simResult.U(:,j); 
     if flg.without_pos
         dt = file{WhichRef}.simResult.reference.T(j+1) - file{WhichRef}.simResult.reference.T(j);
+        [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, dt);
         simResult.Xhat(4:end,j+1) = file{1}.est.C * simResult.Z(:,j+1);
         simResult.Xhat(1:3,j+1) = simResult.Xhat(1:3,j) + dt * simResult.Xhat(7:9,j+1);
     else
@@ -223,10 +297,11 @@ end
     file{1}.simResult.state.v = simResult.Xhat(7:9,:);
     file{1}.simResult.state.w = simResult.Xhat(10:12,:);
 % end
-catch
-    open("quaternions_all.m");
-    error('Number of observales is different.');
-end
+
+% catch
+%     open("quaternions_all.m");
+%     error('Number of observales is different.');
+% end
 %% 時間の設定 [0, 0.8]等の time[sec]を設定できるようにする
 if ~flg.xlimHold
     timeRange = file{WhichRef}.simResult.reference.T(tlength);
@@ -287,9 +362,9 @@ fprintf("Number of Control rank: %d \n", rank(Co));
 fprintf("Estimation begin time: %.4f \n", startTime);
 fprintf("Estimation time: %.2f \n", xmax);
 fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
-fprintf("Velocity RMSE : vx=%.4f, vy=%.4f, vz=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
-fprintf("Attitude RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
-fprintf("Attitude angular vel. RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
+fprintf("Velocity RMSE : v_x=%.4f, v_y=%.4f, v_z=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
+fprintf("Attitude RMSE : q_roll=%.4f, q_pitch=%.4f, q_yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+fprintf("Attitude angular vel. RMSE : w_roll=%.4f, w_pitch=%.4f, w_yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
 
 fprintf("====================================\n");
 result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
@@ -480,15 +555,13 @@ if flg.confirm_ref && ~args.save_fig
     ylabel('Position [m]', 'FontSize', 15);
     % daspect([1 1 1]);
 
-    subplot(m, n, 6);
+    if flg.figtype; figure(6); else; subplot(m, n, 6); end
     plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), '--', 'LineWidth', 2);
     xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
     grid on; hold on;
-    % daspect([1 1 1]);
 
-    % figure(11);
     plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2, 'Color', 'red');
     xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
@@ -715,4 +788,16 @@ end
 end % flg.divisionのif
 
 end % flg.only_rmse
+end
+
+function h = hermite_plot(w)
+syms x
+h = figure(200);
+fplot(hermiteH(0:4,x), 'LineWidth', w);
+axis([-2 2 -30 30])
+grid on
+
+ylabel('H_n(x)')
+legend('H_0(x)', 'H_1(x)', 'H_2(x)', 'H_3(x)', 'H_4(x)', 'Location', 'southeast')
+% title('Hermite polynomials')
 end

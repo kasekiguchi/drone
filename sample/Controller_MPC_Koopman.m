@@ -4,8 +4,8 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     % Controller_param.controller_model = 'hermite';
 
-    Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    % Controller_param.m = 0.595;
+    % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
+    Controller_param.m = 0.595; % これは実験用
     % Controller_param.m = agent.parameter.mass;
     Controller_param.dt = 0.08; % MPCステップ幅 1222:0.08 0.07
     Controller_param.H = 10; %ホライズン数
@@ -61,19 +61,29 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     
 
     % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
+    % code23
+    Controller_param.weight.P = 1 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.W =10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    % Controller_param.weight.P = 1 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    % Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    % Controller_param.weight.W =10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % code26 weight_1
+    % Controller_param.weight.P = 1 * diag([1; 1; 1]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = 1 * diag([10; 10; 1]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = 10 * diag([1; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = 1* diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
 
     %% 誤差モデル
     % Controller_param.weight.P = diag([100; 100; 10]);    % 位置　10,20刻み  20;1;30

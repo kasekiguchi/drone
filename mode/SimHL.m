@@ -164,6 +164,12 @@ logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num"
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 %%
+% f(1) = figure(3); f(2) = figure(7);
+% savename1 = 'dataset_spline_z_pos.pdf';
+% savename2 = 'dataset_spline_z_3d.pdf';
+% exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
+% exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
+%%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);

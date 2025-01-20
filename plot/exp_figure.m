@@ -21,7 +21,7 @@ fprintf('Plot start\n');
 % filename = '0731_KMPC_saigen_hovering_code00';
 
 % filename = '1223_KMPC_hovering_code23_weight_1720';
-filename = 'KatoGUI4_HL_hovering_Log(20-Jan-2025_12_37_34)';
+% loadfile = '1223_KMPC_hovering_code23_weight_1720.mat';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
@@ -30,8 +30,10 @@ loadfile = strcat("Data/", filename, ".mat");
 % filename = "2_8_Exp_KMPC_P2Py_成功";
 % loadfile = "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2024\2012035_木山康平\第5章\結果\2_8_Exp_KMPC_P2Py_成功.mat";
 % load(loadfile);
-log = LOGGER(loadfile); % loggerの形で収納できる
+% log = LOGGER(loadfile); % loggerの形で収納できる
 % load(loadfile);
+
+logger = load("Data/1223_KMPC_hovering_code23_weight_1720.mat");
 
 % 115:start
 % 97 :arming
@@ -44,6 +46,8 @@ disp("Loaded data...");
 %% save setting
 % savename = strcat(filename, '_all');
 % savefolder = '\Data\Exp_figure_image\';
+
+
 %%
 close all
 clear fig
@@ -127,3 +131,18 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % 
 % comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma) * 
 % (cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
+
+
+%% 抽出
+log = logger.logger;
+%% agent
+est = log.Data.agent.estimator;
+con = log.Data.agent.controller;
+ref = log.Data.agent.reference;
+sen = log.Data.agent.sensor;
+input = log.Data.agent.input;
+innner_input = log.Data.agent.inner_input;
+% param
+param.t = log.Data.t;
+param.phase = log.Data.phase;
+param.k = log.k;

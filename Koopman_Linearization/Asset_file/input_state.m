@@ -1,5 +1,5 @@
 %%
-function state = input_state(param,mode)
+function state = input_state(param,mode,F)
 %一定推力を印加したときの状態遷移
     thrust = param{5};
     torque = param{6};
@@ -17,15 +17,17 @@ function state = input_state(param,mode)
     % Z = quaternions_all(param{7}); % ある区間の始めの状態
     z0 = [param{7}; [0.5844*9.81;0;0;0]];
     if mode == 0
-        Z = quaternions_all(param{7});
+        Z = quaternions_all(z0);
     elseif mode == 1
         Z = obs1(param{7});
     elseif mode == 2
-        Z = obs2(param{7});
+        Z = obs2(param{7}(4:end));
     elseif mode == 3
         Z = quaternions_all(z0);
     elseif mode == 14
         Z = hermite_code14(z0);
+    elseif mode == 100
+        Z = F(z0);
     end
 
     try
