@@ -6,11 +6,11 @@ classdef TAKEOFF_REFERENCE < handle
     base_state
     ts
     %高度0.5m
-    te = 10;
-    zd = 0.5; % goal altitude
+    % te = 10;
+    % zd = 0.5; % goal altitude
     % %高度1m
-    % te = 15;
-    % zd = 1.0;
+    te = 15;
+    zd = 1.0;
     result
     th_offset
     th_offset0 = 200; %iflight 大きすぎる?
