@@ -12,11 +12,11 @@
 close all
 clear multiFigure option addingContents f
 %選択    
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-frmse = 1;%rmseのみ知りたい場合
-startTime = 10;
+frmse = 10;%rmseのみ知りたい場合
+startTime = 0;
 endTime = 100;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
@@ -31,8 +31,8 @@ if fnowdata==1
     end
     if ~exist("loggers","var")
         for i = 1:length(logger.target)
-            loggers{i,1} = simplifyLoggerForCoop(logger,i);
-            % loggers{i,1} = simplifyLoggerForSingle(logger,i);
+            % loggers{i,1} = simplifyLoggerForCoop(logger,i);
+            loggers{i,1} = simplifyLoggerForSingle(logger,i);
         end
     end
     droneID = logger.target(1:end-1);
@@ -99,7 +99,7 @@ nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"th
 if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
     nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
-    nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","peqi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
+    % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","peqi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
     n = ["t_p0" "t_x0" "t_y0" "t_z0" "error0"	"t_errx0"	"t_erry0"	"t_errz0" "three_D0" "peqi"+droneID "mAll" "mL" "inputTrust" "inputRoll"	"inputPitch"	"inputYaw" "constRef"+droneID "minDroneDistance" "t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
     % nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 end
@@ -321,6 +321,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             rai{i}=zero3;rmui{i}=zero3;rdwi{i}=zero3;raidrn{i}=zero3;
              cQeul{i}=zero3;cQeul{i}=zero3;cQeul{i}=zero3;eO{i}=zero3;eO{i}=zero3;eO{i}=zero3;ep{i}=zero3;
              eQ{i} = zero3;pQ{i} = zero3;eO{i} = zero3;pO{i} = zero3;edO{i} = zero3;ea{i} = zero3;
+             constp{i}=zero1;constTargetp{i}=zero1;minDroneDistance{i}=zero1;
         else
             fieldLog = fieldLog(find(fieldLog=="sensor"):end);
             sx0{1} = zero1;sy0{1} = zero1;sz0{1} = zero1;
@@ -329,7 +330,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             rai{i}=zero3;rmui{i}=zero3;rdwi{i}=zero3;raidrn{i}=zero3;
              cQeul{i}=zero3;cQeul{i}=zero3;cQeul{i}=zero3;eO{i}=zero3;eO{i}=zero3;eO{i}=zero3;ep{i}=zero3;
              eQ{i} = zero3;pQ{i} = zero3;eO{i} = zero3;pO{i} = zero3;edO{i} = zero3;ea{i} = zero3;
-             constTargetp{i}=zero1;constTargetp{i}=zero1;minDroneDistance{i}=zero1;
+             constp{i}=zero1;constTargetp{i}=zero1;minDroneDistance{i}=zero1;
         end
         for j = 1:length(fieldLog)
             fieldVar = fieldnames(loggers{i}.(fieldLog{j}));
@@ -427,9 +428,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             refx{j} = rxd{i}(1,:);%
             refy{j} = rxd{i}(2,:);
             refz{j} = rxd{i}(3,:);
-            constp{j} = rconstp{i};
-            constTargetp{j} = rconstTargetp{i};
-            minDroneDistance{j} = rminDroneDistance{i};
+            % constp{j} = rconstp{i};
+            % constTargetp{j} = rconstTargetp{i};
+            % minDroneDistance{j} = rminDroneDistance{i};
             err{i} = epL{i}-rxd{i}(1:3,:);%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);

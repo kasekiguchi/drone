@@ -7,7 +7,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         fpLXY=0;
         tt0
         tl0
-        tte = 5;%ƒZƒ“ƒT[’l‚ð‰½•b‚Å100%Žg‚¤‚©
+        tte = 10;%ƒZƒ“ƒT[’l‚ð‰½•b‚Å100%Žg‚¤‚©
         tle = 5;%ƒZƒ“ƒT[’l‚ð‰½•b‚Å0%Žg‚¤‚©
         ratet
         ratel
@@ -42,7 +42,8 @@ classdef FOR_LOAD < SENSOR_CLASS
                 obj.tt0=[];
                 obj.tl0=[];
             % elseif strcmp(varargin{1}{2},'t')&& norm(sp - spL) > 0.8*obj.self.parameter.get("cableL") %take off
-            elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*1.73*obj.self.parameter.get("cableL")%take off,•¡”Œ¡ˆø‚Å•R‚ÌŠp“x‚ª60deg
+            elseif strcmp(varargin{1}{2},'t')&& spL(3)> 0.4%take off,•¡”Œ¡ˆø‚Å•R‚ÌŠp“x‚ª60deg
+                % elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*1.73*obj.self.parameter.get("cableL")%take off,•¡”Œ¡ˆø‚Å•R‚ÌŠp“x‚ª60deg
             % elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
                 if isempty(obj.tt0)
                     obj.tt0 = varargin{1}{1}.t;

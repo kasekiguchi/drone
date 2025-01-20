@@ -37,7 +37,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_state12_takeoff
         base_state12_landing
         ts
-        te_takeoff = 15% goal time
+        te_takeoff = 25% goal time
         zd_takeoff = 0.8 % goal altitude
         te_landing = 20% goal time
         k_yaw
@@ -210,12 +210,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                p = obj.self.estimator.result.state.p;%機体位置
                real_pL = obj.self.estimator.result.state.pL;%機体位置
                % p = obj.self.sensor.result.state.p;%機体位置
-               if isfield(obj.self.sensor.result.state,"real_pL")
+               if isprop(obj.self.sensor.result.state,"real_pL")
                    real_pL = obj.self.sensor.result.state.real_pL;%牽引物位置
                else
                    real_pL = obj.self.sensor.result.state.pL;%simのため%牽引物位置
                end
-               alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+               % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
+               alpi12 = real_pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
                %衝突回避reference生成用ゲイン
                    if isa(obj.agent1.sensor,"MOTIVE")
@@ -230,10 +231,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    droneDistance = vecnorm(spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
                    minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
-                   constTargetp = 0.1/(minDroneDistance - 0.3)^2;%sim0.4衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   constTargetp = 0.2/(minDroneDistance - 0.15)^2;%sim0.1,0.4衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
                    constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
                    obj.constPrep = constp;
-                   kv = 0.02;%sim0.05速度referenceのゲイン
+                   kv = 0.05;%sim0.05速度referenceのゲイン
                    obj.constPrev = -kv*(constp - constTargetp);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
                    constd = constp - constTargetp;
                    % kv = 0.15;%速度referenceのゲイン
@@ -263,12 +264,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state_takeoff = [real_pL(1:2);p(3)-cablei];
                        obj.base_state12_takeoff = real_pL(1:2);
                    end
-                   if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
+                   % if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
+                   if real_pL(3) >=0.4 || obj.ftakeoff == 1 %紐が60deg
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + max(0.5*cablei,constp*0)*alpiUnit12;%紐がたわんでいる場合を含む
-                       obj.constPrep = 0.5*cablei;
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.6*alpiUnit12;%紐がたわんでいる場合を含む
+                       % obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*cablei*alpiUnit12;%紐がたわんでいる場合を含む
+                       % obj.constPrep = 0.5*cablei;
+                       obj.constPrep = 0.6;
                        obj.constPrev = 0;
                    end
                        refi = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time_takeoff);
@@ -288,9 +292,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if norm(p - real_pL) >= 0.8*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei,constp*0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.6)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + constp*[alpiUnit12;0];%紐がたわんでいる場合を含む
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
                        x0d = refi(1:3) - rhoi;
