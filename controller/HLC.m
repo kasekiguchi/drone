@@ -54,7 +54,7 @@ classdef HLC < handle
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
          cha = varargin{1,3}; %HL 
-       % cha = varargin{1,1}{1,2}; %KMPC
+        % cha = varargin{1,1}{1,2}; %KMPC
 
         if strcmp(cha,'t')
             if obj.flag_anti_spike < 10
