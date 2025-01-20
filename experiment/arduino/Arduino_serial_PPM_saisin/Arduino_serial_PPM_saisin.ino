@@ -100,7 +100,7 @@ void loop()
       // if ((digitalRead(EM_PIN) == HIGH || digitalRead(LAND_PIN) == HIGH) && fReset == false)
       if (digitalRead(EM_PIN) == HIGH && fReset == false)
       {
-        delay(2000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）500
+        delay(500); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）500
         // if (digitalRead(EM_PIN) == HIGH || digitalRead(LAND_PIN) == HIGH)
         if (digitalRead(EM_PIN) == HIGH)
         {
