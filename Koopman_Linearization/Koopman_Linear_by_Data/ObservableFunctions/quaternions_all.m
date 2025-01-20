@@ -19,25 +19,25 @@ km = 0.03010685884691849; % ロータ定数
 k = 0.000008048;          % 推力定数
 
 % 状態がクォータニオンを用いた13次元の場合
-if size(x,1) == 9+4
-    P1 = 0;
-    P2 = 0;
-    P3 = 0;
-    Q1 = x(1,1); % roll
-    Q2 = x(2,1); % pitch
-    Q3 = x(3,1); % yaw
-    V1 = x(4,1);
-    V2 = x(5,1);
-    V3 = x(6,1);
-    W1 = x(7,1);
-    W2 = x(8,1);
-    W3 = x(9,1);
-    u1 = 0;
-    u2 = 0;
-    u3 = 0;
-    u4 = 0;
+% if size(x,1) == 9+4
+    % P1 = 0;
+    % P2 = 0;
+    % P3 = 0;
+    % Q1 = x(1,1); % roll
+    % Q2 = x(2,1); % pitch
+    % Q3 = x(3,1); % yaw
+    % V1 = x(4,1);
+    % V2 = x(5,1);
+    % V3 = x(6,1);
+    % W1 = x(7,1);
+    % W2 = x(8,1);
+    % W3 = x(9,1);
+    % u1 = 0;
+    % u2 = 0;
+    % u3 = 0;
+    % u4 = 0;
 % 状態がオイラー角を用いた12次元の場合
-elseif size(x,1) == 12+4
+% elseif size(x,1) == 12+4
     P1 = x(1,1);
     P2 = x(2,1);
     P3 = x(3,1);
@@ -54,7 +54,7 @@ elseif size(x,1) == 12+4
     u2 = 0; %x(14,1);
     u3 = 0; %x(15,1);
     u4 = 0; %x(16,1);
-end
+% end
 
     % q0-q3 : 与えたオイラー角から求めたクォータニオン
     % eul2quat,quaternion はsingleかdouble型にしか使え無くて関数ハンドルを設定した時にエラーをはいた 残念
@@ -68,14 +68,14 @@ end
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
 R33 = (cos(Q2).*cos(Q1));
-if size(x,1) == 12+4
+% if size(x,1) == 12+4
 common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
             R33;
             1];
 common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
-end
+% end
 common_except_pos_z = [Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
@@ -238,7 +238,7 @@ du = [H(u1); H(u2); H(u3); H(u4)];
 % z = [common_z; d2]; % 20 6万5000次元のため中断
 % z = [common_z; d3]; % 21 kron(RxS, RxS) 528
 % z = [common_z; d4]; % 22 kron(RxS, S) 528
-z = [common_z; isobe_z; d4]; % 23
+% z = [common_z; isobe_z; d4]; % 23
 % z = [common_z; isobe_z; d3; d4]; % 24
 % z = [common_z; isobe_z; d1; d3; d4]; % 25
 % z = [common_z; isobe_z; kron(k1,k2)]; % 26
@@ -255,7 +255,7 @@ z = [common_z; isobe_z; d4]; % 23
 % z = [isobe_z; common_z]; % 07
 % z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
 % z = [common_except_pos_z; isobe_z; partial_param_z]; % 09  11の位置を含まない版
-% z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
+z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
 % z = [common_z; isobe_z; partial_param_z]; % 11
 % z = [common_z; hermite_z]; % 12
 % z = [common_z; isobe_z; hermite_z]; % 13
