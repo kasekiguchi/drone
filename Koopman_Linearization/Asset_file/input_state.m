@@ -1,5 +1,5 @@
 %%
-function state = input_state(param,mode)
+function state = input_state(param,mode,F)
 %一定推力を印加したときの状態遷移
     thrust = param{5};
     torque = param{6};
@@ -26,6 +26,8 @@ function state = input_state(param,mode)
         Z = quaternions_all(z0);
     elseif mode == 14
         Z = hermite_code14(z0);
+    elseif mode == 100
+        Z = F(z0);
     end
 
     try
