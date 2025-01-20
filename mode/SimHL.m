@@ -9,7 +9,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 end
 
-%% 20回まとめてシミュレーションする
+% 20回まとめてシミュレーションする
 % clear; close all; clc;
 % for j = 1:150
 %     fprintf('Initializing... N:%d \n', j);
@@ -75,7 +75,7 @@ end
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 20; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -93,14 +93,14 @@ agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-j = 'z';
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+% j = 'z';
+% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
 
 % reference_file = "Exp_2_4_108";
 % agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
@@ -110,40 +110,26 @@ agent.controller = HLC(agent,Controller_HL(dt)); % HL
 run("SimBase"); % simulation
 % 
 % %% 毎時刻実機データの状態からのHLを計算する
-% % reference_file = strcat("Exp_2_4_", num2str(1));
-% load(strcat(reference_file, '.mat'));
-% startIDX = find(log.Data.phase == 102, 1, "first");
-% endIDX = find(log.Data.phase == 102, 1, "last");
-% timeidx = endIDX - startIDX + 1;
-% for i = 1:timeidx
-%     if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f'); % 毎回estimatorを実機データに書き換え
-% 
-%     tmpvalue = log.Data.agent.estimator.result{startIDX+i-1}.state.get();
-%     agent(1).estimator.result.state.set_state(tmpvalue);
-%     agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
-% 
-%     agent(1).reference.do(time, 'f');
-%     agent(1).controller.do(time, 'f');
-%     agent(1).plant.do(time, 'f'); 
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc;
-%     disp([num2str(time.t)])
-% end
-
-%% default
-for i = 1:te/dt
+% reference_file = strcat("Exp_2_4_", num2str(1));
+load(strcat(reference_file, '.mat'));
+startIDX = find(log.Data.phase == 102, 1, "first");
+endIDX = find(log.Data.phase == 102, 1, "last");
+timeidx = endIDX - startIDX + 1;
+for i = 1:timeidx
     if i < 20 || rem(i, 10) == 0 end
     tic
     agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
+    agent(1).estimator.do(time, 'f'); % 毎回estimatorを実機データに書き換え
+
+    tmpvalue = log.Data.agent.estimator.result{startIDX+i-1}.state.get();
+    agent(1).estimator.result.state.set_state(tmpvalue);
+
+    % agent(1).estimator.result.state.set_state(agent.plant.result)
+    agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
+
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f');
-    agent(1).plant.do(time, 'f');
+    agent(1).plant.do(time, 'f'); 
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
     %pause(1)
@@ -151,13 +137,28 @@ for i = 1:te/dt
     disp([num2str(time.t)])
 end
 
+%% default
+% for i = 1:te/dt
+%     if i < 20 || rem(i, 10) == 0 end
+%     tic
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f');
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     all = toc;
+%     disp([num2str(time.t)])
+% end
+
 %%
 % set(0,'defaultAxesFontSize', 10)
 % set(0, 'DefaultLineLineWidth', 1.5);
-% logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
+logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
 % % logger.save('HL_sim_test_1008_sigmoid');
-app.logger = logger;
-result_plot(app)
+% app.logger = logger;
+% result_plot(app)
 % 
 % % 仮想入力の描画
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));

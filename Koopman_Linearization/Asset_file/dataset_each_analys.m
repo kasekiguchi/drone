@@ -36,7 +36,7 @@
 
 %%
 clear
-load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 %%
 clear data
 for j = 1:Data.HowmanyDataset
@@ -84,20 +84,20 @@ end
 % histogram(data.pd(2,:,2),10); title('sigma')
 
 %%
-clear
-i = 1
-filename{1} = strcat("Exp_2_4_", num2str(i));
-filename{2} = strcat("Exp_Kato_", num2str(i));
-for i = 1:2
-    log{i} = LOGGER(filename{i});
-    phase{i} = log{i}.Data.phase;
-end
-
-for i = 1:2
-    f1 = find(phase{i} == 102, 1, "first"); f2 = find(phase{i} == 102, 1, "last");
-    f_t{i} = log{i}.data(0,"t",[],"ranget", [log{i}.Data.t(f1),log{i}.Data.t(f2)])';
-    f_x{i} = log{i}.data(1,"p","e","ranget", [log{i}.Data.t(f1),log{i}.Data.t(f2)])';
-    figure(1);
-    subplot(1,2,i); plot(f_t{i}, f_x{i});
-end
+% clear
+% i = 1
+% filename{1} = strcat("Exp_2_4_", num2str(i));
+% filename{2} = strcat("Exp_Kato_", num2str(i));
+% for i = 1:2
+%     log{i} = LOGGER(filename{i});
+%     phase{i} = log{i}.Data.phase;
+% end
+% 
+% for i = 1:2
+%     f1 = find(phase{i} == 102, 1, "first"); f2 = find(phase{i} == 102, 1, "last");
+%     f_t{i} = log{i}.data(0,"t",[],"ranget", [log{i}.Data.t(f1),log{i}.Data.t(f2)])';
+%     f_x{i} = log{i}.data(1,"p","e","ranget", [log{i}.Data.t(f1),log{i}.Data.t(f2)])';
+%     figure(1);
+%     subplot(1,2,i); plot(f_t{i}, f_x{i});
+% end
 

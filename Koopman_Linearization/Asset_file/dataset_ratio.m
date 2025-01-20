@@ -78,24 +78,37 @@ Data.U = U(:,idx);
 
 %% データセットがどういう割合のデータなのか算出する
 close all; clear;
-load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 %%
+close all;
 X = Data.X;
 U = Data.U;
 T = 1:size(X,2);
-xrange = [0.6e5, 1.2e5];
+xrange = [0.6e5, 0.7e5];
+% xrange = [min(T), max(T)];
+yrange = [-inf inf];
 
-figure(1);
-subplot(2,2,1); plot(T, U(1:4,:), 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Input", 'FontSize', 15)
-legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15); xlim(xrange);
+% figure(1);
+% subplot(2,2,1); plot(T, U(1:4,:), 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Input", 'FontSize', 15)
+% legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15); xlim(xrange);
+% 
+% subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5]); xlim(xrange);
+% subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15); xlim(xrange);
+% subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15); xlim(xrange);
 
-subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5]); xlim(xrange);
-subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15); xlim(xrange);
-subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15); xlim(xrange);
+figure(2); % 全状態出力
+idx = 0; s = ['p', 'q', 'v', 'w'];
+for i = 1:4
+    for j = 1:3
+        idx = idx + 1;
+        subplot(4, 3, idx); plot(T, X(idx,:), 'LineWidth', 1);
+        xlabel('Dataset', 'FontSize', 15); ylabel(strcat(s(i),num2str(j)), 'FontSize', 15); xlim(xrange); ylim(yrange);
+    end
+end
 %% データセットに上下限を設定
 Data.X(3,:) = max(0, min(3, Data.X(3,:))); % 0 <= z <= 3
 
