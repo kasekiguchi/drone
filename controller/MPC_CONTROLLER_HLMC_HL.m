@@ -192,18 +192,18 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       inputSigma = ksigma .* obj.input.sigma';
       % inputSigma = obj.input.sigma;
 
-      obj.input.u = randn(4,obj.param.H,obj.N) .* inputSigma + mu;
-      obj.input.u = max(-obj.input.input_TH, min(obj.input.input_TH, randn(4,obj.param.H,obj.N) .* inputSigma + mu));
+      % obj.input.u = randn(4,obj.param.H,obj.N) .* inputSigma + mu;
+      % obj.input.u = max(-obj.input.input_TH, min(obj.input.input_TH, randn(4,obj.param.H,obj.N) .* inputSigma + mu));
 
-      % obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
-      % obj.input.u2 = max(-obj.input.input_TH(2), min(obj.input.input_TH(2), normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
-      % obj.input.u3 = max(-obj.input.input_TH(3), min(obj.input.input_TH(3), normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
-      % obj.input.u4 = max(-obj.input.input_TH(4), min(obj.input.input_TH(4), normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
+      obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
+      obj.input.u2 = max(-obj.input.input_TH(2), min(obj.input.input_TH(2), normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
+      obj.input.u3 = max(-obj.input.input_TH(3), min(obj.input.input_TH(3), normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
+      obj.input.u4 = max(-obj.input.input_TH(4), min(obj.input.input_TH(4), normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
       % 
-      % obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
-      % obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
-      % obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
-      % obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
+      obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
+      obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
+      obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
+      obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       obj.predict();
 
@@ -221,8 +221,8 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       obj.input.EvalNorm = obj.Normalize();
 
       % 平均のリサンプリング
-      [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
-      % [obj.input.Resampling_mu, ~] = obj.Resampling_IS(); % ImportanceSampling
+      % [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+      [obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
 
       [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
       vf = obj.input.u(1, 1, BestcostID(2));           
@@ -320,14 +320,25 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       NP = obj.N;
       pw = obj.input.Evaluationtra(:,1); % 全評価値に対してのほうが性能よさそう
 
-      pw = exp(-pw);
-      sumw = sum(pw);
+      pw_exp = exp(-pw);
+      sumw = sum(pw_exp);
+      % sumw = sum(pw);
       if sumw~=0
-        pw = (pw/sum(pw))';%正規化
+        pw = (pw_exp/sum(pw_exp))';%正規化
+        % pw = normalize(pw,"range")';
       else
         pw = zeros(1,NP)+1/NP;
       end
       pw_new = pw;
+
+      %% expをとる値を正規化した評価値とする
+      % pw_n = normalize(pw, "range");
+      % if sum(pw_n) ~= 0
+      %     pw_exp = exp(-pw_n);
+      %     pw_new = (pw_exp/sum(pw_exp))';
+      % else
+      %     pw_new = zeros(1,NP)+1/NP;
+      % end
     end
 
     function [resampling_u,pw] = Resampling_LVS(obj)

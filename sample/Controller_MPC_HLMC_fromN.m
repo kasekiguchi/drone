@@ -11,7 +11,7 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
 
     Controller.dt = 0.1; % MPCステップ幅
     Controller.H = 10;
-    Controller.particle_num = 1000;
+    Controller.particle_num = 2000;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];
@@ -38,6 +38,16 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     Controller.Xf = Controller.X; % 制約時のみ * 1000
     Controller.Yf = Controller.X;
     Controller.PHIf = Controller.PHI;
+
+    % Controller.Z = 1e1 * diag([1; 1]);% * 1e3; %2 %1e3 10
+    % Controller.X = 1e1 * diag([10;1;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    % Controller.Y = Controller.X;% * 1e3;
+    % Controller.PHI = 1* diag([1; 1]);
+    % 
+    % Controller.Zf = 1e1 * diag([1; 1]);
+    % Controller.Xf = Controller.X; % 制約時のみ * 1000
+    % Controller.Yf = Controller.X;
+    % Controller.PHIf = Controller.PHI;
 
 
     Controller.AP = 1e3; % どれくらい距離をとる必要があるか

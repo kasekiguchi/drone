@@ -36,7 +36,7 @@ agent.controller = MPC_CONTROLLER_HLMC_HL(agent, Controller_MPC_HLMC_fromN(dt));
 run("ExpBase");
 %%
 for i = 1:te/dt
-    if i < 20 || rem(i, 10) == 0 end
+    if i < 20 || rem(i, 10) == 0; end
     tic
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
