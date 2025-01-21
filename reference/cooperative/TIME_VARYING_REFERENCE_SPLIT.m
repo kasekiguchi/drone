@@ -111,6 +111,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance", "constp","constTargetp"], 'num_list', [28, 3, 1, 1, 1]));  
                     obj.result.state.set_state("xd",zeros(28,1));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("minDroneDistance",0);
+                    obj.result.state.set_state("constp",0);
+                    obj.result.state.set_state("constTargetp",0);
                     % obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
                     % obj.result.state.yaw=0;
 
@@ -226,12 +229,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                                 spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
                            end 
                    else 
-                           spDrone  = obj.agent1.sensor.reult.spDrone;
+                           spDrone  = obj.agent1.reference.result.spDrone;
                    end
                    droneDistance = vecnorm(spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
                    minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
-                   constTargetp = 0.2/(minDroneDistance - 0.15)^2;%sim0.1,0.4衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   constTargetp = 0.1/(minDroneDistance - 0.4)^2;%sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
                    constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
                    obj.constPrep = constp;
                    kv = 0.05;%sim0.05速度referenceのゲイン
