@@ -10,7 +10,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % loadfilename{1} = '2025-01-14_Exp_Kiyama_code10_saddle_increased';
 % loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
 % loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
 
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
@@ -32,20 +32,19 @@ flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
-flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
+flg.without_pos = 1; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
-flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
 %% 個別
 load(strcat(loadfilename{1}, '.mat'), 'est'); 
-code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
-F = @quaternions_all;
+[F, code] = select_observable(loadfilename);
 g = input_0_verify(args, flg, est, loadfilename{1}, F);
 experiment_fitting(args, flg, loadfilename, F)
 save_fig(args, flg, loadfilename, g, code);
-
+cd('../../');
 %% まとめて
 % file = {'2025-01-12_Exp_Kiyama_code00_saddle_increased';
 %     '2025-01-13_Exp_Kiyama_code02_saddle_increased';
@@ -55,14 +54,7 @@ save_fig(args, flg, loadfilename, g, code);
 %     clear est
 %     loadfilename{1} = file{m};
 %     load(strcat(loadfilename{1}, '.mat'), 'est'); 
-%     code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
-%     switch code
-%         case '00'; F = @quaternions_all_00;
-%         case '02'; F = @quaternions_all_02;
-%         case '23'; F = @quaternions_all_23;
-%         case '26'; F = @quaternions_all_26;
-%         otherwise; error('Not found observables.');
-%     end
+%     [F, code] = select_observable(loadfilename);
 %     g = input_0_verify(args, flg, est, loadfilename{1}, F);
 %     experiment_fitting(args, flg, loadfilename, F)
 %     save_fig(args, flg, loadfilename, g, code);
@@ -71,10 +63,21 @@ save_fig(args, flg, loadfilename, g, code);
 % end
 
 %% どれかだけ
-savename = strcat('saddle_shpaed_trajectory_pos', '.pdf'); 
-f(1) = figure(5);
-exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
+% savename = strcat('saddle_shpaed_trajectory_pos', '.pdf'); 
+% f(1) = figure(5);
+% exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
 %%
+function [F, code] = select_observable(loadfilename)
+    code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
+    switch code
+        case '00'; F = @quaternions_all_00;
+        case '02'; F = @quaternions_all_02;
+        case '23'; F = @quaternions_all_23;
+        case '26'; F = @quaternions_all_26;
+        otherwise; F = @quaternions_all;
+    end
+end
+
 function save_fig(args, flg, loadfilename, g, code)
     if args.save_fig && flg.figtype
         % figure -> hundle
@@ -106,12 +109,6 @@ function save_fig(args, flg, loadfilename, g, code)
     end
 end
 
-%% 単発の保存
-% h = hermite_plot(1.5);
-% savename = strcat('hermite_plot.pdf'); 
-% exportgraphics(h, savename, 'ContentType', 'vector', 'Resolution', 300);
-
-%%
 function f = input_0_verify(args, flg, est, filename, F)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
@@ -155,6 +152,7 @@ arr = 1:ii*jj; idx = 0;
 for i = 1:ii
     for j = 1:jj
         idx = idx + 1;
+        if flg.without_pos && idx > 9; break; end
         if flg.figtype == 0
             subplot(ii,jj,idx);
             plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
@@ -175,7 +173,7 @@ fprintf('\n')
 end
 
 function experiment_fitting(args, flg, loadfilename, F)
-% % save_fig = args.save_fig;
+% save_fig = args.save_fig;
 startTime = args.startTime;
 stepnum = args.stepnum;
 ref_tra = args.ref_tra;
