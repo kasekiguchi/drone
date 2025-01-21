@@ -15,7 +15,7 @@ clear gui
 clc; close all;
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
-te = 20; % terminal time
+te = 60; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -39,15 +39,7 @@ initial_state.w = [0; 0; 0];
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
 
 % model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
-% model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
-
-% 0110
-model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
-% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10.mat";
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10.mat"; % pitch
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1.mat"; %roll, pitch, yaw
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased";
-% 
+model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 A=est.A; B=est.B; C=est.C;
@@ -130,7 +122,7 @@ app.logger = logger;
 result_plot(app, model_file);
 % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
-% logger.save("10_hokukai");
+% logger.save();
 
 %% function 2コンとき
 function result = controller_do(varargin)
