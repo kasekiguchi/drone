@@ -49,7 +49,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     Controller_param.F = @quaternions_all;
     if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
         Controller_param.quad_drone = @quad_drone_code00_mex;
-        Controller_param.F = @observables_isobe; % isobe code00
+        Controller_param.F = @quaternions_all_00; % isobe code00
     elseif size(Controller_param.A,1) == 39
         Controller_param.quad_drone = @quad_drone_code04_mex;
     elseif size(Controller_param.A,1) == 71
