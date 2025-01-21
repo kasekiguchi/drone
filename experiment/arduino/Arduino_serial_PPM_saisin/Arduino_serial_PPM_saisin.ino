@@ -352,12 +352,12 @@ void landing_stop()
     pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
     pw[2] = CH_OFFSET - CH_MIN;     // throttle
     pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-    pw[4] = CH_OFFSET;              // AUX1
+    pw[4] = CH_OFFSET - 700;              // AUX1
     pw[5] = CH_OFFSET;              // AUX2
     pw[6] = CH_OFFSET - CH_LAND;              // AUX3
     // if(LAND_stop < 280)//40=1秒
     // {
-      pw[7] = CH_OFFSET;
+    pw[7] = CH_OFFSET;
     // }
     // else
     // {

@@ -41,9 +41,13 @@ pause(1.45)
     sy = 0;
     while Command <= 10000
         pause(0.005)
-        msg=gen_msg([500,500,10,500,0,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
+        if Command <10
+        msg=gen_msg([500,500,0,500,700,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
         agent.plant.connector.sendData(msg)
-
+        else
+        msg=gen_msg([500,500,10,500,700,0,0,1000]); %([Roll,Pitch,Throttle,Yaw,arming])
+        agent.plant.connector.sendData(msg)
+        end
         Command = Command + 1;
 
     end
