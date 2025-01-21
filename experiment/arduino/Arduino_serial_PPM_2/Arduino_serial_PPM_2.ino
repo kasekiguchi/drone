@@ -37,7 +37,7 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // #define CH_OFFSET 1620       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
 // #define TOTAL_CH_OFFSET 12960 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
 #define CH_OFFSET 1659       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
-#define TOTAL_CH_OFFSET 13272 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
+#define TOTAL_CH_OFFSET 13248 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
 // CH1の値が他のCHの値に比べて不安定なのは上記の動作が原因だと考えられる　transmitterのプログラムで行っている可能性あり AUX5の意味が不明AUX4までしか定義されていないはずである
 // volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
