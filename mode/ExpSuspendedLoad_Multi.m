@@ -34,13 +34,13 @@ rigid_num = motive.result.rigid_num;%剛体数
 %     addIds(i+1) = sum(Ns(1:i+1),2);%pcごとに機体ずらす
 % end
 % addId = addIds(PCId);%このpcで加算するrigidのid
-handlingModelNum = 1;%扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
+handlingModelNum = 1:2;%扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
 N = length(handlingModelNum) + mod(rigid_num,2);
-addId = (handlingModelNum(1) - 1)*2 + mod(rigid_num,2);
+addId = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 % addId=0;
 % N=2;
 %COMの番号指定
-COMs = [3];%pc1 lenovo割り当てる順番に設定
+COMs = [3,12];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
 % cableL=[0.91,0.91];

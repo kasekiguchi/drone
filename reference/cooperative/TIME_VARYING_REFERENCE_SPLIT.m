@@ -8,7 +8,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         self
 %         agent1 % cooprative情報
         ref_set
-        t=[];
+        baseflighttime=[];
         cha='s';
         com % 使用制御モデル->"HL"or"Cooperative"or"Suspended"or"Split"
         dfunc
@@ -159,11 +159,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         function result = do(obj, varargin)%chaによって単機のtakeoffやlandingに切り換えられるようにする．普通のTIME_VARYING_REFERENCEを参考にする
            dt = varargin{1}.dt;
            obj.cha = varargin{2};
-           if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
+           if obj.cha=='f'&& isempty(obj.baseflighttime)    %flightからreferenceの時間を開始
+                obj.baseflighttime =  varargin{1}.t;
+                t=obj.baseflighttime;
+           elseif obj.cha=='f'
+                t = varargin{1}.t - obj.baseflighttime;
            else
-                obj.t=varargin{1}.t;
-                t = obj.t;
+                t = 0;
            end
            if strcmp(obj.com, "Split")
                %================================================
@@ -221,16 +223,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % alpi12 = obj.self.sensor.result.state.pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpi12 = real_pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                alpiUnit12 = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
-               %衝突回避reference生成用ゲイン
-                   if isa(obj.agent1.sensor,"MOTIVE")
-                       rigid = obj.agent1.sensor.result.rigid;%剛体情報を全て取得
-                           spDrone = zeros(3,(length(rigid)-1)/2);
-                           for i = 1:(length(rigid)-1)/2
-                                spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
-                           end 
-                   else 
-                           spDrone  = obj.agent1.reference.result.spDrone;
-                   end
+               %衝突回避reference生成用ゲイン 
+                   spDrone  = obj.agent1.reference.result.spDrone;
                    droneDistance = vecnorm(spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
                    minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
@@ -268,11 +262,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state12_takeoff = real_pL(1:2);
                    end
                    % if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
-                   if real_pL(3) >=0.4 || obj.ftakeoff == 1 %紐が60deg
+                   if real_pL(3) >=0.3 || obj.ftakeoff == 1 %紐が60deg
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.6*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.3*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*cablei*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.constPrep = 0.5*cablei;
                        obj.constPrep = 0.6;
@@ -453,12 +447,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 
                %全てのドローンの位置を取得
                if isa( obj.self.sensor,"MOTIVE")
-                   % rigid = obj.self.sensor.result.rigid;%剛体情報を全て取得
-                   % rho = obj.self.parameter.rho;
-                   % spDrone = zeros(size(rho));
-                   % for i = 1:size(rho,2)
-                   %      spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
-                   % end
+                   rigid = obj.agent1.sensor.result.rigid;%剛体情報を全て取得
+                   spDrone = zeros(3,(length(rigid)-1)/2);
+                   for i = 1:(length(rigid)-1)/2
+                        spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
+                   end
                else
                     sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
                     %分割前ペイロード

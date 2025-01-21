@@ -38,34 +38,40 @@ classdef FOR_LOAD < SENSOR_CLASS
             spL=obj.self.sensor.motive.result.rigid(obj.rigid_num).p;
             ipL = sp -[0;0;obj.self.parameter.get("cableL")];% For:PE-Model
             if strcmp(varargin{1}{2},'f')%obj.result.state.pL(3) >= 0.2&&(cha,'f')||strcmp(cha,'l')
-                obj.result.state.pL = spL;
+                % obj.result.state.pL = spL;
                 obj.tt0=[];
                 obj.tl0=[];
             % elseif strcmp(varargin{1}{2},'t')&& norm(sp - spL) > 0.8*obj.self.parameter.get("cableL") %take off
-            elseif strcmp(varargin{1}{2},'t')&& spL(3)> 0.4%take off,ï°êîå°à¯Ç≈ïRÇÃäpìxÇ™60deg
-                % elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*1.73*obj.self.parameter.get("cableL")%take off,ï°êîå°à¯Ç≈ïRÇÃäpìxÇ™60deg
-            % elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
-                if isempty(obj.tt0)
-                    obj.tt0 = varargin{1}{1}.t;
+            elseif strcmp(varargin{1}{2},'t')%&& spL(3)> 0.4%take off,ï°êîå°à¯Ç≈ïRÇÃäpìxÇ™60deg
+                if spL(3)> 0.3
+                    % elseif strcmp(varargin{1}{2},'t')&& sp(3) - spL(3)> 0.5*1.73*obj.self.parameter.get("cableL")%take off,ï°êîå°à¯Ç≈ïRÇÃäpìxÇ™60deg
+                % elseif strcmp(varargin{1}{2},'t')&&ipL(3)> obj.ilength%take off
+                    if isempty(obj.tt0)
+                        obj.tt0 = varargin{1}{1}.t;
+                    end
+                    t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
+                    k = obj.ratet*t^2;%îΩâfäÑçá
+                    spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
+                else
+                    spL = ipL;
                 end
-                t = min((varargin{1}{1}.t - obj.tt0),obj.tte);
-                k = obj.ratet*t^2;%îΩâfäÑçá
-                % spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-                spL = spL + k*(spL - sp);
             elseif strcmp(varargin{1}{2},'l')&& norm(sp - spL) < 0.8*obj.self.parameter.get("cableL")%landing
             % elseif strcmp(varargin{1}{2},'l')&&ipL(3) < obj.ilength%landing
-                if isempty(obj.tl0)
-                    obj.tl0 = varargin{1}{1}.t;
-                end
-                t = min(varargin{1}{1}.t - obj.tl0, obj.tle);
-                k = -obj.ratel*t^2 + 1;%îΩâfäÑçá
-                spL = spL + k*(spL - sp);
-                % spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
-                % spL(3) = ipL(3);
-            else
-                spL = ipL;
-                obj.tt0=[];
-                obj.tl0=[];
+                % if norm(sp - spL) < 0.8*obj.self.parameter.get("cableL")%landing
+                    if isempty(obj.tl0)
+                        obj.tl0 = varargin{1}{1}.t;
+                    end
+                    t = min(varargin{1}{1}.t - obj.tl0, obj.tle);
+                    k = -obj.ratel*t^2 + 1;%îΩâfäÑçá
+                    spL = spL + k*(spL - sp);
+                    spL(1:2) = sp(1:2) + k*(spL(1:2) - sp(1:2));
+                    spL(3) = ipL(3);
+                
+                % end
+            % else
+            %     spL = ipL;
+            %     obj.tt0=[];
+            %     obj.tl0=[];
             end
             obj.result.state.p = sp;
             obj.result.state.q = sq;
