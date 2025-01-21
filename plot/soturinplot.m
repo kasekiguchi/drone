@@ -488,7 +488,7 @@ figure;
 plot(t_1_post_convergence,rmse_x_1_fig(1:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('RMSE[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
@@ -496,7 +496,7 @@ ylim([0 0.4])
 hold on
 plot(t_1_post_convergence,rmse_y_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_z_1_fig(1:end), '-','LineWidth',2);
-legend('x.error','y.error','z.error','Location', ...
+legend('x.RMSE','y.RMSE','z.RMSE','Location', ...
     'northeast','fontsize',12,'NumColumns',2)
 hold off
 
@@ -767,7 +767,7 @@ figure;
 plot(t_1_post_convergence,rmse_vx_1_fig(1:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Velocity[m/s]','FontSize',12)
+ylabel('RMSE[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_1_post_convergence(1,1) inf])
@@ -775,7 +775,7 @@ ylim([0 0.3])
 hold on
 plot(t_1_post_convergence,rmse_vy_1_fig(1:end), '-','LineWidth',2);
 plot(t_1_post_convergence,rmse_vz_1_fig(1:end), '-','LineWidth',2);
-legend('v_x.error','v_y.error','v_z.error','Location', ...
+legend('v_x.RMSE','v_y.RMSE','v_z.RMSE','Location', ...
     'northeast','fontsize',12,'NumColumns',2)
 hold off
 
