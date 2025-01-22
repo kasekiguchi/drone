@@ -6,7 +6,7 @@
 % data = return_state_prop(newLog1)
 % newLog1 = simplifyLogger(log);
 %機体1と機体2
-[newLog1,newLog2] = simplifyLogger(log);
+[newLog1,newLog2] = simplifyLogger(log1);
 t_1 = newLog1.t; %t:時間
 phase_1 = newLog1.phase;%phase:アーミングやフライトなどの状態
 k_1 = newLog1.k;%データ数
@@ -40,7 +40,7 @@ transmitterinput_2 = newLog2.inner_input;%プロポからの指令
 %%
 %セクションの実行
 %機体3と機体4
-[newLog3,newLog4] = simplifyLogger(log);
+[newLog3,newLog4] = simplifyLogger(log2);
 t_3 = newLog3.t; %t:時間
 phase_3 = newLog3.phase;%phase:アーミングやフライトなどの状態
 k_3 = newLog3.k;%データ数
@@ -250,7 +250,7 @@ y_ref_sel1 = [];
 z_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase_1(aa,1) == 102
+    if phase_1(aa,1) == 116
         x_est_sel1 = [x_est_sel1,x_est1(1,aa)];
         y_est_sel1 = [y_est_sel1,y_est1(1,aa)];
         z_est_sel1 = [z_est_sel1,z_est1(1,aa)];
@@ -272,7 +272,7 @@ pitch_ref_sel1 = [];
 yaw_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase_1(aa,1) == 102
+    if phase_1(aa,1) == 116
         roll_est_sel1 = [roll_est_sel1,roll_est1(1,aa)];
         pitch_est_sel1 = [pitch_est_sel1,pitch_est1(1,aa)];
         yaw_est_sel1 = [yaw_est_sel1,yaw_est1(1,aa)];
@@ -300,7 +300,7 @@ ininput_AUX3_sel1 = [];
 ininput_AUX4_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase_1(aa,1) == 102
+    if phase_1(aa,1) == 116
         input_roll_sel1 = [input_roll_sel1,inproll_1(1,aa)];
         input_pitch_sel1 = [input_pitch_sel1,inppitch_1(1,aa)];
         input_throttle_sel1 = [input_throttle_sel1,inpthrottle_1(1,aa)];
@@ -328,7 +328,7 @@ vy_ref_sel1 = [];
 vz_ref_sel1 = [];
 t_sel1 = [];
 while aa <= ba
-    if phase_1(aa,1) == 102
+    if phase_1(aa,1) == 116
         vx_est_sel1 = [vx_est_sel1,vx_est1(1,aa)];
         vy_est_sel1 = [vy_est_sel1,vy_est1(1,aa)];
         vz_est_sel1 = [vz_est_sel1,vz_est1(1,aa)];
@@ -351,7 +351,7 @@ y_ref_sel2 = [];
 z_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase_2(aa,1) == 102
+    if phase_2(aa,1) == 116
         x_est_sel2 = [x_est_sel2,x_est2(1,aa)];
         y_est_sel2 = [y_est_sel2,y_est2(1,aa)];
         z_est_sel2 = [z_est_sel2,z_est2(1,aa)];
@@ -373,7 +373,7 @@ pitch_ref_sel2 = [];
 yaw_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase_2(aa,1) == 102
+    if phase_2(aa,1) == 116
         roll_est_sel2 = [roll_est_sel2,roll_est2(1,aa)];
         pitch_est_sel2 = [pitch_est_sel2,pitch_est2(1,aa)];
         yaw_est_sel2 = [yaw_est_sel2,yaw_est2(1,aa)];
@@ -401,7 +401,7 @@ ininput_AUX3_sel2 = [];
 ininput_AUX4_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase_2(aa,1) == 102
+    if phase_2(aa,1) == 116
         input_roll_sel2 = [input_roll_sel2,inproll_2(1,aa)];
         input_pitch_sel2 = [input_pitch_sel2,inppitch_2(1,aa)];
         input_throttle_sel2 = [input_throttle_sel2,inpthrottle_2(1,aa)];
@@ -429,7 +429,7 @@ vy_ref_sel2 = [];
 vz_ref_sel2 = [];
 t_sel2 = [];
 while aa <= ba
-    if phase_2(aa,1) == 102
+    if phase_2(aa,1) == 116
         vx_est_sel2 = [vx_est_sel2,vx_est2(1,aa)];
         vy_est_sel2 = [vy_est_sel2,vy_est2(1,aa)];
         vz_est_sel2 = [vz_est_sel2,vz_est2(1,aa)];
@@ -454,7 +454,7 @@ y_ref_sel3 = [];
 z_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase_3(aa,1) == 102
+    if phase_3(aa,1) == 116
         x_est_sel3 = [x_est_sel3,x_est3(1,aa)];
         y_est_sel3 = [y_est_sel3,y_est3(1,aa)];
         z_est_sel3 = [z_est_sel3,z_est3(1,aa)];
@@ -476,7 +476,7 @@ pitch_ref_sel3 = [];
 yaw_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase_3(aa,1) == 102
+    if phase_3(aa,1) == 116
         roll_est_sel3 = [roll_est_sel3,roll_est3(1,aa)];
         pitch_est_sel3 = [pitch_est_sel3,pitch_est3(1,aa)];
         yaw_est_sel3 = [yaw_est_sel3,yaw_est3(1,aa)];
@@ -504,7 +504,7 @@ ininput_AUX3_sel3 = [];
 ininput_AUX4_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase_3(aa,1) == 102
+    if phase_3(aa,1) == 116
         input_roll_sel3 = [input_roll_sel3,inproll_3(1,aa)];
         input_pitch_sel3 = [input_pitch_sel3,inppitch_3(1,aa)];
         input_throttle_sel3 = [input_throttle_sel3,inpthrottle_3(1,aa)];
@@ -532,7 +532,7 @@ vy_ref_sel3 = [];
 vz_ref_sel3 = [];
 t_sel3 = [];
 while aa <= ba
-    if phase_3(aa,1) == 102
+    if phase_3(aa,1) == 116
         vx_est_sel3 = [vx_est_sel3,vx_est3(1,aa)];
         vy_est_sel3 = [vy_est_sel3,vy_est3(1,aa)];
         vz_est_sel3 = [vz_est_sel3,vz_est3(1,aa)];
@@ -555,7 +555,7 @@ y_ref_sel4 = [];
 z_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase_4(aa,1) == 102
+    if phase_4(aa,1) == 116
         x_est_sel4 = [x_est_sel4,x_est4(1,aa)];
         y_est_sel4 = [y_est_sel4,y_est4(1,aa)];
         z_est_sel4 = [z_est_sel4,z_est4(1,aa)];
@@ -577,7 +577,7 @@ pitch_ref_sel4 = [];
 yaw_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase_4(aa,1) == 102
+    if phase_4(aa,1) == 116
         roll_est_sel4 = [roll_est_sel4,roll_est4(1,aa)];
         pitch_est_sel4 = [pitch_est_sel4,pitch_est4(1,aa)];
         yaw_est_sel4 = [yaw_est_sel4,yaw_est4(1,aa)];
@@ -605,7 +605,7 @@ ininput_AUX3_sel4 = [];
 ininput_AUX4_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase_4(aa,1) == 102
+    if phase_4(aa,1) == 116
         input_roll_sel4 = [input_roll_sel4,inproll_4(1,aa)];
         input_pitch_sel4 = [input_pitch_sel4,inppitch_4(1,aa)];
         input_throttle_sel4 = [input_throttle_sel4,inpthrottle_4(1,aa)];
@@ -633,7 +633,7 @@ vy_ref_sel4 = [];
 vz_ref_sel4 = [];
 t_sel4 = [];
 while aa <= ba
-    if phase_4(aa,1) == 102
+    if phase_4(aa,1) == 116
         vx_est_sel4 = [vx_est_sel4,vx_est4(1,aa)];
         vy_est_sel4 = [vy_est_sel4,vy_est4(1,aa)];
         vz_est_sel4 = [vz_est_sel4,vz_est4(1,aa)];
@@ -645,165 +645,61 @@ while aa <= ba
     aa = aa + 1;
 end
 
-% %データをそろえる
-% minLength = min(length(t_sel1), length(t_sel3));
-% t_sel1 = t_sel1(1:minLength);
-% t_sel2 = t_sel2(1:minLength);
-% t_sel3 = t_sel3(1:minLength);
-% t_sel4 = t_sel4(1:minLength);
-% x_est_sel1 = x_est_sel1(1:minLength);
-% y_est_sel1 = y_est_sel1(1:minLength);
-% z_est_sel1 = z_est_sel1(1:minLength);
-% x_ref_sel1 = x_ref_sel1(1:minLength);
-% y_ref_sel1 = y_ref_sel1(1:minLength);
-% z_ref_sel1 = z_ref_sel1(1:minLength);
-% roll_est_sel1 = roll_est_sel1(1:minLength);
-% pitch_est_sel1 = pitch_est_sel1(1:minLength);
-% yaw_est_sel1 = yaw_est_sel1(1:minLength);
-% roll_ref_sel1 = roll_ref_sel1(1:minLength);
-% pitch_ref_sel1 = pitch_ref_sel1(1:minLength);
-% yaw_ref_sel1 = yaw_ref_sel1(1:minLength);
-% input_roll_sel1 = input_roll_sel1(1:minLength);
-% input_pitch_sel1 = input_pitch_sel1(1:minLength);
-% input_throttle_sel1 = input_throttle_sel1(1:minLength);
-% input_yaw_sel1 = input_yaw_sel1(1:minLength);
-% ininput_roll_sel1 = ininput_roll_sel1(1:minLength);
-% ininput_pitch_sel1 = ininput_pitch_sel1(1:minLength);
-% ininput_throttle_sel1 = ininput_throttle_sel1(1:minLength);
-% ininput_yaw_sel1 = ininput_yaw_sel1(1:minLength);
-% ininput_AUX1_sel1 = ininput_AUX1_sel1(1:minLength);
-% ininput_AUX2_sel1 = ininput_AUX2_sel1(1:minLength);
-% ininput_AUX3_sel1 = ininput_AUX3_sel1(1:minLength);
-% ininput_AUX4_sel1 = ininput_AUX4_sel1(1:minLength);
-% vx_est_sel1 = vx_est_sel1(1:minLength);
-% vy_est_sel1 = vy_est_sel1(1:minLength);
-% vz_est_sel1 = vz_est_sel1(1:minLength);
-% vx_ref_sel1 = vx_ref_sel1(1:minLength);
-% vy_ref_sel1 = vy_ref_sel1(1:minLength);
-% vz_ref_sel1 = vz_ref_sel1(1:minLength);
-% x_est_sel2 = x_est_sel2(1:minLength);
-% y_est_sel2 = y_est_sel2(1:minLength);
-% z_est_sel2 = z_est_sel2(1:minLength);
-% x_ref_sel2 = x_ref_sel2(1:minLength);
-% y_ref_sel2 = y_ref_sel2(1:minLength);
-% z_ref_sel2 = z_ref_sel2(1:minLength);
-% roll_est_sel2 = roll_est_sel2(1:minLength);
-% pitch_est_sel2 = pitch_est_sel2(1:minLength);
-% yaw_est_sel2 = yaw_est_sel2(1:minLength);
-% roll_ref_sel2 = roll_ref_sel2(1:minLength);
-% pitch_ref_sel2 = pitch_ref_sel2(1:minLength);
-% yaw_ref_sel2 = yaw_ref_sel2(1:minLength);
-% input_roll_sel2 = input_roll_sel2(1:minLength);
-% input_pitch_sel2 = input_pitch_sel2(1:minLength);
-% input_throttle_sel2 = input_throttle_sel2(1:minLength);
-% input_yaw_sel2 = input_yaw_sel2(1:minLength);
-% ininput_roll_sel2 = ininput_roll_sel2(1:minLength);
-% ininput_pitch_sel2 = ininput_pitch_sel2(1:minLength);
-% ininput_throttle_sel2 = ininput_throttle_sel2(1:minLength);
-% ininput_yaw_sel = ininput_yaw_sel2(1:minLength);
-% ininput_AUX1_sel2 = ininput_AUX1_sel2(1:minLength);
-% ininput_AUX2_sel2 = ininput_AUX2_sel2(1:minLength);
-% ininput_AUX3_sel2 = ininput_AUX3_sel2(1:minLength);
-% ininput_AUX4_sel2 = ininput_AUX4_sel2(1:minLength);
-% vx_est_sel2 = vx_est_sel2(1:minLength);
-% vy_est_sel2 = vy_est_sel2(1:minLength);
-% vz_est_sel2 = vz_est_sel2(1:minLength);
-% vx_ref_sel2 = vx_ref_sel2(1:minLength);
-% vy_ref_sel2 = vy_ref_sel2(1:minLength);
-% vz_ref_sel2 = vz_ref_sel2(1:minLength);
-% 
-% x_est_sel3 = x_est_sel3(1:minLength);
-% y_est_sel3 = y_est_sel3(1:minLength);
-% z_est_sel3 = z_est_sel3(1:minLength);
-% x_ref_sel3 = x_ref_sel3(1:minLength);
-% y_ref_sel3 = y_ref_sel3(1:minLength);
-% z_ref_sel3 = z_ref_sel3(1:minLength);
-% roll_est_sel3 = roll_est_sel3(1:minLength);
-% pitch_est_sel3 = pitch_est_sel3(1:minLength);
-% yaw_est_sel3 = yaw_est_sel3(1:minLength);
-% roll_ref_sel3 = roll_ref_sel3(1:minLength);
-% pitch_ref_sel3 = pitch_ref_sel3(1:minLength);
-% yaw_ref_sel3 = yaw_ref_sel3(1:minLength);
-% input_roll_sel3 = input_roll_sel3(1:minLength);
-% input_pitch_sel3 = input_pitch_sel3(1:minLength);
-% input_throttle_sel3 = input_throttle_sel3(1:minLength);
-% input_yaw_sel3 = input_yaw_sel3(1:minLength);
-% ininput_roll_sel3 = ininput_roll_sel3(1:minLength);
-% ininput_pitch_sel3 = ininput_pitch_sel3(1:minLength);
-% ininput_throttle_sel3 = ininput_throttle_sel3(1:minLength);
-% ininput_yaw_sel3 = ininput_yaw_sel3(1:minLength);
-% ininput_AUX1_sel3 = ininput_AUX1_sel3(1:minLength);
-% ininput_AUX2_sel3 = ininput_AUX2_sel3(1:minLength);
-% ininput_AUX3_sel3 = ininput_AUX3_sel3(1:minLength);
-% ininput_AUX4_sel3 = ininput_AUX4_sel3(1:minLength);
-% vx_est_sel3 = vx_est_sel3(1:minLength);
-% vy_est_sel3 = vy_est_sel3(1:minLength);
-% vz_est_sel3 = vz_est_sel3(1:minLength);
-% vx_ref_sel3 = vx_ref_sel3(1:minLength);
-% vy_ref_sel3 = vy_ref_sel3(1:minLength);
-% vz_ref_sel3 = vz_ref_sel3(1:minLength);
-% x_est_sel4 = x_est_sel4(1:minLength);
-% y_est_sel4 = y_est_sel4(1:minLength);
-% z_est_sel4 = z_est_sel4(1:minLength);
-% x_ref_sel4 = x_ref_sel4(1:minLength);
-% y_ref_sel4 = y_ref_sel4(1:minLength);
-% z_ref_sel4 = z_ref_sel4(1:minLength);
-% roll_est_sel4 = roll_est_sel4(1:minLength);
-% pitch_est_sel4 = pitch_est_sel4(1:minLength);
-% yaw_est_sel4 = yaw_est_sel4(1:minLength);
-% roll_ref_sel4 = roll_ref_sel4(1:minLength);
-% pitch_ref_sel4 = pitch_ref_sel4(1:minLength);
-% yaw_ref_sel4 = yaw_ref_sel4(1:minLength);
-% input_roll_sel4 = input_roll_sel4(1:minLength);
-% input_pitch_sel4 = input_pitch_sel4(1:minLength);
-% input_throttle_sel4 = input_throttle_sel4(1:minLength);
-% input_yaw_sel4 = input_yaw_sel4(1:minLength);
-% ininput_roll_sel4 = ininput_roll_sel4(1:minLength);
-% ininput_pitch_sel4 = ininput_pitch_sel4(1:minLength);
-% ininput_throttle_sel4 = ininput_throttle_sel4(1:minLength);
-% ininput_yaw_sel4 = ininput_yaw_sel4(1:minLength);
-% ininput_AUX1_sel4 = ininput_AUX1_sel4(1:minLength);
-% ininput_AUX2_sel4 = ininput_AUX2_sel4(1:minLength);
-% ininput_AUX3_sel4 = ininput_AUX3_sel4(1:minLength);
-% ininput_AUX4_sel4 = ininput_AUX4_sel4(1:minLength);
-% vx_est_sel4 = vx_est_sel4(1:minLength);
-% vy_est_sel4 = vy_est_sel4(1:minLength);
-% vz_est_sel4 = vz_est_sel4(1:minLength);
-% vx_ref_sel4 = vx_ref_sel4(1:minLength);
-% vy_ref_sel4 = vy_ref_sel4(1:minLength);
-% vz_ref_sel4 = vz_ref_sel4(1:minLength);
-
 %% 収束後　位置
+
+ftime = 0;      % 収束時間の初期化
+shuti = 0;
+ftime2 = 0;
+shuti2 = 0;
+
+for i = 1:length(vx_est_sel1)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if t_sel1(i) > 14 && ftime == 0
+
+            convergence_start_time = t_sel1(i);  % 収束開始時刻を設定
+            shuti = i;                % 収束開始行を記録
+            ftime = 1;
+    end
+end
+for i = 1:length(vx_est_sel4)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if t_sel4(i) > 14 && ftime2 == 0
+
+            convergence_start_time2 = t_sel3(i);  % 収束開始時刻を設定
+            shuti2 = i;                % 収束開始行を記録
+            ftime2 = 1;
+    end
+end
 
 % 誤差の計算
 %位置
-er_x_1 = mean(x_est_sel1 - x_ref_sel1);
-er_y_1 = mean(y_est_sel1 - y_ref_sel1);
-er_z_1 = mean(z_est_sel1 - z_ref_sel1);
-er_x_1_fig = x_est_sel1 - x_ref_sel1;
-er_y_1_fig = y_est_sel1 - y_ref_sel1;
-er_z_1_fig = z_est_sel1 - z_ref_sel1;
+er_x_1 = mean(x_est_sel1(shuti:end) - x_ref_sel1(shuti:end));
+er_y_1 = mean(y_est_sel1(shuti:end) - y_ref_sel1(shuti:end));
+er_z_1 = mean(z_est_sel1(shuti:end) - z_ref_sel1(shuti:end));
+er_x_1_fig = x_est_sel1(shuti:end) - x_ref_sel1(shuti:end);
+er_y_1_fig = y_est_sel1(shuti:end) - y_ref_sel1(shuti:end);
+er_z_1_fig = z_est_sel1(shuti:end) - z_ref_sel1(shuti:end);
 
-er_x_2 = mean(x_est_sel2 - x_ref_sel2);
-er_y_2 = mean(y_est_sel2 - y_ref_sel2);
-er_z_2 = mean(z_est_sel2 - z_ref_sel2);
-er_x_2_fig = x_est_sel2 - x_ref_sel2;
-er_y_2_fig = y_est_sel2 - y_ref_sel2;
-er_z_2_fig = z_est_sel2 - z_ref_sel2;
+er_x_2 = mean(x_est_sel2(shuti:end) - x_ref_sel2(shuti:end));
+er_y_2 = mean(y_est_sel2(shuti:end) - y_ref_sel2(shuti:end));
+er_z_2 = mean(z_est_sel2(shuti:end) - z_ref_sel2(shuti:end));
+er_x_2_fig = x_est_sel2(shuti:end) - x_ref_sel2(shuti:end);
+er_y_2_fig = y_est_sel2(shuti:end) - y_ref_sel2(shuti:end);
+er_z_2_fig = z_est_sel2(shuti:end) - z_ref_sel2(shuti:end);
 
-er_x_3 = mean(x_est_sel3 - x_ref_sel3);
-er_y_3 = mean(y_est_sel3 - y_ref_sel3);
-er_z_3 = mean(z_est_sel3 - z_ref_sel3);
-er_x_3_fig = x_est_sel3 - x_ref_sel3;
-er_y_3_fig = y_est_sel3 - y_ref_sel3;
-er_z_3_fig = z_est_sel3 - z_ref_sel3;
+er_x_3 = mean(x_est_sel3(shuti2:end) - x_ref_sel3(shuti2:end));
+er_y_3 = mean(y_est_sel3(shuti2:end) - y_ref_sel3(shuti2:end));
+er_z_3 = mean(z_est_sel3(shuti2:end) - z_ref_sel3(shuti2:end));
+er_x_3_fig = x_est_sel3(shuti2:end) - x_ref_sel3(shuti2:end);
+er_y_3_fig = y_est_sel3(shuti2:end) - y_ref_sel3(shuti2:end);
+er_z_3_fig = z_est_sel3(shuti2:end) - z_ref_sel3(shuti2:end);
 
-er_x_4 = mean(x_est_sel4 - x_ref_sel4);
-er_y_4 = mean(y_est_sel4 - y_ref_sel4);
-er_z_4 = mean(z_est_sel4 - z_ref_sel4);
-er_x_4_fig = x_est_sel4 - x_ref_sel4;
-er_y_4_fig = y_est_sel4 - y_ref_sel4;
-er_z_4_fig = z_est_sel4 - z_ref_sel4;
+er_x_4 = mean(x_est_sel4(shuti2:end) - x_ref_sel4(shuti2:end));
+er_y_4 = mean(y_est_sel4(shuti2:end) - y_ref_sel4(shuti2:end));
+er_z_4 = mean(z_est_sel4(shuti2:end) - z_ref_sel4(shuti2:end));
+er_x_4_fig = x_est_sel4(shuti2:end) - x_ref_sel4(shuti2:end);
+er_y_4_fig = y_est_sel4(shuti2:end) - y_ref_sel4(shuti2:end);
+er_z_4_fig = z_est_sel4(shuti2:end) - z_ref_sel4(shuti2:end);
 
 % MSEの計算
 %位置
@@ -816,33 +712,33 @@ er_z_4_fig = z_est_sel4 - z_ref_sel4;
 
 % RMSEの計算
 %位置
-rmse_x_1 = sqrt(mean((x_est_sel1 - x_ref_sel1).^2));
-rmse_y_1 = sqrt(mean((y_est_sel1 - y_ref_sel1).^2));
-rmse_z_1 = sqrt(mean((z_est_sel1 - z_ref_sel1).^2));
-rmse_x_1_fig = sqrt((x_est_sel1 - x_ref_sel1).^2);
-rmse_y_1_fig = sqrt((y_est_sel1 - y_ref_sel1).^2);
-rmse_z_1_fig = sqrt((z_est_sel1 - z_ref_sel1).^2);
+rmse_x_1 = sqrt(mean((x_est_sel1(shuti:end) - x_ref_sel1(shuti:end)).^2));
+rmse_y_1 = sqrt(mean((y_est_sel1(shuti:end) - y_ref_sel1(shuti:end)).^2));
+rmse_z_1 = sqrt(mean((z_est_sel1(shuti:end) - z_ref_sel1(shuti:end)).^2));
+rmse_x_1_fig = sqrt((x_est_sel1(shuti:end) - x_ref_sel1(shuti:end)).^2);
+rmse_y_1_fig = sqrt((y_est_sel1(shuti:end) - y_ref_sel1(shuti:end)).^2);
+rmse_z_1_fig = sqrt((z_est_sel1(shuti:end) - z_ref_sel1(shuti:end)).^2);
 
-rmse_x_2 = sqrt(mean((x_est_sel2 - x_ref_sel2).^2));
-rmse_y_2 = sqrt(mean((y_est_sel2 - y_ref_sel2).^2));
-rmse_z_2 = sqrt(mean((z_est_sel2 - z_ref_sel2).^2));
-rmse_x_2_fig = sqrt((x_est_sel2 - x_ref_sel2).^2);
-rmse_y_2_fig = sqrt((y_est_sel2 - y_ref_sel2).^2);
-rmse_z_2_fig = sqrt((z_est_sel2 - z_ref_sel2).^2);
+rmse_x_2 = sqrt(mean((x_est_sel2(shuti:end) - x_ref_sel2(shuti:end)).^2));
+rmse_y_2 = sqrt(mean((y_est_sel2(shuti:end) - y_ref_sel2(shuti:end)).^2));
+rmse_z_2 = sqrt(mean((z_est_sel2(shuti:end) - z_ref_sel2(shuti:end)).^2));
+rmse_x_2_fig = sqrt((x_est_sel2(shuti:end) - x_ref_sel2(shuti:end)).^2);
+rmse_y_2_fig = sqrt((y_est_sel2(shuti:end) - y_ref_sel2(shuti:end)).^2);
+rmse_z_2_fig = sqrt((z_est_sel2(shuti:end) - z_ref_sel2(shuti:end)).^2);
 
-rmse_x_3 = sqrt(mean((x_est_sel3 - x_ref_sel3).^2));
-rmse_y_3 = sqrt(mean((y_est_sel3 - y_ref_sel3).^2));
-rmse_z_3 = sqrt(mean((z_est_sel3 - z_ref_sel3).^2));
-rmse_x_3_fig = sqrt((x_est_sel3 - x_ref_sel3).^2);
-rmse_y_3_fig = sqrt((y_est_sel3 - y_ref_sel3).^2);
-rmse_z_3_fig = sqrt((z_est_sel3 - z_ref_sel3).^2);
+rmse_x_3 = sqrt(mean((x_est_sel3(shuti2:end) - x_ref_sel3(shuti2:end)).^2));
+rmse_y_3 = sqrt(mean((y_est_sel3(shuti2:end) - y_ref_sel3(shuti2:end)).^2));
+rmse_z_3 = sqrt(mean((z_est_sel3(shuti2:end) - z_ref_sel3(shuti2:end)).^2));
+rmse_x_3_fig = sqrt((x_est_sel3(shuti2:end) - x_ref_sel3(shuti2:end)).^2);
+rmse_y_3_fig = sqrt((y_est_sel3(shuti2:end) - y_ref_sel3(shuti2:end)).^2);
+rmse_z_3_fig = sqrt((z_est_sel3(shuti2:end) - z_ref_sel3(shuti2:end)).^2);
 
-rmse_x_4 = sqrt(mean((x_est_sel4 - x_ref_sel4).^2));
-rmse_y_4 = sqrt(mean((y_est_sel4 - y_ref_sel4).^2));
-rmse_z_4 = sqrt(mean((z_est_sel4 - z_ref_sel4).^2));
-rmse_x_4_fig = sqrt((x_est_sel4 - x_ref_sel4).^2);
-rmse_y_4_fig = sqrt((y_est_sel4 - y_ref_sel4).^2);
-rmse_z_4_fig = sqrt((z_est_sel4 - z_ref_sel4).^2);
+rmse_x_4 = sqrt(mean((x_est_sel4(shuti2:end) - x_ref_sel4(shuti2:end)).^2));
+rmse_y_4 = sqrt(mean((y_est_sel4(shuti2:end) - y_ref_sel4(shuti2:end)).^2));
+rmse_z_4 = sqrt(mean((z_est_sel4(shuti2:end) - z_ref_sel4(shuti2:end)).^2));
+rmse_x_4_fig = sqrt((x_est_sel4(shuti2:end) - x_ref_sel4(shuti2:end)).^2);
+rmse_y_4_fig = sqrt((y_est_sel4(shuti2:end) - y_ref_sel4(shuti2:end)).^2);
+rmse_z_4_fig = sqrt((z_est_sel4(shuti2:end) - z_ref_sel4(shuti2:end)).^2);
 
 % MAEの計算
 %位置
@@ -854,32 +750,32 @@ rmse_z_4_fig = sqrt((z_est_sel4 - z_ref_sel4).^2);
 % mae_z_1_fig = abs(trajectory_z_1_post_convergence - reference_z_1_post_convergence);
 
 %最大誤差
-max_error_x_1 = max(abs(x_est_sel1 - x_ref_sel1));
-max_error_y_1 = max(abs(y_est_sel1 - y_ref_sel1));
-max_error_z_1 = max(abs(z_est_sel1 - z_ref_sel1));
-max_error_x_2 = max(abs(x_est_sel2 - x_ref_sel2));
-max_error_y_2 = max(abs(y_est_sel2 - y_ref_sel2));
-max_error_z_2 = max(abs(z_est_sel2 - z_ref_sel2));
-max_error_x_3 = max(abs(x_est_sel3 - x_ref_sel3));
-max_error_y_3 = max(abs(y_est_sel3 - y_ref_sel3));
-max_error_z_3 = max(abs(z_est_sel3 - z_ref_sel3));
-max_error_x_4 = max(abs(x_est_sel4 - x_ref_sel4));
-max_error_y_4 = max(abs(y_est_sel4 - y_ref_sel4));
-max_error_z_4 = max(abs(z_est_sel4 - z_ref_sel4));
+max_error_x_1 = max(abs(x_est_sel1(shuti:end) - x_ref_sel1(shuti:end)));
+max_error_y_1 = max(abs(y_est_sel1(shuti:end) - y_ref_sel1(shuti:end)));
+max_error_z_1 = max(abs(z_est_sel1(shuti:end) - z_ref_sel1(shuti:end)));
+max_error_x_2 = max(abs(x_est_sel2(shuti:end) - x_ref_sel2(shuti:end)));
+max_error_y_2 = max(abs(y_est_sel2(shuti:end) - y_ref_sel2(shuti:end)));
+max_error_z_2 = max(abs(z_est_sel2(shuti:end) - z_ref_sel2(shuti:end)));
+max_error_x_3 = max(abs(x_est_sel3(shuti2:end) - x_ref_sel3(shuti2:end)));
+max_error_y_3 = max(abs(y_est_sel3(shuti2:end) - y_ref_sel3(shuti2:end)));
+max_error_z_3 = max(abs(z_est_sel3(shuti2:end) - z_ref_sel3(shuti2:end)));
+max_error_x_4 = max(abs(x_est_sel4(shuti2:end) - x_ref_sel4(shuti2:end)));
+max_error_y_4 = max(abs(y_est_sel4(shuti2:end) - y_ref_sel4(shuti2:end)));
+max_error_z_4 = max(abs(z_est_sel4(shuti2:end) - z_ref_sel4(shuti2:end)));
 
 % 結果を表示
-fprintf('軌道x_1の収束後の位置誤差: %f\n', er_x_1);
-fprintf('軌道y_1の収束後の位置誤差: %f\n', er_y_1);
-fprintf('軌道z_1の収束後の位置誤差: %f\n', er_z_1);
-fprintf('軌道x_2の収束後の位置誤差: %f\n', er_x_2);
-fprintf('軌道y_2の収束後の位置誤差: %f\n', er_y_2);
-fprintf('軌道z_2の収束後の位置誤差: %f\n', er_z_2);
-fprintf('軌道x_3の収束後の位置誤差: %f\n', er_x_3);
-fprintf('軌道y_3の収束後の位置誤差: %f\n', er_y_3);
-fprintf('軌道z_3の収束後の位置誤差: %f\n', er_z_3);
-fprintf('軌道x_4の収束後の位置誤差: %f\n', er_x_4);
-fprintf('軌道y_4の収束後の位置誤差: %f\n', er_y_4);
-fprintf('軌道z_4の収束後の位置誤差: %f\n', er_z_4);
+% fprintf('軌道x_1の収束後の位置誤差: %f\n', er_x_1);
+% fprintf('軌道y_1の収束後の位置誤差: %f\n', er_y_1);
+% fprintf('軌道z_1の収束後の位置誤差: %f\n', er_z_1);
+% fprintf('軌道x_2の収束後の位置誤差: %f\n', er_x_2);
+% fprintf('軌道y_2の収束後の位置誤差: %f\n', er_y_2);
+% fprintf('軌道z_2の収束後の位置誤差: %f\n', er_z_2);
+% fprintf('軌道x_3の収束後の位置誤差: %f\n', er_x_3);
+% fprintf('軌道y_3の収束後の位置誤差: %f\n', er_y_3);
+% fprintf('軌道z_3の収束後の位置誤差: %f\n', er_z_3);
+% fprintf('軌道x_4の収束後の位置誤差: %f\n', er_x_4);
+% fprintf('軌道y_4の収束後の位置誤差: %f\n', er_y_4);
+% fprintf('軌道z_4の収束後の位置誤差: %f\n', er_z_4);
 
 fprintf('軌道x_1の収束後の位置RMSE: %f\n', rmse_x_1);
 fprintf('軌道y_1の収束後の位置RMSE: %f\n', rmse_y_1);
@@ -894,40 +790,40 @@ fprintf('軌道x_4の収束後の位置RMSE: %f\n', rmse_x_4);
 fprintf('軌道y_4の収束後の位置RMSE: %f\n', rmse_y_4);
 fprintf('軌道z_4の収束後の位置RMSE: %f\n', rmse_z_4);
 
-fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
-fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
-fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
-fprintf('軌道x_2の収束後の位置最大誤差: %f\n', max_error_x_2);
-fprintf('軌道y_2の収束後の位置最大誤差: %f\n', max_error_y_2);
-fprintf('軌道z_2の収束後の位置最大誤差: %f\n', max_error_z_2);
-fprintf('軌道x_3の収束後の位置最大誤差: %f\n', max_error_x_3);
-fprintf('軌道y_3の収束後の位置最大誤差: %f\n', max_error_y_3);
-fprintf('軌道z_3の収束後の位置最大誤差: %f\n', max_error_z_3);
-fprintf('軌道x_4の収束後の位置最大誤差: %f\n', max_error_x_4);
-fprintf('軌道y_4の収束後の位置最大誤差: %f\n', max_error_y_4);
-fprintf('軌道z_4の収束後の位置最大誤差: %f\n', max_error_z_4);
+% fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
+% fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
+% fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
+% fprintf('軌道x_2の収束後の位置最大誤差: %f\n', max_error_x_2);
+% fprintf('軌道y_2の収束後の位置最大誤差: %f\n', max_error_y_2);
+% fprintf('軌道z_2の収束後の位置最大誤差: %f\n', max_error_z_2);
+% fprintf('軌道x_3の収束後の位置最大誤差: %f\n', max_error_x_3);
+% fprintf('軌道y_3の収束後の位置最大誤差: %f\n', max_error_y_3);
+% fprintf('軌道z_3の収束後の位置最大誤差: %f\n', max_error_z_3);
+% fprintf('軌道x_4の収束後の位置最大誤差: %f\n', max_error_x_4);
+% fprintf('軌道y_4の収束後の位置最大誤差: %f\n', max_error_y_4);
+% fprintf('軌道z_4の収束後の位置最大誤差: %f\n', max_error_z_4);
 
-% xy目標軌道
-figure;
-plot(x_ref_sel1, y_ref_sel1, '--','LineWidth',2);
-grid on
-xlabel('x[m]') 
-ylabel('y[m]')
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-daspect([1 1 1])
-xlim([-2.5 2.5])
-ylim([-2.5 2.5])
-hold on
-plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
-plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
-plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
-legend('D1.REF','D2.REF','D3.REF','D4.REF','fontsize',8,'NumColumns',2)
-hold off
+% % xy目標軌道
+% figure;
+% plot(x_ref_sel1, y_ref_sel1, '--','LineWidth',2);
+% grid on
+% xlabel('x[m]') 
+% ylabel('y[m]')
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% daspect([1 1 1])
+% xlim([-2.5 2.5])
+% ylim([-2.5 2.5])
+% hold on
+% plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
+% plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
+% plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
+% legend('D1.REF','D2.REF','D3.REF','D4.REF','fontsize',8,'NumColumns',2)
+% hold off
 
 % xy
 figure;
-plot(x_est_sel1, y_est_sel1, '-','LineWidth',2);
+plot(x_est_sel1(shuti:end), y_est_sel1(shuti:end), '-','LineWidth',2);
 grid on
 xlabel('x[m]') 
 ylabel('y[m]')
@@ -937,13 +833,13 @@ daspect([1 1 1])
 xlim([-2.5 2.5])
 ylim([-2.5 2.5])
 hold on
-plot(x_est_sel2, y_est_sel2, '-','LineWidth',2);
-plot(x_est_sel3, y_est_sel3, '-','LineWidth',2);
-plot(x_est_sel4, y_est_sel4, '-','LineWidth',2);
-plot(x_ref_sel1, y_ref_sel1, '--','LineWidth',2);
-plot(x_ref_sel2, y_ref_sel2, '--','LineWidth',2);
-plot(x_ref_sel3, y_ref_sel3, '--','LineWidth',2);
-plot(x_ref_sel4, y_ref_sel4, '--','LineWidth',2);
+plot(x_est_sel2(shuti:end), y_est_sel2(shuti:end), '-','LineWidth',2);
+plot(x_est_sel3(shuti2:end), y_est_sel3(shuti2:end), '-','LineWidth',2);
+plot(x_est_sel4(shuti2:end), y_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(x_ref_sel1(shuti:end), y_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(x_ref_sel2(shuti:end), y_ref_sel2(shuti:end), '--','LineWidth',2);
+plot(x_ref_sel3(shuti2:end), y_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(x_ref_sel4(shuti2:end), y_ref_sel4(shuti2:end), '--','LineWidth',2);
 legend('D1.EST','D2.EST','D3.EST','D4.EST', ...
     'D1.REF','D2.REF','D3.REF','D4.REF','fontsize',8,'NumColumns',2)
 hold off
@@ -974,51 +870,51 @@ hold off
 
 %推定値と目標値
 figure;
-plot(t_sel1,x_est_sel1, '-','LineWidth',2);
+plot(t_sel1(shuti:end),x_est_sel1(shuti:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel1(1,shuti) t_sel1(1,end)])
 ylim([-2.5 2.5])
 hold on
-plot(t_sel1,y_est_sel1, '-','LineWidth',2);
-plot(t_sel1,z_est_sel1, '-','LineWidth',2);
-plot(t_sel2,x_est_sel2, '-','LineWidth',2);
-plot(t_sel2,y_est_sel2, '-','LineWidth',2);
-plot(t_sel2,z_est_sel2, '-','LineWidth',2);
-plot(t_sel1,x_ref_sel1, '--','LineWidth',2);
-plot(t_sel1,y_ref_sel1, '--','LineWidth',2);
-plot(t_sel1,z_ref_sel1, '--','LineWidth',2);
-plot(t_sel2,x_ref_sel2, '--','LineWidth',2);
-plot(t_sel2,y_ref_sel2, '--','LineWidth',2);
-plot(t_sel2,z_ref_sel2, '--','LineWidth',2);
+plot(t_sel1(shuti:end),y_est_sel1(shuti:end), '-','LineWidth',2);
+plot(t_sel1(shuti:end),z_est_sel1(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),x_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),y_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),z_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel1(shuti:end),x_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel1(shuti:end),y_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel1(shuti:end),z_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),x_ref_sel2(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),y_ref_sel2(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),z_ref_sel2(shuti:end), '--','LineWidth',2);
 legend('x_1.EST','y_1.EST','z_1.EST','x_2.EST','y_2.EST','z_2.EST', ...
     'x_1.REF','y_1.REF','z_1.REF','x_2.REF','y_2.REF','z_2.REF','Location', ...
     'northeast','fontsize',8,'NumColumns',4)
 hold off
 figure;
-plot(t_sel3,x_est_sel3, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),x_est_sel3(shuti2:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel3(1,shuti2) t_sel3(1,end)])
 ylim([-2.5 2.5])
 hold on
-plot(t_sel3,y_est_sel3, '-','LineWidth',2);
-plot(t_sel3,z_est_sel3, '-','LineWidth',2);
-plot(t_sel4,x_est_sel4, '-','LineWidth',2);
-plot(t_sel4,y_est_sel4, '-','LineWidth',2);
-plot(t_sel4,z_est_sel4, '-','LineWidth',2);
-plot(t_sel3,x_ref_sel3, '--','LineWidth',2);
-plot(t_sel3,y_ref_sel3, '--','LineWidth',2);
-plot(t_sel3,z_ref_sel3, '--','LineWidth',2);
-plot(t_sel4,x_ref_sel4, '--','LineWidth',2);
-plot(t_sel4,y_ref_sel4, '--','LineWidth',2);
-plot(t_sel4,z_ref_sel4, '--','LineWidth',2);
+plot(t_sel3(shuti2:end),y_est_sel3(shuti2:end), '-','LineWidth',2);
+plot(t_sel3(shuti2:end),z_est_sel3(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),x_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),y_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),z_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel3(shuti2:end),x_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel3(shuti2:end),y_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel3(shuti2:end),z_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),x_ref_sel4(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),y_ref_sel4(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),z_ref_sel4(shuti2:end), '--','LineWidth',2);
 legend('x_3.EST','y_3.EST','z_3.EST','x_4.EST','y_4.EST','z_4.EST', ...
     'x_3.REF','y_3.REF','z_3.REF','x_4.REF','y_4.REF','z_4.REF','Location', ...
     'northeast','fontsize',8,'NumColumns',4)
@@ -1064,73 +960,97 @@ hold off
 
 %RMSE
 figure;
-plot(t_sel1,rmse_x_1_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_x_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('RMSE[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel1(1,shuti) t_sel1(1,end)])
 ylim([-0.5 2])
 hold on
-plot(t_sel1,rmse_y_1_fig, '-','LineWidth',2);
-plot(t_sel1,rmse_z_1_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_x_2_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_y_2_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_z_2_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_y_1_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_z_1_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_x_2_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_y_2_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_z_2_fig, '-','LineWidth',2);
 legend('x_1.RMSE','y_1.RMSE','z_1.RMSE','x_2.RMSE','y_2.RMSE','z_2.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 figure;
-plot(t_sel3,rmse_x_3_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_x_3_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('RMSE[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel3(1,shuti2) t_sel3(1,end)])
 ylim([-0.5 2])
 hold on
-plot(t_sel3,rmse_y_3_fig, '-','LineWidth',2);
-plot(t_sel3,rmse_z_3_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_x_4_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_y_4_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_z_4_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_y_3_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_z_3_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_x_4_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_y_4_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_z_4_fig, '-','LineWidth',2);
 legend('x_3.RMSE','y_3.RMSE','z_3.RMSE','x_4.RMSE','y_4.RMSE','z_4.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
 %% 収束後　速度
 
+ftime = 0;      % 収束時間の初期化
+shuti = 0;
+ftime2 = 0;
+shuti2 = 0;
+
+for i = 1:length(vx_est_sel1)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if t_sel1(i) > 14 && ftime == 0
+
+            convergence_start_time = t_sel1(i);  % 収束開始時刻を設定
+            shuti = i;                % 収束開始行を記録
+            ftime = 1;
+    end
+end
+for i = 1:length(vx_est_sel4)
+    % 現在の誤差が収束閾値を満たしているか確認
+    if t_sel4(i) > 14 && ftime2 == 0
+
+            convergence_start_time2 = t_sel3(i);  % 収束開始時刻を設定
+            shuti2 = i;                % 収束開始行を記録
+            ftime2 = 1;
+    end
+end
+
 % 誤差の計算
 %速度
-er_vx_1 = mean(vx_est_sel1 - vx_ref_sel1);
-er_vy_1 = mean(vy_est_sel1 - vy_ref_sel1);
-er_vz_1 = mean(vz_est_sel1 - vz_ref_sel1);
-er_vx_1_fig = vx_est_sel1 - vx_ref_sel1;
-er_vy_1_fig = vy_est_sel1 - vy_ref_sel1;
-er_vz_1_fig = vz_est_sel1 - vz_ref_sel1;
+er_vx_1 = mean(vx_est_sel1(shuti:end) - vx_ref_sel1(shuti:end));
+er_vy_1 = mean(vy_est_sel1(shuti:end) - vy_ref_sel1(shuti:end));
+er_vz_1 = mean(vz_est_sel1(shuti:end) - vz_ref_sel1(shuti:end));
+er_vx_1_fig = vx_est_sel1(shuti:end) - vx_ref_sel1(shuti:end);
+er_vy_1_fig = vy_est_sel1(shuti:end) - vy_ref_sel1(shuti:end);
+er_vz_1_fig = vz_est_sel1(shuti:end) - vz_ref_sel1(shuti:end);
 
-er_vx_2 = mean(vx_est_sel2 - vx_ref_sel2);
-er_vy_2 = mean(vy_est_sel2 - vy_ref_sel2);
-er_vz_2 = mean(vz_est_sel2 - vz_ref_sel2);
-er_vx_2_fig = vx_est_sel2 - vx_ref_sel2;
-er_vy_2_fig = vy_est_sel2 - vy_ref_sel2;
-er_vz_2_fig = vz_est_sel2 - vz_ref_sel2;
+er_vx_2 = mean(vx_est_sel2(shuti:end) - vx_ref_sel2(shuti:end));
+er_vy_2 = mean(vy_est_sel2(shuti:end) - vy_ref_sel2(shuti:end));
+er_vz_2 = mean(vz_est_sel2(shuti:end) - vz_ref_sel2(shuti:end));
+er_vx_2_fig = vx_est_sel2(shuti:end) - vx_ref_sel2(shuti:end);
+er_vy_2_fig = vy_est_sel2(shuti:end) - vy_ref_sel2(shuti:end);
+er_vz_2_fig = vz_est_sel2(shuti:end) - vz_ref_sel2(shuti:end);
 
-er_vx_3 = mean(vx_est_sel3 - vx_ref_sel3);
-er_vy_3 = mean(vy_est_sel3 - vy_ref_sel3);
-er_vz_3 = mean(vz_est_sel3 - vz_ref_sel3);
-er_vx_3_fig = vx_est_sel3 - vx_ref_sel3;
-er_vy_3_fig = vy_est_sel3 - vy_ref_sel3;
-er_vz_3_fig = vz_est_sel3 - vz_ref_sel3;
+er_vx_3 = mean(vx_est_sel3(shuti2:end) - vx_ref_sel3(shuti2:end));
+er_vy_3 = mean(vy_est_sel3(shuti2:end) - vy_ref_sel3(shuti2:end));
+er_vz_3 = mean(vz_est_sel3(shuti2:end) - vz_ref_sel3(shuti2:end));
+er_vx_3_fig = vx_est_sel3(shuti2:end) - vx_ref_sel3(shuti2:end);
+er_vy_3_fig = vy_est_sel3(shuti2:end) - vy_ref_sel3(shuti2:end);
+er_vz_3_fig = vz_est_sel3(shuti2:end) - vz_ref_sel3(shuti2:end);
 
-er_vx_4 = mean(vx_est_sel4 - vx_ref_sel4);
-er_vy_4 = mean(vy_est_sel4 - vy_ref_sel4);
-er_vz_4 = mean(vz_est_sel4 - vz_ref_sel4);
-er_vx_4_fig = vx_est_sel4 - vx_ref_sel4;
-er_vy_4_fig = vy_est_sel4 - vy_ref_sel4;
-er_vz_4_fig = vz_est_sel4 - vz_ref_sel4;
+er_vx_4 = mean(vx_est_sel4(shuti2:end) - vx_ref_sel4(shuti2:end));
+er_vy_4 = mean(vy_est_sel4(shuti2:end) - vy_ref_sel4(shuti2:end));
+er_vz_4 = mean(vz_est_sel4(shuti2:end) - vz_ref_sel4(shuti2:end));
+er_vx_4_fig = vx_est_sel4(shuti2:end) - vx_ref_sel4(shuti2:end);
+er_vy_4_fig = vy_est_sel4(shuti2:end) - vy_ref_sel4(shuti2:end);
+er_vz_4_fig = vz_est_sel4(shuti2:end) - vz_ref_sel4(shuti2:end);
 
 % MSEの計算
 %位置
@@ -1143,33 +1063,33 @@ er_vz_4_fig = vz_est_sel4 - vz_ref_sel4;
 
 % RMSEの計算
 %速度
-rmse_vx_1 = sqrt(mean((vx_est_sel1 - vx_ref_sel1).^2));
-rmse_vy_1 = sqrt(mean((vy_est_sel1 - vy_ref_sel1).^2));
-rmse_vz_1 = sqrt(mean((vz_est_sel1 - vz_ref_sel1).^2));
-rmse_vx_1_fig = sqrt((vx_est_sel1 - vx_ref_sel1).^2);
-rmse_vy_1_fig = sqrt((vy_est_sel1 - vy_ref_sel1).^2);
-rmse_vz_1_fig = sqrt((vz_est_sel1 - vz_ref_sel1).^2);
+rmse_vx_1 = sqrt(mean((vx_est_sel1(shuti:end) - vx_ref_sel1(shuti:end)).^2));
+rmse_vy_1 = sqrt(mean((vy_est_sel1(shuti:end) - vy_ref_sel1(shuti:end)).^2));
+rmse_vz_1 = sqrt(mean((vz_est_sel1(shuti:end) - vz_ref_sel1(shuti:end)).^2));
+rmse_vx_1_fig = sqrt((vx_est_sel1(shuti:end) - vx_ref_sel1(shuti:end)).^2);
+rmse_vy_1_fig = sqrt((vy_est_sel1(shuti:end) - vy_ref_sel1(shuti:end)).^2);
+rmse_vz_1_fig = sqrt((vz_est_sel1(shuti:end) - vz_ref_sel1(shuti:end)).^2);
 
-rmse_vx_2 = sqrt(mean((vx_est_sel2 - vx_ref_sel2).^2));
-rmse_vy_2 = sqrt(mean((vy_est_sel2 - vy_ref_sel2).^2));
-rmse_vz_2 = sqrt(mean((vz_est_sel2 - vz_ref_sel2).^2));
-rmse_vx_2_fig = sqrt((vx_est_sel2 - vx_ref_sel2).^2);
-rmse_vy_2_fig = sqrt((vy_est_sel2 - vy_ref_sel2).^2);
-rmse_vz_2_fig = sqrt((vz_est_sel2 - vz_ref_sel2).^2);
+rmse_vx_2 = sqrt(mean((vx_est_sel2(shuti:end) - vx_ref_sel2(shuti:end)).^2));
+rmse_vy_2 = sqrt(mean((vy_est_sel2(shuti:end) - vy_ref_sel2(shuti:end)).^2));
+rmse_vz_2 = sqrt(mean((vz_est_sel2(shuti:end) - vz_ref_sel2(shuti:end)).^2));
+rmse_vx_2_fig = sqrt((vx_est_sel2(shuti:end) - vx_ref_sel2(shuti:end)).^2);
+rmse_vy_2_fig = sqrt((vy_est_sel2(shuti:end) - vy_ref_sel2(shuti:end)).^2);
+rmse_vz_2_fig = sqrt((vz_est_sel2(shuti:end) - vz_ref_sel2(shuti:end)).^2);
 
-rmse_vx_3 = sqrt(mean((vx_est_sel3 - vx_ref_sel3).^2));
-rmse_vy_3 = sqrt(mean((vy_est_sel3 - vy_ref_sel3).^2));
-rmse_vz_3 = sqrt(mean((vz_est_sel3 - vz_ref_sel3).^2));
-rmse_vx_3_fig = sqrt((vx_est_sel3 - vx_ref_sel3).^2);
-rmse_vy_3_fig = sqrt((vy_est_sel3 - vy_ref_sel3).^2);
-rmse_vz_3_fig = sqrt((vz_est_sel3 - vz_ref_sel3).^2);
+rmse_vx_3 = sqrt(mean((vx_est_sel3(shuti2:end) - vx_ref_sel3(shuti2:end)).^2));
+rmse_vy_3 = sqrt(mean((vy_est_sel3(shuti2:end) - vy_ref_sel3(shuti2:end)).^2));
+rmse_vz_3 = sqrt(mean((vz_est_sel3(shuti2:end) - vz_ref_sel3(shuti2:end)).^2));
+rmse_vx_3_fig = sqrt((vx_est_sel3(shuti2:end) - vx_ref_sel3(shuti2:end)).^2);
+rmse_vy_3_fig = sqrt((vy_est_sel3(shuti2:end) - vy_ref_sel3(shuti2:end)).^2);
+rmse_vz_3_fig = sqrt((vz_est_sel3(shuti2:end) - vz_ref_sel3(shuti2:end)).^2);
 
-rmse_vx_4 = sqrt(mean((vx_est_sel4 - vx_ref_sel4).^2));
-rmse_vy_4 = sqrt(mean((vy_est_sel4 - vy_ref_sel4).^2));
-rmse_vz_4 = sqrt(mean((vz_est_sel4 - vz_ref_sel4).^2));
-rmse_vx_4_fig = sqrt((vx_est_sel4 - vx_ref_sel4).^2);
-rmse_vy_4_fig = sqrt((vy_est_sel4 - vy_ref_sel4).^2);
-rmse_vz_4_fig = sqrt((vz_est_sel4 - vz_ref_sel4).^2);
+rmse_vx_4 = sqrt(mean((vx_est_sel4(shuti2:end) - vx_ref_sel4(shuti2:end)).^2));
+rmse_vy_4 = sqrt(mean((vy_est_sel4(shuti2:end) - vy_ref_sel4(shuti2:end)).^2));
+rmse_vz_4 = sqrt(mean((vz_est_sel4(shuti2:end) - vz_ref_sel4(shuti2:end)).^2));
+rmse_vx_4_fig = sqrt((vx_est_sel4(shuti2:end) - vx_ref_sel4(shuti2:end)).^2);
+rmse_vy_4_fig = sqrt((vy_est_sel4(shuti2:end) - vy_ref_sel4(shuti2:end)).^2);
+rmse_vz_4_fig = sqrt((vz_est_sel4(shuti2:end) - vz_ref_sel4(shuti2:end)).^2);
 
 % MAEの計算
 %位置
@@ -1181,32 +1101,32 @@ rmse_vz_4_fig = sqrt((vz_est_sel4 - vz_ref_sel4).^2);
 % mae_z_1_fig = abs(trajectory_z_1_post_convergence - reference_z_1_post_convergence);
 
 %最大誤差
-max_error_vx_1 = max(abs(vx_est_sel1 - vx_ref_sel1));
-max_error_vy_1 = max(abs(vy_est_sel1 - vy_ref_sel1));
-max_error_vz_1 = max(abs(vz_est_sel1 - vz_ref_sel1));
-max_error_vx_2 = max(abs(vx_est_sel2 - vx_ref_sel2));
-max_error_vy_2 = max(abs(vy_est_sel2 - vy_ref_sel2));
-max_error_vz_2 = max(abs(vz_est_sel2 - vz_ref_sel2));
-max_error_vx_3 = max(abs(vx_est_sel3 - vx_ref_sel3));
-max_error_vy_3 = max(abs(vy_est_sel3 - vy_ref_sel3));
-max_error_vz_3 = max(abs(vz_est_sel3 - vz_ref_sel3));
-max_error_vx_4 = max(abs(vx_est_sel4 - vx_ref_sel4));
-max_error_vy_4 = max(abs(vy_est_sel4 - vy_ref_sel4));
-max_error_vz_4 = max(abs(vz_est_sel4 - vz_ref_sel4));
+max_error_vx_1 = max(abs(vx_est_sel1(shuti:end) - vx_ref_sel1(shuti:end)));
+max_error_vy_1 = max(abs(vy_est_sel1(shuti:end) - vy_ref_sel1(shuti:end)));
+max_error_vz_1 = max(abs(vz_est_sel1(shuti:end) - vz_ref_sel1(shuti:end)));
+max_error_vx_2 = max(abs(vx_est_sel2(shuti:end) - vx_ref_sel2(shuti:end)));
+max_error_vy_2 = max(abs(vy_est_sel2(shuti:end) - vy_ref_sel2(shuti:end)));
+max_error_vz_2 = max(abs(vz_est_sel2(shuti:end) - vz_ref_sel2(shuti:end)));
+max_error_vx_3 = max(abs(vx_est_sel3(shuti2:end) - vx_ref_sel3(shuti2:end)));
+max_error_vy_3 = max(abs(vy_est_sel3(shuti2:end) - vy_ref_sel3(shuti2:end)));
+max_error_vz_3 = max(abs(vz_est_sel3(shuti2:end) - vz_ref_sel3(shuti2:end)));
+max_error_vx_4 = max(abs(vx_est_sel4(shuti2:end) - vx_ref_sel4(shuti2:end)));
+max_error_vy_4 = max(abs(vy_est_sel4(shuti2:end) - vy_ref_sel4(shuti2:end)));
+max_error_vz_4 = max(abs(vz_est_sel4(shuti2:end) - vz_ref_sel4(shuti2:end)));
 
 % 結果を表示
-fprintf('軌道x_1の収束後の速度誤差: %f\n', er_vx_1);
-fprintf('軌道y_1の収束後の速度誤差: %f\n', er_vy_1);
-fprintf('軌道z_1の収束後の速度誤差: %f\n', er_vz_1);
-fprintf('軌道x_2の収束後の速度誤差: %f\n', er_vx_2);
-fprintf('軌道y_2の収束後の速度誤差: %f\n', er_vy_2);
-fprintf('軌道z_2の収束後の速度誤差: %f\n', er_vz_2);
-fprintf('軌道x_3の収束後の速度誤差: %f\n', er_vx_3);
-fprintf('軌道y_3の収束後の速度誤差: %f\n', er_vy_3);
-fprintf('軌道z_3の収束後の速度誤差: %f\n', er_vz_3);
-fprintf('軌道x_4の収束後の速度誤差: %f\n', er_vx_4);
-fprintf('軌道y_4の収束後の速度誤差: %f\n', er_vy_4);
-fprintf('軌道z_4の収束後の速度誤差: %f\n', er_vz_4);
+% fprintf('軌道x_1の収束後の速度誤差: %f\n', er_vx_1);
+% fprintf('軌道y_1の収束後の速度誤差: %f\n', er_vy_1);
+% fprintf('軌道z_1の収束後の速度誤差: %f\n', er_vz_1);
+% fprintf('軌道x_2の収束後の速度誤差: %f\n', er_vx_2);
+% fprintf('軌道y_2の収束後の速度誤差: %f\n', er_vy_2);
+% fprintf('軌道z_2の収束後の速度誤差: %f\n', er_vz_2);
+% fprintf('軌道x_3の収束後の速度誤差: %f\n', er_vx_3);
+% fprintf('軌道y_3の収束後の速度誤差: %f\n', er_vy_3);
+% fprintf('軌道z_3の収束後の速度誤差: %f\n', er_vz_3);
+% fprintf('軌道x_4の収束後の速度誤差: %f\n', er_vx_4);
+% fprintf('軌道y_4の収束後の速度誤差: %f\n', er_vy_4);
+% fprintf('軌道z_4の収束後の速度誤差: %f\n', er_vz_4);
 
 fprintf('軌道x_1の収束後の速度RMSE: %f\n', rmse_vx_1);
 fprintf('軌道y_1の収束後の速度RMSE: %f\n', rmse_vy_1);
@@ -1221,66 +1141,66 @@ fprintf('軌道x_4の収束後の速度RMSE: %f\n', rmse_vx_4);
 fprintf('軌道y_4の収束後の速度RMSE: %f\n', rmse_vy_4);
 fprintf('軌道z_4の収束後の速度RMSE: %f\n', rmse_vz_4);
 
-fprintf('軌道x_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
-fprintf('軌道y_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
-fprintf('軌道z_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
-fprintf('軌道x_2の収束後の速度最大誤差: %f\n', max_error_vx_2);
-fprintf('軌道y_2の収束後の速度最大誤差: %f\n', max_error_vy_2);
-fprintf('軌道z_2の収束後の速度最大誤差: %f\n', max_error_vz_2);
-fprintf('軌道x_3の収束後の速度最大誤差: %f\n', max_error_vx_3);
-fprintf('軌道y_3の収束後の速度最大誤差: %f\n', max_error_vy_3);
-fprintf('軌道z_3の収束後の速度最大誤差: %f\n', max_error_vz_3);
-fprintf('軌道x_4の収束後の速度最大誤差: %f\n', max_error_vx_4);
-fprintf('軌道y_4の収束後の速度最大誤差: %f\n', max_error_vy_4);
-fprintf('軌道z_4の収束後の速度最大誤差: %f\n', max_error_vz_4);
+% fprintf('軌道x_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
+% fprintf('軌道y_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
+% fprintf('軌道z_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
+% fprintf('軌道x_2の収束後の速度最大誤差: %f\n', max_error_vx_2);
+% fprintf('軌道y_2の収束後の速度最大誤差: %f\n', max_error_vy_2);
+% fprintf('軌道z_2の収束後の速度最大誤差: %f\n', max_error_vz_2);
+% fprintf('軌道x_3の収束後の速度最大誤差: %f\n', max_error_vx_3);
+% fprintf('軌道y_3の収束後の速度最大誤差: %f\n', max_error_vy_3);
+% fprintf('軌道z_3の収束後の速度最大誤差: %f\n', max_error_vz_3);
+% fprintf('軌道x_4の収束後の速度最大誤差: %f\n', max_error_vx_4);
+% fprintf('軌道y_4の収束後の速度最大誤差: %f\n', max_error_vy_4);
+% fprintf('軌道z_4の収束後の速度最大誤差: %f\n', max_error_vz_4);
 
 %推定値と目標値
 figure;
-plot(t_sel1,vx_est_sel1, '-','LineWidth',2);
+plot(t_sel1(shuti:end),vx_est_sel1(shuti:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel1(1,shuti) t_sel1(1,end)])
 ylim([-1.5 1.5])
 hold on
-plot(t_sel1,vy_est_sel1, '-','LineWidth',2);
-plot(t_sel1,vz_est_sel1, '-','LineWidth',2);
-plot(t_sel2,vx_est_sel2, '-','LineWidth',2);
-plot(t_sel2,vy_est_sel2, '-','LineWidth',2);
-plot(t_sel2,vz_est_sel2, '-','LineWidth',2);
-plot(t_sel1,vx_ref_sel1, '--','LineWidth',2);
-plot(t_sel1,vy_ref_sel1, '--','LineWidth',2);
-plot(t_sel1,vz_ref_sel1, '--','LineWidth',2);
-plot(t_sel2,vx_ref_sel2, '--','LineWidth',2);
-plot(t_sel2,vy_ref_sel2, '--','LineWidth',2);
-plot(t_sel2,vz_ref_sel2, '--','LineWidth',2);
+plot(t_sel1(shuti:end),vy_est_sel1(shuti:end), '-','LineWidth',2);
+plot(t_sel1(shuti:end),vz_est_sel1(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),vx_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),vy_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel2(shuti:end),vz_est_sel2(shuti:end), '-','LineWidth',2);
+plot(t_sel1(shuti:end),vx_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel1(shuti:end),vy_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel1(shuti:end),vz_ref_sel1(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),vx_ref_sel2(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),vy_ref_sel2(shuti:end), '--','LineWidth',2);
+plot(t_sel2(shuti:end),vz_ref_sel2(shuti:end), '--','LineWidth',2);
 legend('vx_1.EST','vy_1.EST','vz_1.EST','vx_2.EST','vy_2.EST','vz_2.EST', ...
     'vx_1.REF','vy_1.REF','vz_1.REF','vx_2.REF','vy_2.REF','vz_2.REF','Location', ...
     'northwest','fontsize',8,'NumColumns',4)
 hold off
 figure;
-plot(t_sel3,vx_est_sel3, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),vx_est_sel3(shuti2:end), '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('Velocity[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel3(1,shuti2) t_sel3(1,end)])
 ylim([-1.5 1.5])
 hold on
-plot(t_sel3,vy_est_sel3, '-','LineWidth',2);
-plot(t_sel3,vz_est_sel3, '-','LineWidth',2);
-plot(t_sel4,vx_est_sel4, '-','LineWidth',2);
-plot(t_sel4,vy_est_sel4, '-','LineWidth',2);
-plot(t_sel4,vz_est_sel4, '-','LineWidth',2);
-plot(t_sel3,vx_ref_sel3, '--','LineWidth',2);
-plot(t_sel3,vy_ref_sel3, '--','LineWidth',2);
-plot(t_sel3,vz_ref_sel3, '--','LineWidth',2);
-plot(t_sel4,vx_ref_sel4, '--','LineWidth',2);
-plot(t_sel4,vy_ref_sel4, '--','LineWidth',2);
-plot(t_sel4,vz_ref_sel4, '--','LineWidth',2);
+plot(t_sel3(shuti2:end),vy_est_sel3(shuti2:end), '-','LineWidth',2);
+plot(t_sel3(shuti2:end),vz_est_sel3(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),vx_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),vy_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel4(shuti2:end),vz_est_sel4(shuti2:end), '-','LineWidth',2);
+plot(t_sel3(shuti2:end),vx_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel3(shuti2:end),vy_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel3(shuti2:end),vz_ref_sel3(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),vx_ref_sel4(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),vy_ref_sel4(shuti2:end), '--','LineWidth',2);
+plot(t_sel4(shuti2:end),vz_ref_sel4(shuti2:end), '--','LineWidth',2);
 legend('vx_3.EST','vy_3.EST','vz_3.EST','vx_4.EST','vy_4.EST','vz_4.EST', ...
     'vx_3.REF','vy_3.REF','vz_3.REF','vx_4.REF','vy_4.REF','vz_4.REF','Location', ...
     'southwest','fontsize',8,'NumColumns',4)
@@ -1326,38 +1246,38 @@ hold off
 
 %RMSE
 figure;
-plot(t_sel1,rmse_vx_1_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_vx_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('RMSE[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel1(1,shuti) t_sel1(1,end)])
 ylim([-0.5 1])
 hold on
-plot(t_sel1,rmse_vy_1_fig, '-','LineWidth',2);
-plot(t_sel1,rmse_vz_1_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_vx_2_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_vy_2_fig, '-','LineWidth',2);
-plot(t_sel2,rmse_vz_2_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_vy_1_fig, '-','LineWidth',2);
+plot(t_sel1(shuti:end),rmse_vz_1_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_vx_2_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_vy_2_fig, '-','LineWidth',2);
+plot(t_sel2(shuti:end),rmse_vz_2_fig, '-','LineWidth',2);
 legend('vx_1.RMSE','vy_1.RMSE','vz_1.RMSE','vx_2.RMSE','vy_2.RMSE','vz_2.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 figure;
-plot(t_sel3,rmse_vx_3_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_vx_3_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
 ylabel('RMSE[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
+xlim([t_sel3(1,shuti2) t_sel3(1,end)])
 ylim([-0.5 1])
 hold on
-plot(t_sel3,rmse_vy_3_fig, '-','LineWidth',2);
-plot(t_sel3,rmse_vz_3_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_vx_4_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_vy_4_fig, '-','LineWidth',2);
-plot(t_sel4,rmse_vz_4_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_vy_3_fig, '-','LineWidth',2);
+plot(t_sel3(shuti2:end),rmse_vz_3_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_vx_4_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_vy_4_fig, '-','LineWidth',2);
+plot(t_sel4(shuti2:end),rmse_vz_4_fig, '-','LineWidth',2);
 legend('vx_3.RMSE','vy_3.RMSE','vz_3.RMSE','vx_4.RMSE','vy_4.RMSE','vz_4.RMSE','Location', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
