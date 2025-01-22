@@ -43,6 +43,12 @@ save_master = 1;
 % 102:flight
 % 108:landing
 % 0:stop or quit
+%%
+% logger.controller = con;
+logger.Data.agent.estimator = est;
+logger.Data.agent.reference = ref;
+logger.Data.agent.input = input;
+logger.Data.param = param;
 
 disp("Loaded data...");
 %% save setting
@@ -53,7 +59,7 @@ disp("Loaded data...");
 %%
 close all
 clear fig
-flg.figtype = 0; % 0:subplot
+flg.figtype = 1; % 0:subplot
 % flg.ylim = 1;
 flg.savefig = 0;
 flg.animation_save = 0;
@@ -69,8 +75,9 @@ fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'f
 % fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
 
-% [x, xr] = fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
-% app = app.logger, app.fExp の構造体を作ればよい
+fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
+fig = fig.main_figure();
+%Exp の構造体を作ればよい
 
 if save_master
     fig = fig.master_plot(); % 修論用

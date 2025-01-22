@@ -31,7 +31,7 @@ flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 0; % コマンドウィンドウに表示
+flg.only_rmse = 1; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
@@ -113,11 +113,9 @@ function f = input_0_verify(args, flg, est, filename, F)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
-thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
-torque = zeros(3, step_num);
-% thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
+% thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
+thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
 % torque = input_result(2:4,start_num:step_num);
-
 Est = zeros(12,1);
 % Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
 mode = 100; % 1:00, 2:10, 3:hermite, 0:free, F:@quaternions_all
