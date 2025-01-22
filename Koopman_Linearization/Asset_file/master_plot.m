@@ -7,11 +7,11 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
-% loadfilename{1} = '2025-01-14_Exp_Kiyama_code10_saddle_increased';
+% loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
 % loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
-loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
-% loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+% loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
+loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
 
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
@@ -32,9 +32,9 @@ flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
-flg.without_pos = 1; % 観測量に位置が含まれているかどうか 
+flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 args.save_fig = 0;     % 1：出力したグラフをfigで保存する
-flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
@@ -368,10 +368,10 @@ fprintf("====================================\n");
 result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
 fprintf("Position MAPE : x=%.4f, y=%.4f, z=%.4f \n", result.p.mape(1), result.p.mape(2), result.p.mape(3))
 
-disp(["p_max: "+ num2str(round(max(error_p, [], 2)',5))]);
-disp(["v_max: "+ num2str(round(max(error_v, [], 2)',5))]);
-disp(["q_max: "+ num2str(round(max(error_q, [], 2)',5))]);
-disp(["w_max: "+ num2str(round(max(error_w, [], 2)',5))]);
+disp(["p_max: "+ num2str(round(max(abs(error_p), [], 2)',5))]);
+disp(["v_max: "+ num2str(round(max(abs(error_v), [], 2)',5))]);
+disp(["q_max: "+ num2str(round(max(abs(error_q), [], 2)',5))]);
+disp(["w_max: "+ num2str(round(max(abs(error_w), [], 2)',5))]);
 if flg.only_rmse
     % dammy
     fprintf("Excel RMSE.P: %.4f %.4f %.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
