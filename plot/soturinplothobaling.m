@@ -219,9 +219,9 @@ max_error_y_1 = max(abs(y_est_sel(shuti:end) - y_ref_sel(shuti:end)));
 max_error_z_1 = max(abs(z_est_sel(shuti:end) - z_ref_sel(shuti:end)));
 
 % 結果を表示
-fprintf('軌道x_1の収束後の位置誤差: %f\n', er_x_1);
-fprintf('軌道y_1の収束後の位置誤差: %f\n', er_y_1);
-fprintf('軌道z_1の収束後の位置誤差: %f\n', er_z_1);
+% fprintf('軌道x_1の収束後の位置誤差: %f\n', er_x_1);
+% fprintf('軌道y_1の収束後の位置誤差: %f\n', er_y_1);
+% fprintf('軌道z_1の収束後の位置誤差: %f\n', er_z_1);
 % fprintf('軌道x_1の収束後の位置MSE: %f\n', mse_x_1);
 % fprintf('軌道y_1の収束後の位置MSE: %f\n', mse_y_1);
 % fprintf('軌道z_1の収束後の位置MSE: %f\n', mse_z_1);
@@ -231,9 +231,9 @@ fprintf('軌道z_1の収束後の位置RMSE: %f\n', rmse_z_1);
 % fprintf('軌道x_1の収束後の位置MAE: %f\n', mae_x_1);
 % fprintf('軌道y_1の収束後の位置MAE: %f\n', mae_y_1);
 % fprintf('軌道z_1の収束後の位置MAE: %f\n', mae_z_1);
-fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
-fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
-fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
+% fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
+% fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
+% fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
 itigosa = [er_x_1;er_y_1;er_z_1;rmse_x_1;rmse_y_1;rmse_z_1;max_error_x_1;max_error_y_1;max_error_z_1];
 % % xy
 figure;
@@ -425,9 +425,9 @@ max_error_vy_1 = max(abs(vy_est_sel(shuti:end) - vy_ref_sel(shuti:end)));
 max_error_vz_1 = max(abs(vz_est_sel(shuti:end) - vz_ref_sel(shuti:end)));
 
 % 結果を表示
-fprintf('速度vx_1の収束後の速度誤差: %f\n', er_vx_1);
-fprintf('速度vy_1の収束後の速度誤差: %f\n', er_vy_1);
-fprintf('速度vz_1の収束後の速度誤差: %f\n', er_vz_1);
+% fprintf('速度vx_1の収束後の速度誤差: %f\n', er_vx_1);
+% fprintf('速度vy_1の収束後の速度誤差: %f\n', er_vy_1);
+% fprintf('速度vz_1の収束後の速度誤差: %f\n', er_vz_1);
 % fprintf('速度vx_1の収束後の速度MSE: %f\n', mse_vx_1);
 % fprintf('速度vy_1の収束後の速度MSE: %f\n', mse_vy_1);
 % fprintf('速度vz_1の収束後の速度MSE: %f\n', mse_vz_1);
@@ -437,9 +437,9 @@ fprintf('速度vz_1の収束後の速度RMSE: %f\n', rmse_vz_1);
 % fprintf('速度vx_1の収束後の速度MAE: %f\n', mae_vx_1);
 % fprintf('速度vy_1の収束後の速度MAE: %f\n', mae_vy_1);
 % fprintf('速度vz_1の収束後の速度MAE: %f\n', mae_vz_1);
-fprintf('速度vx_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
-fprintf('速度vy_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
-fprintf('速度vz_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
+% fprintf('速度vx_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
+% fprintf('速度vy_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
+% fprintf('速度vz_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
 sokudogosa = [er_vx_1;er_vy_1;er_vz_1;rmse_vx_1;rmse_vy_1;rmse_vz_1;max_error_vx_1;max_error_vy_1;max_error_vz_1];
 %推定値と目標値
 figure;
