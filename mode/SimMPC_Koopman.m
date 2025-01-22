@@ -15,14 +15,14 @@ clear gui
 clc; close all;
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 60; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 機数，1, z (初期位置)
-initial_state.q = [0; 0.01; 0];
+initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
@@ -39,15 +39,7 @@ initial_state.w = [0; 0; 0];
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
 
 % model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
-% model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
-
-% 0110
-% model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
-% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10.mat";
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10.mat"; % pitch
-model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight_1.mat"; %roll, pitch, yaw
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased";
-% 
+model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
 A=est.A; B=est.B; C=est.C;
@@ -79,7 +71,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0.6]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
@@ -130,7 +122,7 @@ app.logger = logger;
 result_plot(app, model_file);
 % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
-% logger.save("10_hokukai");
+% logger.save();
 
 %% function 2コンとき
 function result = controller_do(varargin)

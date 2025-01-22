@@ -49,7 +49,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     Controller_param.F = @quaternions_all;
     if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
         Controller_param.quad_drone = @quad_drone_code00_mex;
-        Controller_param.F = @observables_isobe; % isobe code00
+        Controller_param.F = @quaternions_all_00; % isobe code00
     elseif size(Controller_param.A,1) == 39
         Controller_param.quad_drone = @quad_drone_code04_mex;
     elseif size(Controller_param.A,1) == 71
@@ -68,22 +68,12 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    % code23
     Controller_param.weight.P = 1 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
     Controller_param.weight.W =10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-
-    % code26 weight_1
-    % Controller_param.weight.P = 1 * diag([1; 1; 1]);    % 位置　10,20刻み  20;1;30
-    % Controller_param.weight.Q = 1 * diag([10; 10; 1]);    % 速度  10,20刻み  30;20;10
-    % Controller_param.weight.V = 10 * diag([1; 1; 1]); % 15良い気がする
-    % Controller_param.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    % Controller_param.weight.R = 1* diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-
 
     %% 誤差モデル
     % Controller_param.weight.P = diag([100; 100; 10]);    % 位置　10,20刻み  20;1;30
