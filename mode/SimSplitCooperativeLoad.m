@@ -137,9 +137,9 @@ end
 % G = [x;y;0.5];
 % rhos = p-G;
 
-noize_sp = normrnd(0,0.0,[3,tn]);
-noize_spT = 1*normrnd(0,0.00,[3,tn]);
-noize_sqDrone = 1*normrnd(0,0.00,[3,tn]);%degで0.1くらいの標準偏差
+noize_sp = normrnd(0,0.01*0,[3,tn]);
+noize_spT = 1*normrnd(0,0.001*0,[3,tn]);
+noize_sqDrone = 1*normrnd(0,0.0017*0,[3,tn]);%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn
