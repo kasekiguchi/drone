@@ -53,14 +53,16 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             if isempty(param.rho)&& 1
             %非対称牽引物
                 %上面
-                xUp = [-2 -1.5 0 1.5 1 0];
-                yUp = [-1 0.5 1 0.5 -0.5 -1];
-                zUp = 0.5*ones(1,6);
+                % xUp = [-2 -1.5 0 1.5 1 0];
+                % yUp = [-1 0.5 1 0.5 -0.5 -1];
+                xUp = [-2 -1.5  1.5  0];
+                yUp = [-1 0.5 0.5  -1];
+                zUp = 0.5*ones(1,4);
                 pUp = [xUp;yUp;zUp]*0.4;
                 %下面
-                xDown = [-2 -1.5 0 1.5 1 0];
-                yDown = [-1 0.5 1 0.5 -0.5 -1];
-                zDown = -0.5*ones(1,6);
+                xDown = [-2 -1.5  1.5  0];
+                yDown = [-1 0.5 0.5  -1];
+                zDown = -0.5*ones(1,4);
                 pDown = [xDown;yDown;zDown]*0.4;
                 %重心の計算
                 polyin = polyshape(xUp,yUp);
@@ -69,6 +71,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % 重心から接続点までの距離
                 rho = pUp-G;
 
+                % param.rho = [rho(:,1),rho(:,3),rho(:,4),rho(:,5)];
                 param.rho = rho(:,1:N);
                 param.pUp = pUp;
                 param.pDown = pDown;

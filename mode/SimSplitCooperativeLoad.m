@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 50;
+te = 100/2;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -67,7 +67,7 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;2],"size",1*[2,2,1]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;2],"size",[2,2,0]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
@@ -137,9 +137,9 @@ end
 % G = [x;y;0.5];
 % rhos = p-G;
 
-noize_sp = normrnd(0,0.001,[3,tn]);
-noize_spT = 1*normrnd(0,0.001,[3,tn]);
-noize_sqDrone = 1*normrnd(0,0.002,[3,tn]);%degで0.1くらいの標準偏差
+noize_sp = normrnd(0,0.01,[3,tn])*0;
+noize_spT = 1*normrnd(0,0.001,[3,tn])*0;
+noize_sqDrone = 1*normrnd(0,0.0017,[3,tn])*0;%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn
@@ -237,10 +237,10 @@ for j = 1:tn
     %pause(1)
 end
 % clc
-disp(time.t)
+disp(time.t - time.dt)
 %%
 % close all
-% run("DataPlot.m")
+run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all

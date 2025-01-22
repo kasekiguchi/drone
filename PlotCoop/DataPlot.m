@@ -12,12 +12,12 @@
 close all
 clear multiFigure option addingContents f loggers
 %選択    
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 frmse = 10;%rmseのみ知りたい場合
 startTime = 0;
-endTime = 100;%1E3;
+endTime = 50;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
@@ -31,8 +31,8 @@ if fnowdata==1
     end
     if ~exist("loggers","var")
         for i = 1:length(logger.target)
-            % loggers{i,1} = simplifyLoggerForCoop(logger,i);
-            loggers{i,1} = simplifyLoggerForSingle(logger,i);
+            loggers{i,1} = simplifyLoggerForCoop(logger,i);
+            % loggers{i,1} = simplifyLoggerForSingle(logger,i);
         end
     end
     droneID = logger.target(1:end-1);
@@ -100,8 +100,11 @@ if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
     nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
     % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","peqi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
-    n = ["t_p0" "t_x0" "t_y0" "t_z0" "error0"	"t_errx0"	"t_erry0"	"t_errz0" "three_D0" "peqi"+droneID "mAll" "mL" "inputTrust" "inputRoll"	"inputPitch"	"inputYaw" "constRef"+droneID "minDroneDistance" "t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
-    nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
+    % n = ["t_p0" "t_x0" "t_y0" "t_z0" "error0"	"t_errx0"	"t_erry0"	"t_errz0" "three_D0" "peqi"+droneID "mAll" "mL" "inputTrust" "inputRoll"	"inputPitch"	"inputYaw" "constRef"+droneID "minDroneDistance" "t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
+    % n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    n = ["t_p0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
 
@@ -375,7 +378,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             refx0{1} = rxd{i}(1,:);
             refy0{1} = rxd{i}(2,:);
             refz0{1} = rxd{i}(3,:);
-            refeul0 = rxd{i}(end-3:end-1,:);
+            refeul0 = rxd{i}(end-3:end-1,:)*180/pi;
             
             if ~fExp
                 ex0{1} = ep{i}(1,:);
@@ -387,9 +390,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 vx0{1} = ev{i}(1,:);
                 vy0{1} = ev{i}(2,:);
                 vz0{1} = ev{i}(3,:);
-                qroll0{1} = cQeul{i}(1,:);
-                qpitch0{1} = cQeul{i}(2,:);
-                qyaw0{1} = cQeul{i}(3,:);
+                qroll0{1} = cQeul{i}(1,:)*180/pi;
+                qpitch0{1} = cQeul{i}(2,:)*180/pi;
+                qyaw0{1} = cQeul{i}(3,:)*180/pi;
                 wroll0{1} = eO{i}(1,:);
                 wpitch0{1} = eO{i}(2,:);
                 wyaw0{1} = eO{i}(3,:);
@@ -421,16 +424,16 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             sqpitch{j} = sq{i}(2,:);
             sqyaw{j} = sq{i}(3,:);
             % estimator
-            % refx{j} = rp{i}(1,:);%
-            % refy{j} = rp{i}(2,:);
-            % refz{j} = rp{i}(3,:);
+            refx{j} = rp{i}(1,:);%
+            refy{j} = rp{i}(2,:);
+            refz{j} = rp{i}(3,:);
             ref{j} = rxd{i}(1:3,:);
             refx{j} = rxd{i}(1,:);%
             refy{j} = rxd{i}(2,:);
             refz{j} = rxd{i}(3,:);
-            % constp{j} = rconstp{i};
-            % constTargetp{j} = rconstTargetp{i};
-            % minDroneDistance{j} = rminDroneDistance{i};
+            constp{j} = rconstp{i};
+            constTargetp{j} = rconstTargetp{i};
+            minDroneDistance{j} = rminDroneDistance{i};
             err{i} = epL{i}-rxd{i}(1:3,:);%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);

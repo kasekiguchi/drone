@@ -11,6 +11,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         estimate_load_mass 
         flag_anti_spike=0
         % preW
+        errors
+        RMSE
+        resetEstTimer
     end
     
     methods
@@ -22,6 +25,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
             obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
             % obj.preW =zeros(3,1);
+            obj.errors = zeros(3*40,1);
+            obj.RMSE = 100*ones(3*40,1);
+            obj.resetEstTimer = 0;
         end
         
         function result=do(obj,varargin)
@@ -126,10 +132,28 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             if isfield(model.state,"fdst")
                 obj.result.input = [max(0,min(20,tmp(1) - fdst));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             else
-                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])];
             end
             obj.self.controller.result.input = obj.result.input;%tmp;
             result = obj.result;  
+
+            % zL = model.state.pL(3) ;
+            % zLRef = xd(3);
+            % zLError = zL -zLRef;
+            % 
+            % obj.errors = [obj.errors(2:end);zLError];
+            % nowRMSE = sqrt(sum(obj.errors.^2)/length(obj.errors));
+            % 
+            % obj.RMSE = [obj.RMSE(2:end);nowRMSE];
+            % RMSERMSE = sqrt(sum(obj.RMSE.^2)/length(obj.RMSE))-nowRMSE;
+            % 
+            % estTime = varargin{1}.t - obj.resetEstTimer;
+            % if abs(RMSERMSE) < 0.001 && abs(zLError)> 0.0001 %&& estTime > 0.5
+            %     obj.resetEstTimer = varargin{1}.t;
+            %     obj.self.estimator.result.state.mL =  max(model.state.mL - 0.1*zLError,0);%F1(1)*F1(2)*zLError/9.81; 
+            %     obj.self.estimator.model.state.mL = max(model.state.mL - 0.1*zLError,0);
+            % end
+
             % control barrier funciton
             % fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
             % [A,b] = conic_cfb(xq,P,[10;1],10*pi/180);%deg

@@ -179,6 +179,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                rli = sqrt(2)*obj.self.parameter.get("lx");                           %機体のロータまでの長さ
                % g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
+               % rhoi = [rhoi(:,1),rhoi(:,3),rhoi(:,4),rhoi(:,5)];
                %reference
                ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
 
@@ -242,7 +243,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp
+                   constp=0
                    constTargetp
                    constd
 
