@@ -205,6 +205,11 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
+      obj.input.u4 = [0.1 0.2 0.3 0.4 0.5; 0.1 0.2 0.3 0.4 0.5];
+      obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
+      obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u4;
+      obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u4;
+      obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u4;
       obj.predict();
 
       %% 実状態変換
@@ -270,9 +275,14 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
     end
 
     %%-- 離散：階層型線形化
+    % function predict(obj)
+    %   obj.state.state_data = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
+    %   obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
+    % end
+
     function predict(obj)
-      obj.state.state_data = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
-      obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
+      tmp = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
+      obj.state.state_data = reshape(tmp, obj.param.state_size, obj.param.H, obj.N);
     end
 
     function [MCeval] = objective(obj, ~)   % obj.~とする
@@ -380,24 +390,26 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
         pw = obj.input.EvalNorm; % 正規化された評価値
         H = obj.param.H;
         u = obj.input.u;
-        resampling_u = zeros(4, H, NP);
-        u1 = reshape(u(1,:,:), [], NP); 
-        u2 = reshape(u(2,:,:), [], NP); 
-        u3 = reshape(u(3,:,:), [], NP); 
-        u4 = reshape(u(4,:,:), [], NP); 
-        sumu1w = sum(u1.*pw);
-        sumu2w = sum(u2.*pw);
-        sumu3w = sum(u3.*pw);
-        sumu4w = sum(u4.*pw);
-        sumw = sum(pw);
-        u1 = repmat(sumu1w ./ sumw, H, 1);
-        u2 = repmat(sumu2w ./ sumw, H, 1);
-        u3 = repmat(sumu3w ./ sumw, H, 1);
-        u4 = repmat(sumu4w ./ sumw, H, 1);
-        resampling_u(4, 1:H, 1:NP) = u4;
-        resampling_u(3, 1:H, 1:NP) = u3;
-        resampling_u(2, 1:H, 1:NP) = u2;
-        resampling_u(1, 1:H, 1:NP) = u1;
+        resampling_u = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
+            ./ sum(pw), 4, 1, NP), 1, H, 1);
+        % resampling_u = zeros(4, H, NP);
+        % u1 = reshape(u(1,:,:), [], NP); 
+        % u2 = reshape(u(2,:,:), [], NP); 
+        % u3 = reshape(u(3,:,:), [], NP); 
+        % u4 = reshape(u(4,:,:), [], NP); 
+        % sumu1w = sum(u1.*pw);
+        % sumu2w = sum(u2.*pw);
+        % sumu3w = sum(u3.*pw);
+        % sumu4w = sum(u4.*pw);
+        % sumw = sum(pw);
+        % u1 = repmat(sumu1w ./ sumw, H, 1);
+        % u2 = repmat(sumu2w ./ sumw, H, 1);
+        % u3 = repmat(sumu3w ./ sumw, H, 1);
+        % u4 = repmat(sumu4w ./ sumw, H, 1);
+        % resampling_u(4, 1:H, 1:NP) = u4;
+        % resampling_u(3, 1:H, 1:NP) = u3;
+        % resampling_u(2, 1:H, 1:NP) = u2;
+        % resampling_u(1, 1:H, 1:NP) = u1;
     end
 
     function [xr] = generate_reference(obj)
