@@ -8,10 +8,10 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
 % loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
-% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
-loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+% loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
 
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
@@ -113,7 +113,7 @@ function f = input_0_verify(args, flg, est, filename, F)
 ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
-thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
+thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
 torque = zeros(3, step_num);
 % thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
 % torque = input_result(2:4,start_num:step_num);
