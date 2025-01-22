@@ -281,29 +281,29 @@ legend('x_1.EST','y_1.EST','z_1.EST', ...
     'northeast','fontsize',8,'NumColumns',4)
 hold off
 
-%誤差
-figure;
-plot(t_sel1,er_x_1_fig, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
-ylim([-2 2])
-hold on
-plot(t_sel1,er_y_1_fig, '-','LineWidth',2);
-plot(t_sel1,er_z_1_fig, '-','LineWidth',2);
-legend('x_1.error','y_1.error','z_1.error','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
+% %誤差
+% figure;
+% plot(t_sel1,er_x_1_fig, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Trajectory[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_sel1(1,1) t_sel1(1,end)])
+% ylim([-2 2])
+% hold on
+% plot(t_sel1,er_y_1_fig, '-','LineWidth',2);
+% plot(t_sel1,er_z_1_fig, '-','LineWidth',2);
+% legend('x_1.error','y_1.error','z_1.error','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
 
 %RMSE
 figure;
 plot(t_sel1,rmse_x_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
+ylabel('RMSE[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
@@ -392,29 +392,29 @@ legend('vx_1.EST','vy_1.EST','vz_1.EST', ...
     'northwest','fontsize',8,'NumColumns',4)
 hold off
 
-%誤差
-figure;
-plot(t_sel1,er_vx_1_fig, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Velocity[m/s]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_sel1(1,1) t_sel1(1,end)])
-ylim([-1 1])
-hold on
-plot(t_sel1,er_vy_1_fig, '-','LineWidth',2);
-plot(t_sel1,er_vz_1_fig, '-','LineWidth',2);
-legend('vx_1.error','vy_1.error','vz_1.error','Location', ...
-    'northwest','fontsize',8,'NumColumns',2)
-hold off
+% %誤差
+% figure;
+% plot(t_sel1,er_vx_1_fig, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Velocity[m/s]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_sel1(1,1) t_sel1(1,end)])
+% ylim([-1 1])
+% hold on
+% plot(t_sel1,er_vy_1_fig, '-','LineWidth',2);
+% plot(t_sel1,er_vz_1_fig, '-','LineWidth',2);
+% legend('vx_1.error','vy_1.error','vz_1.error','Location', ...
+%     'northwest','fontsize',8,'NumColumns',2)
+% hold off
 
 %RMSE
 figure;
 plot(t_sel1,rmse_vx_1_fig, '-','LineWidth',2);
 grid on
 xlabel('Time[s]','FontSize',12) 
-ylabel('Velocity[m/s]','FontSize',12)
+ylabel('RMSE[m/s]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([t_sel1(1,1) t_sel1(1,end)])
