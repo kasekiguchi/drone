@@ -10,8 +10,8 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2);
 
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 10;
-    Controller.particle_num = 200;
+    Controller.H = 2;
+    Controller.particle_num = 5;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];
@@ -62,7 +62,7 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     %%  
     disp('MCMPC using HL model')
     % 
-    % Controller.name = "mcmpc"; % HLでもMCだから
-    % Controller.type = "HLMCMPC_CONTROLLER"; % file
+    Controller.name = "mcmpc"; % HLでもMCだから
+    Controller.type = "MPC_CONTROLLER_HLMC_akanuma"; % file
     % Controller.param = Controller;
 end

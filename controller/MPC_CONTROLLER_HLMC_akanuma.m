@@ -152,8 +152,8 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
 
     function result = controller_HLMC(obj,varargin)
         tic
-      obj.param.t = varargin{1,1}.t; % 現在時刻
-      obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
+      obj.param.t = varargin{1}{1}.t; % 現在時刻
+      obj.param.te = varargin{1}{1}.te; % 終了時間(default : 10s)
 
       %% ===プログラム作成部分開始======================================
 
@@ -186,21 +186,22 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
 
       % %-- 入力生成
       rng("shuffle");
-      mu = obj.input.mu; % Importance Sampling / Low Variance Sampling
       % mu = repmat(obj.input.u, 1, obj.param.H, obj.N); % 前の入力を平均値
 
       %- 使えるパラメータ: obj.input.input_TH, obj.H, obj.N, inputSigma, mu
       ksigma_max = 0.1 * obj.H;
       ksigma = 1:ksigma_max/(obj.H-1):1+ksigma_max; % 1~1+ksigma_maxまでH個の配列を作成
       inputSigma = ksigma .* obj.input.sigma';
-      obj.input.u = randn(4,obj.H,obj.N) .* inputSigma(:,:) + mu(:,:,:);
+      % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma(:,:) + obj.input.mu(:,:,:);
+      % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
 
+      obj.input.u = repmat(reshape([0.1 0.2 0.3 0.4 0.5; 0.1 0.2 0.3 0.4 0.5], 1, 2, 5), 4, 1, 1);
       obj.predict(); % ココは変えない
 
       %% 実状態変換
       Xd = repmat(obj.state.ref(1:12,:), 1,1,obj.N);
       Xreal = Xd + obj.state.state_data; % + or -
-      obj.state.error_data = Xd - Xreal; % error_data = state_data   / default : -
+      % obj.state.error_data = Xd - Xreal; % error_data = state_data   / default : -
       %現状ホライズンを考慮していない．obj.state.ref(:,1)との誤差になってしまっている気がする
       obj.state.real_data = Xreal;
 
@@ -256,7 +257,7 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
     function objective(obj)
         % obj.Weight:12*12*200, obj.WeightR:4*4*200
         u = obj.input.u; % 入力:4，ホライズン:10，サンプル:200
-        x = obj.state.error_data; % 状態数:12，ホライズン:10，サンプル:200，状態（z, z', x, x',x'' ,x''' ,y ,y' ,y'' ,y''' ,yaw ,yaw'）
+        x = obj.state.state_data; % 状態数:12，ホライズン:10，サンプル:200，状態（z, z', x, x',x'' ,x''' ,y ,y' ,y'' ,y''' ,yaw ,yaw'）
         % J = zeros(13,obj.N);
         % for n = 1:obj.N
         %     for h = 1:obj.H
