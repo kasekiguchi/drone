@@ -352,24 +352,16 @@ void landing_stop()
     pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
     pw[2] = CH_OFFSET - CH_MIN;     // throttle
     pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-    pw[4] = CH_OFFSET - 750;              // AUX1
+    pw[4] = CH_OFFSET - CH_LAND;              // AUX1
     pw[5] = CH_OFFSET;              // AUX2
     pw[6] = CH_OFFSET - CH_LAND;              // AUX3
-    // if(LAND_stop < 280)//40=1秒
-    // {
     pw[7] = CH_OFFSET;
-    // }
-    // else
-    // {
-    //   pw[7] = CH_OFFSET;
-    // }
-    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN - CH_LAND) - 9 * TIME_LOW;
+    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN - 3 * CH_LAND) - 9 * TIME_LOW;
     isLanding = true;
     digitalWrite(LED_PIN, LOW);
     digitalWrite(RLED_PIN, LOW);
     digitalWrite(GLED_PIN, HIGH);
     Serial.println("LANDING !! ");
-    // LAND_stop++;
   }
 }
 void software_reset()
