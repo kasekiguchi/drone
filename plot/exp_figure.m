@@ -44,7 +44,6 @@ save_master = 1;
 % 108:landing
 % 0:stop or quit
 %%
-% logger.controller = con;
 logger.Data.agent.estimator = est;
 logger.Data.agent.reference = ref;
 logger.Data.agent.input = input;
@@ -70,20 +69,22 @@ flg.masterplot = 1;
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
-fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[3, 3]),struct('model',filename));
+% fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[3, 3]),struct('model',filename));
+% fig.master_plot();
 % fig.main_animation();
 % fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
 
 fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
-fig = fig.main_figure();
+% fig2 = fig2.master_plot();
 %Exp の構造体を作ればよい
 
+%%
 if save_master
     fig = fig.master_plot(); % 修論用
     s = {'p','q','v','w','thrust','torque'};
     for i = 1:6
-        savename = strcat('Data/code23_sim_', s{i}, '.pdf'); exportgraphics(fig.data.f(i), savename, 'ContentType', 'vector', 'Resolution', 300);
+        savename = strcat('Data/code23_exp_', s{i}, '.pdf'); exportgraphics(fig.data.f(i), savename, 'ContentType', 'vector', 'Resolution', 300);
     end
 end
 
