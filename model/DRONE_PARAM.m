@@ -40,7 +40,7 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 type = "row";
                 % param.mass = 0.540; %KMPC下限 sim30s
                  % param.mass = 0.5884; eachine
-                param.mass = 0.595; % 0.595 iflight 実験
+                param.mass = 0.615; % iflight 実験
                 % param.mass = 0.669; %KMPC上限 sim30s
                 % param.mass = 0.640; %2024/1/15計量、機体+battery
                  % param.mass = 0.730; %iflight
