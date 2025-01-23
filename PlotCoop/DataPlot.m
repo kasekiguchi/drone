@@ -15,8 +15,8 @@ clear multiFigure option addingContents f loggers
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-frmse = 10;%rmseのみ知りたい場合
-startTime = 0;
+frmse = 1;%rmseのみ知りたい場合
+startTime = 10;
 endTime = 50;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
@@ -103,8 +103,9 @@ if fnowdata==1
     % n = ["t_p0" "t_x0" "t_y0" "t_z0" "error0"	"t_errx0"	"t_erry0"	"t_errz0" "three_D0" "peqi"+droneID "mAll" "mL" "inputTrust" "inputRoll"	"inputPitch"	"inputYaw" "constRef"+droneID "minDroneDistance" "t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
     nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
     % n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
-    n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
-    n = ["t_p0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    % n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","mAll","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    % n = ["t_p0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
 

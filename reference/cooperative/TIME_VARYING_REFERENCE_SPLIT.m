@@ -243,7 +243,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp=0
+                   constp%=0
                    constTargetp
                    constd
 
