@@ -10,8 +10,8 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2);
 
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 2;
-    Controller.particle_num = 5;
+    Controller.H = 10;
+    Controller.particle_num = 200;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];

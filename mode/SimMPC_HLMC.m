@@ -32,7 +32,8 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); 百瀬ref
 % agent.controller = MPC_CONTROLLER_HLMC(agent, Controller_MPC_HLMC(agent));
-agent.controller = MPC_CONTROLLER_HLMC_HL(agent, Controller_MPC_HLMC_fromN(dt));
+% agent.controller = MPC_CONTROLLER_HLMC_HL(agent, Controller_MPC_HLMC_fromN(dt));
+agent.controller = MPC_CONTROLLER_HLMC_akanuma(agent, Controller_MPC_HLMC_fromN(dt));
 run("ExpBase");
 %%
 for i = 1:te/dt
