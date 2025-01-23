@@ -2,7 +2,7 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     %% HL
-    Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
+    Controller.F1=lqrd([0 1;0 0],[0;1],diag([400,1]),[0.1],dt);                                % z 
     Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,5000,2000,10]),0.001,dt); % xdiag([100,10,10,1])
     Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,5000,2000,10]),0.001,dt); % ydiag([100,10,10,1])
     Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt); 
@@ -10,8 +10,8 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2);
 
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 10;
-    Controller.particle_num = 2000;
+    Controller.H = 2;
+    Controller.particle_num = 5;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];
@@ -29,8 +29,18 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     Controller.input.ub = [10; 1;  1;  1];
 
     %% 
-    Controller.Z = 1e3 * diag([1000; 10]);% * 1e3; %2 %1e3 10
-    Controller.X = 1e3 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    % Controller.Z = 1e3 * diag([1000; 10]);% * 1e3; %2 %1e3 10
+    % Controller.X = 1e3 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    % Controller.Y = Controller.X;% * 1e3;
+    % Controller.PHI = 1* diag([100; 1]);
+    % 
+    % Controller.Zf = 1e3 * diag([1000; 10]);
+    % Controller.Xf = Controller.X; % 制約時のみ * 1000
+    % Controller.Yf = Controller.X;
+    % Controller.PHIf = Controller.PHI;
+
+    Controller.Z = 1e2 * diag([1000; 10]);% * 1e3; %2 %1e3 10
+    Controller.X = 1e5 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
     Controller.Y = Controller.X;% * 1e3;
     Controller.PHI = 1* diag([100; 1]);
 
@@ -38,16 +48,6 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     Controller.Xf = Controller.X; % 制約時のみ * 1000
     Controller.Yf = Controller.X;
     Controller.PHIf = Controller.PHI;
-
-    % Controller.Z = 1e1 * diag([1; 1]);% * 1e3; %2 %1e3 10
-    % Controller.X = 1e1 * diag([10;1;1;1]);% 1e2でも結構いい感じ %1e3 1e1
-    % Controller.Y = Controller.X;% * 1e3;
-    % Controller.PHI = 1* diag([1; 1]);
-    % 
-    % Controller.Zf = 1e1 * diag([1; 1]);
-    % Controller.Xf = Controller.X; % 制約時のみ * 1000
-    % Controller.Yf = Controller.X;
-    % Controller.PHIf = Controller.PHI;
 
 
     Controller.AP = 1e3; % どれくらい距離をとる必要があるか

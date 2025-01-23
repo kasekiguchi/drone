@@ -18,8 +18,8 @@ post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 1, 1, z
-% initial_state.q = [1; 0; 0; 0];
-initial_state.q = [0; 0.01; 0];
+initial_state.q = [1; 0; 0; 0];
+% initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
@@ -51,10 +51,11 @@ for i = 1:te/dt
     agent.controller.show;
 end
 %%
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1, "p", "er"}, {1, "v", "er"}, {1, "q", "e"}, {1, "p1-p2", "er"}, {1, "input", ""},...
+    "xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 3]);
 % 仮想入力の描画
-imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.input_v, 1:te/dt, 'UniformOutput', false));
-figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
+% imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.input_v, 1:te/dt, 'UniformOutput', false));
+% figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
