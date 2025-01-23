@@ -68,10 +68,10 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller_param.weight.P = 1 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.P = 1 * diag([20; 10; 30]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller_param.weight.W =10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
