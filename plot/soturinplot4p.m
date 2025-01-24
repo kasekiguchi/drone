@@ -6,7 +6,7 @@
 % data = return_state_prop(newLog1)
 % newLog1 = simplifyLogger(log);
 %機体1と機体2
-[newLog1,newLog2] = simplifyLogger(log);
+[newLog1,newLog2] = simplifyLogger(log1);
 t_1 = newLog1.t; %t:時間
 phase_1 = newLog1.phase;%phase:アーミングやフライトなどの状態
 k_1 = newLog1.k;%データ数
@@ -40,7 +40,7 @@ transmitterinput_2 = newLog2.inner_input;%プロポからの指令
 %%
 %セクションの実行
 %機体3と機体4
-[newLog3,newLog4] = simplifyLogger(log);
+[newLog3,newLog4] = simplifyLogger(log2);
 t_3 = newLog3.t; %t:時間
 phase_3 = newLog3.phase;%phase:アーミングやフライトなどの状態
 k_3 = newLog3.k;%データ数
