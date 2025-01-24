@@ -205,7 +205,7 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
-      obj.input.u4 = [0.1 0.2 0.3 0.4 0.5; 0.1 0.2 0.3 0.4 0.5];
+      % obj.input.u4 = [0.1 0.2 0.3 0.4 0.5; 0.1 0.2 0.3 0.4 0.5];
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u4;
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u4;

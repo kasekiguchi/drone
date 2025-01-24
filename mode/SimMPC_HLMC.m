@@ -34,7 +34,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]
 % agent.controller = MPC_CONTROLLER_HLMC(agent, Controller_MPC_HLMC(agent));
 % agent.controller = MPC_CONTROLLER_HLMC_HL(agent, Controller_MPC_HLMC_fromN(dt));
 agent.controller = MPC_CONTROLLER_HLMC_akanuma(agent, Controller_MPC_HLMC_fromN(dt));
-run("ExpBase");
+run("SimBase");
 %%
 for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0; end
@@ -65,4 +65,14 @@ app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 % figtype = 2; % 1:それぞれ, 2:subplot
 % savefigure;
+flg.figtype = 0; % 0:subplot
+flg.savefig = 0;
+flg.animation_save = 0;
+flg.animation = 0;
+flg.timerange = 1;
+flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+filename = string(datetime('now'), 'yyyy-MM-dd');
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[],'fignum',[2, 3]), struct('model', filename));
+% struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange)
+fig.main_figure();
 end

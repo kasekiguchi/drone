@@ -2,7 +2,7 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     %% HL
-    Controller.F1=lqrd([0 1;0 0],[0;1],diag([400,1]),[0.1],dt);                                % z 
+    Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
     Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,5000,2000,10]),0.001,dt); % xdiag([100,10,10,1])
     Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([5000,5000,2000,10]),0.001,dt); % ydiag([100,10,10,1])
     Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt); 
@@ -10,8 +10,8 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2);
 
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 2;
-    Controller.particle_num = 5;
+    Controller.H = 10;
+    Controller.particle_num = 1000;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];

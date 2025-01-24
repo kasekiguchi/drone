@@ -7,7 +7,7 @@ end
 hostname = string(strtrim(hostname));
 % ClientIP = resolvehost(hostname,"address"); % client ip 1系統以外もあると誤認識が起こる
 % ClientIP = '192.168.1.6'; % 実験用PC lenovo
-ClientIP = '192.168.1.11'; % なぶ
+ClientIP = '192.168.1.3'; % なぶ
 %% ipconfigから取得
 % [~, cmdout] = system('ipconfig');
 % ipidx = strfind(cmdout, '192.168.1.');

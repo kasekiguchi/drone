@@ -101,7 +101,7 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
             result = obj.controller_HLMC(varargin);
             disp('controller: MC,  phase: a');
         elseif phase == 't' || phase == 'l'
-            result = obj.controller_HL(varargin);
+            result = obj.controller_HL(varargin); % takeoff and landing -> HLC
             disp('controller: HL  phase: t or l');
         elseif phase == 'f'
             obj.state.ref = obj.generate_reference();
@@ -116,8 +116,8 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
         ref = obj.self.reference.result;
         xd = ref.state.xd;
         xd0 =xd;
-        P = obj.param.P;
-        F1 = obj.param.F1;
+        P = obj.P;
+        F1 = obj.F1;
         F2 = obj.param.F2;
         F3 = obj.param.F3;
         F4 = obj.param.F4;
@@ -182,7 +182,7 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
       % 仮想状態の結合 Z, X, Y, YAW
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)]; % 目標値，実現在状態から仮想状態の算出
 
-      obj.state.ref = obj.generate_reference();
+      % obj.state.ref = obj.generate_reference();
 
       % %-- 入力生成
       rng("shuffle");
@@ -192,10 +192,10 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
       ksigma_max = 0.1 * obj.H;
       ksigma = 1:ksigma_max/(obj.H-1):1+ksigma_max; % 1~1+ksigma_maxまでH個の配列を作成
       inputSigma = ksigma .* obj.input.sigma';
-      % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma(:,:) + obj.input.mu(:,:,:);
-      % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
 
-      obj.input.u = repmat(reshape([0.1 0.2 0.3 0.4 0.5; 0.1 0.2 0.3 0.4 0.5], 1, 2, 5), 4, 1, 1);
+      % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
+      obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
+
       obj.predict(); % ココは変えない
 
       %% 実状態変換
@@ -207,7 +207,7 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
 
       obj.objective();
       obj.input.EvalNorm = obj.normalize();
-      obj.input.mu = obj.Resampling_LVS(); % or Resampling_IS(obj)
+      obj.input.mu = obj.Resampling_IS(); % Resampling_LVS or Resampling_IS(obj)
       obj.get_input(xn, xd); % 最適入力の取得および標準偏差のリサンプリング
 
       %% 値の保存
@@ -222,7 +222,6 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
       obj.result.xr = obj.state.ref;
 
       obj.show();
-
       %%
       result = obj.result;
       toc
