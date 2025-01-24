@@ -193,8 +193,8 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
       ksigma = 1:ksigma_max/(obj.H-1):1+ksigma_max; % 1~1+ksigma_maxまでH個の配列を作成
       inputSigma = ksigma .* obj.input.sigma';
 
-      % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
-      obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
+      obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
+      % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
 
       obj.predict(); % ココは変えない
 
@@ -212,16 +212,16 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
 
       %% 値の保存
       obj.result.input_v = obj.input.u; % input.v
-      obj.result.bestcostID = 1;
+      obj.result.bestcostID = obj.input.BestcostID;
       obj.result.bestcost = obj.input.Bestcost_now;
-      obj.result.contParam = obj.param;
-      obj.result.path = obj.state.real_data; % 実状態
+      % obj.result.contParam = obj.param;
+      % obj.result.path = obj.state.real_data; % 実状態
       obj.result.sigma = obj.input.sigma;
-      obj.result.variable_N = obj.N;
+      % obj.result.variable_N = obj.N;
       obj.result.Evaluationtra = obj.input.Evaluationtra;
-      obj.result.xr = obj.state.ref;
+      % obj.result.xr = obj.state.ref;
 
-      obj.show();
+      % obj.show();
       %%
       result = obj.result;
       toc

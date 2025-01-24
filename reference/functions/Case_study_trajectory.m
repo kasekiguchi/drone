@@ -29,11 +29,11 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 %% 円旋回
-% T = 12;
-% x = cos(2*pi*t/T);
-% % y = sin(2*pi*t/T);
+T = 15;
+x = cos(2*pi*t/T);
+y = sin(2*pi*t/T);
 % y = 0;
-% z = 1;
+z = 0.6;
 
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
@@ -73,13 +73,13 @@ syms t real
 % z = 0.6;
 
 %% sigmoid
-te = 10; % 何秒で移動するか
-% a = 0.25;
-x = 0;
-% y = 1/(1+exp(a*(-t + te/2))); % ゆるやかに移動するようにしたい
-z = 0.6;
-% x = 1/(1+exp(-t + te/2));
-y = 0.5/(1+exp(-t + te/2));
+% te = 10; % 何秒で移動するか
+% % a = 0.25;
+% x = 0;
+% % y = 1/(1+exp(a*(-t + te/2))); % ゆるやかに移動するようにしたい
+% z = 0.6;
+% % x = 1/(1+exp(-t + te/2));
+% y = 1/(1+exp(-t + te/2));
 
 timevarying_refrence=[x y z]
 ref=@(t)[x;y;z;0];
