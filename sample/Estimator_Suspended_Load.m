@@ -1,17 +1,7 @@
-<<<<<<< Updated upstream
 function Estimator = Estimator_Suspended_Load(rigid_num)
 
 %% estimator class demo
-% % estimator property ‚ğEstimator class‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”z—ñ‚Æ‚µ‚Ä’è‹`
-% ‚·‚×‚Ä‚Ì‹@‘Ì‚Å“¯ˆêİ’è
+% % estimator property ï¿½ï¿½Estimator classï¿½ÌƒCï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½zï¿½ï¿½Æ‚ï¿½ï¿½Ä’ï¿½`
+% ï¿½ï¿½ï¿½×‚Ä‚Ì‹@ï¿½Ì‚Å“ï¿½ï¿½ï¿½İ’ï¿½
 Estimator.rigid_num=rigid_num;
 end
-=======
-function Estimator = Estimator_Suspended_Load(rigid_num)
-
-%% estimator class demo
-% % estimator property ‚ğEstimator class‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”z—ñ‚Æ‚µ‚Ä’è‹`
-% ‚·‚×‚Ä‚Ì‹@‘Ì‚Å“¯ˆêİ’è
-Estimator.rigid_num=rigid_num;
-end
->>>>>>> Stashed changes

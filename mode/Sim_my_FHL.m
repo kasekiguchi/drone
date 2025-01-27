@@ -45,10 +45,10 @@ for j = 1:1
 
     num = j;
     reference_file = strcat("Exp_2_4_", num2str(num));
-    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
-    agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
-    % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-    % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+    % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
+    % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
+    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+    agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
     % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0,"i",j},"HL"});
     % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0,"i",j},"HL"});
     % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5],"i",j},"HL"});
@@ -109,9 +109,9 @@ for j = 1:1
     end
     logger = [logger1 logger2];
     % save(strcat("Data\learning_data\data", num2str(j), ".mat"),"logger")
-    % save("Data\test","logger")
+    save("Data\test","logger")
     
-    save('Data\MEC_Pn_u_delta_u.mat')
+    % save('Data\MEC_Pn_u_delta_u.mat')
     % save('Data\MEC_Pn_u.mat')
     
     % agent.logger.save(app.data_file_name);

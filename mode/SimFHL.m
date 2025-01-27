@@ -23,8 +23,8 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','MyNewSheet'),1));%コマンドでシートを選びたいときは位置2を1にする
-% agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
-agent.controller = FUNCTIONAL_HLNNC(agent,Controller_FHLNN(dt));
+agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
+% agent.controller = FUNCTIONAL_HLNNC(agent,Controller_FHLNN(dt));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

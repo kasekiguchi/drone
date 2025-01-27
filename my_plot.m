@@ -1,11 +1,6 @@
-<<<<<<< Updated upstream
-clear
-cf = pwd;
-=======
 clear;clc;
 cf = pwd;
 close all
->>>>>>> Stashed changes
 if contains(mfilename('fullpath'),"mainGUI")
   cd(fileparts(mfilename('fullpath')));
 else
@@ -13,85 +8,6 @@ else
   cd(fileparts(tmp.Filename));
 end
 
-<<<<<<< Updated upstream
-log = load('Data\data_mid_Log.mat');
-%% logを開く
-logger = simplifyLogger(log.log);
-t = logger.t;
-
-c=logger.controller;
-z1=c.z1;
-z2=c.z2;
-z3=c.z3;
-z4=c.z4;
-NN_xi=c.xi_log;
-input = c.input;
-    
-c = logger.plant;
-q = c.q;
-p = c.p;
-v = c.v;
-w = c.w;
-
-
-c2 = logger.reference;
-ref_q = c2.q;
-ref_p = c2.p;
-ref_v = c2.v;
-% ref_w = c.w; wのリファレンスは存在しません
-
-figure(1);
-label = ["t","p", "t","v", "t","q", "t","w"];
-legend = ["x","y","z";
-          "x","y","z";
-          "roll","pitch","yow";
-          "roll","pitch","yow"];
-
-q = Quat2Eul(q);
-hold on
-triple_plot(t,p,t,v,t,q,t,w, label, legend)
-hold off
-
-figure(2);
-label = ["t","p:reference", "t","v:reference", "t","q:reference", "t","w:reference"];
-legend = ["x","y","z";
-          "x","y","z";
-          "roll","pitch","yow";
-          "roll","pitch","yow"];
-triple_plot(t,ref_p,t,ref_v,t,ref_q,[],[], label, legend)
-
-figure(3);
-hold on
-label = ["t","z1", "t","z2", "t","z3", "t","z4"];
-legend = ["z1","dz1","","";
-          "z2","dz2","ddz2","dddz2";
-          "z3","dz3","ddz3","dddz3";
-          "z4","dz4","",""];
-% triple_plot(t,[z1;NN_xi(1:2,:)],t,[z2;NN_xi(3:6,:)],t,[z3;NN_xi(7:10,:)],t,[z4;NN_xi(11:12,:)], label)
-triple_plot(t,z1,t,z2,t,z3,t,z4, label,legend)
-% triple_plot(t,NN_xi(1:2,:),t,NN_xi(3:6,:),t,NN_xi(7:10,:),t,NN_xi(11:12,:), label)
-hold off
-
-figure(4);
-hold on
-label = ["t","z1", "t","z2", "t","z3", "t","z4"];
-legend = ["z1","dz1","","";
-          "z2","dz2","ddz2","dddz2";
-          "z3","dz3","ddz3","dddz3";
-          "z4","dz4","",""];
-triple_plot(t,NN_xi(1:2,:),t,NN_xi(3:6,:),t,NN_xi(7:10,:),t,NN_xi(11:12,:), label,legend)
-hold off
-
-figure(5);
-label = ["time [s]","position [m]", "time [s]","velocity [m/s]", "time [s]","attitude angle [rad]", "time [s]","angular velocity [rad/s]"];
-legend = ["x","y","z","xr","yr","zr";
-          "x","y","z","xr","yr","zr";
-          "roll","pitch","yow","rollr","pitchr","yowr";
-          "roll","pitch","yow","","",""];
-
-hold on
-triple_plot2(t,p,t,v,t,q,t,w,t,ref_p,t,ref_v,t,ref_q,[],[], label, legend)
-=======
 log = load('Data\learning_data\data6.mat');
 log = load('Data\test.mat');
 %% logを開く
@@ -210,7 +126,6 @@ legend = ["total thrust","\Deltau","pich","yow";
 
 hold on
 create_y234_LinkedSubplots(t,Pa.input, Pa.delta_u, label, legend, title)
->>>>>>> Stashed changes
 hold off
 
 % 2. グラフのフォーマット調整
@@ -222,11 +137,6 @@ set(gcf, 'Units', 'centimeters', 'Position', [0, 0, 23, 14]);  % サイズ設定
 
 % 4. PDFとして保存
 % print(gcf, 'output_figure.pdf', '-dpdf', '-bestfit', '-r300');
-<<<<<<< Updated upstream
-exportgraphics(gcf, 'Data/output_figure.pdf', 'ContentType', 'vector', 'Resolution', 300);
-
-
-=======
 exportgraphics(gcf, 'Data/delta_u.pdf', 'ContentType', 'vector', 'Resolution', 300);
 
 
@@ -324,7 +234,6 @@ exportgraphics(gcf, 'Data/Pa_state.pdf', 'ContentType', 'vector', 'Resolution', 
 % % print(gcf, 'output_figure.pdf', '-dpdf', '-bestfit', '-r300');
 % exportgraphics(gcf, 'Data/state.pdf', 'ContentType', 'vector', 'Resolution', 300);
 
->>>>>>> Stashed changes
 function newLog = simplifyLogger(log)
         % name = ['new_', inputname(1)];
         newLog.t = log.Data.t(1:log.k);    
@@ -373,11 +282,7 @@ function newLog = simplifyLogger(log)
         
 end
 
-<<<<<<< Updated upstream
-function triple_plot(x1,y1,x2,y2,x3,y3,x4,y4,label,leg)
-=======
 function quadruple_plot(x1,y1,x2,y2,x3,y3,x4,y4,label,leg,title)
->>>>>>> Stashed changes
     % グラフを描画するためのサブプロットを作成
     
     % 1つ目のグラフ
@@ -386,10 +291,7 @@ function quadruple_plot(x1,y1,x2,y2,x3,y3,x4,y4,label,leg,title)
     xlabel(label(1));
     ylabel(label(2));
     legend(leg(1,:))
-<<<<<<< Updated upstream
-=======
     grid on;
->>>>>>> Stashed changes
     
     % 2つ目のグラフ
     subplot(2, 2, 2);
@@ -397,10 +299,7 @@ function quadruple_plot(x1,y1,x2,y2,x3,y3,x4,y4,label,leg,title)
     xlabel(label(3));
     ylabel(label(4));
     legend(leg(2,:))
-<<<<<<< Updated upstream
-=======
     grid on;
->>>>>>> Stashed changes
     
     % 3つ目のグラフ
     subplot(2, 2, 3);
@@ -408,78 +307,46 @@ function quadruple_plot(x1,y1,x2,y2,x3,y3,x4,y4,label,leg,title)
     xlabel(label(5));
     ylabel(label(6));
     legend(leg(3,:))
-<<<<<<< Updated upstream
-=======
     grid on;
->>>>>>> Stashed changes
 
     subplot(2, 2, 4);
     plot(x4, y4,"LineWidth",1.5);
     xlabel(label(7));
     ylabel(label(8));
     legend(leg(4,:))
-<<<<<<< Updated upstream
-end
-
-function triple_plot2(x1,y1,x2,y2,x3,y3,x4,y4,x1r,y1r,x2r,y2r,x3r,y3r,x4r,y4r,label,leg)
-=======
     grid on;
 
     sgtitle(title)
 end
 
 function quadruple_plot2(t,Pa,label,leg,title)
->>>>>>> Stashed changes
     % グラフを描画するためのサブプロットを作成
     
     % 1つ目のグラフ
     subplot(2, 2, 1);
     hold on
-<<<<<<< Updated upstream
-    plot(x1, y1,"LineWidth",1.5);
-    plot(x1r, y1r,"LineWidth",1.0,"Linestyle","--");
-    xlabel(label(1));
-    ylabel(label(2));
-    legend(leg(1,:))
-=======
     plot(t, Pa.p,"LineWidth",1.5);
     plot(t, Pa.ref_p,"LineWidth",1.5,"Linestyle","--");
     xlabel(label(1));
     ylabel(label(2));
     legend(leg(1,:))
     grid on;
->>>>>>> Stashed changes
     hold off
     
     % 2つ目のグラフ
     subplot(2, 2, 2);
     hold on
-<<<<<<< Updated upstream
-    plot(x2, y2,"LineWidth",1.5);
-    plot(x2r, y2r,"LineWidth",1.0,"Linestyle","--");
-    xlabel(label(3));
-    ylabel(label(4));
-    legend(leg(2,:))
-=======
     plot(t, Pa.v,"LineWidth",1.5);
     plot(t, Pa.ref_v,"LineWidth",1.5,"Linestyle","--");
     xlabel(label(3));
     ylabel(label(4));
     legend(leg(2,:))
     grid on;
->>>>>>> Stashed changes
     hold off
     
     % 3つ目のグラフ
     subplot(2, 2, 3);
     hold on
-<<<<<<< Updated upstream
-    plot(x3, y3,"LineWidth",1.5);
-    plot(x3r, y3r,"LineWidth",1.0,"Linestyle","--");
-    xlabel(label(5));
-    ylabel(label(6));
-    legend(leg(3,:))
-=======
     plot(t, Pa.q,"LineWidth",1.5);
     plot(t, Pa.ref_q(3,:),"LineWidth",1.5,"Linestyle","--");
     xlabel(label(5));
@@ -487,20 +354,10 @@ function quadruple_plot2(t,Pa,label,leg,title)
     % ylim([-pi pi]);
     legend(leg(3,:))
     grid on;
->>>>>>> Stashed changes
     hold off
 
     subplot(2, 2, 4);
     hold on
-<<<<<<< Updated upstream
-    plot(x4, y4,"LineWidth",1.5);
-    plot(x4r, y4r,"LineWidth",1.0,"LineStyle","--");
-    xlabel(label(7));
-    ylabel(label(8));
-    legend(leg(4,:))
-    hold off
-end
-=======
     plot(t, Pa.w,"LineWidth",1.5);
     xlabel(label(7));
     ylabel(label(8));
@@ -996,4 +853,3 @@ end
 %         Pn.delta_u(:,i) = log.Data.agent.controller.result{1, i}.plant_.delta_u;
 %     end
 % end
->>>>>>> Stashed changes
