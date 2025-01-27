@@ -78,9 +78,23 @@ if isCoop == 1
     for i = 1:N-1
         rho(:,i) = motive.result.rigid(1+2*i+addId).p - motive.result.rigid(1).p;
     end
+    
+    %紐の接続点が頂点の図形の中心の場合(平面を仮定)
+    pLs = zeros(3,N-1);
+    for i = 1:N-1
+        pLs(:,i) = motive.result.rigid(1+2*i+addId).p;
+    end
+    polyin = polyshape(pLs(1,1:N),pLs(2:N));
+    [x,y] = centroid(polyin);
+    G = [x;y;motive.result.rigid(1).p(3)];
+    deltaG = G - motive.result.rigid(1).p;
+    % 重心から接続点までの距離とdeltaGとrho1rho2の内積
+    dotDeltaG = [rho(1:2,1)';rho(1:2,2)']*deltaG ;
+    rho = pLs-G;%図形重心からのrhoに変更
+
     rho
     agent(1) = DRONE; %DRONE.m
-    agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
+    agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho,"G",G,"dotDeltaG",dotDeltaG);
     agent(1).plant = struct("do",@(varargin)[], "arming" ,[],"stop",[]);
     agent(1).plant.connector.serial = [];
 

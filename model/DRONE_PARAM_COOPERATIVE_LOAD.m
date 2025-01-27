@@ -21,6 +21,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
         pUp
         pDown
         G
+        dotDeltaG
     end
 
     methods
@@ -70,6 +71,9 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 pDown = [xDown;yDown;zDown]*0.4;
                 %重心の計算
                 polyin = polyshape(xUp,yUp);
+                [x,y] = centroid(polyin);
+                %紐の接続点が頂点の図形の中心の場合
+                polyin = polyshape(xUp(1:N),yUp(1:N));
                 [x,y] = centroid(polyin);
                 G = [x;y;0];
                 % 重心から接続点までの距離

@@ -453,6 +453,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    for i = 1:(length(rigid)-1)/2
                         spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
                    end
+                   if ~isempty(obj.agent1.parameter.dotDeltaG)
+                       rho35 = [rigit(3).p';rigit(5).p'] - rigit(1).p';
+                       obj.agent1.sensor.result.state.p =  rigid(1).p + rho35(1:2,1:2)\obj.agent1.parameter.dotDeltaG ;
+                   end
                else
                     sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
                     %分割前ペイロード

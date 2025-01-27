@@ -12,13 +12,13 @@
 close all
 clear multiFigure option addingContents f loggers
 %選択    
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
-frmse = 1;%rmseのみ知りたい場合
-startTime = 10;
-endTime = 50;%1E3;
-fnowdata = 1;
+fF=1;%flightのみは１
+frmse = 10;%rmseのみ知りたい場合
+startTime = 0;
+endTime = 1000;%1E3;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -40,10 +40,13 @@ else
     % loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
     % loggers = simple_log_expandSysEKF;
     % loggers = simple_log_ptopx01210_1_2y0000000z05_yaw10;
-    loggers = simple_log_saddle_rot_updateRef;
-    if 0
-        loggers = [simple_log_circle_success_PC1;...
-                    simple_log_circle_success_PC2(2:end)
+    % loggers = simple_log_saddle_rot_updateRef;
+    if 1
+        loggers = [
+                    % simple_log_circle_success_PC1;...
+                    % simple_log_circle_success_PC2(2:end)
+                    simple_log_saddle_rotPC1;...
+                    simple_log_saddle_rotPC2(2:end)
                     ];
     end
     droneID = 1:length(loggers)-1;
@@ -96,6 +99,7 @@ nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"th
 nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0",["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
+nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
 if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
     nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
@@ -407,6 +411,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 ez0{1} = sp{i}(3,:);
                 err{1} = sp{1}-ref0;%誤差
                 epL{1} = sp{1};
+                qroll0{1} = sq{i}(1,:)*180/pi;
+                qpitch0{1} = sq{i}(2,:)*180/pi;
+                qyaw0{1} = sq{i}(3,:)*180/pi;
             end
             errx0{1} = err{1}(1,:);
             erry0{1} = err{1}(2,:);
@@ -425,16 +432,16 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             sqpitch{j} = sq{i}(2,:);
             sqyaw{j} = sq{i}(3,:);
             % estimator
-            refx{j} = rp{i}(1,:);%
-            refy{j} = rp{i}(2,:);
-            refz{j} = rp{i}(3,:);
+            % refx{j} = rp{i}(1,:);%
+            % refy{j} = rp{i}(2,:);
+            % refz{j} = rp{i}(3,:);
             ref{j} = rxd{i}(1:3,:);
             refx{j} = rxd{i}(1,:);%
             refy{j} = rxd{i}(2,:);
             refz{j} = rxd{i}(3,:);
-            constp{j} = rconstp{i};
-            constTargetp{j} = rconstTargetp{i};
-            minDroneDistance{j} = rminDroneDistance{i};
+            % constp{j} = rconstp{i};
+            % constTargetp{j} = rconstTargetp{i};
+            % minDroneDistance{j} = rminDroneDistance{i};
             err{i} = epL{i}-rxd{i}(1:3,:);%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);
