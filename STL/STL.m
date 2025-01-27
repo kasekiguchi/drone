@@ -47,7 +47,7 @@ classdef STL < handle
             modeExecution=zeros(1,4);
             obj.t=varargin{1};
              fprintf("mode : %d",obj.mode);
-            if mod((obj.t.k),100)==0 && obj.t.t ~=0
+            if mod((obj.t.k),400)==0 && obj.t.t ~=0
                 obj.modechangeflag=1;
                 obj.currentmodecount=obj.currentmodecount+1;
 
@@ -57,11 +57,11 @@ classdef STL < handle
                 modeExecutionCount = length(obj.cha);
                 %   modeExecution=struct();
                 for i = 1:modeExecutionCount
-                    if strcmp(obj.cha(1,i),'l') && ~isempty(obj.t)
+                    if strcmp(obj.cha(1,i),'c') && ~isempty(obj.t)
                         modeExecution(1,i)=1;
-                    elseif strcmp(obj.cha(1,i),'c') && ~isempty(obj.t)
-                        modeExecution(1,i)=2;
                     elseif strcmp(obj.cha(1,i),'h') && ~isempty(obj.t)
+                        modeExecution(1,i)=2;
+                    elseif strcmp(obj.cha(1,i),'l') && ~isempty(obj.t)
                         modeExecution(1,i)=3;
                     elseif strcmp(obj.cha(1,i),'t') && ~isempty(obj.t)
                         modeExecution(1,i)=4;
@@ -73,13 +73,13 @@ classdef STL < handle
             end
                 switch obj.mode %mode change for % 1: landing 2:circle movement 3:hoving 4:take off  etc...
                     case 1
-                        obj.result.state.xd=obj.LANDING_REFERENCE_KYOREF(varargin{1}.t);
-
-                    case 2
                         obj.result.state.xd=obj.CIRCLEMOVING_REFERENCE_KYOREF(varargin{1}.t);
 
-                    case 3
+                    case 2
                         obj.result.state.xd=obj.HOVERING_REFERENCE_KYOREF(varargin{1}.t);
+
+                    case 3
+                        obj.result.state.xd=obj.LANDING_REFERENCE_KYOREF(varargin{1}.t);
 
                     case 4
                         obj.result.state.xd=obj.TAKINGOFF_REFERENCE_KYOREF(varargin{1}.t);

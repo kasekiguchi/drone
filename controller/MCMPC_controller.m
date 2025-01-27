@@ -50,7 +50,7 @@ classdef MCMPC_controller < handle
         
         %-- main()的な
         function result = do(obj,varargin)
-            rng default
+            %rng default
            % restart = 0;
 %           profile on
             %while restart == 0 
@@ -92,7 +92,7 @@ classdef MCMPC_controller < handle
                 obj.input.AllRemove = 0;
             end
 
-            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + mu(1));
+            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N)) + mu(1);
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.N);    % すべて同じ入力、　確認用
             obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.N);
             obj.input.u4 = obj.input.sigma.*randn(obj.param.H, obj.N);
@@ -108,11 +108,11 @@ classdef MCMPC_controller < handle
             else
                 obj.stlflag = 0;
             end
-            % if obj.stlflag == 1
-            %     if obj.state.predict_state(3, 1, :) > 20
-            %         obj.param.fRemove = 1;
-            %     end
-            % end
+            if obj.stlflag == 1
+                 if obj.state.predict_state(3, 1, :) > 20
+                     obj.param.fRemove = 1;
+                 end
+            end
             % %-- 状態予測
             [obj.state.predict_state] = obj.predict();
             % if obj.state.predict_state(3, 1, :) < 0
@@ -134,7 +134,8 @@ classdef MCMPC_controller < handle
             %  survive = obj.N;
             %end
             %-- 評価値計算
-            
+          
+
             obj.param.fin = 0;
             eachCost = zeros(obj.N, 3);
             for m = 1:obj.N
@@ -142,6 +143,9 @@ classdef MCMPC_controller < handle
             end
             obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); % サンプル数が小さくなった時に最小値を見失わないように
             
+%            [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+%            [obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
+
             %-- 評価値の正規化
             obj.input.normE = obj.Normalize(); % ほぼ使わない
 
@@ -351,5 +355,51 @@ classdef MCMPC_controller < handle
                 xr(13:16, h+1) = 0.269*9.81/4 * [1;1;1;1]; % MC -> 0.6597,   HL -> 0
             end
         end
+        function [resampling_u,pw] = Resampling_LVS(obj)
+        %RESAMPLING この関数の概要をここに記述
+        % アルゴリズムはLow Variance Sampling
+        NP = obj.N;   % サンプル数
+        pw = obj.input.EvalNorm; % 正規化された評価値
+        u1 = reshape(obj.input.u(1,:,:), [], NP); 
+        u2 = reshape(obj.input.u(2,:,:), [], NP); 
+        u3 = reshape(obj.input.u(3,:,:), [], NP); 
+        u4 = reshape(obj.input.u(4,:,:), [], NP); 
+        wcum=cumsum(pw); % 評価値を累積
+        base=cumsum(pw*0+1/NP)-1/NP;%乱数を加える前のbase
+        resampleID=base+rand/NP;%ルーレットを乱数分増やす
+        pu1 = u1;%データ格納用
+        pu2 = u2;
+        pu3 = u3;
+        pu4 = u4;
+        ind=1;%新しいID
+        for ip=1:NP
+            while(resampleID(ip)>wcum(ind))
+                ind=ind+1;
+            end
+            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
+            u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
+            u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
+            u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
+            pw(ip)=1/NP;%尤度は初期化
+        end
+        resampling_u(4, 1:obj.param.H, 1:obj.N) = u4;
+        resampling_u(3, 1:obj.param.H, 1:obj.N) = u3;
+        resampling_u(2, 1:obj.param.H, 1:obj.N) = u2;
+        resampling_u(1, 1:obj.param.H, 1:obj.N) = u1;
+    end
+
+    function [resampling_u, pw] = Resampling_IS(obj)
+        % 重点サンプリング
+        NP = obj.N;
+        pw = obj.input.EvalNorm; % 正規化された評価値
+        H = obj.param.H;
+        u = obj.input.u;
+
+        % sumUw = reshape(sum(u.*reshape(pw,1,1,[]),2), 4,NP);
+        % resampling_u = repmat(reshape(sumUw ./ sum(pw), 4, 1, NP), 1, H, 1);
+
+        resampling_u = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
+            ./ sum(pw), 4, 1, NP), 1, H, 1);
+    end
     end
 end

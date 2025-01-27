@@ -1,9 +1,11 @@
 classdef LANDING_REFERENCE < handle
   properties
     param
+    func
     self
     vd = 0.5;
     dt
+    xd
     result
     base_state
     base_time
@@ -19,6 +21,10 @@ classdef LANDING_REFERENCE < handle
       obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
       obj.dt = varargin{1};
       obj.vd = varargin{2};
+      obj.base_state = [10;10;10];
+    %  obj.xd = obj.gen_ref_for_landing(obj.dt);
+    %  obj.func = str2func("obj.gen_ref_for_landing");   When the program runs to mcmpc_controller can not get the obj. reference
+    %  obj.func = gen_ref_for_HL(obj.func);
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
@@ -30,12 +36,12 @@ classdef LANDING_REFERENCE < handle
         %obj.base_state = [obj.self.estimator.result.state.p(1:2);obj.result.state.p(3)];   
         %end
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
-        obj.th_offset = obj.self.input_transform.param.th_offset;
+  %      obj.th_offset = obj.self.input_transform.param.th_offset;
       end
       obj.result.state.xd = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);
-      obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+   %   obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
       result = obj.result;
     end
     function Xd = gen_ref_for_landing(obj,t)
@@ -53,17 +59,22 @@ classdef LANDING_REFERENCE < handle
       %% Variable set
       Xd  = zeros( 20, 1);
       %% Set Xd
+      if isempty(obj.result.state.xd)
+          t=cell2mat(t);
+      end
       if t<=obj.te
         Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
       elseif t> obj.te
         Zd = zeros(1,5);
       end
+
       Xd(1:3,1) = obj.base_state(1:3);
       Xd(3,1) = Zd(1);
       Xd(7,1) = Zd(2);
       Xd(11,1) = Zd(3);
       Xd(15,1) = Zd(4);
       Xd(19,1) = Zd(5);
+      
     end
   end
 end

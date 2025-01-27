@@ -24,7 +24,8 @@ classdef TIME_VARYING_REFERENCE < handle
             obj.self = self;
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
-            obj.func = gen_func_name(param_for_gen_func{:});
+            param_for_gen_func_v = args{4};
+            obj.func = gen_func_name(param_for_gen_func{:},param_for_gen_func_v{:},obj.t);
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);
@@ -49,7 +50,8 @@ classdef TIME_VARYING_REFERENCE < handle
                 obj.t=varargin{1}.t;
                 t = obj.t;
            end 
-           
+           % p = obj.self.plant.state.p; 
+           % v = obj.self.plant.state.v;  
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
