@@ -149,10 +149,11 @@ classdef DRAW_COOPERATIVE_DRONES
       % x = [xm,xm(1);xM,xM(1)];
       % y = [ym,ym(1);yM,yM(1)];
       % z = [zm,zm(1);zM,zM(1)];
-      h(1) = fill3(xm,ym,zm,"cyan");%上面
-      h(2) = fill3(xM,yM,zM,"cyan");%下面
+      h(1) = fill3(xm,ym,zm,"cyan","FaceAlpha",0.5);%上面
+      h(2) = fill3(xM,yM,zM,"cyan","FaceAlpha",0.5);%下面
       % h(3) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
-      h(3) = surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)]);%側面
+      h(3) = surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)],"FaceAlpha",0.5);%側面
+      h(4) = plot3(0,0,0,"MarkerSize",10,"Marker","*","Color","red");%重心位置
       % h(3) = surf(x,y,z);
 
       % h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");

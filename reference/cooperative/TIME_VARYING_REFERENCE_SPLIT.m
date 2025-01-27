@@ -179,6 +179,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                rli = sqrt(2)*obj.self.parameter.get("lx");                           %機体のロータまでの長さ
                % g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
+               rhoic = obj.agent1.parameter.rhoc(:,id);%紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % rhoi = [rhoi(:,1),rhoi(:,3),rhoi(:,4),rhoi(:,5)];
                %reference
                ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
@@ -251,8 +252,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
                    obj.flanding = 0;%landing条件分岐用フラグ
                    rotm0 = obj.agent1.reference.result.rotms;     %回転行列
-                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   rhoi = rhoi + constp*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   rhoicUnit12 = rhoic(1:2)/norm(rhoic(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
+                   rhoi = rhoi + constp*[rhoicUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'

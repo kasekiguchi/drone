@@ -12,12 +12,12 @@
 close all
 clear multiFigure option addingContents f loggers
 %選択    
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-frmse = 1;%rmseのみ知りたい場合
-startTime = 10;
-endTime = 50;%1E3;
+frmse = 10;%rmseのみ知りたい場合
+startTime = 0;
+endTime = 1000;%1E3;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
@@ -534,9 +534,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.t_erry0 = {struct('x',{time(1)},'y',{erry0} ), struct('x','time (s)','y','error $y$ (m)'),C0,add_option([],option,addingContents)};
         allData.t_errz0 = {struct('x',{time(1)},'y',{errz0} ), struct('x','time (s)','y','error $z$ (m)'),C0,add_option([],option,addingContents)};
         allData.attitude0 = {struct('x',{time(1)},'y',{[cQeul(1)',{refeul0'}]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],C0),add_option([],option,addingContents)};
-        allData.t_qroll0 = {struct('x',{time(1)},'y',{[qroll0{1}',{refeul0(1,:)'}]}), struct('x','time (s)','y','$q_{roll}$ (rad)'),Rc0,add_option([],option,addingContents)};
-        allData.t_qpitch0 = {struct('x',{time(1)},'y',{[qpitch0{1}',{refeul0(2,:)'}]}), struct('x','time (s)','y','$q_{pitch}$ (rad)'),Rc0,add_option([],option,addingContents)};
-        allData.t_qyaw0 = {struct('x',{time(1)},'y',{[qyaw0{1}',{refeul0(3,:)'}]}), struct('x','time (s)','y','$q_{yaw}$ (rad)'),Rc0,add_option([],option,addingContents)};
+        allData.t_qroll0 = {struct('x',{time(1)},'y',{[qroll0{1}',{refeul0(1,:)'}]}), struct('x','time (s)','y','$q_{roll}$ (deg)'),Rc0,add_option([],option,addingContents)};
+        allData.t_qpitch0 = {struct('x',{time(1)},'y',{[qpitch0{1}',{refeul0(2,:)'}]}), struct('x','time (s)','y','$q_{pitch}$ (deg)'),Rc0,add_option([],option,addingContents)};
+        allData.t_qyaw0 = {struct('x',{time(1)},'y',{[qyaw0{1}',{refeul0(3,:)'}]}), struct('x','time (s)','y','$q_{yaw}$ (deg)'),Rc0,add_option([],option,addingContents)};
         allData.velocity0 = {struct('x',{time(1)},'y',{ev0(1)}), struct('x','time (s)','y','velocity(m/s)'), LgndCrt(["$x$","$y$","$z$"],C0),add_option([],option,addingContents)};
         allData.t_vx0 = {struct('x',{time(1)},'y',{vx0}), struct('x','time (s)','y','$v_x$ (m/s)'),C0,add_option([],option,addingContents)};
         allData.t_vy0 = {struct('x',{time(1)},'y',{vy0}), struct('x','time (s)','y','$v_y$ (m/s)'),C0,add_option([],option,addingContents)};

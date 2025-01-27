@@ -21,6 +21,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
         pUp
         pDown
         G
+        rhoc
     end
 
     methods
@@ -69,14 +70,20 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 zDown = -0.5*ones(1,6);
                 pDown = [xDown;yDown;zDown]*0.4;
                 %重心の計算
-                polyin = polyshape(xUp,yUp);
+                polyin = polyshape(pUp(1,:),pUp(2,:));
                 [x,y] = centroid(polyin);
                 G = [x;y;0];
+                %接続点を頂点とする図形の重心位置
+                polyin = polyshape(pUp(1,1:N),pUp(2,1:N));
+                [x,y] = centroid(polyin);
+                Gc = [x;y;0];
                 % 重心から接続点までの距離
                 rho = pUp-G;
+                %接続点を頂点とする図形の重心位置
+                rhoc = pUp-Gc;%Gc
 
-                % param.rho = [rho(:,1),rho(:,3),rho(:,4),rho(:,5)];
                 param.rho = rho(:,1:N);
+                param.rhoc = rhoc(:,1:N);
                 param.pUp = pUp;
                 param.pDown = pDown;
                 param.G=G;
@@ -90,10 +97,12 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                   zm = pDown(3,:) - G(3);
                   
                   % plot
-                  fill3(xm,ym,zm,"cyan");%上面
+                  fill3(xm,ym,zm,"cyan","FaceAlpha",0.5);%上面
                   hold on
-                  fill3(xM,yM,zM,"cyan");%下面
-                  surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)]);%側面
+                  fill3(xM,yM,zM,"cyan","FaceAlpha",0.5);%下面
+                  surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)],"FaceAlpha",0.5);%側面
+                  plot3(G(1),G(2),G(3),"MarkerSize",10,"Marker","*","Color","red")%重心位置
+                  plot3(Gc(1),Gc(2),Gc(3),"MarkerSize",10,"Marker","*","Color","blue")%重心位置
                   hold off
                   daspect([1,1,1])
                   grid minor
