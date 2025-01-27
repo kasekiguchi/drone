@@ -16,6 +16,7 @@ Controller.F = blkdiag(Controller.F1,Controller.F2,Controller.F3,Controller.F4);
 % F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角
 % Controller.F = blkdiag(F1,F2,F3,F4);
 
+<<<<<<< Updated upstream
 HLNN1 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp1.onnx");
 HLNN1.Initialized
 HLNN2 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp2.onnx");
@@ -24,6 +25,21 @@ HLNN3 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takan
 HLNN3.Initialized
 
 load("./Data/Ad_Bd_F.mat")
+=======
+% HLNN1 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp1.onnx");
+% HLNN1.Initialized
+% HLNN2 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp2.onnx");
+% HLNN2.Initialized
+% HLNN3 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp3.onnx");
+% HLNN3.Initialized
+
+HLNN1 = importNetworkFromONNX("..\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp1.onnx");
+HLNN1.Initialized
+HLNN2 = importNetworkFromONNX("..\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp2.onnx");
+HLNN2.Initialized
+
+load("./Data/OriginalData/Ad_Bd_F.mat")
+>>>>>>> Stashed changes
 Controller.Ad = Ad;
 Controller.Bd = Bd;
 
@@ -34,6 +50,7 @@ Controller.Bd = Bd;
 % layer =inputLayer([40 1], "SC");
 % Controller.HLNN2 = addInputLayer(HLNN2,layer);
 
+<<<<<<< Updated upstream
 layer =inputLayer([13 1], "SC");
 Controller.HLNN1 = addInputLayer(HLNN1,layer);
 layer =inputLayer([19 1], "SC");
@@ -41,6 +58,15 @@ Controller.HLNN2 = addInputLayer(HLNN2,layer);
 % layer =inputLayer([53 1], "SC");
 layer =inputLayer([41 1], "SC");
 Controller.HLNN3 = addInputLayer(HLNN3,layer);
+=======
+layer =inputLayer([14 1], "SC");
+Controller.HLNN1 = addInputLayer(HLNN1,layer);
+layer =inputLayer([52 1], "SC");
+Controller.HLNN2 = addInputLayer(HLNN2,layer);
+% layer =inputLayer([53 1], "SC");
+% layer =inputLayer([41 1], "SC");
+% Controller.HLNN3 = addInputLayer(HLNN3,layer);
+>>>>>>> Stashed changes
 
 
 % layer =inputLayer([9 1], "SC");

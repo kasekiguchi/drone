@@ -3,7 +3,12 @@ arguments
     param.freq = 10% 周期
     param.init = [0 0 0]% サドルの中心
     param.radius = 1.0 % 各軸の振幅
+<<<<<<< Updated upstream
     param.phase = 0.0 % 位相    
+=======
+    param.phase = 0.0 % 位相
+    param.i 
+>>>>>>> Stashed changes
 end
 x_0 = param.init(1);
 y_0 = param.init(2);
@@ -21,6 +26,7 @@ syms t real
 % lz_offset=origin(3);% 1;
 % w = 2*pi/T; % T秒で一周
 
+<<<<<<< Updated upstream
 ref=@(t) [x_0 + r*sin(2*pi*t/T); % x
 y_0 + r*cos(2*pi*t/T); % y
 1; % z
@@ -28,5 +34,18 @@ y_0 + r*cos(2*pi*t/T); % y
 
 
 % ref=@(t) [0;0;2;0];%
+=======
+% ref=@(t) [x_0 + r*sin(2*pi*t/((0.75 + 0.125*param.i)*T)); % x
+% y_0 + r*cos(2*pi*t/((0.75 + 0.125*param.i)*T)); % y
+% 2; % z
+% 0];%
+
+ref=@(t) [x_0 + r*sin(2*pi*t/T); % x
+y_0 + r*cos(2*pi*t/T); % y
+2; % z
+0];%
+
+% ref=@(t) [0;0;0;0];%
+>>>>>>> Stashed changes
 
 end

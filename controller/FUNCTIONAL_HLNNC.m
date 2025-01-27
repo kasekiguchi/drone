@@ -15,7 +15,11 @@ properties
     p_log
 
 end
+<<<<<<< Updated upstream
 
+=======
+% my_torch_onnxは重みとバイアスしか取り出していないのでその他の操作はMATLABで手実装する必要がある
+>>>>>>> Stashed changes
 methods
 
     function obj = FUNCTIONAL_HLNNC(self, param)
@@ -36,7 +40,12 @@ methods
         km1 = self.parameter.km1;           
         km2 = self.parameter.km2;           
         km3 = self.parameter.km3;           
+<<<<<<< Updated upstream
         km4 = self.parameter.km4;           
+=======
+        km4 = self.parameter.km4;
+        mass = self.parameter.mass;
+>>>>>>> Stashed changes
         obj.IT = [1 1 1 1;-ly, -ly, (Ly - ly), (Ly - ly); lx, -(Lx-lx), lx, -(Lx-lx); km1, -km2, -km3, km4];          
         
         
@@ -53,6 +62,7 @@ methods
         F4 = obj.param.F4;
 
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
+<<<<<<< Updated upstream
         % std = load('./Data/mean_std_data.mat');
 
         Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
@@ -61,6 +71,16 @@ methods
         x = [R2q(Rb0' * model.state.getq("rotmat")); [0;0;0]; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
         % x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
         
+=======
+        % std = load("..\VarietyPack\Takano\HLNN\Result\mean_std_data.mat");
+
+        Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
+        
+
+        x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
+        % x = [R2q(Rb0' * model.state.getq("rotmat")); [0;0;0]; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
+         
+>>>>>>> Stashed changes
         xd(1:3) = Rb0' * xd(1:3);
         xd(4) = 0;
         xd(9:11) = Rb0' * xd(9:11);
@@ -81,16 +101,43 @@ methods
         %% 
         % 
         my_xd = zeros([12, 1]);
+<<<<<<< Updated upstream
         my_xd(1:2) = xd(1:2);
         my_xd(3:6) = xd(5:8);
         my_xd(7:10) = xd(9:12);
         my_xd(11:12) = xd(13:14);
        
         % my_xd = (x-ref_std(:,1))./ref_std(:,2);
+=======
+        my_xd(1) = xd(3);
+        my_xd(2) = xd(7);
+        my_xd(3) = xd(1);
+        my_xd(4) = xd(5);
+        my_xd(5) = xd(9);
+        my_xd(6) = xd(13);
+        my_xd(7) = xd(2);
+        my_xd(8) = xd(6);
+        my_xd(9) = xd(10);
+        my_xd(10) = xd(14);
+        my_xd(11) = xd(4);
+        my_xd(12) = xd(8);
+        
+        % my_xd = (x-ref_std(:,1))./ref_std(:,2);
+        
+        
+        %% NN1-2
+        % x_ = [Quat2Eul(R2q(Rb0' * model.state.getq("rotmat"))); Rb0' * model.state.v; model.state.w]; % [q, v, w]に並べ替え
+        x = [Rb0' * model.state.p; Quat2Eul(R2q(Rb0' * model.state.getq("rotmat"))); Rb0' * model.state.v; model.state.w]; % [p, q, v, w]に並べ替え
+        x_ = x;
+        x_(1:3) = x_(1:3) - obj.p_log;
+        % x_ = [Quat2Eul(R2q(Rb0' * model.state.getq("rotmat"))); Rb0' * model.state.v; model.state.w]; % [q, v, w]に並べ替え
+
+>>>>>>> Stashed changes
         %%%%%%%%%%%%%%%%
         % x = my_standardization(x,std.x_qua_std)';
         %%%%%%%%%%%%%%%%
 
+<<<<<<< Updated upstream
         % %% NN1-2
         % xi = predict(obj.param.HLNN1,x)' ;
         % xi = cast(xi, "double");
@@ -125,10 +172,27 @@ methods
         xi234 = cast(predict(obj.param.HLNN2,NN2_input)', "double");
 
         xi = [xi1;xi234];
+=======
+        A1 = obj.param.Ad(1:2,1:2);
+        B1 = obj.param.Bd(1:2,1:2);
+        F1 = obj.param.F(1:2,1:2);
+        xi1 = [x(3);x(9)];
+        delta1 = xi1-xd(1:2);
+        v1   = -F1*delta1;
+        % v1   = -F1*xi1;
+        dv1  = -F1*(A1 - B1*F1)*xi1;
+        ddv1 = -F1*(A1 - B1*F1)^2*xi1;
+
+        
+        xi = predict(obj.param.HLNN1,[x_;v1])' ;
+        xi = cast(xi, "double");
+        xi = [xi1;x(1);x(7);xi(1:2);x(2);x(8);xi(3:4);x(6);x(12)];
+>>>>>>> Stashed changes
         obj.result.xi_log = xi;
 
         v = obj.param.F*(xi-my_xd);
         xi_plus = obj.param.Ad*xi - obj.param.Bd*v;
+<<<<<<< Updated upstream
         % x = [x;xi;xi_plus;v;my_xd];
         x = [x;xi;xi_plus;v];
 
@@ -146,6 +210,52 @@ methods
         %% calc actual input
         tmp = prob(1:4);
         
+=======
+
+        % ref=gen_ref_saddle(obj.param);
+        % ref = zeros(12,1);
+        x = [x_;xi;xi_plus;v;my_xd];
+        % x = [xi;xi_plus;v];
+
+        prob = cast(predict(obj.param.HLNN2,x)', "double");
+
+        % %% NN1-3
+        % x = [[0;0;0]; R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.v; model.state.w]; % [p, q, v, w]に並べ替え
+        % xi1 = predict(obj.param.HLNN1,x)';
+        % xi1 = cast(xi1, "double");
+        % 
+        % 
+        
+        % 
+        % NN2_input = [x;v1;dv1;ddv1];
+        % % x = my_standardization(x,std.x_qua_std)';
+        % xi234 = cast(predict(obj.param.HLNN2,NN2_input)', "double");
+        % 
+        % xi = [xi1;xi234];
+        % obj.result.xi_log = xi;
+        % 
+        % v = obj.param.F*(xi-my_xd);
+        % xi_plus = obj.param.Ad*xi - obj.param.Bd*v;
+        % % x = [x;xi;xi_plus;v;my_xd];
+        % x = [x;xi;xi_plus;v];
+        % 
+        % prob = cast(predict(obj.param.HLNN3,x)', "double");
+        % 
+        % obj.p_log =  model.state.p;
+        % obj.p_log
+        % 
+        % % ref=gen_ref_saddle(obj.param);
+        % % ref = zeros(12,1);
+        % % x = [x;xi;xi_plus;v;ref];
+        % % 
+        % % prob = cast(predict(obj.param.HLNN2,x)', "double");
+
+        %% calc actual input
+        % tmp = obj.IT*prob(1:4);   %各プロペラの推力
+        tmp = prob(1:4);   %総推力とトルク
+        tmp(2:4) = 0.01*tanh(tmp(2:4));
+        % tmp(1) = tmp(1) + 0.5884*9.81
+>>>>>>> Stashed changes
         % tmp = obj.IT*tmp;
         
         %%%%%%%%%%%%%%%

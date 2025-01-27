@@ -7,16 +7,30 @@ else
   cd(fileparts(tmp.Filename));
 end
 
+<<<<<<< Updated upstream
 files = dir('Data/data1.mat');
 for i = 1:length(files)
+=======
+% files = dir('Data/data1.mat');
+% for i = 1:length(files)
+>>>>>>> Stashed changes
     % a = files(i).name;
     % str="data"+num2str(i)+".mat";
     % cd Data
     % movefile(a,str);
     % cd ..
+<<<<<<< Updated upstream
 
 end
 log = LOGGER("./Data/waypoint.mat");
+=======
+% end
+i = 1;
+
+% log = LOGGER("./Data/OriginalData/waipoint_m_1kg_Log.mat");
+% log = LOGGER("./Data/test.mat");
+log = LOGGER('Data\data_04kg.mat');
+>>>>>>> Stashed changes
 for j = 1:i
     [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
     cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
@@ -58,7 +72,12 @@ for j = 1:i
     
     
     clearvars -except p q v w Reference rotmat uHL z1 z2 z3 z4 input
+<<<<<<< Updated upstream
     save("./Data/data_for_Py_mywaypoint")
+=======
+    % save("./Data/OriginalData/waipoint_m_1kg_reshapede.mat")
+    save("Data/OriginalData/data_04kg.mat")
+>>>>>>> Stashed changes
 end
 
 function rotmat = for_RodriguesQuaternion(mat)

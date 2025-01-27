@@ -21,4 +21,8 @@ F = blkdiag(F1,F2,F3,F4);
 
 clearvars -except Ad Bd F dt
 
+<<<<<<< Updated upstream
 save("./Data/Ad_Bd_F.mat")
+=======
+save("./Data/OriginalData/Ad_Bd_F.mat")
+>>>>>>> Stashed changes
