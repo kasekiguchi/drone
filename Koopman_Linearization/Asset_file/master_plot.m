@@ -31,9 +31,9 @@ flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 1; % コマンドウィンドウに表示
+flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
-args.save_fig = 0;     % 1：出力したグラフをfigで保存する
+args.save_fig = 1;     % 1：出力したグラフをfigで保存する
 flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
@@ -67,24 +67,24 @@ cd('../../');
 % f(1) = figure(5);
 % exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
 %%
-function [F, code] = select_observable(loadfilename)
-    code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
-    switch code
-        case '00'; F = @quaternions_all_00;
-        case '02'; F = @quaternions_all_02;
-        case '23'; F = @quaternions_all_23;
-        case '26'; F = @quaternions_all_26;
-        otherwise; F = @quaternions_all;
-    end
-end
+% function [F, code] = select_observable(loadfilename)
+%     code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
+%     switch code
+%         case '00'; F = @quaternions_all_00;
+%         case '02'; F = @quaternions_all_02;
+%         case '23'; F = @quaternions_all_23;
+%         case '26'; F = @quaternions_all_26;
+%         otherwise; F = @quaternions_all;
+%     end
+% end
 
 function save_fig(args, flg, loadfilename, g, code)
     if args.save_fig && flg.figtype
         % figure -> hundle
-        for i = 1:4; f(i) = figure(i); end
+        for i = 1:4; f(i) = figure(i); f(i).Position = ([680 458 560 420]); end
         type = ['p', 'q', 'v', 'w'];
-        % filetmp = strrep(loadfilename{1},'-','_');
-        % savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
+
+        % ちょっとフィッティング検証のグラフ変更
 
         %-- make folder and move folder
         if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
@@ -115,7 +115,7 @@ start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
 % thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
 thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
-% torque = input_result(2:4,start_num:step_num);
+torque = zeros(3, step_num);
 Est = zeros(12,1);
 % Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
 mode = 100; % 1:00, 2:10, 3:hermite, 0:free, F:@quaternions_all
@@ -161,6 +161,7 @@ for i = 1:ii
             plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
             text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
             xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+            ytickformat('%.2f')
         end
         fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
     end
@@ -421,6 +422,7 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position [m]','FontSize',Fsize.label);
 hold off
+ytickformat('%.2f');
 
 %% Q
 if flg.figtype; figure(2);
@@ -463,6 +465,7 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Attitude [rad]','FontSize',Fsize.label);
 hold off
+ytickformat('%.2f');
 
 %% V
 if flg.figtype; figure(3);
@@ -501,6 +504,7 @@ xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Velocity [m/s]','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
 hold off
+ytickformat('%.2f');
 
 %% W
 if flg.figtype; figure(4);
@@ -539,6 +543,7 @@ ylabel('Angular Velocity [rad/s]','FontSize',Fsize.label);
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 hold off
+ytickformat('%.2f');
 
 %% referenceの確認
 if flg.confirm_ref && ~args.save_fig
@@ -549,6 +554,7 @@ if flg.confirm_ref && ~args.save_fig
     legend('x', 'y', 'z', 'verification range', 'Location', 'southeast', 'FontSize', 12); grid on;
     xlabel('Time [s]', 'FontSize', 15);
     ylabel('Position [m]', 'FontSize', 15);
+    ytickformat('%.2f');
     % daspect([1 1 1]);
 
     if flg.figtype; figure(6); else; subplot(m, n, 6); end
@@ -563,6 +569,7 @@ if flg.confirm_ref && ~args.save_fig
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
     hold off;
+    ytickformat('%.2f');
 end
 
 %% RMSE
