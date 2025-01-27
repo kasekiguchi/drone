@@ -72,6 +72,9 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 %重心の計算
                 polyin = polyshape(pUp(1,:),pUp(2,:));
                 [x,y] = centroid(polyin);
+                %紐の接続点が頂点の図形の中心の場合
+                polyin = polyshape(xUp(1:N),yUp(1:N));
+                [x,y] = centroid(polyin);
                 G = [x;y;0];
                 %接続点を頂点とする図形の重心位置
                 polyin = polyshape(pUp(1,1:N),pUp(2,1:N));
