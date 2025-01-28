@@ -38,7 +38,7 @@ initial_state.w = [0; 0; 0];
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
 
-% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
+% model_file = "2025-01-19_Exp_Kiyama_code00_saddle_increased_weight.mat";
 model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
@@ -78,16 +78,6 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0.
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation_hermite(agent,Controller_MPC_Koopman(dt, model_file, agent));
-conmode = 2;
-%% 誤差モデル
-% % 1コンのとき  100行目もコメントイン
-% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-% conmode = 1;
-% % 2つのコントローラの設定  101行目もコメントイン
-% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
 
 %%
 % run("ExpBase");
@@ -103,9 +93,6 @@ for i = 1:te/dt
     agent(1).estimator.do(time, phase);
     agent(1).reference.do(time, phase);
     agent(1).controller.do(time, phase);
-    % if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
-    % else; agent(1).controller.do(time, 'f', agent);
-    % end
     agent(1).plant.do(time, phase);
     logger.logging(time, phase, agent);
     time.t = time.t + time.dt;
@@ -124,21 +111,12 @@ result_plot(app, model_file);
 % logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 % logger.save();
 
-%% function 2コンとき
-function result = controller_do(varargin)
-    controller = varargin{5}.controller; % GUI : varargin{5}
-    result.mpc = controller.mpc.do(varargin);
-    result.hlc = controller.hlc.do(varargin);
-    result = result.mpc;
-    varargin{5}.controller.result = result;
-end
-
 function result_plot(app, model)
     app.fExp = 0;
     flg.figtype = 0; % 0:subplot
     flg.savefig = 0;
     flg.animation_save = 0;
-    flg.animation = 1;
+    flg.animation = 0;
     flg.timerange = 0;
     flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
     filename = string(datetime('now'), 'yyyy-MM-dd');

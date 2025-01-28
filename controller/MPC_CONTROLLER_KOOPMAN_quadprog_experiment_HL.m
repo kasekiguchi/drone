@@ -73,7 +73,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
             % H: 変数
             % F: fを生成するために必要な行列
-            obj.result.setting.weight = struct('Q',obj.weight,'Qf',obj.weightF,'R',obj.weightR);
+            % obj.result.setting.weight = struct('Q',obj.weight,'Qf',obj.weightF,'R',obj.weightR);
             % obj.result.setting.A = obj.param.A;
             % obj.result.setting.B = obj.param.B;
             % obj.result.setting.C = obj.param.C;

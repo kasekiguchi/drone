@@ -67,24 +67,24 @@ cd('../../');
 % f(1) = figure(5);
 % exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
 %%
-function [F, code] = select_observable(loadfilename)
-    code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
-    switch code
-        case '00'; F = @quaternions_all_00;
-        case '02'; F = @quaternions_all_02;
-        case '23'; F = @quaternions_all_23;
-        case '26'; F = @quaternions_all_26;
-        otherwise; F = @quaternions_all;
-    end
-end
+% function [F, code] = select_observable(loadfilename)
+%     code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
+%     switch code
+%         case '00'; F = @quaternions_all_00;
+%         case '02'; F = @quaternions_all_02;
+%         case '23'; F = @quaternions_all_23;
+%         case '26'; F = @quaternions_all_26;
+%         otherwise; F = @quaternions_all;
+%     end
+% end
 
 function save_fig(args, flg, loadfilename, g, code)
     if args.save_fig && flg.figtype
         % figure -> hundle
-        for i = 1:4; f(i) = figure(i); end
+        for i = 1:4; f(i) = figure(i); f(i).Position = ([680 458 560 420]); end
         type = ['p', 'q', 'v', 'w'];
-        % filetmp = strrep(loadfilename{1},'-','_');
-        % savefile = strrep(strcat(filetmp,'--startTime_',num2str(args.startTime), 's--', args.ref_tra), '.', '-');
+
+        % ちょっとフィッティング検証のグラフ変更
 
         %-- make folder and move folder
         if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
@@ -434,6 +434,7 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position [m]','FontSize',Fsize.label);
 hold off
+ytickformat('%.2f');
 
 %% Q
 if flg.figtype; figure(2);
@@ -476,6 +477,7 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Attitude [rad]','FontSize',Fsize.label);
 hold off
+ytickformat('%.2f');
 
 %% V
 if flg.figtype; figure(3);
@@ -514,6 +516,7 @@ xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Velocity [m/s]','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
 hold off
+ytickformat('%.2f');
 
 %% W
 if flg.figtype; figure(4);
@@ -552,6 +555,7 @@ ylabel('Angular Velocity [rad/s]','FontSize',Fsize.label);
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 hold off
+ytickformat('%.2f');
 
 %% referenceの確認
 if flg.confirm_ref && ~args.save_fig
@@ -562,6 +566,7 @@ if flg.confirm_ref && ~args.save_fig
     legend('x', 'y', 'z', 'verification range', 'Location', 'southeast', 'FontSize', 12); grid on;
     xlabel('Time [s]', 'FontSize', 15);
     ylabel('Position [m]', 'FontSize', 15);
+    ytickformat('%.2f');
     % daspect([1 1 1]);
 
     if flg.figtype; figure(6); else; subplot(m, n, 6); end
@@ -576,6 +581,7 @@ if flg.confirm_ref && ~args.save_fig
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
     hold off;
+    ytickformat('%.2f');
 end
 
 %% RMSE
