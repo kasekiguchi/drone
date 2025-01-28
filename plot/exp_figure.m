@@ -26,7 +26,7 @@ log = LOGGER(loadfile); % loggerの形で収納できる
 
 % logger = load("Data/1223_KMPC_hovering_code23_weight_1720.mat");
 
-save_master = 0; % LOGGERで読み込めないやつ
+save_master = 1; % LOGGERで読み込めないやつ
 % 115:start
 % 97 :arming
 % 116:takeoff q no data
@@ -34,12 +34,13 @@ save_master = 0; % LOGGERで読み込めないやつ
 % 108:landing
 % 0:stop or quit
 %%
-% logger.Data.agent.estimator = est;
-% logger.Data.agent.reference = ref;
-% logger.Data.agent.input = input;
-% logger.Data.param = param;
+save_master = 1;
+logger.Data.agent.estimator = est;
+logger.Data.agent.reference = ref;
+logger.Data.agent.input = input;
+logger.Data.param = param;
 
-% disp("Loaded data...");
+disp("Loaded data...");
 %% save setting
 % savename = strcat(filename, '_all');
 % savefolder = '\Data\Exp_figure_image\';
@@ -71,8 +72,11 @@ fig = fig.main_figure();
 
 %%
 if save_master
+    filename = '';
     fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
     fig = fig.master_plot(); % 修論用
+    for i=1:6; fig.data.f(i).Position = [100 100 560 350]; end
+    ytickformat('%,.2f');
     s = {'p','q','v','w','thrust','torque'};
     for i = 1:6
         savename = strcat('Data/code23_exp_', s{i}, '.pdf'); exportgraphics(fig.data.f(i), savename, 'ContentType', 'vector', 'Resolution', 300);

@@ -24,8 +24,8 @@ mode.training_data = 'Kiyama';
 % filename = '2024-12-04_Exp_Kiyama_code22_saddle'; % hermite [1; x]
 % filename = '2024-12-18_Exp_Kiyama_code23_saddle_weight4';
 % filename = '2024-12-10_Exp_Kiyama_code00_saddle_weight_1-00001';
-% filename = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
-filename = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
+filename = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+% filename = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
 % code12=without isobe, 13=with isobe, 14=一番ぽいやつ, 15=たくさん
 load(strcat(filename, '.mat'), 'est');
 
@@ -40,6 +40,8 @@ Input_file = 'Input_Kiyama_result.mat';
 Est_file = 'Est_Kiyama_result.mat';
 % Est_file = 'Est_Y20_result.mat';
 
+F = @quaternions_all_23;
+
 load(Input_file);
 load(Est_file);
 
@@ -49,7 +51,7 @@ load(Est_file);
 % torque = zeros(3, xx);
 
 clear X; close all;
-N = 20;
+N = 31;
 start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
 thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
@@ -59,8 +61,8 @@ torque = zeros(3, step_num);
 
 Est = zeros(12,1);
 % Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
-mode = 3; % 1:00, 2:10, 3:hermite, 0:free
-X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode);
+mode = 100; % 1:00, 2:10, 3:hermite, 0:free
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode, F);
 
 % 位置含まないモデルのとき
 % p = [0;0;0];

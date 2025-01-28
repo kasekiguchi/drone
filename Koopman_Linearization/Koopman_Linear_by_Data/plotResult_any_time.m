@@ -41,8 +41,8 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 % loadfilename{1} = '2024-12-04_Exp_Kiyama_code22_saddle';
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
-% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
-loadfilename{1} = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
+loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+% loadfilename{1} = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
 % loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
@@ -56,10 +56,10 @@ loadfilename{1} = '2024-12-22_Exp_Kiyama_code26_saddle_weight10';
 % file2 : 別のリファレンス
 % ref_tra = 'P2Py';
 % loadfilename{2} = WhichLoadFile(ref_tra, 1, []);
-loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
-% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
@@ -150,7 +150,7 @@ end
 
 %% 任意の時間からの推定を行う
 try
-F = @quaternions_all; % 読み込んだデータと観測量を合わせる
+F = @quaternions_all_23; % 読み込んだデータと観測量を合わせる
 % 実験データがreferenceになっている場合、dtは時刻によって様々に変化する
 % dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
 dt = diff(file{WhichRef}.simResult.reference.T);

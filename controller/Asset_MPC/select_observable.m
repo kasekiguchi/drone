@@ -1,5 +1,5 @@
 function [F, code] = select_observable(loadfilename)
-    if size(loadfilename, 1) == 1; file = loadfilename; 
+    if size(loadfilename, 2) == 1; file = loadfilename; 
     else; file = loadfilename{1}; end
     code = cell2mat(append(extract(file, 27), extract(file, 28))); % codeの抽出
     switch code

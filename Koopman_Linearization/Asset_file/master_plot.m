@@ -67,21 +67,10 @@ cd('../../');
 % f(1) = figure(5);
 % exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
 %%
-% function [F, code] = select_observable(loadfilename)
-%     code = cell2mat(append(extract(loadfilename{1}, 27), extract(loadfilename{1}, 28))); % codeの抽出
-%     switch code
-%         case '00'; F = @quaternions_all_00;
-%         case '02'; F = @quaternions_all_02;
-%         case '23'; F = @quaternions_all_23;
-%         case '26'; F = @quaternions_all_26;
-%         otherwise; F = @quaternions_all;
-%     end
-% end
-
 function save_fig(args, flg, loadfilename, g, code)
     if args.save_fig && flg.figtype
         % figure -> hundle
-        for i = 1:4; f(i) = figure(i); f(i).Position = ([680 458 560 420]); end
+        for i = 1:4; f(i) = figure(i); f(i).Position = ([680 458 560 350]); end
         type = ['p', 'q', 'v', 'w'];
 
         % ちょっとフィッティング検証のグラフ変更
@@ -147,7 +136,8 @@ ideal_vz = 9.81065 * (0.025*N);
 
 
 label_x = {'$$p_x$$', '$$p_y$$', '$$p_z$$', '$$q_{\mathrm{roll}}$$', '$$q_{\mathrm{pitch}}$$', '$$q_{\mathrm{yaw}}$$', '$$v_x$$', '$$v_y$$', '$$v_z$$', '$$\omega_{\mathrm{roll}}$$', '$$\omega_{\mathrm{pitch}}$$', '$$\omega_{\mathrm{yaw}}$$'};
-ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; % p,q,v,w,(z),(vz)
+% ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; % p,q,v,w,(z),(vz)
+ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1];
 fprintf('0input verification result. max value = \n');
 format long
 arr = 1:ii*jj; idx = 0; m = 5;
