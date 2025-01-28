@@ -31,9 +31,9 @@ flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 1; % コマンドウィンドウに表示
+flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
-args.save_fig = 0;     % 1：出力したグラフをfigで保存する
+args.save_fig = 1;     % 1：出力したグラフをfigで保存する
 flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
@@ -115,7 +115,7 @@ start_num = 1; % 単体で利用時はステップ数
 step_num = start_num + N;
 % thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
 thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
-% torque = input_result(2:4,start_num:step_num);
+torque = zeros(3, step_num);
 Est = zeros(12,1);
 % Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
 mode = 100; % 1:00, 2:10, 3:hermite, 0:free, F:@quaternions_all
@@ -141,12 +141,16 @@ set(0,'defaultLineMarkerSize',Fontsize);
 if ~flg.figtype; f = figure(100); end 
 if args.title; sgtitle(strrep(filename, '_', '-')); else; sgtitle(""); end
 
+% 理想
+ideal_z = 1/2 * 9.81065 * (0.025*N)^2;
+ideal_vz = 9.81065 * (0.025*N);
+
 
 label_x = {'$$p_x$$', '$$p_y$$', '$$p_z$$', '$$q_{\mathrm{roll}}$$', '$$q_{\mathrm{pitch}}$$', '$$q_{\mathrm{yaw}}$$', '$$v_x$$', '$$v_y$$', '$$v_z$$', '$$\omega_{\mathrm{roll}}$$', '$$\omega_{\mathrm{pitch}}$$', '$$\omega_{\mathrm{yaw}}$$'};
-ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05];
+ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; % p,q,v,w,(z),(vz)
 fprintf('0input verification result. max value = \n');
 format long
-arr = 1:ii*jj; idx = 0;
+arr = 1:ii*jj; idx = 0; m = 5;
 for i = 1:ii
     for j = 1:jj
         idx = idx + 1;
@@ -157,10 +161,19 @@ for i = 1:ii
             text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
             xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
         else
+            if idx == 3 || idx == 9
+                ylimset = ylimsetting(m,:);
+                m = m + 1;
+            else
+                ylimset = ylimsetting(i,:);
+            end
             f(idx) = figure(idx+100);
-            plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
-            text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimset); xlim([-inf inf]);
+            text(0.65, 0.12, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
             xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+            f(idx).Position = [100 100 500 200];
+            ytickformat('%,.2f');
+            pbaspect([1.000000000000000   0.373568763593945   0.373568763593945]);
         end
         fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
     end
