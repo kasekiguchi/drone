@@ -56,9 +56,9 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.A = param.A;
       % obj.B = param.B;
       % obj.C = param.C;
-      obj.A = repmat(param.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
-      obj.B = repmat(param.B,1,1,obj.N);
-      obj.C = repmat(param.C,1,1,obj.N);
+      % obj.A = repmat(param.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
+      % obj.B = repmat(param.B,1,1,obj.N);
+      % obj.C = repmat(param.C,1,1,obj.N);
 
       % Initialize parameter
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
@@ -67,7 +67,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.state.state_data = zeros(n,obj.H, obj.N);
       obj.input.Evaluationtra = zeros(obj.N, 5);
       obj.input.sigma = param.input.Initsigma;
-      obj.input.mu = zeros(4, obj.H, obj.N);
+      obj.input.mu = param.ref_input;
 
       % Initialize input
       obj.result.input = zeros(self.estimator.model.dim(2),1);
@@ -75,9 +75,12 @@ classdef MPC_CONTROLLER_KMC < handle
 
       % Extended Coefficient Matrix ベクトル化
       obj.model = ExtendedCoefficientMatrix({param.A,param.B,obj.H,param.state_size}); % 一括計算 2025/1/21確認
-      obj.param.A = repmat(obj.model.A, 1, 1, obj.N);
-      obj.param.B = repmat(obj.model.B, 1, 1, obj.N);
-      obj.param.C = repmat(param.C, obj.H, obj.H, obj.N);
+      % obj.param.A = repmat(obj.model.A, 1, 1, obj.N);
+      % obj.param.B = repmat(obj.model.B, 1, 1, obj.N);
+      % obj.param.C = repmat(param.C, obj.H, obj.H, obj.N);
+      obj.param.A = obj.model.A;
+      obj.param.B = obj.model.B;
+      obj.param.C = repmat(param.C, obj.H, obj.H);
 
       % QP change equation
       % Q = reshape(obj.Weight(:,:,1), obj.param.state_size, []);
@@ -205,8 +208,13 @@ classdef MPC_CONTROLLER_KMC < handle
         % X = pagemtimes(obj.param.A,x_0)+pagemtimes(obj.param.B,U);
         % obj.state.state_data = reshape(X,12,obj.H,[]);
 
-        obj.state.state_data = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
-      obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
+        % obj.state.state_data = pagemtimes(obj.param.A, obj.param.F(obj.current_state)) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
+        % obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
+
+        current = repmat(obj.param.F(obj.current_state), 1, 1, obj.N);
+        tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
+        tmp = pagemtimes(obj.param.C, tmp_z);
+        obj.state.state_data = reshape(tmp, obj.param.state_size, obj.param.H, obj.N);
     end
 
     function objective(obj)
@@ -299,25 +307,18 @@ classdef MPC_CONTROLLER_KMC < handle
             ./ sum(pw), 4, 1, NP), 1, H, 1);
     end
 
-    function get_input(obj, xn, xd)
+    function get_input(obj)
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        vf = obj.input.u(1, 1, BestcostID(2));
-        vs(1,1) = obj.input.u(2, 1, BestcostID(3));
-        vs(2,1) = obj.input.u(3, 1, BestcostID(4));
-        vs(3,1) = obj.input.u(4, 1, BestcostID(5));
-
-        P = obj.P;
-        tmp = Uf(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = obj.input.u(:,1,BestcostID);
 
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-        obj.input.u = [vf; vs];
-        obj.input.v = obj.input.u;
+        obj.input.pre_u = obj.result.input;
 
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
-        obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
-        obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))'));
+        obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        % obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))'));
         obj.input.BestcostID = BestcostID;
     end
 

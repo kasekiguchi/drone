@@ -54,6 +54,9 @@ for i = 1:te/dt
     all = toc;
     % disp([num2str(time.t)])
     agent.controller.show;
+    if agent.estimator.result.state.p(3) < 0
+        break;
+    end
 end
 %%
 logger.plot({1, "p", "er"}, {1, "v", "er"}, {1, "q", "e"}, {1, "input", ""},...
