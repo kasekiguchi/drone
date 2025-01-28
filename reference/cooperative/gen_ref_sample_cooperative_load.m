@@ -48,7 +48,7 @@ z = 1*lz*sin(2*w*t - pi/2)+lz_offset; % z
 % y = ly_offset;  % y
 % z = lz_offset; % z
 %exp
-roll = 2*pi/180;
+roll = -3*pi/180;
 pitch = 3*sin(2*pi*t/T/2)*pi/180;
 % pitch = 3*pi/180;
 yaw = -5*pi/180;

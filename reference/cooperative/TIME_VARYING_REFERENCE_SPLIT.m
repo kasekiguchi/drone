@@ -215,7 +215,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d  = obj.agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
                p = obj.self.estimator.result.state.p;%機体位置
-               real_pL = obj.self.estimator.result.state.pL;%機体位置
+               % real_pL = obj.self.estimator.result.state.pL;%機体位置
                % p = obj.self.sensor.result.state.p;%機体位置
                if isprop(obj.self.sensor.result.state,"real_pL")
                    real_pL = obj.self.sensor.result.state.real_pL;%牽引物位置
@@ -244,7 +244,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp%=0
+                   constp=0
                    constTargetp
                    constd
 
@@ -288,12 +288,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
                        obj.base_state12_landing = obj.self.sensor.result.state.pL(1:2);
                    end
-                   if norm(p - real_pL) >= 0.8*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
+                   if norm(p - real_pL) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.6)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
+                       % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
                        x0d = refi(1:3) - rhoi;
@@ -454,10 +455,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    for i = 1:(length(rigid)-1)/2
                         spDrone(:,i) = rigid(2*i).p;%機体の位置を取得
                    end
-                   if ~isempty(obj.agent1.parameter.dotDeltaG)
-                       rho35 = [rigit(3).p';rigit(5).p'] - rigit(1).p';
-                       obj.agent1.sensor.result.state.p =  rigid(1).p + rho35(1:2,1:2)\obj.agent1.parameter.dotDeltaG ;
-                   end
+                   % if ~isempty(obj.agent1.parameter.dotDeltaG)
+                   %     rho35 = [rigit(3).p';rigit(5).p'] - rigit(1).p';
+                   %     obj.agent1.sensor.result.state.p =  rigid(1).p + rho35(1:2,1:2)\obj.agent1.parameter.dotDeltaG ;
+                   % end
                else
                     sensor1 = obj.self.sensor.result.state;%複数機モデルから機体と接続点の位置を計測
                     %分割前ペイロード

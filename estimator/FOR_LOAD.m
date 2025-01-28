@@ -68,10 +68,10 @@ classdef FOR_LOAD < SENSOR_CLASS
                     spL(3) = ipL(3);
                 
                 % end
-            % else
-            %     spL = ipL;
-            %     obj.tt0=[];
-            %     obj.tl0=[];
+            else
+                spL = ipL;
+                obj.tt0=[];
+                obj.tl0=[];
             end
             obj.result.state.p = sp;
             obj.result.state.q = sq;
