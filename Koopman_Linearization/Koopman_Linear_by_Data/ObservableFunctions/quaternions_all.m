@@ -20,40 +20,40 @@ k = 0.000008048;          % 推力定数
 
 % 状態がクォータニオンを用いた13次元の場合
 % if size(x,1) == 9+4
-    % P1 = 0;
-    % P2 = 0;
-    % P3 = 0;
-    % Q1 = x(1,1); % roll
-    % Q2 = x(2,1); % pitch
-    % Q3 = x(3,1); % yaw
-    % V1 = x(4,1);
-    % V2 = x(5,1);
-    % V3 = x(6,1);
-    % W1 = x(7,1);
-    % W2 = x(8,1);
-    % W3 = x(9,1);
-    % u1 = 0;
-    % u2 = 0;
-    % u3 = 0;
-    % u4 = 0;
+    P1 = 0;
+    P2 = 0;
+    P3 = 0;
+    Q1 = x(1,1); % roll
+    Q2 = x(2,1); % pitch
+    Q3 = x(3,1); % yaw
+    V1 = x(4,1);
+    V2 = x(5,1);
+    V3 = x(6,1);
+    W1 = x(7,1);
+    W2 = x(8,1);
+    W3 = x(9,1);
+    u1 = 0;
+    u2 = 0;
+    u3 = 0;
+    u4 = 0;
 % 状態がオイラー角を用いた12次元の場合
 % elseif size(x,1) == 12+4
-    P1 = x(1,1);
-    P2 = x(2,1);
-    P3 = x(3,1);
-    Q1 = x(4,1); % roll
-    Q2 = x(5,1); % pitch
-    Q3 = x(6,1); % yaw
-    V1 = x(7,1);
-    V2 = x(8,1);
-    V3 = x(9,1);
-    W1 = x(10,1);
-    W2 = x(11,1);
-    W3 = x(12,1);
-    u1 = 0; %x(13,1);
-    u2 = 0; %x(14,1);
-    u3 = 0; %x(15,1);
-    u4 = 0; %x(16,1);
+    % P1 = x(1,1);
+    % P2 = x(2,1);
+    % P3 = x(3,1);
+    % Q1 = x(4,1); % roll
+    % Q2 = x(5,1); % pitch
+    % Q3 = x(6,1); % yaw
+    % V1 = x(7,1);
+    % V2 = x(8,1);
+    % V3 = x(9,1);
+    % W1 = x(10,1);
+    % W2 = x(11,1);
+    % W3 = x(12,1);
+    % u1 = 0; %x(13,1);
+    % u2 = 0; %x(14,1);
+    % u3 = 0; %x(15,1);
+    % u4 = 0; %x(16,1);
 % end
 
     % q0-q3 : 与えたオイラー角から求めたクォータニオン
@@ -255,7 +255,7 @@ z = [common_z; isobe_z]; % 00
 % z = [isobe_z; common_z]; % 07
 % z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
 % z = [common_except_pos_z; isobe_z; partial_param_z]; % 09  11の位置を含まない版
-z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
+% z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
 % z = [common_z; isobe_z; partial_param_z]; % 11
 % z = [common_z; hermite_z]; % 12
 % z = [common_z; isobe_z; hermite_z]; % 13

@@ -208,6 +208,7 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       obj.predict();
 
       %% 実状態変換
+      % obj.state.ref = zeros(12,obj.param.H);
       Xd = repmat(obj.state.ref(1:12,:), 1,1,obj.N);
       Xreal = Xd + obj.state.state_data; % + or -
       obj.state.error_data = Xd - Xreal; % error_data = state_data   / default : -
@@ -274,6 +275,16 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
       obj.state.state_data = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
       obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
     end
+
+    % function predict(obj)
+    %     tmp(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);
+    %     for n = 1:obj.N
+    %         for h = 1:obj.param.H
+    %             tmp(:,h+1,n) = obj.A(:,:,1) * tmp(:,h,n) + obj.B(:,:,1) * obj.input.u(:,h,n);
+    %         end
+    %     end
+    %     obj.state.state_data = tmp(:,2:end,:);
+    % end
 
     function [MCeval] = objective(obj, ~)   % obj.~とする
       U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N

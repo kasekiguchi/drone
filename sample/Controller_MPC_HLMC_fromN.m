@@ -11,7 +11,7 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
 
     Controller.dt = 0.1; % MPCステップ幅
     Controller.H = 10;
-    Controller.particle_num = 2000;
+    Controller.particle_num = 1000;
 
     % Controller.constParticle_num = 100000;
     Controller.input.sigma = 1*[0.1,1,1,1];
