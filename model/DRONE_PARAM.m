@@ -62,7 +62,6 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 % param.additional = []; % プロパティに無いパラメータを追加する場合
                 
                 %% iFlight
-                % param.mass = 0.640; %eachine+4cell
                 param.mass = 0.730; %iflight+6cell
                 % param.mass = 0.595; % Kato これがいいらしい
                 param.Lx = 0.175;

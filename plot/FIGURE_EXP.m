@@ -308,6 +308,60 @@ classdef FIGURE_EXP
 
         end
 
+        function obj = master_plot(obj)
+            calt = obj.data.logt;
+            % plot_title = strcat(strrep(obj.filename,'_','-'));
+            xrange_max = obj.data.logt(end);
+            % xrange_max = obj.data.logt(end);
+            set(0,'defaultAxesFontSize', 20)
+            set(0, 'DefaultLineLineWidth', 1.5);
+            
+            disp('Plotting start...');
+            obj.data.f(1) = figure(1);
+            plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]); %obj.data.logt(end)
+            ylim([-0.05 0.65])
+
+            obj.data.f(2) = figure(2);
+            plot(obj.data.logt, obj.data.Est(4:6,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(4:6, :), '--', "LineWidth", 1.5); hold off;
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]);
+            ylim([-0.05 0.05])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end 
+            
+            obj.data.f(3) = figure(3);
+            plot(obj.data.logt, obj.data.Est(7:9,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(7:9, :), '--', "LineWidth", 1.5); hold off;
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]); 
+            ylim([-0.15 0.15])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+
+            obj.data.f(4) = figure(4);
+            plot(obj.data.logt, obj.data.Est(10:12,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(10:12, :), '--', "LineWidth", 1.5); hold off;
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Angular velocity [m/s]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]); 
+            ylim([-0.15 0.2])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            
+            obj.data.f(5) = figure(5);
+            plot(obj.data.logt, obj.data.Input(1,:), "LineWidth", 1.5);
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]);
+            ylim([5.75 5.79])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ytickformat('%.3f');
+            
+            obj.data.f(6) = figure(6);
+            plot(obj.data.logt, obj.data.Input(2:4,:), "LineWidth", 1.5);
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
+            grid on; xlim([obj.data.logt(1), xrange_max]);
+            ylim([-0.045 0.07])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ytickformat('%.3f');
+        end
+
         function background_color(obj, yoffset, gca, logphase)
             txt = {''};
             font_size = 10;
@@ -352,7 +406,8 @@ classdef FIGURE_EXP
             
             obj.data.Ref = [obj.log.data(1,"p","r","ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)])';
                 zeros(size(obj.data.Est(1:3,:)));
-                obj.log.data(1,"v","r","ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)])'];
+                obj.log.data(1,"v","r","ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)])';
+                zeros(size(obj.data.Est(1:3,:)));];
             % store_result = obj.data;
 
             %% Input が空の時の対応 2コンMPCだとlogger.dataには保存されない問題の解決

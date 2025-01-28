@@ -100,38 +100,39 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % subplot(3,1,3); plot(idx ,expu(2:4,:), '-', idx, simu(2:4,:), '--'); legend('exp.tr1', 'exp.tr2', 'exp.tr3', 'sim.tr1', 'sim.tr2', 'sim.tr3')
 
 %% シミュレーションの比較
-clear; close all;
-j = 'sigmoid';
-load(strcat('Data\HL_sim_test_1008_', j, '.mat')); sim1 = log;
-load(strcat('Data\KMPC_sim_test_1008_', j, '.mat')); sim2 = log;
-idx = 1:find(sim1.Data.phase == 102, 1, 'last');
-data1.x = cell2mat(arrayfun(@(N) sim1.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
-data1.u = cell2mat(arrayfun(@(N) sim1.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
-data2.x = cell2mat(arrayfun(@(N) sim2.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
-data2.u = cell2mat(arrayfun(@(N) sim2.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
-r = [cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.p,idx,'UniformOutput',false));
-    cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.q,idx,'UniformOutput',false));
-    cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.v,idx,'UniformOutput',false))];
+% clear; close all;
+% j = 'sigmoid';
+% load(strcat('Data\HL_sim_test_1008_', j, '.mat')); sim1 = log;
+% load(strcat('Data\KMPC_sim_test_1008_', j, '.mat')); sim2 = log;
+% idx = 1:find(sim1.Data.phase == 102, 1, 'last');
+% data1.x = cell2mat(arrayfun(@(N) sim1.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
+% data1.u = cell2mat(arrayfun(@(N) sim1.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
+% data2.x = cell2mat(arrayfun(@(N) sim2.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
+% data2.u = cell2mat(arrayfun(@(N) sim2.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
+% r = [cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.p,idx,'UniformOutput',false));
+%     cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.q,idx,'UniformOutput',false));
+%     cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.v,idx,'UniformOutput',false))];
 %%
-close all;
-set(0,'defaultAxesFontSize',12)
-set(0, 'DefaultLineLineWidth', 1.5);
-% leg = {'1x', '1y', '1z', '2x', '2y', '2z'};
-% leg_th = {'1th', '2th'};
-% leg_tr = {'1roll', '1pitch', '1yaw', '2roll', '2pitch', '2yaw'};
-leg = {'HL.x', 'HL.y', 'HL.z', 'KMPC.x', 'KMPC.y', 'KMPC.z', 'ref.x', 'ref.y', 'ref.z'};
-leg_th = {'HL.thrust', 'KMPC.thrust'};
-leg_tr = {'HL.roll', 'HL.pitch', 'HL.yaw', 'KMPC.roll', 'KMPC.pitch', 'KMPC.yaw'};
-limits = [1 20]; % seconds
-t = sim1.Data.t(1:idx(end));
-figure(1); 
-subplot(2,2,1); plot(t, data1.x(1:3,:), '--', t, data2.x(1:3,:), '-', t, r(1:3,:), ':'); xlim(limits); grid on; legend(leg); ylabel('position');%pos
-subplot(2,2,2); plot(t, data1.x(4:6,:), '--', t, data2.x(4:6,:), '-', t, r(4:6,:), ':'); xlim(limits); grid on; legend(leg); ylabel('angle');%q
-subplot(2,2,3); plot(t, data1.x(7:9,:), '--', t, data2.x(7:9,:), '-', t, r(7:9,:), ':'); xlim(limits); grid on; legend(leg); ylabel('velocity');%v
-subplot(2,2,4); plot(t, data1.x(10:12,:), '--', t, data2.x(10:12,:), '-'); xlim(limits); grid on; legend(leg); ylabel('angular velocity');%w
-figure(2);
-subplot(1,2,1); plot(t, data1.u(1,:), '--', t, data2.u(1,:), '-'); xlim(limits); grid on; legend(leg_th); ylabel('thrust');%thrust
-subplot(1,2,2); plot(t, data1.u(2:4,:), '--', t, data2.u(2:4,:), '-'); xlim(limits); grid on; legend(leg_tr); ylabel('torque');%torque
+% close all;
+% set(0,'defaultAxesFontSize',12)
+% set(0, 'DefaultLineLineWidth', 1.5);
+% % leg = {'1x', '1y', '1z', '2x', '2y', '2z'};
+% % leg_th = {'1th', '2th'};
+% % leg_tr = {'1roll', '1pitch', '1yaw', '2roll', '2pitch', '2yaw'};
+% leg = {'HL.x', 'HL.y', 'HL.z', 'KMPC.x', 'KMPC.y', 'KMPC.z', 'ref.x', 'ref.y', 'ref.z'};
+% leg_th = {'HL.thrust', 'KMPC.thrust'};
+% leg_tr = {'HL.roll', 'HL.pitch', 'HL.yaw', 'KMPC.roll', 'KMPC.pitch', 'KMPC.yaw'};
+% limits = [1 20]; % seconds
+% t = sim1.Data.t(1:idx(end));
+% figure(1); 
+% subplot(2,2,1); plot(t, data1.x(1:3,:), '--', t, data2.x(1:3,:), '-', t, r(1:3,:), ':'); xlim(limits); grid on; legend(leg); ylabel('position');%pos
+% subplot(2,2,2); plot(t, data1.x(4:6,:), '--', t, data2.x(4:6,:), '-', t, r(4:6,:), ':'); xlim(limits); grid on; legend(leg); ylabel('angle');%q
+% subplot(2,2,3); plot(t, data1.x(7:9,:), '--', t, data2.x(7:9,:), '-', t, r(7:9,:), ':'); xlim(limits); grid on; legend(leg); ylabel('velocity');%v
+% subplot(2,2,4); plot(t, data1.x(10:12,:), '--', t, data2.x(10:12,:), '-'); xlim(limits); grid on; legend(leg); ylabel('angular velocity');%w
+% figure(2);
+% subplot(1,2,1); plot(t, data1.u(1,:), '--', t, data2.u(1,:), '-'); xlim(limits); grid on; legend(leg_th); ylabel('thrust');%thrust
+% subplot(1,2,2); plot(t, data1.u(2:4,:), '--', t, data2.u(2:4,:), '-'); xlim(limits); grid on; legend(leg_tr); ylabel('torque');%torque
+%%
 
 
 

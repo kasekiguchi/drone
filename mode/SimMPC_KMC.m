@@ -23,6 +23,12 @@ initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
+%%
+model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
+load(model_file,'est'); % main
+% [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
+A=est.A; B=est.B; C=est.C;
+%%
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
@@ -30,10 +36,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); 百瀬ref
-% agent.controller = MPC_CONTROLLER_HLMC(agent, Controller_MPC_HLMC(agent));
-% agent.controller = MPC_CONTROLLER_HLMC_HL(agent, Controller_MPC_HLMC_fromN(dt));
-agent.controller = MPC_CONTROLLER_HLMC_akanuma(agent, Controller_MPC_HLMC_fromN(dt));
+% agent.controller = MPC_CONTROLLER_HLMC_akanuma(agent, Controller_MPC_HLMC_fromN(dt));
+agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%
 for i = 1:te/dt
@@ -54,12 +58,6 @@ end
 %%
 logger.plot({1, "p", "er"}, {1, "v", "er"}, {1, "q", "e"}, {1, "input", ""},...
     "xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-% 仮想入力の描画
-imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.input_v, 1:te/dt, 'UniformOutput', false));
-figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
-
-% eval = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.Evaluationtra(logger.Data.controller.result{N}.bestcost(1), 1:te/dt, 'UniformOutput', false));
-% figure(10); plot([1:te/dt] .* dt, eval); legend('z', 'x', 'y', 'yaw');
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

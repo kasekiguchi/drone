@@ -29,40 +29,60 @@ function Controller = Controller_MPC_HLMC_fromN(dt)
     Controller.input.ub = [10; 1;  1;  1];
 
     %% 
-    Controller.Z = 1e3 * diag([1000; 10]);% * 1e3; %2 %1e3 10
-    Controller.X = 1e3 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
-    Controller.Y = Controller.X;% * 1e3;
-    Controller.PHI = 1* diag([100; 1]);
-
-    Controller.Zf = 1e3 * diag([1000; 10]);
-    Controller.Xf = Controller.X; % 制約時のみ * 1000
-    Controller.Yf = Controller.X;
-    Controller.PHIf = Controller.PHI;
-
-    % Controller.Z = 1e1 * diag([1; 1]);% * 1e3; %2 %1e3 10
-    % Controller.X = 1e1 * diag([10;1;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    % Controller.Z = 1e3 * diag([1000; 10]);% * 1e3; %2 %1e3 10
+    % Controller.X = 1e3 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
     % Controller.Y = Controller.X;% * 1e3;
-    % Controller.PHI = 1* diag([1; 1]);
+    % Controller.PHI = 1* diag([100; 1]);
     % 
-    % Controller.Zf = 1e1 * diag([1; 1]);
+    % Controller.Zf = 1e3 * diag([1000; 10]);
     % Controller.Xf = Controller.X; % 制約時のみ * 1000
     % Controller.Yf = Controller.X;
     % Controller.PHIf = Controller.PHI;
+    % 
+    % Controller.Z = 1e2 * diag([1000; 10]);% * 1e3; %2 %1e3 10
+    % Controller.X = 1e2 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    % Controller.Y = Controller.X;% * 1e3;
+    % Controller.PHI = 1* diag([100; 1]);
+    % 
+    % Controller.Zf = 1e3 * diag([1000; 10]);
+    % Controller.Xf = Controller.X; % 制約時のみ * 1000
+    % Controller.Yf = Controller.X;
+    % Controller.PHIf = Controller.PHI;
+    % 
+    % 
+    % Controller.AP = 1e3; % どれくらい距離をとる必要があるか
+    % 
+    % Controller.R = 1e-2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); % -5
+    % % Controller.RP = 1e-1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    % Controller.RP = 1e1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
 
 
-    Controller.AP = 1e3; % どれくらい距離をとる必要があるか
+    % % 赤沼
+    Controller.Z = 1e2 * diag([100; 1]);
+    Controller.X = diag([1000;1000;1;1]);
+    Controller.Y = Controller.X;
+    Controller.PHI = diag([10; 1]);
 
-    Controller.R = 1e-2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); % -5
-    % Controller.RP = 1e-1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
-    Controller.RP = 1e1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
-    
-    Controller.input.u = [0;0;0;0]; %  sekiguchi 
+    Controller.Zf = diag([1; 1]);
+    Controller.Xf = Controller.X; 
+    Controller.Yf = Controller.X;
+    Controller.PHIf = Controller.PHI;
+
+
+    Controller.AP = 1e3;
+
+    Controller.R = diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    Controller.RP = 1e-1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    % 
+    % 
+    % 
+    Controller.input.u = [0;0;0;0];
     Controller.ref_input = [0;0;0;0];
 
     %%  
     disp('MCMPC using HL model')
     % 
-    % Controller.name = "mcmpc"; % HLでもMCだから
-    % Controller.type = "HLMCMPC_CONTROLLER"; % file
+    Controller.name = "mcmpc"; % HLでもMCだから
+    Controller.type = "MPC_CONTROLLER_HLMC_akanuma"; % file
     % Controller.param = Controller;
 end
