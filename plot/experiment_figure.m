@@ -8,8 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20250122_Exp_HL_circleT=12_[700,700,700,20],335_[500,1000,200,1],0.001_great_Log(22-Jan-2025_10_49_53).mat");
-
+load("20241120_iflight_Exp_KMPC_newdata_hovering_[1000,1000,1000,100],327.7_0.730kg_zbat.mat")
 %%
 figtype = 2;
 Agent = log.Data.agent;
@@ -75,17 +74,23 @@ elseif figtype == 2
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     subplot(m,n,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Position [m]"); legend({"$x$", "$y$", "$z$", "$x$.reference", "$y$.reference", "$z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    grid on; xlim([logt(1), logt(9686)]); 
+    ylim([-1.2 1.2]);
+    %ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     subplot(m,n,2); plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Attitude [rad]"); legend({"$\phi$", "$\theta$", "$\psi$", "$\phi$.reference", "$\theta$.reference", "$\psi$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    grid on; xlim([logt(1), logt(9686)]); 
+    ylim([-0.2 0.2]);
+    %ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     subplot(m,n,3); plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend({"$v_x$", "$v_y$", "$v_z$", "$v_x$.reference", "$v_y$.reference", "$v_z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    grid on; xlim([logt(1), logt(9686)]); 
+    ylim([-0.4 0.4]);
+    %ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
     subplot(m,n,4); plot(logt, Input(1,:), "LineWidth", 1.5); hold on;
