@@ -3,9 +3,9 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_Koopman(varargin)
     % drone Prop. input
 
     %% transmitter system
-    % Kato iFlight
-    u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    u_trans_param.th_offset = 340;         % 325のほうがちょうどいい
+    % Kato iFlight 0128 comment out
+    % u_trans_param.gain =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    % u_trans_param.th_offset = 340;         % 325のほうがちょうどいい
 
     % iFlight
     % u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
@@ -23,10 +23,18 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_Koopman(varargin)
     % u_trans_param.gain2 =[650;650;650;17]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
     % u_trans_param.th_offset2 = 335;
 
-    %% Kato Kiyama Dataset -> iFlight
-    u_trans_param.gain2 = [1600;1600;1600;170];
-    u_trans_param.th_offset2 = 342;
+    %% Kato Kiyama Dataset -> iFlight 0128 comment out
+    % u_trans_param.gain2 = [1600;1600;1600;170];
+    % u_trans_param.th_offset2 = 342;
 
+    %% exp 0128 HLMCと同じ値にしてみた
+    % iFlight
+    u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
+    u_trans_param.th_offset = 340; %350  
+
+    g2 = 1000; % 650
+    u_trans_param.gain2 = [ones(3,1)*g2;150];
+    u_trans_param.th_offset2 = 335; %340
 
 
     % gain_f

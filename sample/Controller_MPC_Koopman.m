@@ -2,28 +2,23 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 %UNTITLED この関数の概要をここに記述
 %   各種値
 
-    % Controller_param.controller_model = 'hermite';
+% Controller_param.m = 0.595; % これは実験用
+
+    %% HL param
+    Controller_param = Controller_HL(dt);
 
     % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.m = 0.595; % これは実験用
-    % Controller_param.m = agent.parameter.mass;
+    Controller_param.m = agent.parameter.mass;
+
+    
+    
+    %%
     Controller_param.dt = 0.08; % MPCステップ幅 1222:0.08 0.07
     Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
-    % ssflg = 1;
 
-    %% Koopman
-    % modeファイルとファイル名をそろえる
-    % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
-    % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
-
-    %% 今はこっちの検証
-    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est'); % x方向増加データ
-    % load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
-    % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     load(model, 'est');
     [Controller_param.A, Controller_param.B, Controller_param.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller_param.dt);
     if isfield(est, 'Ae'); [Controller_param.Ae,Controller_param.Be,Controller_param.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller_param.dt); end
@@ -46,19 +41,20 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     %% quadprogを実行するmexファイルを選択
     % 観測量によってファイルが異なる
-    Controller_param.F = @quaternions_all;
-    if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
-        Controller_param.quad_drone = @quad_drone_code00_mex;
-        Controller_param.F = @quaternions_all_00; % isobe code00
-    elseif size(Controller_param.A,1) == 39
-        Controller_param.quad_drone = @quad_drone_code04_mex;
-    elseif size(Controller_param.A,1) == 71
-        Controller_param.quad_drone = @quad_drone_code08_mex;
-    else
-        Controller_param.quad_drone = @quad_drone;
-        warning('観測量に合うmexコントローラーがありませｎ');
-    end
-    
+    % Controller_param.F = @quaternions_all;
+    % if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
+    %     Controller_param.quad_drone = @quad_drone_code00_mex;
+    %     Controller_param.F = @quaternions_all_00; % isobe code00
+    % elseif size(Controller_param.A,1) == 39
+    %     Controller_param.quad_drone = @quad_drone_code04_mex;
+    % elseif size(Controller_param.A,1) == 71
+    %     Controller_param.quad_drone = @quad_drone_code08_mex;
+    % else
+    %     Controller_param.quad_drone = @quad_drone;
+    %     warning('観測量に合うmexコントローラーがありませｎ');
+    % end
+    Controller_param.quad_drone = @quad_drone;
+    [Controller_param.F, code] = select_observable(model);
 
     % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
@@ -68,12 +64,28 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller_param.weight.P = 1 * diag([20; 10; 30]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.P = 10 * diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = 1 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = 1 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
+    if strcmp(code, '23')
+    Controller_param.weight.P = 1*diag([20; 10; 30]);  
+    Controller_param.weight.Q = 10*diag([30; 20; 1]);
+    Controller_param.weight.V = diag([10; 1; 1]);  
+    Controller_param.weight.W = 5 * diag([1; 1; 1]); 
+    Controller_param.weight.R = diag([1; 1; 1; 1]); 
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
+    elseif strcmp(code, '00')
+    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller_param.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    end
 
     %% 誤差モデル
     % Controller_param.weight.P = diag([100; 100; 10]);    % 位置　10,20刻み  20;1;30
@@ -95,30 +107,10 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     end
     Controller_param.input.lb = [0; -1; -1; -1];
     Controller_param.input.ub = [10; 1;  1;  1];
-
-    % 実質制約なし
-    % Controller_param.input.lb = [0; -10; -10; -10];
-    % Controller_param.input.ub = [100;10;  10;  10];
-    % 
     
-%     Controller_param.torque_TH = 0;
-
-    %% HL param 
-    % eachine
-    % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-    % Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,1,1]),[0.01],dt); % xdiag([100,10,10,1])
-    % Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,1,1]),[0.01],dt); % ydiag([100,10,10,1])
-    % Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([400,10]),[0.1],dt); 
-
-    % iFlight
-    Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-    Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([4000,8000,2000,10]),0.001,dt); % xdiag([100,10,10,1])
-    Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([4000,8000,2000,10]),0.001,dt); % ydiag([100,10,10,1])
-    Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);  
-
     %% 以下は変更なし
     fprintf("Koopman MPC controller\n")
-    disp(strcat('model:', model));
+    disp(strcat('model:', model, '// code', code));
 
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
 

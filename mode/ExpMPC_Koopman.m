@@ -24,60 +24,19 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % masterではth_offset_tlに対応していない可能性
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone_Koopman()); % 推力からスロットルに変換
-% 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
 %% ##############################################################
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
-% model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
-% model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-% model_file = "2024-08-06_Exp_KiyamaY20_code00_saddle.mat"; % y方向増加
-% model_file = "2024-07-14_Exp_KiyamaX20_code00_saddle.mat"; % x方向増加
-% model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
-% model_file = "2024-09-11_Exp_Kiyama_code10_saddle.mat";
-% model_file = "2024-10-07_Exp_Kiyama_Error_correct_code00_saddle";
-
-% model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat";
-% model_file = "2024-12-22_Exp_Kiyama_code26_saddle_weight10";
-% model_file = "2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10"; % pitch
-model_file = "2025-01-10_Exp_Kiyama_code26_saqsddle_increased_weight_1.mat"; %roll, pitch, yaw
+model_file = "2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat"; %roll, pitch, yaw
 
 %% controllerでHL, KMPCをphaseで判別して動かす
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent));
-%% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
-% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
-%------------------------------------------------------------------------------------------------------------------------
-
-% disp(['Select model confirmation: ' + model_file]); % dispはダブルクォーテーションのみ対応
 run("ExpBase");
 
 %% save log
 % log = gui.logger;
 % save("Data/110_KMPC_hovering_codeo26_weight_1_fall.mat", "log", "-v7.3");
-
-%% function
-% function result = controller_do(varargin)
-% tic
-%     controller = varargin{5}.controller;
-%     if varargin{2} == 'a'
-%         result = controller.mpc.do(varargin); % arming: KMPC
-%     elseif varargin{2} == 't'
-%         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
-%         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
-%         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
-%     elseif varargin{2} == 'f'
-%         result.mpc = controller.mpc.do(varargin); % flight: KMPC
-%         result.hlc = controller.hlc.do(varargin);
-%         result = result.mpc;
-%     elseif varargin{2} == 'l'
-%         result = controller.hlc.do(varargin); % landing: HL
-%    end
-%     varargin{5}.controller.result = result;
-%     toc
-% end
 
 function post(app)
 close all;

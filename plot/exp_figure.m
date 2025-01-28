@@ -15,28 +15,18 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 fprintf('Plot start\n');
-% load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
-% load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
-% load("Data/20240528_KMPC_P2Py=1.mat")
-% filename = '0731_KMPC_saigen_hovering_code00';
 
 % filename = '1223_KMPC_hovering_code23_weight_1720';
-% loadfile = '1223_KMPC_hovering_code23_weight_1720.mat';
 filename = 'code23_sim';
-% filename = '0722_KMPC_X20_hovering_H10_dt008';
-% filename = '0722_KMPC_X20_hovering_H10_dt008';
-% filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
-% filename = '2_8_Exp_KMPC_P2Py_成功';
+% filename = 'code23_weight_p_10times';
+
 loadfile = strcat("Data/", filename, ".mat");
-% filename = "2_8_Exp_KMPC_P2Py_成功";
-% loadfile = "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2024\2012035_木山康平\第5章\結果\2_8_Exp_KMPC_P2Py_成功.mat";
-% load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
 % load(loadfile);
 
 % logger = load("Data/1223_KMPC_hovering_code23_weight_1720.mat");
 
-save_master = 1;
+save_master = 0; % LOGGERで読み込めないやつ
 % 115:start
 % 97 :arming
 % 116:takeoff q no data
@@ -44,12 +34,12 @@ save_master = 1;
 % 108:landing
 % 0:stop or quit
 %%
-logger.Data.agent.estimator = est;
-logger.Data.agent.reference = ref;
-logger.Data.agent.input = input;
-logger.Data.param = param;
+% logger.Data.agent.estimator = est;
+% logger.Data.agent.reference = ref;
+% logger.Data.agent.input = input;
+% logger.Data.param = param;
 
-disp("Loaded data...");
+% disp("Loaded data...");
 %% save setting
 % savename = strcat(filename, '_all');
 % savefolder = '\Data\Exp_figure_image\';
@@ -69,18 +59,19 @@ flg.masterplot = 1;
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
-% fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[3, 3]),struct('model',filename));
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[3, 3]),struct('model',filename));
 % fig.master_plot();
 % fig.main_animation();
-% fig = fig.main_figure();
+fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
 
-fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
-% fig2 = fig2.master_plot();
+% fig = FIGURE_EXP_master(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
+% fig = fig.master_plot();
 %Exp の構造体を作ればよい
 
 %%
 if save_master
+    fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
     fig = fig.master_plot(); % 修論用
     s = {'p','q','v','w','thrust','torque'};
     for i = 1:6
@@ -153,15 +144,15 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 
 
 %% 抽出
-log = logger.logger;
+% log = logger.logger;
 %% agent
-est = log.Data.agent.estimator;
-con = log.Data.agent.controller;
-ref = log.Data.agent.reference;
-sen = log.Data.agent.sensor;
-input = log.Data.agent.input;
-innner_input = log.Data.agent.inner_input;
-% param
-param.t = log.Data.t;
-param.phase = log.Data.phase;
-param.k = log.k;
+% est = log.Data.agent.estimator;
+% con = log.Data.agent.controller;
+% ref = log.Data.agent.reference;
+% sen = log.Data.agent.sensor;
+% input = log.Data.agent.input;
+% innner_input = log.Data.agent.inner_input;
+% % param
+% param.t = log.Data.t;
+% param.phase = log.Data.phase;
+% param.k = log.k;
