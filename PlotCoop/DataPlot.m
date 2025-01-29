@@ -31,8 +31,8 @@ if fnowdata==1
     end
     if ~exist("loggers","var")
         for i = 1:length(logger.target)
-            loggers{i,1} = simplifyLoggerForCoop(logger,i);
-            % loggers{i,1} = simplifyLoggerForSingle(logger,i);
+            % loggers{i,1} = simplifyLoggerForCoop(logger,i);
+            loggers{i,1} = simplifyLoggerForSingle(logger,i);
         end
     end
     droneID = logger.target(1:end-1);

@@ -37,7 +37,7 @@ if ~isempty(agent.plant) && isEstLoadMass
       Setting.dim=[25,4,21];
       Setting.num_list = [3,3,3,3,3,3,3,3,1];
       Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-      Setting.initial.mL = agent.parameter.loadmass*0+0.3*0;
+      Setting.initial.mL = agent.parameter.loadmass*0+0.1;
   else
       Model.name="load_mL_fdst_HL"; % print name
       Setting.method = get_model_name("Load_mL_fdst_HL"); % model dynamicsの実体名

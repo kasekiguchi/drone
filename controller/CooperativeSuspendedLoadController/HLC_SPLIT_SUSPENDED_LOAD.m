@@ -132,7 +132,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             if isfield(model.state,"fdst")
                 obj.result.input = [max(0,min(20,tmp(1) - fdst));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
             else
-                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;
             end
             obj.self.controller.result.input = obj.result.input;%tmp;
             result = obj.result;  
