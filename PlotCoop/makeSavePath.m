@@ -1,7 +1,7 @@
 %% make path and folder
     %変更しない
     % ExportFolder='A:\Work2024\momose';%実験用pcのパス
-    ExportFolder='C:\きょうゆう';
+    % ExportFolder='C:\きょうゆう';
     ExportFolder='\\Desktop-2pivavv\きょうゆう';
     ExportFolder='A:\Work2024\momose';
     % % % ExportFolder='C:\Users\acsl_students\Documents\students\workspace2024\momose';%実験用pcのパス
@@ -15,9 +15,15 @@
     % date2 = "2025_0116";%日付が変わってしまった場合は自分で変更
     subfolder='exp';%sim or exp
     % subfolder='sim';%sim or exp
+<<<<<<< Updated upstream
     ExpSimName='drone4p1_saddleAndAngle';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
     contents='saddle08T12_rottm3_4sin_3PC1';%実験,シミュレーション内容64文字以内
+=======
+    ExpSimName='drone4p_syuuronn';%実験,シミュレーション名
+    % contents='FT_apx_max';%実験,シミュレーション内容
+    contents='saddle_rotPC1';%実験,シミュレーション内容64文字以内
+>>>>>>> Stashed changes
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内

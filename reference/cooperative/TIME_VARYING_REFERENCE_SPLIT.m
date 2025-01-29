@@ -294,7 +294,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if norm(p - real_pL) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
+<<<<<<< Updated upstream
                        obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+=======
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.3)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+>>>>>>> Stashed changes
                    else 
                        obj.base_state_landing(1:2) = obj.base_state12_landing + 0.0*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
