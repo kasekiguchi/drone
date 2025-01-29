@@ -20,31 +20,16 @@ motive.getData([], []); % get data from Motive モーションキャプチャか
 rigid_num = motive.result.rigid_num;%剛体数
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-% numberOFpc = 2;%pcの総数
-% PCId = 1;%pcの番号
-% % PCId = 2;%pcの番号
-% NdroneAndLoad = round(rigid_num/2);%機体と分割後の牽引物の組数
-% s = NdroneAndLoad -1*mod(rigid_num,2);%牽引物の分を引く(複数牽引でなかったら引かない)
-% r = mod(s,numberOFpc);
-% sParPc = (s-r)/numberOFpc;%各PCでいくつの組を制御するか
-% Ns = ones(1,numberOFpc)*sParPc + [ones(1,r),zeros(1,numberOFpc-r)];%各PCで制御する組を決定
-% N = Ns(PCId)+1*mod(rigid_num,2);%(複数牽引でなかったら足さない)
-% addIds = zeros(1,length(Ns));%機体と分割後の牽引物分+牽引物分ずらしていく
-% for i = 1:length(Ns) - 1 
-%     addIds(i+1) = sum(Ns(1:i+1),2);%pcごとに機体ずらす
-% end
-% addId = addIds(PCId);%このpcで加算するrigidのid
 handlingModelNum = 1:2;%扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
 N = length(handlingModelNum) + mod(rigid_num,2);
 addId = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
-% addId=0;
-% N=2;
+
 %COMの番号指定
 COMs = [3,12];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
-% cableL=[0.91,0.91];
-cableL=[0.785,0.785];
+cableL=[0.896,0.896];
+% cableL=[0.785,0.785];
 length=cableL;
 
 refName = {
