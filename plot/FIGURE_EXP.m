@@ -143,8 +143,9 @@ classdef FIGURE_EXP
             
             %
             if ~obj.flg.figtype % subplotなら
-                set(gcf, "WindowState", "maximized");
+                % set(gcf, "WindowState", "maximized");
                 % set(gcf, "Position", [960 0 960 1000])
+                set(gcf, "Position", [1200 0 1200 2000])
             end
 
             if obj.flg.animation; obj.make_animation(); end

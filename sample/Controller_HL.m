@@ -1,4 +1,4 @@
-function Controller= Controller_HL(dt)
+function Controller = Controller_HL(dt)
 % 階層型線形化コントローラの設定
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）ゲイン：500くらいでもうまく飛ぶはず
 % Eachine

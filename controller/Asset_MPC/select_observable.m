@@ -1,6 +1,4 @@
-function [F, code] = select_observable(loadfilename)
-    if size(loadfilename, 2) == 1; file = loadfilename; 
-    else; file = loadfilename{1}; end
+function [F, code] = select_observable(file)
     code = cell2mat(append(extract(file, 27), extract(file, 28))); % codeの抽出
     switch code
         case '00'; F = @quaternions_all_00;

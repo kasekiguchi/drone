@@ -132,7 +132,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             state_monte = obj.self.estimator.result.state;
             % if idx == 1; state_monte = obj.self.estimator.result.state;
             % else; state_monte = obj.self.plant.result; end
-            
+            clc
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
