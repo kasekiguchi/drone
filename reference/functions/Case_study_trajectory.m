@@ -1,11 +1,11 @@
-function [ref] = Case_study_trajectory(X0, V0, te)
+function [ref] = Case_study_trajectory(X0, te)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
 syms t real
-% x_0 = X0(1);
-% y_0 = X0(2);
-% z_0 = X0(3);
+x_0 = X0(1);
+y_0 = X0(2);
+z_0 = X0(3);
 % vx_0 = V0(1);
 % vy_0 = V0(2);
 % vz_0 = V0(3);
@@ -25,17 +25,17 @@ syms t real
 % z = 1;
 
 %% circle
-% x = cos(t/5) -1;
-% y = sin(t/5);
-% z = 10;
+x = cos(t/5) -1;
+y = sin(t/5);
+z = 1;
 %%
 % x = 1/(1+exp(-t + te/2));
 % y = 0;
 % z = 1;
 
 %% landing
-% x = 0;
-% y = 0;
+% x = 1;
+% y = 1;
 % z = -1/(1+exp(-t + 5)) + 1;
 
 % landing use exp funcution
@@ -43,13 +43,15 @@ syms t real
 % x = -0.01975*15*t*t;
 % y = -0.00625*15*t*t;
 
-ref = @(t)curve_interpolation_9order(t,10,X0,V0,0,0); %
+%ref = @(t)curve_interpolation_9order(t,10,X0,V0,0,0); %
+% 
+% x = 0;
+% y = 0;
+% z = 0;
 
 
 
-
-
-%Trajectory = [x,y,z]
-%ref=@(t)[x;y;z;0];
+Trajectory = [x,y,z]
+ref=@(t)[x;y;z;0];
 end
 
