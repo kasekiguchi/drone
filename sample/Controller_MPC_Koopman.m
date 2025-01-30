@@ -15,8 +15,9 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-      load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+       % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
     % load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
+   load("2025verKatoGUI3.iFlight_Dataset_xyz100_z50.mat",'est') %vzから算出したzで学習、総推力
 %    load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_code02_Exp_Kiyama_code03_2.mat", "est");
@@ -36,7 +37,7 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 10倍× 1/10×
    % Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み 木山
-    Controller_param.weight.V = diag([30; 2; 1]);    % 速度  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
+    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山
