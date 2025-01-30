@@ -12,8 +12,8 @@ motive.getData([], []); % get data from Motive モーションキャプチャか
 rigid_num = motive.result.rigid_num;%けん引物もある場合は工夫する必要あり
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-numberOFpc = 1;%pcの総数
-PCId = 1;%pcの番号
+numberOFpc = 2;%pcの総数
+PCId = 2;%pcの番号
 NdroneAndLoad = rigid_num;%round(rigid_num/2);%機体と分割後の牽引物の組数
 s = NdroneAndLoad -1*mod(rigid_num,2);%牽引物の分を引く(複数牽引でなかったら引かない)
 r = mod(s,numberOFpc);
@@ -27,7 +27,7 @@ end
 addId = addIds(PCId);%このpcで加算するrigidのid
 
 % COMs = string([6,10]);%割り当てる順番に設定
-COMs = string([5]);
+COMs = string([26,27]);
 refName = {
             {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
             {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}

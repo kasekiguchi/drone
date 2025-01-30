@@ -8,7 +8,7 @@ classdef TAKEOFF_REFERENCE < handle
 
     %高度0.5m
     te = 10;
-    zd = 0.5; % goal altitude
+    zd = 0.2; % goal altitude
     % %高度1m
     % te = 15;
     % zd = 1.0;
