@@ -1,11 +1,11 @@
 %=====================
 %ペイロードの分割モデル
 %=====================
-clc; clear; close all
+% clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100;
+te = 100/2;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -60,7 +60,7 @@ end
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 rho12 = [agent(1).parameter.rho(1:2,:);zeros(1,N)];
 rho12Unit = rho12./vecnorm(rho12);
-pTpre = rho12Unit*tan(3*pi/180) + [0;0;1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）
+pTpre = rho12Unit*tan(4*pi/180) + [0;0;1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）
 initial_state(1).qi = -reshape(pTpre./vecnorm(pTpre),[],1) ;%zup- zdown+
 
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
@@ -137,9 +137,9 @@ end
 % G = [x;y;0.5];
 % rhos = p-G;
 
-noize_sp = normrnd(0,0.001,[3,tn])*1;
+noize_sp = normrnd(0,0.001,[3,tn])*1*0;
 noize_spT = 1*normrnd(0,0.001,[3,tn])*0;
-noize_sqDrone = 1*normrnd(0,0.0017,[3,tn])*1;%degで0.1くらいの標準偏差
+noize_sqDrone = 1*normrnd(0,0.0017,[3,tn])*1*0;%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn
@@ -147,15 +147,31 @@ for j = 1:tn
         for i = 1:N+1
             if i >= 2
                 sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
+                % %分割前ペイロード
+                % sp = sensor1.p;
+                % sR = RodriguesQuaternion(sensor1.Q);%回転行列
+                % %分割後ペイロード
+                % spL = sp + sR * rho(:,i-1)+noize_sp(:,j) + 0*[0.2;-0.2;0];%分割後の質量重心位置
+                % spT = sensor1.qi(3*i-5:3*i-3,1)+noize_spT(:,j);%分割後の紐の方向ベクトル
+                % %ドローン
+                % spDrone = spL - agent(1).parameter.li(i-1)*spT;
+                % sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+noize_sqDrone(:,j);
+
                 %分割前ペイロード
                 sp = sensor1.p;
                 sR = RodriguesQuaternion(sensor1.Q);%回転行列
                 %分割後ペイロード
-                spL = sp + sR * rho(:,i-1)+noize_sp(:,j) + 0*[0.2;-0.2;0];%分割後の質量重心位置
-                spT = sensor1.qi(3*i-5:3*i-3,1)+noize_spT(:,j);%分割後の紐の方向ベクトル
+                spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
+                spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
                 %ドローン
                 spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+noize_sqDrone(:,j);
+                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
+                
+                % ノイズ印加
+                spL = spL + noize_sp;
+                spDrone = spDrone + noize_sqDrone;
+                spT = spL - spDrone;
+                
 
                 % 単機牽引のモデルで推定する
                 % agent(i).sensor.do(time, 'f');
@@ -247,8 +263,8 @@ run("DataPlot.m")
 % agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 % logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);
-% mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",2);
+% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);
+mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 

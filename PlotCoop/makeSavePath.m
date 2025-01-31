@@ -12,15 +12,17 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付ファイル
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付フォルダ
 %変更==============================================================================
-    date2 = "2025_0127";%日付が変わってしまった場合は自分で変更
-    date2 = "2025_0128";%日付が変わってしまった場合は自分で変更
+    % date2 = "2025_0127";%日付が変わってしまった場合は自分で変更
+    % date2 = "2025_0128";%日付が変わってしまった場合は自分で変更
+    date2 = "2025_0129";%日付が変わってしまった場合は自分で変更
     % subfolder='exp';%sim or exp
     subfolder='sim';%sim or exp
-    ExpSimName='drone4p1_saddleAndAngle';%実験,シミュレーション名
+    ExpSimName='drone4p1_cost_syuuron';%実験,シミュレーション名
     % ExpSimName='drone4p1_const';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='saddle08T12_rottm3_4sin_3P';%実験,シミュレーション内容64文字以内
+    contents='saddle2T10_rott2_3sin_m5';%実験,シミュレーション内容64文字以内
     % contents='saddle_rott_Noise';%実験,シミュレーション内容64文字以内
+    % contents='saddle_rott_noNoise';%実験,シミュレーション内容64文字以内
     % contents='loadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='expnadAndloadSysEKF';%実験,シミュレーション内容64文字以内
     % contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内

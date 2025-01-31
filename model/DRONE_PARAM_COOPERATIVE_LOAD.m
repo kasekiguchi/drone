@@ -52,28 +52,19 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
               rho0 = [0;0;-1/4];
             end
             if isempty(param.rho)&& 1
-            %非対称牽引物
+            %% 非対称牽引物
                 %上面
                 xUp = [-2 -1.5 0 1.5 1 0];
                 yUp = [-1 0.5 1 0.5 -0.5 -1];
                 zUp = 0.5*ones(1,6);
-                % xUp = [-2 -1.5  1.5  0];
-                % yUp = [-1 0.5 0.5  -1];
-                % zUp = 0.5*ones(1,4);
                 pUp = [xUp;yUp;zUp]*0.4;
                 %下面
-                % xDown = [-2 -1.5  1.5  0];
-                % yDown = [-1 0.5 0.5  -1];
-                % zDown = -0.5*ones(1,4);
                 xDown = [-2 -1.5 0 1.5 1 0];
                 yDown = [-1 0.5 1 0.5 -0.5 -1];
                 zDown = -0.5*ones(1,6);
                 pDown = [xDown;yDown;zDown]*0.4;
                 %重心の計算
                 polyin = polyshape(pUp(1,:),pUp(2,:));
-                [x,y] = centroid(polyin);
-                %紐の接続点が頂点の図形の中心の場合
-                polyin = polyshape(xUp(1:N),yUp(1:N));
                 [x,y] = centroid(polyin);
                 G = [x;y;0];
                 %接続点を頂点とする図形の重心位置
@@ -90,29 +81,37 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 param.pUp = pUp;
                 param.pDown = pDown;
                 param.G=G;
-
                 %plot payload shape
-                  xM = pUp(1,:) - G(1);
-                  yM = pUp(2,:) - G(2);
-                  zM = pUp(3,:) - G(3);
-                  xm = pDown(1,:) - G(1);
-                  ym = pDown(2,:) - G(2);
-                  zm = pDown(3,:) - G(3);
+                  xM = pUp(1,:); %- G(1);
+                  yM = pUp(2,:); %- G(2);
+                  zM = pUp(3,:); %- G(3);
+                  xm = pDown(1,:); % - G(1);
+                  ym = pDown(2,:); % - G(2);
+                  zm = pDown(3,:); % - G(3);
                   
                   % plot
-                  fill3(xm,ym,zm,"cyan","FaceAlpha",0.5);%上面
-                  hold on
-                  fill3(xM,yM,zM,"cyan","FaceAlpha",0.5);%下面
-                  surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)],"FaceAlpha",0.5);%側面
+                  % plot3(0,0,0,"MarkerSize",10,"Marker","*","Color","red")%重心位置
+                  % plot3(Gc(1)-G(1),Gc(2)-G(2),Gc(3)-G(3),"MarkerSize",10,"Marker","*","Color","blue")%重心位置
+
+                  % plot3(Gc(1),Gc(2),Gc(3),"MarkerSize",10,"Marker","*","Color","blue")%重心位置
                   plot3(G(1),G(2),G(3),"MarkerSize",10,"Marker","*","Color","red")%重心位置
-                  plot3(Gc(1),Gc(2),Gc(3),"MarkerSize",10,"Marker","*","Color","blue")%重心位置
+                  hold on
+                  fill3(xm,ym,zm,"cyan","FaceAlpha",0.5);%下面
+                  fill3(xM,yM,zM,"cyan","FaceAlpha",0.5);%上面
+                  surf([xm,xm(1);xM,xM(1)],[ym,ym(1);yM,yM(1)],[zm,zm(1);zM,zM(1)],"FaceAlpha",0.5);%側面
                   hold off
+                  legend("COG","Interpreter","latex")
+                  xlim([min(xM),max(xM)])
+                  ylim([min(yM),max(yM)])
+                  zlim([min(zm),max(zM)])
                   daspect([1,1,1])
+                  grid on
                   grid minor
-                  set(gca,"TickLabelInterpreter","latex","fontsize",10)
-                  xlabel('$x$ (m)','Interpreter','latex',"FontSize",18)
-                  ylabel('$y$ (m)','Interpreter','latex',"FontSize",18)
-                  zlabel('$z$ (m)','Interpreter','latex',"FontSize",18)
+                  set(gca,"TickLabelInterpreter","latex","fontsize",16)
+                  xlabel('$x$ (m)','Interpreter','latex')%,"FontSize",18)
+                  ylabel('$y$ (m)','Interpreter','latex')%,"FontSize",18)
+                  zlabel('$z$ (m)','Interpreter','latex')%,"FontSize",18)
+                  %%
                   input("Confirm the figure and press Enter.")
                   close
             end
