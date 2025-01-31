@@ -119,8 +119,7 @@ classdef MCMPC_controller < handle
                  obj.param.fRemove = 1;
              end
             %stl 条件判断
-            %  removeX = find(any((abs(obj.state.predict_state(9, :, :)))> 10));
-            % % if removeX ~= 0
+              removeX = find(any((abs(obj.state.predict_state(9, 3:obj.param.H, :)))> 1.5));
             % %     restart =1;
             % %     obj.input.u1=obj.input.u1 * 0.9;
             % %     obj.input.u2=obj.input.u2 * 0.9;
@@ -150,7 +149,7 @@ classdef MCMPC_controller < handle
             obj.input.normE = obj.Normalize(); % ほぼ使わない
 
             %-- 制約条件
-          removeF = 0; removeX = []; survive = obj.N; 
+          %removeF = 0; removeX = []; survive = obj.N; 
             % [removeF, removeX, survive] = obj.constraints();
             %     vx2=obj.self.estimator.result.state.v(1)^2;
             %     vy2=obj.self.estimator.result.state.v(2)^2;
@@ -170,15 +169,17 @@ classdef MCMPC_controller < handle
                 obj.input.Bestcost_now = Bestcost;
                 
                 % 棄却数がサンプル数の半分以上なら入力増やす
-                if removeF > obj.N
+                if removeF > obj.N/2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
+                    
                 else
+
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
                     obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
                 end
-
+                
             elseif removeF == obj.N    % 全棄却
                 obj.result.input = obj.input.u;
                 obj.input.nextsigma = obj.input.Constsigma;
@@ -187,6 +188,9 @@ classdef MCMPC_controller < handle
                 obj.input.AllRemove = 1;
 
                 obj.param.nextparticle_num = obj.param.Maxparticle_num;
+            end
+            if obj.param.fRemove ==  1
+                obj.param.fRemove = 0;
             end
             obj.input.u = obj.result.input;
 

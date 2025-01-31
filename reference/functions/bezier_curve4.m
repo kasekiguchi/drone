@@ -3,13 +3,16 @@ function ref = bezier_curve4(X0,te)
 syms t real
 
 P0 = X0;        % start point
-P1 = [10, 10, 10];    % control point1 z hovering  move in x y)
+P1 = [8, 8, 10];    % control point1 z hovering  move in x y)
 P2 = [5, 5, 5];     % control point2 (slow down)
 P3 = [2, 2, 2];     % control point3 (speed down)
 P4 = [0,0,0];     %  end point
 
 T_total = 10;  % total time 10s
-%N = 400;       % samples
+dt=0.025;       % sample period
+N = T_total/dt;
+
+ref = zeros(N,4);
 % real time% dt=T/N
 
 %tau = zeros(size(t));
@@ -24,11 +27,15 @@ T_total = 10;  % total time 10s
 
 
 % bezier_curve4
-ref= @(t)(1 - (t/T_total))^4 * P0 + 4 * (1 - (t/T_total))^3 * (t/T_total) * P1 ...
+reftemp= ((1 - (t/T_total))^4 * P0 + 4 * (1 - (t/T_total))^3 * (t/T_total) * P1 ...
           + 6 * (1 - (t/T_total))^2 * (t/T_total)^2 * P2 ...
-          + 4 * (1 - (t/T_total)) * (t/T_total)^3 * P3 + (t/T_total)^4 * P4;
+          + 4 * (1 - (t/T_total)) * (t/T_total)^3 * P3 + (t/T_total)^4 * P4)';
 
+x = reftemp(1);
+y = reftemp(2);
+z = reftemp(3);
 
+ref = @(t)[x;y;z;0];
 % v
 %dt = T_total / (N - 1);
 %V = diff(B) / dt;

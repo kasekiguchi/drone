@@ -53,7 +53,7 @@ for i = 1:400
 end
 %% 途中で止めた時もセクション実行でグラフ出せる
 %logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-logger.plot({1,"p","er"},{1, "q", "e"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
+logger.plot({1,"p","er"},{1, "q", "er"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
