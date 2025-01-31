@@ -47,6 +47,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
+            obj.result.input = obj.param.input.u;
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.H);

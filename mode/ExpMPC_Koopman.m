@@ -24,7 +24,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % masterではth_offset_tlに対応していない可能性
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone_Koopman()); % 推力からスロットルに変換
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0.6]},"HL"});
 
 %% ##############################################################
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
@@ -75,6 +75,9 @@ fig.main_figure();
 % fig.make_mpc_plot();
 % fig.main_animation();
 % fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
+
+f(1) = figure(100);
+f(1).Position = [100 100 1920 1080];
 
 
 %% controller calculation time

@@ -1,4 +1,4 @@
-function ref = Case_study_trajectory(~)
+function ref = Case_study_trajectory(xd)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 % arguments
@@ -7,6 +7,10 @@ function ref = Case_study_trajectory(~)
 %     param.size = [1 1 0]% 各軸の振幅
 %     param.phase = -pi% 位相
 % end
+
+x0 = xd(1);
+y0 = xd(2);
+z0 = xd(3);
 
 syms t real
 %% 
@@ -40,9 +44,9 @@ syms t real
 % z = 1;
 
 %% hovering
-x = 0;
-y = 0;
-z = 0.6;
+x = x0;
+y = y0;
+z = z0;
 
 %% 縦円旋回
 % x = 0.5*sin(2*pi*t/T);

@@ -76,7 +76,8 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0.
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation_hermite(agent,Controller_MPC_Koopman(dt, model_file, agent));
 
 %%
@@ -98,6 +99,8 @@ for i = 1:te/dt
     time.t = time.t + time.dt;
     %pause(1)
     toc
+
+    agent.controller.show(agent.controller.result.mpc.fval, agent.controller.result.mpc.exitflag);
 
     est = agent(1).estimator.result.state.p;
     if est(3) < 0 || est(3) > 2

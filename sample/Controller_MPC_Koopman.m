@@ -81,20 +81,20 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
 
         % 試験中のやつ
-    % Controller_param.weight.P = 1*diag([20; 10; 10]);  
-    % Controller_param.weight.Q = 10*diag([20; 10; 1]);
-    % Controller_param.weight.V = diag([10; 1; 1]);  
-    % Controller_param.weight.W = 10 * diag([1; 1; 1]); 
-    % Controller_param.weight.R = 0.1 * diag([1; 1; 1; 1]); 
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
+    Controller_param.weight.P = 1*diag([1; 10; 10]);  
+    Controller_param.weight.Q = 10*diag([30; 30; 1]);
+    Controller_param.weight.V = diag([10; 1; 1]);  
+    Controller_param.weight.W = 10 * diag([1; 1; 1]); 
+    Controller_param.weight.R = 0.1 * diag([1; 1; 1; 1]); 
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
 
         % 00と同じやつ
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
+    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
     elseif strcmp(code, '00')
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
@@ -122,8 +122,9 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     else
         Controller_param.input.u = Controller_param.m * 9.81 / 4 * [1;1;1;1]; % 4入力
     end
-    Controller_param.input.lb = [0; -1; -1; -1];
-    Controller_param.input.ub = [10; 1;  1;  1];
+    trq = 0.5; %default: 0<th<10, -1<tr<1
+    Controller_param.input.lb = [0; -trq; -trq; -trq];
+    Controller_param.input.ub = [7.5; trq;  trq;  trq];
     
     %% 以下は変更なし
     fprintf("Koopman MPC controller\n")
