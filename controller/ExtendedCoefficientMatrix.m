@@ -3,6 +3,7 @@ function [ECM] = ExtendedCoefficientMatrix(Param)
     % ECM:Extended Coeifficient Matrix
     A = Param{1};
     B = Param{2};
+    
     Horizon = Param{3};
     Xnum = Param{4};
 

@@ -10,16 +10,22 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
 
     %% MPC param
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 5;
-    Controller.particle_num = 2000;
-    Controller.input.Initsigma = 1*[2,1,1,1];
-    Controller.input.Constsigma = 100 * [0.01, 1,1,1];
-    Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
-    Controller.input.Minsigma = 0.1 * [0.1,1,1,1]; %0.5
+    Controller.H = 10;
+    Controller.particle_num = 5000;
+    % Controller.input.Initsigma = 1*[2,1,1,1];
+    % Controller.input.Constsigma = 100 * [0.01, 1,1,1];
+    % Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
+    % Controller.input.Minsigma = 0.1 * [0.1,1,1,1]; %0.5
     Controller.input.Maxinput = 1.5;
     Controller.input.Constinput = 10;
     Controller.input.range = [[10;30;30;10], [0.1;0.1;0.1;0.1]]; % max min
     Controller.input.Bestcost_now = [1e5, 1e3, 1e3, 1e3, 1e3];
+
+    Controller.input.Initsigma = 0.1*[1;1;1;1];
+    Controller.input.Constsigma = 5.0*[1;1;1;1];
+    Controller.input.Maxsigma = 1.0 * [1;1.5;1.5;1.5];
+    Controller.input.Minsigma = 0.01 * [1;1;1;1];
+    % Controller.input.Maxinput = 1.5 * [1;1;1;1];
 
     %% common param
     Controller.m = agent.parameter.mass;
@@ -32,9 +38,9 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     [Controller.A, Controller.B, Controller.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller.dt);
     if isfield(est, 'Ae'); [Controller.Ae,Controller.Be,Controller.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller.dt); end
 
-    % Controller_param.A = model{1};
-    % Controller_param.B = model{2};
-    % Controller_param.C = model{3};
+    % Controller.A = model{1};
+    % Controller.B = model{2};
+    % Controller.C = model{3};
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     % torqueモデルなら1をとるように．ifを使わない方法で実装してみた
@@ -52,14 +58,14 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     [Controller.F, Controller.code] = select_observable(model);
 
     % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    % Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
-    % Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    % Controller.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    % Controller.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller.weight.P = 1 * diag([20; 10; 30]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.P = 1 * diag([20; 10; 3000]);    % 位置　10,20刻み  20;1;30
     Controller.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller.weight.V = diag([10; 1; 1]); % 15良い気がする
     Controller.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 

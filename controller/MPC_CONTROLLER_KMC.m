@@ -28,7 +28,7 @@ classdef MPC_CONTROLLER_KMC < handle
     WeightRp % 前時刻入力との誤差項
     A % 制御モデルのA行列
     B % 制御モデルのB行列
-    C
+    C % 制御モデルのC行列
     qpparam % 二次計画法QPのパラメータ
     previous_input % 前時刻入力
   end
@@ -47,15 +47,15 @@ classdef MPC_CONTROLLER_KMC < handle
       
       % 重みの配列サイズ変換
       weight = param.weight;
-      obj.Weight = repmat(blkdiag(weight.P, weight.Q, weight.V, weight.W), 1, 1, obj.N);
-      obj.WeightF = repmat(blkdiag(weight.Pf, weight.Qf, weight.Vf, weight.Wf), 1, 1, obj.N);
-      obj.WeightR = repmat(weight.R,1,1,obj.N);  % 目標入力
-      obj.WeightRp = repmat(weight.RP,1,1,obj.N); % 前ステップとの入力
+      obj.Weight = blkdiag(weight.P, weight.Q, weight.V, weight.W);
+      obj.WeightF = blkdiag(weight.Pf, weight.Qf, weight.Vf, weight.Wf);
+      obj.WeightR = weight.R;  % 目標入力
+      obj.WeightRp = weight.RP; % 前ステップとの入力
 
       % HL. A, B行列定義 z, x, y, yawの順番
-      % obj.A = param.A;
-      % obj.B = param.B;
-      % obj.C = param.C;
+      obj.A = param.A;
+      obj.B = param.B;
+      obj.C = param.C;
       % obj.A = repmat(param.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       % obj.B = repmat(param.B,1,1,obj.N);
       % obj.C = repmat(param.C,1,1,obj.N);
@@ -65,7 +65,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.state.state_data = zeros(n,obj.H, obj.N);
-      obj.input.Evaluationtra = zeros(obj.N, 5);
+      obj.input.Evaluationtra = zeros(obj.N, 2);
       obj.input.sigma = param.input.Initsigma;
       obj.input.mu = param.ref_input;
 
@@ -80,7 +80,9 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.param.C = repmat(param.C, obj.H, obj.H, obj.N);
       obj.param.A = obj.model.A;
       obj.param.B = obj.model.B;
-      obj.param.C = repmat(param.C, obj.H, obj.H);
+      % obj.param.C = obj.model.C; % ECM()に統合も可能
+      C = repmat({obj.C}, 1, obj.H);
+      obj.param.C = blkdiag(C{:});
 
       % QP change equation
       % Q = reshape(obj.Weight(:,:,1), obj.param.state_size, []);
@@ -104,6 +106,7 @@ classdef MPC_CONTROLLER_KMC < handle
             result = obj.controller_KMC(varargin);
             disp('controller: MC,  phase: a');
         elseif phase == 't' || phase == 'l'
+            obj.state.ref = obj.generate_reference(); % for sim
             result = obj.controller_HL(varargin); % takeoff and landing -> HLC
             disp('controller: HL  phase: t or l');
         elseif phase == 'f'
@@ -157,6 +160,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
       obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
 
+      obj.input.mu = obj.param.ref_input;
       obj.generate_input(0.1);  % 入力生成
       obj.predict();            % 状態予測
       obj.objective();          % 評価計算
@@ -173,8 +177,9 @@ classdef MPC_CONTROLLER_KMC < handle
       result = obj.result;
       toc
     end
+
     function show(obj)
-        clc;
+        % clc;
         est_print = obj.self.estimator.result.state;
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
@@ -192,12 +197,16 @@ classdef MPC_CONTROLLER_KMC < handle
     end
 
     function generate_input(obj, si)
-        ksigma_max = si * obj.H;
-        ksigma = 1:ksigma_max/(obj.H-1):1+ksigma_max; % 1~1+ksigma_maxまでH個の配列を作成
-        inputSigma = ksigma .* obj.input.sigma';
+        % ksigma_max = si * obj.H;
+        ksigma_max = 1.001;
+        ksigma = linspace(1, ksigma_max, obj.H); % 1~1+ksigma_maxまでH個の配列を作成
+        inputSigma = ksigma .* obj.input.sigma;
 
         obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
         % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
+    
+        % 検証用
+        obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
     end
 
     %% 状態予測
@@ -214,7 +223,19 @@ classdef MPC_CONTROLLER_KMC < handle
         current = repmat(obj.param.F(obj.current_state), 1, 1, obj.N);
         tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
         tmp = pagemtimes(obj.param.C, tmp_z);
-        obj.state.state_data = reshape(tmp, obj.param.state_size, obj.param.H, obj.N);
+        obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
+
+        % tmp(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
+        % state = zeros(26, obj.H, obj.N); % Z
+        % state(:, 1, :) = current; % Z初期値
+        % for n = 1:obj.N
+        %     for h = 1:obj.H
+        %         state(:, h+1, n) = obj.A * state(:, h, n) + obj.B * obj.input.u(:, h, n);
+        %         s(:, h, n) = obj.C * state(:, h+1, n);
+        %     end
+        % end
+        % obj.state.state_data = tmpx;
+      % 
     end
 
     function objective(obj)
@@ -230,10 +251,10 @@ classdef MPC_CONTROLLER_KMC < handle
         tildeUref = U - obj.param.ref_input;  % 目標入力
 
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
-        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
+        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
+        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
 
-        stageStateX =    k .* X.*pagemtimes(obj.Weight(:,:,1:obj.N),X);
+        stageStateX =    k .* X.*pagemtimes(obj.Weight,X);
         terminalState = 0;
 
         %% 人工ポテンシャル場法
@@ -243,7 +264,9 @@ classdef MPC_CONTROLLER_KMC < handle
         costX = stageStateX + terminalState;
 
         obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1);
-        obj.input.Evaluationtra(:,2:4) = ones(obj.N, 3) * 1e3;
+        obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
+        % 
+        % obj.input.Evaluationtra(:,2:4) = ones(obj.N, 3) * 1e3;
     end
 
     function normalize(obj)

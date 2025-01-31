@@ -75,7 +75,7 @@ end
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 30; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -95,12 +95,12 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-% j = 'z';
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+j = 'z';
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
 
 % reference_file = "Exp_2_4_108";
 % agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
@@ -155,20 +155,21 @@ end
 %%
 % set(0,'defaultAxesFontSize', 10)
 % set(0, 'DefaultLineLineWidth', 1.5);
-logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
+% logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
 % % logger.save('HL_sim_test_1008_sigmoid');
-% app.logger = logger;
-% result_plot(app)
+app.logger = logger;
+result_plot(app)
 % 
 % % 仮想入力の描画
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 %%
-% f(1) = figure(3); f(2) = figure(7);
-% savename1 = 'dataset_spline_z_pos.pdf';
-% savename2 = 'dataset_spline_z_3d.pdf';
-% exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
-% exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
+f(1) = figure(1); f(2) = figure(7);
+for i=1:2; f(i).Position = [100 100 560 350]; end
+savename1 = 'dataset_spline_z_pos.pdf';
+savename2 = 'dataset_spline_z_3d.pdf';
+exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
+exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

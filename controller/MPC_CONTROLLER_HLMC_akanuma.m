@@ -281,10 +281,10 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
 
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         %-- 入力
-        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
-        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
+        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1),tildeUpre);
+        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1),tildeUref);
 
-        stageStateZ =    k .* x.*pagemtimes(obj.Weight(:,:,1:obj.N),x);
+        stageStateZ =    k .* x.*pagemtimes(obj.Weight(:,:,1),x);
         terminalState = 0;
 
         %% 人工ポテンシャル場法
