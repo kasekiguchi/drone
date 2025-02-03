@@ -15,11 +15,11 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-        %load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-     load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
+       % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    % load("20241110_iflight_randam100_z50_est.mat",'est') %vzから算出したzで学習、総推力
   % load("2025KatoGUI3ver.iFlight_Dataset_xyz100_z50_est.mat",'est') %vzから算出したzで学習、総推力
   % load("2025ver.iFlight_Dataset_xyz200_z100_est.mat",'est') %vzから算出したzで学習、総推力
-  % load("2025ver2.iFlight_Dataset_xyz200_z100_est.mat",'est') %vzから算出したzで学習、総推力
+   load("2025ver2.iFlight_Dataset_xyz200_z100_est.mat",'est') %vzから算出したzで学習、総推力
 %    load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_Exp_Kiyama_code03_2.mat", "est");
 %    load("EstimationResult_2024-06-10_code02_Exp_Kiyama_code03_2.mat", "est");

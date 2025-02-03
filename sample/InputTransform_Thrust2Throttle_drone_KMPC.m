@@ -11,7 +11,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_KMPC(varargin)
     % u_trans_param.th_offset2 = 332.5; %hov,p2p332.5
 
     % iflight 6cell
-    u_trans_param.gain2 =[1500;1500;1500;200]; %hov,p2p[800,800,800,500]
+    u_trans_param.gain2 =[800;800;800;200]; %hov,p2p[800,800,800,500]
     u_trans_param.th_offset2 = 331.5;
 
     % u_trans_param.gain_SuspendedLoad =[500;500;500;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
