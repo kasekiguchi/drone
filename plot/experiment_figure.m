@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20241125_iflight_Exp_KMPC_olddata_hovering_[1000,1000,1000,100],327.5_730kg_6minflight.mat");
+load("20241216_Exp_KMPC_olddata_hovering_[1600,1600,1600,200],332.mat");
 
 %%
 figtype = 2;
