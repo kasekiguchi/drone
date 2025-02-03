@@ -23,8 +23,12 @@ function [var, fval, exitflag] = quad_drone(param)
     ur = param.ref(13:16,:);
     ur = ur(:); %目標入力、列ベクトルに変換
 
+    % 追加　全ステップとの誤差項
+    pur = repmat(param.u, param.H,1);
+
     H = param.qpH;
     f = [Xc', r', ur'] * param.qpF;
+    % f = [Xc', r', ur', pur'] * param.qpF;
     % f = param.qpf(Xc, r, ur);
 
     % options, constraints, initial state

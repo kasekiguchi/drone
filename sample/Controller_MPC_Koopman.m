@@ -6,9 +6,10 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
 
     %% HL param
     Controller_param = Controller_HL(dt);
-
-    % Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.m = agent.parameter.mass;
+
+    % Controller_param.m = 0.5884; % eachine
+    % Controller_param.m = 0.730;  % iflight
 
     
     
@@ -86,7 +87,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     Controller_param.weight.V = diag([10; 1; 1]);  
     Controller_param.weight.W = 10 * diag([1; 1; 1]); 
     Controller_param.weight.R = 0.1 * diag([1; 1; 1; 1]); 
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]); 
+    Controller_param.weight.Rp = 0 * diag([1; 1; 1; 1]); 
 
         % 00と同じやつ
     % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
@@ -101,7 +102,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
     Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.weight.Rp = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
     end
 
     %% 誤差モデル
@@ -124,7 +125,7 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     end
     trq = 0.5; %default: 0<th<10, -1<tr<1
     Controller_param.input.lb = [0; -trq; -trq; -trq];
-    Controller_param.input.ub = [7.5; trq;  trq;  trq];
+    Controller_param.input.ub = [7.3; trq;  trq;  trq];
     
     %% 以下は変更なし
     fprintf("Koopman MPC controller\n")

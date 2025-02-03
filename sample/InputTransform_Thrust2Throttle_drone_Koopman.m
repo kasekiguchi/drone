@@ -32,9 +32,13 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_Koopman(varargin)
     u_trans_param.gain = [300;500;300;20]; % 300;500;300;20
     u_trans_param.th_offset = 340; %350  
 
-    g2 = 1000; % 650
-    u_trans_param.gain2 = [ones(3,1)*g2;150];
-    u_trans_param.th_offset2 = 335; %340
+    % g2 = 1000; % 650
+    % u_trans_param.gain2 = [ones(3,1)*g2;150];
+    % u_trans_param.th_offset2 = 335; %340
+
+    % from kato
+    u_trans_param.gain2 =[800;800;800;200]; %hov,p2p[800,800,800,500]
+    u_trans_param.th_offset2 = 331.5;
 
 
     % gain_f
