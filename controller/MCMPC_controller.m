@@ -119,7 +119,7 @@ classdef MCMPC_controller < handle
                  obj.param.fRemove = 1;
              end
             %stl 条件判断
-              removeX = find(any((abs(obj.state.predict_state(9, 3:obj.param.H, :)))> 1.5));
+              removeX = find((abs(obj.state.predict_state(9, 2, :))> 1.8));
             % %     restart =1;
             % %     obj.input.u1=obj.input.u1 * 0.9;
             % %     obj.input.u2=obj.input.u2 * 0.9;
@@ -128,7 +128,7 @@ classdef MCMPC_controller < handle
             % % end
             %  obj.state.predict_state(:, :, removeX) = [];
             %   obj.state.state_data =  obj.state.predict_state;
-            %   removeF=size(removeX,1);
+             %  removeF=size(removeX,1);
             %  obj.N = obj.N-removeF;
             %   survive = obj.N;
             %end
@@ -137,6 +137,7 @@ classdef MCMPC_controller < handle
 
             obj.param.fin = 0;
             eachCost = zeros(obj.N, 3);
+            
             for m = 1:obj.N
                 [obj.input.eval(1,m), eachCost(m, :)] = objective(obj,m);
             end
@@ -149,7 +150,7 @@ classdef MCMPC_controller < handle
             obj.input.normE = obj.Normalize(); % ほぼ使わない
 
             %-- 制約条件
-          %removeF = 0; removeX = []; survive = obj.N; 
+            %removeF = 0; removeX = []; survive = obj.N; 
             % [removeF, removeX, survive] = obj.constraints();
             %     vx2=obj.self.estimator.result.state.v(1)^2;
             %     vy2=obj.self.estimator.result.state.v(2)^2;
@@ -158,22 +159,29 @@ classdef MCMPC_controller < handle
             %     [removeF, removeX, survive] = obj.constraints();
             % end
             obj.state.COG.g = 0; obj.state.COG.gc = 0;
-            
+             removeF=size(removeX,1);
             
             if removeF ~= obj.N
+
+                obj.state.predict_state(:, :, removeX) = [];
+                obj.state.state_data =  obj.state.predict_state;
+                obj.N = obj.N-removeF;
+                survive = obj.N;
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
                 %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
                 % 評価が良くなったら標準偏差を狭めるようにしている
                 obj.input.Bestcost_pre = obj.input.Bestcost_now;
                 obj.input.Bestcost_now = Bestcost;
+                %% 
                 
                 % 棄却数がサンプル数の半分以上なら入力増やす
                 if removeF > obj.N/2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
-                    
+                   % [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+                    %[obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
                 else
 
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
@@ -185,8 +193,9 @@ classdef MCMPC_controller < handle
                 obj.input.nextsigma = obj.input.Constsigma;
                 Bestcost = obj.param.ConstEval;
                 BestcostID = 1;
-                obj.input.AllRemove = 1;
-
+                obj.input.AllRemove = 1
+                [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+               % [obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
                 obj.param.nextparticle_num = obj.param.Maxparticle_num;
             end
             if obj.param.fRemove ==  1
@@ -359,51 +368,51 @@ classdef MCMPC_controller < handle
                 xr(13:16, h+1) = 0.269*9.81/4 * [1;1;1;1]; % MC -> 0.6597,   HL -> 0
             end
         end
-    %     function [resampling_u,pw] = Resampling_LVS(obj)
-    %     %RESAMPLING この関数の概要をここに記述
-    %     % アルゴリズムはLow Variance Sampling
-    %     NP = obj.N;   % サンプル数
-    %     pw = obj.input.EvalNorm; % 正規化された評価値
-    %     u1 = reshape(obj.input.u(1,:,:), [], NP); 
-    %     u2 = reshape(obj.input.u(2,:,:), [], NP); 
-    %     u3 = reshape(obj.input.u(3,:,:), [], NP); 
-    %     u4 = reshape(obj.input.u(4,:,:), [], NP); 
-    %     wcum=cumsum(pw); % 評価値を累積
-    %     base=cumsum(pw*0+1/NP)-1/NP;%乱数を加える前のbase
-    %     resampleID=base+rand/NP;%ルーレットを乱数分増やす
-    %     pu1 = u1;%データ格納用
-    %     pu2 = u2;
-    %     pu3 = u3;
-    %     pu4 = u4;
-    %     ind=1;%新しいID
-    %     for ip=1:NP
-    %         while(resampleID(ip)>wcum(ind))
-    %             ind=ind+1;
-    %         end
-    %         u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
-    %         u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
-    %         u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
-    %         u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
-    %         pw(ip)=1/NP;%尤度は初期化
-    %     end
-    %     resampling_u(4, 1:obj.param.H, 1:obj.N) = u4;
-    %     resampling_u(3, 1:obj.param.H, 1:obj.N) = u3;
-    %     resampling_u(2, 1:obj.param.H, 1:obj.N) = u2;
-    %     resampling_u(1, 1:obj.param.H, 1:obj.N) = u1;
-    % end
-    % 
-    % function [resampling_u, pw] = Resampling_IS(obj)
-    %     % 重点サンプリング
-    %     NP = obj.N;
-    %     pw = obj.input.EvalNorm; % 正規化された評価値
-    %     H = obj.param.H;
-    %     u = obj.input.u;
-    % 
-    %     % sumUw = reshape(sum(u.*reshape(pw,1,1,[]),2), 4,NP);
-    %     % resampling_u = repmat(reshape(sumUw ./ sum(pw), 4, 1, NP), 1, H, 1);
-    % 
-    %     resampling_u = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
-    %         ./ sum(pw), 4, 1, NP), 1, H, 1);
-    % end
+        function [resampling_u,pw] = Resampling_LVS(obj)
+        %RESAMPLING この関数の概要をここに記述
+        % アルゴリズムはLow Variance Sampling
+        NP = obj.N;   % サンプル数
+        pw = obj.input.EvalNorm; % 正規化された評価値
+        u1 = reshape(obj.input.u(1,:,:), [], NP); 
+        u2 = reshape(obj.input.u(2,:,:), [], NP); 
+        u3 = reshape(obj.input.u(3,:,:), [], NP); 
+        u4 = reshape(obj.input.u(4,:,:), [], NP); 
+        wcum=cumsum(pw); % 評価値を累積
+        base=cumsum(pw*0+1/NP)-1/NP;%乱数を加える前のbase
+        resampleID=base+rand/NP;%ルーレットを乱数分増やす
+        pu1 = u1;%データ格納用
+        pu2 = u2;
+        pu3 = u3;
+        pu4 = u4;
+        ind=1;%新しいID
+        for ip=1:NP
+            while(resampleID(ip)>wcum(ind))
+                ind=ind+1;
+            end
+            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
+            u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
+            u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
+            u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
+            pw(ip)=1/NP;%尤度は初期化
+        end
+        resampling_u(4, 1:obj.param.H, 1:obj.N) = u4;
+        resampling_u(3, 1:obj.param.H, 1:obj.N) = u3;
+        resampling_u(2, 1:obj.param.H, 1:obj.N) = u2;
+        resampling_u(1, 1:obj.param.H, 1:obj.N) = u1;
+    end
+
+    function [resampling_u, pw] = Resampling_IS(obj)
+        % 重点サンプリング
+        NP = obj.N;
+        pw = obj.input.EvalNorm; % 正規化された評価値
+        H = obj.param.H;
+        u = obj.input.u;
+
+        % sumUw = reshape(sum(u.*reshape(pw,1,1,[]),2), 4,NP);
+        % resampling_u = repmat(reshape(sumUw ./ sum(pw), 4, 1, NP), 1, H, 1);
+
+        resampling_u = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
+            ./ sum(pw), 4, 1, NP), 1, H, 1);
+    end
     end
 end
