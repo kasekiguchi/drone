@@ -180,7 +180,7 @@ classdef MCMPC_controller < handle
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
-                   % [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+                    [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
                     %[obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
                 else
 
@@ -372,7 +372,7 @@ classdef MCMPC_controller < handle
         %RESAMPLING この関数の概要をここに記述
         % アルゴリズムはLow Variance Sampling
         NP = obj.N;   % サンプル数
-        pw = obj.input.EvalNorm; % 正規化された評価値
+        pw = obj.input.normE; % 正規化された評価値
         u1 = reshape(obj.input.u(1,:,:), [], NP); 
         u2 = reshape(obj.input.u(2,:,:), [], NP); 
         u3 = reshape(obj.input.u(3,:,:), [], NP); 
