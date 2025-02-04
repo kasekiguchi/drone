@@ -11,8 +11,8 @@ end
 
 
 
-log = load('Data\MEC_Pn_u_delta_u.mat');
-log_ = load('Data\MEC_Pn_u.mat');
+log = load('Data\test_p2p.mat');
+log_ = load('Data\test_p2p2.mat');
 %% logを開く
 % Pn = simplify_MEC_Logger(log.log);
 
@@ -29,12 +29,24 @@ Pa_ = DataStructure(logger);
 
 delta_p = Pa.ref_p - Pa.p;
 delta_p_ = Pa_.ref_p - Pa_.p;
+L = length(delta_p_);
 
+disp("#############################")
+fprintf("x:MEC : %f \n",sum(abs(delta_p(1,:)))/L)
+fprintf("x:nom : %f \n",sum(abs(delta_p_(1,:)))/L)
+fprintf("y:MEC : %f \n",sum(abs(delta_p(2,:)))/L)
+fprintf("y:nom : %f \n",sum(abs(delta_p_(2,:)))/L)
+fprintf("z:MEC : %f \n",sum(abs(delta_p(3,:)))/L)
+fprintf("z:nom : %f \n",sum(abs(delta_p_(3,:)))/L)
 disp("#############################")
 fprintf("x : %f \n",(sum(abs(delta_p(1,:)))-sum(abs(delta_p_(1,:))))/sum(abs(delta_p_(1,:))))
 fprintf("y : %f \n",(sum(abs(delta_p(2,:)))-sum(abs(delta_p_(2,:))))/sum(abs(delta_p_(2,:))))
 fprintf("z : %f \n",(sum(abs(delta_p(3,:)))-sum(abs(delta_p_(3,:))))/sum(abs(delta_p_(3,:))))
 disp("#############################")
+
+mean_z = mean(Pa.p(3,400*2/10:end));
+fprintf("mean:z : %f \n",mean_z)
+
 figure(1);
 
 title = "";

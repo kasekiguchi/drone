@@ -20,7 +20,7 @@ Controller.Ad = Ad;
 Controller.Bd = Bd;
 
 % layer =inputLayer([24 1], "SC");
-layer =inputLayer([12 1], "SC");
+layer = inputLayer([12 1], "SC");
 Controller.MECNN = addInputLayer(MECNN,layer);
 
 

@@ -123,7 +123,7 @@ methods
         end
             obj.result.input = obj.Pn_u + obj.result.delta_u;
             % obj.result.input = obj.Pn_u;
-            obj.result.delta_u
+            % obj.result.delta_u
             
         % delta_u
         % obj.result.plant_.p = obj.agent.plant.state.p;

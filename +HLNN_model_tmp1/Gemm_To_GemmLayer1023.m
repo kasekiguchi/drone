@@ -1,20 +1,12 @@
 classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
     % A custom layer auto-generated while importing an ONNX network.
-<<<<<<< Updated upstream
-    
-=======
 
->>>>>>> Stashed changes
     %#codegen
     %#ok<*PROPLC>
     %#ok<*NBRAK>
     %#ok<*INUSL>
     %#ok<*VARARG>
-<<<<<<< Updated upstream
-    
-=======
 
->>>>>>> Stashed changes
     properties (Learnable)
         linears_0_bias
         linears_0_weight
@@ -27,19 +19,11 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
         linears_4_bias
         linears_4_weight
     end
-<<<<<<< Updated upstream
-    
-    properties
-        ONNXParams         % An ONNXParameters object containing parameters used by this layer.
-    end
-    
-=======
 
     properties
         ONNXParams         % An ONNXParameters object containing parameters used by this layer.
     end
 
->>>>>>> Stashed changes
     methods
         function this = Gemm_To_GemmLayer1023(name, onnxParams)
             this.Name = name;
@@ -57,11 +41,7 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
             this.linears_4_bias = onnxParams.Learnables.linears_4_bias;
             this.linears_4_weight = onnxParams.Learnables.linears_4_weight;
         end
-<<<<<<< Updated upstream
-        
-=======
 
->>>>>>> Stashed changes
         function [x19] = predict(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
@@ -90,11 +70,7 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
                 x19 = extractdata(x19);
             end
         end
-<<<<<<< Updated upstream
-        
-=======
 
->>>>>>> Stashed changes
         function [x19] = forward(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
@@ -188,11 +164,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % ONNX__GEMM_0
 %			- Input(s) to the ONNX network.
 %			  The input size(s) expected by the ONNX file are:
-<<<<<<< Updated upstream
-%				  ONNX__GEMM_0:		[1, 13]				Type: DOUBLE
-=======
 %				  ONNX__GEMM_0:		[1, 14]				Type: DOUBLE
->>>>>>> Stashed changes
 %			  By default, the function will try to permute the input(s)
 %			  into this dimension ordering. If the default is incorrect,
 %			  use the 'InputDataPermutation' argument to control the
@@ -207,11 +179,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % X19
 %			- Output(s) of the ONNX network.
 %			  Without permutation, the size(s) of the outputs are:
-<<<<<<< Updated upstream
-%				  X19:		[1, 12]				Type: DOUBLE
-=======
 %				  X19:		[1, 4]				Type: DOUBLE
->>>>>>> Stashed changes
 %			  By default, the function will try to permute the output(s)
 %			  from this dimension ordering into a conventional MATLAB
 %			  ordering. If the default is incorrect, use the
@@ -336,12 +304,9 @@ end
 %% dlarray functions implementing ONNX operators:
 
 function [A, B, C, alpha, beta, numDimsY] = prepareGemmArgs(A, B, C, alpha, beta, transA, transB, numDimsC)
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 % Prepares arguments for implementing the ONNX Gemm operator
 if transA
     A = A';
@@ -360,12 +325,9 @@ end
 
 function s = appendStructs(varargin)
 % s = appendStructs(s1, s2,...). Assign all fields in s1, s2,... into s.
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 if isempty(varargin)
     s = struct;
 else
@@ -382,11 +344,8 @@ end
 
 function checkInputSize(inputShape, expectedShape, inputName)
 
-<<<<<<< Updated upstream
-=======
 %   Copyright 2020-2021 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 if numel(expectedShape)==0
     % The input is a scalar
     if ~isequal(inputShape, [1 1])
@@ -403,34 +362,16 @@ elseif numel(expectedShape)==1
     end
 else
     % The input has 2 dimensions or more
-<<<<<<< Updated upstream
-    
-    % The input dimensions have been reversed; flip them back to compare to the
-    % expected ONNX shape.
-    inputShape = fliplr(inputShape);
-    
-=======
 
     % The input dimensions have been reversed; flip them back to compare to the
     % expected ONNX shape.
     inputShape = fliplr(inputShape);
 
->>>>>>> Stashed changes
     % If the expected shape has fewer dims than the input shape, error.
     if numel(expectedShape) < numel(inputShape)
         expectedSizeStr = strjoin(["[", strjoin(string(expectedShape), ","), "]"], "");
         error(message('nnet_cnn_onnx:onnx:InputHasGreaterNDims', inputName, expectedSizeStr));
     end
-<<<<<<< Updated upstream
-    
-    % Prepad the input shape with trailing ones up to the number of elements in
-    % expectedShape
-    inputShape = num2cell([ones(1, numel(expectedShape) - length(inputShape)) inputShape]);
-    
-    % Find the number of variable size dimensions in the expected shape
-    numVariableInputs = sum(cellfun(@(x) isa(x, 'char') || isa(x, 'string'), expectedShape));
-    
-=======
 
     % Prepad the input shape with trailing ones up to the number of elements in
     % expectedShape
@@ -439,16 +380,11 @@ else
     % Find the number of variable size dimensions in the expected shape
     numVariableInputs = sum(cellfun(@(x) isa(x, 'char') || isa(x, 'string'), expectedShape));
 
->>>>>>> Stashed changes
     % Find the number of input dimensions that are not in the expected shape
     % and cannot be represented by a variable dimension
     nonMatchingInputDims = setdiff(string(inputShape), string(expectedShape));
     numNonMatchingInputDims  = numel(nonMatchingInputDims) - numVariableInputs;
-<<<<<<< Updated upstream
-    
-=======
 
->>>>>>> Stashed changes
     expectedSizeStr = makeSizeString(expectedShape);
     inputSizeStr = makeSizeString(inputShape);
     if numNonMatchingInputDims == 0 && ~iSizesMatch(inputShape, expectedShape)
@@ -488,12 +424,9 @@ end
 end
 function X = makeUnlabeledDlarray(X)
 % Make numeric X into an unlabelled dlarray
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020-2021 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 if isa(X, 'dlarray')
     X = stripdims(X);
 elseif isnumeric(X)
@@ -507,12 +440,9 @@ end
 end
 
 function [Vars, NumDims] = packageVariables(params, inputNames, inputValues, inputNumDims)
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 % inputNames, inputValues are cell arrays. inputRanks is a numeric vector.
 Vars = appendStructs(params.Learnables, params.Nonlearnables, params.State);
 NumDims = params.NumDimensions;
@@ -524,11 +454,8 @@ end
 end
 
 function X = permuteInputVar(X, userDataPerm, onnxNDims)
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020-2021 The MathWorks, Inc.
->>>>>>> Stashed changes
 % Returns reverse-ONNX ordering
 if onnxNDims == 0
     return;
@@ -556,11 +483,8 @@ X = permute(X, perm);
 end
 
 function Y = permuteOutputVar(Y, userDataPerm, onnxNDims)
-<<<<<<< Updated upstream
-=======
 
 %   Copyright 2020-2021 The MathWorks, Inc.
->>>>>>> Stashed changes
 switch onnxNDims
     case 0
         perm = [];
@@ -609,14 +533,10 @@ end
 end
 
 function s = updateStruct(s, t)
-<<<<<<< Updated upstream
-% Set all existing fields in s from fields in t, ignoring extra fields in t.
-=======
 % Set all existing fields in s from fields in t, ignoring extra fields in
 % t.
 %   Copyright 2020 The MathWorks, Inc.
 
->>>>>>> Stashed changes
 for name = transpose(fieldnames(s))
     s.(name{1}) = t.(name{1});
 end
