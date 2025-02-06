@@ -170,7 +170,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
       %% 予測状態を確認する
       close all
-      s = obj.state.state_data;
+      s = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
       % % % figure(101); % xy
       % % % hold on;
       % % % for n = 1:obj.N
@@ -189,6 +189,11 @@ classdef MPC_CONTROLLER_KMC < handle
       yline(0.6, '--', 'Color', 'green', 'LineWidth', 1); xline(0, '--', 'Color', 'green', 'LineWidth', 1); 
       hold off;
       xlabel('X [m]'); ylabel('Z [m]');
+
+      %%
+      x = obj.state.state_data(:,:,obj.input.BestcostID(1));
+      r = obj.state.ref;
+      Jeach = calc_J(x, r, obj.input.u(:,:,obj.input.BestcostID(1)), obj.Weight, obj.WeightR, obj.H);
 
       %% 値の保存
       obj.result.bestcostID = obj.input.BestcostID;
