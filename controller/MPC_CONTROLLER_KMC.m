@@ -168,6 +168,28 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.Resampling_IS();      % リサンプリング
       obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
+      %% 予測状態を確認する
+      close all
+      s = obj.state.state_data;
+      % % % figure(101); % xy
+      % % % hold on;
+      % % % for n = 1:obj.N
+      % % %   plot(s(1,:,n), s(2,:,n), 'Color', 'blue', 'LineWidth', 0.5);
+      % % % end
+      % % % plot(s(1,:,obj.input.BestcostID(1)), s(2,:,obj.input.BestcostID(1)), 'Color', 'red', 'LineWidth', 1);
+      % % % hold off;
+      % % % xlabel('X [m]'); ylabel('Y [m]');
+
+      % figure(102); % xy
+      hold on;
+      for n = 1:obj.N
+        plot(s(1,:,n), s(3,:,n), 'Color', 'blue', 'LineWidth', 0.5);
+      end
+      plot(s(1,:,obj.input.BestcostID(1)), s(3,:,obj.input.BestcostID(1)), 'Color', 'red', 'LineWidth', 1);
+      yline(0.6, '--', 'Color', 'green', 'LineWidth', 1); xline(0, '--', 'Color', 'green', 'LineWidth', 1); 
+      hold off;
+      xlabel('X [m]'); ylabel('Z [m]');
+
       %% 値の保存
       obj.result.bestcostID = obj.input.BestcostID;
       obj.result.bestcost = obj.input.Bestcost_now;
@@ -191,22 +213,23 @@ classdef MPC_CONTROLLER_KMC < handle
             obj.state.ref(3,1), obj.state.ref(7,1), obj.state.ref(1,1),...
             obj.state.ref(4,1), obj.state.ref(8,1), obj.state.ref(2,1),...
             0, 0, obj.state.ref(11,1)*180/pi)                             % r:reference 目標状態
-        fprintf("t: %f \t input: %f %f %f %f", ...
-            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4));
+        fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f", ...
+            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2));
         fprintf("\n");
     end
 
     function generate_input(obj, si)
         % ksigma_max = si * obj.H;
-        ksigma_max = 1.001;
+        ksigma_max = 1;
         ksigma = linspace(1, ksigma_max, obj.H); % 1~1+ksigma_maxまでH個の配列を作成
         inputSigma = ksigma .* obj.input.sigma;
 
-        obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
-        % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
+        % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
+        % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu)); 可変制約
+        obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        % obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
     end
 
     %% 状態予測
@@ -332,7 +355,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
     function get_input(obj)
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        tmp = obj.input.u(:,1,BestcostID);
+        tmp = obj.input.u(:,1,BestcostID(1));
 
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         obj.input.pre_u = obj.result.input;
@@ -340,7 +363,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
-        obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        % obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
         % obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))'));
         obj.input.BestcostID = BestcostID;
     end

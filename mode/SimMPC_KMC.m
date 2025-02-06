@@ -41,6 +41,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%
+figure(102);
 phase = 'f'
 for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0; end
@@ -61,15 +62,24 @@ for i = 1:te/dt
     end
 end
 %%
-logger.plot({1, "p", "er"}, {1, "v", "er"}, {1, "q", "e"}, {1, "input", ""},...
-    "xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+% logger.plot({1, "p", "er"}, {1, "v", "er"}, {1, "q", "e"}, {1, "input", ""},...
+%     "xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
-%% MPC parma
-tt = dt:dt:time.t;
+% MPC parma
+figure(1);
+tt = logger.data(0,"t",[]);
+m = 2; n=2;
 cost = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.bestcost(1), 1:time.t/dt,'UniformOutput',false));
 Ucost = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.bestcost(2), 1:time.t/dt,'UniformOutput',false));
-figure(101); plot(tt, cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15);
-% figure(101); plot(tt, Ucost);
+N = length(cost);
+subplot(m,n,1); plot(tt(1:N), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15);
+
+pe = logger.data(1,"p","e")'; ve = logger.data(1,"v","e")';
+pr = logger.data(1,"p","r")'; vr = logger.data(1,"v","r")';
+input = logger.data(1,"input",[])';
+subplot(m,n,2); plot(tt, pe, tt, pr); xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15);
+subplot(m,n,3); plot(tt, ve, tt, vr); xlabel('Time [s]', 'Fontsize', 15); ylabel('Velocity [m/s]', 'Fontsize', 15);
+subplot(m,n,4); plot(tt, input); xlabel('Time [s]', 'Fontsize', 15); ylabel('Input [N]', 'Fontsize', 15);
 %%
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

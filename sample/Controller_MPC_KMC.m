@@ -10,8 +10,8 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
 
     %% MPC param
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 10;
-    Controller.particle_num = 5000;
+    Controller.H = 20;
+    Controller.particle_num = 200;
     % Controller.input.Initsigma = 1*[2,1,1,1];
     % Controller.input.Constsigma = 100 * [0.01, 1,1,1];
     % Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
@@ -19,9 +19,9 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.input.Maxinput = 1.5;
     Controller.input.Constinput = 10;
     Controller.input.range = [[10;30;30;10], [0.1;0.1;0.1;0.1]]; % max min
-    Controller.input.Bestcost_now = [1e5, 1e3, 1e3, 1e3, 1e3];
+    Controller.input.Bestcost_now = [1e5, 1e3];
 
-    Controller.input.Initsigma = 0.1*[1;1;1;1];
+    Controller.input.Initsigma = 0.001*[500;1;1;1]; % default 0.1
     Controller.input.Constsigma = 5.0*[1;1;1;1];
     Controller.input.Maxsigma = 1.0 * [1;1.5;1.5;1.5];
     Controller.input.Minsigma = 0.01 * [1;1;1;1];
@@ -65,10 +65,17 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller.weight.P = 1 * diag([20; 10; 3000]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    Controller.weight.V = diag([10; 1; 1]); % 15良い気がする
-    Controller.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller.weight.P = 1 * diag([20; 10; 3000]);    % 位置　10,20刻み  20;1;30
+    % Controller.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
+    Controller.weight.P = diag([1;1;1000]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = diag([1;1;1]);    % 速度  10,20刻み  30;20;10
+    Controller.weight.V = diag([1;1;1]); % 15良い気がする
+    Controller.weight.W = diag([1;1;1]);  % 姿勢角，角速度　1,2刻み 
     Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
