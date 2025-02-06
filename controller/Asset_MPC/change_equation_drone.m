@@ -20,6 +20,7 @@ function [H, F] = change_equation_drone(Param)
 
     Q = Param.weight;
     R = Param.weightR;
+    Rp = Param.weightRp;
     Qf = Param.weightF;
     Horizon = Param.H;
 
@@ -50,6 +51,7 @@ function [H, F] = change_equation_drone(Param)
 
     %% ホライズンH=10 固定値 from kiyama
     Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
+    Rmp = blkdiag(Rp, Rp, Rp, Rp, Rp, Rp, Rp, Rp, Rp, zeros(4)); %Rp
     Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10]; %A
     Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
     qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
@@ -62,9 +64,11 @@ function [H, F] = change_equation_drone(Param)
         end
     end
     
-    H = S' * Qm * S + Rm;
+    H = S' * Qm * S + Rm; %default
+    % H = S' * Qm * S + Rm + Rmp;
     H = (H+H')/2;
-    F = [Am' * Qm * S; -qm * S; -Rm];
+    F = [Am' * Qm * S; -qm * S; -Rm]; % default
+    % F = [Am' * Qm * S; -qm * S; -Rm; -Rmp];
 
     %fはmexファイル内で行う 
     % f = @(x, r, ur) [x', r', ur'] * F;

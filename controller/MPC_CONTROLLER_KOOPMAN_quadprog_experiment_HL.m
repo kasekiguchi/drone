@@ -32,6 +32,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
         weight
         weightF
         weightR
+        weightRp
         qpparam
     end
 
@@ -54,12 +55,14 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
+            obj.result.input = obj.input.u;
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.H);
             obj.weight = blkdiag(obj.param.weight.P, obj.param.weight.Q, obj.param.weight.V, obj.param.weight.W);
             obj.weightF = blkdiag(obj.param.weight.Pf, obj.param.weight.Qf, obj.param.weight.Vf, obj.param.weight.Wf);
             obj.weightR = obj.param.weight.R;
+            obj.weightRp = obj.param.weight.Rp;
 
             %% A行列にxyzの位置を加えた拡張係数行列とする
             % A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
@@ -69,7 +72,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             % obj.param.C = blkdiag(eye(3), obj.C);
 
             %% QP change_equationの共通項をあらかじめ計算
-            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
+            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'weightRp',obj.weightRp,'H',obj.H);
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
             % H: 変数
             % F: fを生成するために必要な行列
@@ -114,12 +117,14 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment_HL < handle
             
             %% ------------------------------------------------------------
             % 最適化部分の関数化とmex化
-            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H,'F',obj.param.F);
+            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'u',obj.input.u,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H,'F',obj.param.F);
             [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
       
             %%
             obj.previous_input = var;
-            obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            u = var(1:4, 1); % 印加する入力 4入力
+            % obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            obj.result.input = max(obj.param.input.lb, min(obj.param.input.ub, u));
 
             %% データ表示用
             calT = toc;

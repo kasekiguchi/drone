@@ -63,6 +63,7 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 
                 %% iFlight
                 param.mass = 0.730; %iflight+6cell
+                % param.mass = 0.5884;
                 % param.mass = 0.595; % Kato これがいいらしい
                 param.Lx = 0.175;
                 param.Ly = 0.175;

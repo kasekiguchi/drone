@@ -15,7 +15,7 @@ clear gui
 clc; close all;
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
-te = 60; % terminal time
+te = 100; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -38,7 +38,7 @@ initial_state.w = [0; 0; 0];
 % model_file = "2024-11-18_Exp_Kiyama_Error_code00_saddle"; % 誤差拡張
 % model_file = "2024-12-06_Exp_Kiyama_code23_saddle"; 
 
-% model_file = "2025-01-19_Exp_Kiyama_code00_saddle_increased_weight.mat";
+% model_file = "2025-01-12_Exp_Kiyama_code00_saddle_increased.mat";
 model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
@@ -101,7 +101,6 @@ for i = 1:te/dt
     toc
 
     agent.controller.show(agent.controller.result.mpc.fval, agent.controller.result.mpc.exitflag);
-
     est = agent(1).estimator.result.state.p;
     if est(3) < 0 || est(3) > 2
         break

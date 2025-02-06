@@ -14,6 +14,14 @@ end
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear; clc;
 userpath('clear');
+
+% open file
+open TAKEOFF_REFERENCE.m
+open LANDING_REFERENCE.m
+open SimMPC_Koopman.m
+open Controller_MPC_Koopman.m
+open Case_study_trajectory.m
+open ExpMPC_Koopman.m
 %%
 % each method's arguments : app.time,app.cha,app.logger,app.env,app.agent,i
 clc
