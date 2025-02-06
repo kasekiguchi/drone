@@ -81,7 +81,7 @@ in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 0.6);
+initial_state.p = arranged_position([0, 0], 1, 1, 1);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -96,11 +96,12 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),10});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;0;1],"g",[-1.5;0;1]),7});
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-j = 'z';
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+% j = 'z';
+% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
 
 % reference_file = "Exp_2_4_108";
 % agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,0,te});
@@ -139,14 +140,23 @@ run("SimBase"); % simulation
 
 %% default
 for i = 1:te/dt
-    if i < 20 || rem(i, 10) == 0 end
+    % if i < 20 || rem(i, 10) == 0 end
+    if time.t > 10
+        phase = 'g'; 
+    elseif time.t > 20
+        phase = 'h';
+    elseif time.t > 30
+        phase = 'j';
+    else
+        phase = 'f';
+    end
     tic
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f');
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
+    agent(1).sensor.do(time, phase);
+    agent(1).estimator.do(time, phase);
+    agent(1).reference.do(time, phase);
+    agent(1).controller.do(time, phase);
+    agent(1).plant.do(time, phase);
+    logger.logging(time, phase, agent);
     time.t = time.t + time.dt;
     all = toc;
     clc; disp([num2str(time.t)])
@@ -155,7 +165,7 @@ end
 %%
 % set(0,'defaultAxesFontSize', 10)
 % set(0, 'DefaultLineLineWidth', 1.5);
-% logger.plot({1, "p", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[1 2]);
+logger.plot({1, "p", "er"},"xrange",[time.ts,time.t],"fig_num",1);
 % % logger.save('HL_sim_test_1008_sigmoid');
 app.logger = logger;
 result_plot(app)
@@ -164,12 +174,12 @@ result_plot(app)
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');
 %%
-f(1) = figure(1); f(2) = figure(7);
-for i=1:2; f(i).Position = [100 100 560 350]; end
-savename1 = 'dataset_spline_z_pos.pdf';
-savename2 = 'dataset_spline_z_3d.pdf';
-exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
-exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
+% f(1) = figure(1); f(2) = figure(7);
+% for i=1:2; f(i).Position = [100 100 560 350]; end
+% savename1 = 'dataset_spline_z_pos.pdf';
+% savename2 = 'dataset_spline_z_3d.pdf';
+% exportgraphics(f(1), savename1, 'ContentType', 'vector', 'Resolution', 300);
+% exportgraphics(f(2), savename2, 'ContentType', 'vector', 'Resolution', 300);
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

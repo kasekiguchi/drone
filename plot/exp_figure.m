@@ -17,10 +17,13 @@ set(0,'defaultLineMarkerSize',15);
 fprintf('Plot start\n');
 
 % filename = '1223_KMPC_hovering_code23_weight_1720';
-filename = 'code23_sim';
+% filename = 'code23_sim';
 % filename = 'code23_weight_p_10times';
 
 loadfile = strcat("Data/", filename, ".mat");
+
+% loadfile = 'experiment_10_25_P2Py_estimator.mat';
+% loadfile = 'experiment_10_20_P2Px_estimator.mat';
 log = LOGGER(loadfile); % loggerの形で収納できる
 % load(loadfile);
 
@@ -34,11 +37,13 @@ save_master = 1; % LOGGERで読み込めないやつ
 % 108:landing
 % 0:stop or quit
 %%
-save_master = 1;
+if save_master
 logger.Data.agent.estimator = est;
 logger.Data.agent.reference = ref;
 logger.Data.agent.input = input;
 logger.Data.param = param;
+filename = '';
+end
 
 disp("Loaded data...");
 %% save setting
@@ -49,14 +54,14 @@ disp("Loaded data...");
 %%
 close all
 clear fig
-flg.figtype = 1; % 0:subplot
+flg.figtype = 0; % 0:subplot
 % flg.ylim = 1;
 flg.savefig = 0;
 flg.animation_save = 0;
 flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
-flg.masterplot = 1;
+flg.masterplot = 0;
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
@@ -74,7 +79,8 @@ fig = fig.main_figure();
 if save_master
     filename = '';
     fig = FIGURE_EXP_master(struct('logger',logger,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange,'fignum',[2 3]),struct('model',filename));
-    fig = fig.master_plot(); % 修論用
+    % fig = fig.master_plot(); % 修論用
+    fig = fig.main_figure();
     for i=1:6; fig.data.f(i).Position = [100 100 560 350]; end
     ytickformat('%,.2f');
     s = {'p','q','v','w','thrust','torque'};

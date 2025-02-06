@@ -7,8 +7,8 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
-% loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
-loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
 % loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
@@ -33,17 +33,17 @@ flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
-args.save_fig = 1;     % 1：出力したグラフをfigで保存する
-flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+args.save_fig = 0;     % 1：出力したグラフをfigで保存する
+flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
 args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 args.ref_tra = 'saddle';
 %% 個別
 load(strcat(loadfilename{1}, '.mat'), 'est'); 
-[F, code] = select_observable(loadfilename);
+[F, code] = select_observable(loadfilename{1});
 g = input_0_verify(args, flg, est, loadfilename{1}, F);
 experiment_fitting(args, flg, loadfilename, F)
-save_fig(args, flg, loadfilename, g, code);
+% save_fig(args, flg, loadfilename, g, code);
 cd('../../');
 %% まとめて
 % file = {'2025-01-12_Exp_Kiyama_code00_saddle_increased';
@@ -78,10 +78,10 @@ function save_fig(args, flg, loadfilename, g, code)
         %-- make folder and move folder
         if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
         cd(strcat('./', loadfilename{1}, '/'));
-        if ~isfolder('jpg'); mkdir('jpg'); mkdir('pdf'); end
+        if ~isfolder('png'); mkdir('png'); mkdir('pdf'); end
         %-- save
         savefile = strcat('code', code);
-        for i = 1:4; saveas(i, strcat('./jpg/',savefile, '_', type(i),'.jpg')); end; fprintf('saved jpg\n');
+        for i = 1:4; saveas(i, strcat('./png/',savefile, '_', type(i),'.png')); end; fprintf('saved png\n');
         for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '_', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
 
         if flg.figtype == 0
@@ -137,26 +137,27 @@ ideal_vz = 9.81065 * (0.025*N);
 
 label_x = {'$$p_x$$', '$$p_y$$', '$$p_z$$', '$$q_{\mathrm{roll}}$$', '$$q_{\mathrm{pitch}}$$', '$$q_{\mathrm{yaw}}$$', '$$v_x$$', '$$v_y$$', '$$v_z$$', '$$\omega_{\mathrm{roll}}$$', '$$\omega_{\mathrm{pitch}}$$', '$$\omega_{\mathrm{yaw}}$$'};
 % ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; % p,q,v,w,(z),(vz)
-ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1];
+ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; 
+% ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05]; % thrustあり
 fprintf('0input verification result. max value = \n');
 format long
 arr = 1:ii*jj; idx = 0; m = 5;
 for i = 1:ii
     for j = 1:jj
         idx = idx + 1;
+        if idx == 3 || idx == 9
+            ylimset = ylimsetting(m,:);
+            m = m + 1;
+        else
+            ylimset = ylimsetting(i,:);
+        end
         if flg.without_pos && idx > 9; break; end
         if flg.figtype == 0
             subplot(ii,jj,idx);
-            plot(0:step_num,X(idx,:)); grid on; ylim(ylimsetting(i,:)); xlim([-inf inf]);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimset); xlim([-inf inf]);
             text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
             xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
         else
-            if idx == 3 || idx == 9
-                ylimset = ylimsetting(m,:);
-                m = m + 1;
-            else
-                ylimset = ylimsetting(i,:);
-            end
             f(idx) = figure(idx+100);
             plot(0:step_num,X(idx,:)); grid on; ylim(ylimset); xlim([-inf inf]);
             text(0.65, 0.12, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
@@ -381,8 +382,8 @@ if ~flg.division % plotResult
 i = 1;
 %% P
 % strrep _を "【空白】"に置換
-fig_title = strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra);
-% fig_title = '';
+if args.title; fig_title = strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra);
+else; fig_title = ''; end
 if flg.figtype; figure(1);
 else; fig = figure(1); sgtitle(fig_title); subplot(m,n,1); end 
 % Referenceをplot
