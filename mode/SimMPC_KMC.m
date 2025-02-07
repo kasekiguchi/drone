@@ -11,7 +11,7 @@ end
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 30; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -80,6 +80,13 @@ input = logger.data(1,"input",[])';
 subplot(m,n,2); plot(tt, pe, tt, pr); xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15);
 subplot(m,n,3); plot(tt, ve, tt, vr); xlabel('Time [s]', 'Fontsize', 15); ylabel('Velocity [m/s]', 'Fontsize', 15);
 subplot(m,n,4); plot(tt, input); xlabel('Time [s]', 'Fontsize', 15); ylabel('Input [N]', 'Fontsize', 15);
+
+%% mojamoja
+% gui = struct;
+mkdir('plot\Mov\');
+gui.logger = logger;
+P = Controller_MPC_KMC(dt, model_file, agent);
+mojamoja(gui, P, 'xz')
 %%
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

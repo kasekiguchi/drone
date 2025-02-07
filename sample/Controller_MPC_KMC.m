@@ -10,8 +10,8 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
 
     %% MPC param
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 2;
-    Controller.particle_num = 100;
+    Controller.H = 5;
+    Controller.particle_num = 1000;
     % Controller.input.Initsigma = 1*[2,1,1,1];
     % Controller.input.Constsigma = 100 * [0.01, 1,1,1];
     % Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452

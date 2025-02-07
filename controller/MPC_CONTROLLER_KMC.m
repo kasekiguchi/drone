@@ -71,6 +71,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
       % Initialize input
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.input.pre_u = obj.result.input;
       obj.input.U = zeros(self.estimator.model.dim(2),1);
 
       % Extended Coefficient Matrix ベクトル化
@@ -168,38 +169,22 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.Resampling_IS();      % リサンプリング
       obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
-      %% 予測状態を確認する
-      close all
-      s = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
-      % % % figure(101); % xy
-      % % % hold on;
-      % % % for n = 1:obj.N
-      % % %   plot(s(1,:,n), s(2,:,n), 'Color', 'blue', 'LineWidth', 0.5);
-      % % % end
-      % % % plot(s(1,:,obj.input.BestcostID(1)), s(2,:,obj.input.BestcostID(1)), 'Color', 'red', 'LineWidth', 1);
-      % % % hold off;
-      % % % xlabel('X [m]'); ylabel('Y [m]');
-
-      % figure(102); % xy
-      hold on;
-      for n = 1:obj.N
-        plot(s(1,:,n), s(3,:,n), 'Color', 'blue', 'LineWidth', 0.5);
-      end
-      plot(s(1,:,obj.input.BestcostID(1)), s(3,:,obj.input.BestcostID(1)), 'Color', 'red', 'LineWidth', 1);
-      yline(0.6, '--', 'Color', 'green', 'LineWidth', 1); xline(0, '--', 'Color', 'green', 'LineWidth', 1); 
-      hold off;
-      xlabel('X [m]'); ylabel('Z [m]');
-
-      %%
-      x = obj.state.state_data(:,:,obj.input.BestcostID(1));
-      r = obj.state.ref;
-      Jeach = calc_J(x, r, obj.input.u(:,:,obj.input.BestcostID(1)), obj.Weight, obj.WeightR, obj.H);
+      %% 評価関数の確認
+      % J2 = zeros(obj.N, 2);
+      % x = obj.state.state_data(:,:,obj.input.BestcostID(1));
+      % r = obj.state.ref;
+      % u = obj.input.u(:,:,obj.input.BestcostID(1));
+      % % J1 = calc_J(x, r, u, obj.Weight, obj.WeightR, obj.H);
+      % J2 = objective_1sample(obj, x, u);
+      % J = obj.input.Bestcost_now(1);
+      % [J, J2(1)]
 
       %% 値の保存
       obj.result.bestcostID = obj.input.BestcostID;
       obj.result.bestcost = obj.input.Bestcost_now;
       obj.result.sigma = obj.input.sigma;
       obj.result.Evaluationtra = obj.input.Evaluationtra;
+      obj.result.path = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
       %%
       result = obj.result;
       toc
@@ -215,9 +200,9 @@ classdef MPC_CONTROLLER_KMC < handle
             est_print.v(1), est_print.v(2), est_print.v(3),...
             est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
         fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-            obj.state.ref(3,1), obj.state.ref(7,1), obj.state.ref(1,1),...
-            obj.state.ref(4,1), obj.state.ref(8,1), obj.state.ref(2,1),...
-            0, 0, obj.state.ref(11,1)*180/pi)                             % r:reference 目標状態
+            obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+            obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+            0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
         fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f", ...
             obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2));
         fprintf("\n");
@@ -234,7 +219,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        % obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
     end
 
     %% 状態予測
@@ -275,14 +260,15 @@ classdef MPC_CONTROLLER_KMC < handle
         % k = ones(1, obj.param.H);
 
         %% 誤差計算
-        tildeUpre = U - obj.input.u;          % 前時刻入力
-        tildeUref = U - obj.param.ref_input;  % 目標入力
+        tildeUpre = U - obj.input.pre_u;          % 前時刻入力
+        tildeUref = U - obj.state.ref(13:16,:);  % 目標入力
+        tildeX = X - obj.state.ref(1:12,:);
 
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
         stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
 
-        stageStateX =    k .* X.*pagemtimes(obj.Weight,X);
+        stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
 
         %% 人工ポテンシャル場法
@@ -375,14 +361,17 @@ classdef MPC_CONTROLLER_KMC < handle
 
     %% 目標軌道生成
     function [xr] = generate_reference(obj)
-        xr = zeros(16, obj.param.H);    % initialize
+        xr = zeros(obj.param.total_size, obj.H);    % initialize
         % 時間関数の取得→時間を代入してリファレンス生成
         RefTime = obj.self.reference.func;    % 時間関数の取得
-        for h = 0:obj.param.H-1
+        for h = 0:obj.H-1
             t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
-            r = RefTime(t);
-            xr(1:12,h+1) = [r(3);r(7);r(1);r(5);r(9);r(13);r(2);r(6);r(10);r(14);r(4);r(8)];
-            xr(13:16,h+1)= obj.param.ref_input;
+            ref = RefTime(t);
+            xr(1:3, h+1) = ref(1:3);
+            xr(7:9, h+1) = ref(5:7);
+            xr(4:6, h+1) =   [0;0;ref(4)]; % 姿勢角
+            xr(10:12, h+1) = [0;0;0];
+            xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
         end
     end
   end
