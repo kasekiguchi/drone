@@ -1,4 +1,4 @@
-function V1 = Vf_SuspendedLoad(obj,in1,in2,in3,in4)
+function V1 = Vf_SuspendedLoad(in1,in2,in3,in4)
 %VF_SUSPENDEDLOAD
 %    V1 = VF_SUSPENDEDLOAD(IN1,IN2,IN3,IN4)
 

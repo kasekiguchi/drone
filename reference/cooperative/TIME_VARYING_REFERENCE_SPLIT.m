@@ -179,7 +179,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                rli = sqrt(2)*obj.self.parameter.get("lx");                           %機体のロータまでの長さ
                % g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
-               % rhoic = obj.agent1.parameter.rhoc(:,id);%紐の接続位置が頂点の多角形の重心からリンクまでの距離
+               rhoci = obj.agent1.parameter.rhoc(:,id);%紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % rhoi = [rhoi(:,1),rhoi(:,3),rhoi(:,4),rhoi(:,5)];
                %reference
                ref0 = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
@@ -230,10 +230,17 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    droneDistance = vecnorm(spDrone - obj.self.estimator.result.state.p);%自身と相手との距離
                    sortedDroneDistance = sort(droneDistance);
                    minDroneDistance = sortedDroneDistance(2)  - 2*rli;%1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
+                   
                    constTargetp = 0.1/(minDroneDistance - 0.4)^2;%sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
                    constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
                    obj.constPrep = constp;
                    kv = 0.05;%sim0.05速度referenceのゲイン
+
+                   constTargetp = 0.01/(minDroneDistance - 0.4)^2;%sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
+                   obj.constPrep = constp;
+                   kv = 0.05;%sim0.05速度referenceのゲイン
+
                    obj.constPrev = -kv*(constp - constTargetp);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
                    constd = constp - constTargetp;
                    % kv = 0.15;%速度referenceのゲイン
@@ -252,9 +259,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
                    obj.flanding = 0;%landing条件分岐用フラグ
                    rotm0 = obj.agent1.reference.result.rotms;     %回転行列
-                   rhoicUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   rhoi = rhoi + constp*[rhoicUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
+                   rhoi = rhoi + constp*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
+                   
+                   %加速度目標値として制約を設定することで力の次元で制約を考慮
+                   refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
+                   rhoicUnit12 = rhoci(1:2)/norm(rhoci(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
+                   refi(9:10) = constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
+                   % refi(9:10) = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
 
                elseif obj.cha =='t'
                    obj.flanding = 0;%landing条件分岐用フラグ
@@ -330,47 +343,47 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 %yaw補正をするための目標速度と高次微分を計算
                 % yaw*180/pi
                 % if abs(kYawSum)>10*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
-                if abs(yaw)>2000000*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
-                    if isempty(obj.errorVector)
-                        obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
-                    end
-    
-                    w = -obj.k_yaw*yaw;
-                    dw = (-obj.k_yaw)^2*yaw*1;%入力の微分dyaw = -k*yawの関係を用いる
-                    d2w = (-obj.k_yaw)^3*yaw*1;
-                    d3w = (-obj.k_yaw)^4*yaw*1;
-                    d4w = (-obj.k_yaw)^5*yaw*1;
-                    W = [zeros(2,5);w,dw,d2w,d3w,d4w];%加速度と微分
-                    % vL = obj.self.estimator.result.state.vL;
-                    % if vL~=0
-                    %     vLVec = [alpiVecUnit;0]'* vL/norm(vL)*vL;
-                    % else
-                    %     vLVec = 0;
-                    % end
-                    % A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
-                    Vxyz = cross(W,[alpi;0]+zeros(3,5));
-                    refi4_ = reshape(refi,4,[]);
-                    refi4_(1:2,2:6) = refi4_(1:2,2:6) + Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
-                    % refi4_(1:2,2:6) =  Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
-                    refi = reshape(refi4_,[],1);
-                    %yaw修正中の目標軌道
-                    % x0dForCorrection = x0d(1:2) + obj.errorVector;
-                    % refi(1:2) = alpi + x0dForCorrection;
-
-                    % %new version
-                    % thetaAlp = acos(alpiUnit'*[1;0]);
-                    % fsign = sign(cross([1;0;0],[alpiUnit;0]));
-                    % if fsign(3) < 0
-                    %     thetaAlp = 2*pi - thetaAlp; 
-                    % end
-                    % newRef = obj.yawRef(norm(rhoi(1:2)),yaw,thetaAlp,0);
-                    % refi4_ = reshape(refi,4,[]);
-                    % refi4_(1:2,1:6) = [newRef(:,1) + x0dForCorrection,newRef(:,2:6)];
-                    % refi = reshape(refi4_,[],1);
-
-                else
-                    obj.errorVector=[];
-                end
+                % if abs(yaw)>2000000*pi/180 && obj.agent1.sensor.result.state.p(3)>-0.2%&& abs(yaw) < 170*pi/180 %pi
+                %     if isempty(obj.errorVector)
+                %         obj.errorVector = obj.agent1.sensor.result.state.p(1:2) - x0d(1:2);
+                %     end
+                % 
+                %     w = -obj.k_yaw*yaw;
+                %     dw = (-obj.k_yaw)^2*yaw*1;%入力の微分dyaw = -k*yawの関係を用いる
+                %     d2w = (-obj.k_yaw)^3*yaw*1;
+                %     d3w = (-obj.k_yaw)^4*yaw*1;
+                %     d4w = (-obj.k_yaw)^5*yaw*1;
+                %     W = [zeros(2,5);w,dw,d2w,d3w,d4w];%加速度と微分
+                %     % vL = obj.self.estimator.result.state.vL;
+                %     % if vL~=0
+                %     %     vLVec = [alpiVecUnit;0]'* vL/norm(vL)*vL;
+                %     % else
+                %     %     vLVec = 0;
+                %     % end
+                %     % A = [0,norm(vLVec)^2,zeros(1,3)]/norm(rhoi(1:2));%向心方向加速度
+                %     Vxyz = cross(W,[alpi;0]+zeros(3,5));
+                %     refi4_ = reshape(refi,4,[]);
+                %     refi4_(1:2,2:6) = refi4_(1:2,2:6) + Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                %     % refi4_(1:2,2:6) =  Vxyz(1:2,:);% - A.*alpiUnit;%接線方向と向心方向(alpiUnitは半径方向なので符号を反転させる)のref
+                %     refi = reshape(refi4_,[],1);
+                %     %yaw修正中の目標軌道
+                %     % x0dForCorrection = x0d(1:2) + obj.errorVector;
+                %     % refi(1:2) = alpi + x0dForCorrection;
+                % 
+                %     % %new version
+                %     % thetaAlp = acos(alpiUnit'*[1;0]);
+                %     % fsign = sign(cross([1;0;0],[alpiUnit;0]));
+                %     % if fsign(3) < 0
+                %     %     thetaAlp = 2*pi - thetaAlp; 
+                %     % end
+                %     % newRef = obj.yawRef(norm(rhoi(1:2)),yaw,thetaAlp,0);
+                %     % refi4_ = reshape(refi,4,[]);
+                %     % refi4_(1:2,1:6) = [newRef(:,1) + x0dForCorrection,newRef(:,2:6)];
+                %     % refi = reshape(refi4_,[],1);
+                % 
+                % else
+                %     obj.errorVector=[];
+                % end
                 % alpi_unit-rhoi_unit
                 % model = obj.self.estimator.result;
                 % x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え

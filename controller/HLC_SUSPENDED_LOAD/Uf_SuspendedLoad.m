@@ -6,11 +6,11 @@ function U1 = Uf_SuspendedLoad(in1,in2,in3,in4)
 %    2024/06/28 16:37:52
 
 V1 = in3(:,1);
-cableL = in4(:,16);
+cableL = in4(:,7);
 d2Xd3 = in2(:,11);
-gravity = in4(:,6);
+gravity = in4(:,5);
 m = in4(:,1);
-mL = in4(:,15);
+mL = in4(:,6);
 ol1 = in1(17,:);
 ol2 = in1(18,:);
 ol3 = in1(19,:);

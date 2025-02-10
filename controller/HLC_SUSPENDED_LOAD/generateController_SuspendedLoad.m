@@ -22,14 +22,14 @@ dpl = [dpl1;dpl2;dpl3];             % Load velocity
 ol  = [ ol1; ol2; ol3];             % Load angular velocity
 pT  = [ pT1; pT2; pT3];             % String position
 x=[q;ob;pl;dpl;pT;ol];
-physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, Length, mL, cableL];
+physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, mL, cableL];
 f = FL(x,physicalParam);
 g = GL(x,physicalParam);
 % physicalParam = [m, jx, jy, jz, gravity, mL, cableL];
 % f = FL2(x,physicalParam);
 % g = GL2(x,physicalParam);
 %g= [g1 g2 g3 g4];
-physicalParam = [m, Lx, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,mL,cableL];
+physicalParam = [m, jx, jy, jz, gravity,mL,cableL];
 %% 1st layer
 clc
 % % Define virtual output: h1
@@ -142,7 +142,7 @@ syms v2(t) v3(t) v4(t)
     matlabFunction(subs([h1;dh1], [xdReff], [XDf]),'file','Z1_SuspendedLoad.m','vars',{x cell2sym(XD) physicalParam},'outputs',{'cZ1'});
     matlabFunction(subs([h2;dh2;d2h2;d3h2;d4h2;d5h2], [xdReff vInput1f], [XDf V1vf]),'file','Z2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ2'});
     matlabFunction(subs([h3;dh3;d2h3;d3h3;d4h3;d5h3], [xdReff vInput1f], [XDf V1vf]),'file','Z3_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ3'});
-    matlabFunction(subs([h4;dh4], [xdRef vInput1], [XDf V1vf]),'file','Z4_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ4'});
+    matlabFunction(subs([h4;dh4], [xdReff vInput1f], [XDf V1vf]),'file','Z4_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ4'});
 
 %% Make functions of virtual inputs
 clc

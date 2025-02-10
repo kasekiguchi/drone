@@ -33,15 +33,20 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
+                %六角中
                 param.m0 = 1.200;%分割前のペイロード
-                % param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
+                % param.J0 = [0.35;0.47;0.45];%非対称牽引物
+                %四角中
+                % param.m0 = 3.900;%分割前のペイロード実験牽引物四角
+                % param.J0 = [2^2*0.1^2;2^2*0.1^2;2*0.02^2]* 3.900/3;%非対称牽引物正方形
+                
+                param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
                 % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
                 % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
-                param.J0 = [0.35;0.47;0.45];%非対称牽引物
+
                 param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
-                param.li = 2*ones(N,1);%紐の長さ
+                param.li = 2*ones(N,1);%2*ones(N,1);%紐の長さ
                 param.mi = 0.800*ones(N,1)';%ドローンの重さ
-%                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
@@ -53,28 +58,44 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             if isempty(param.rho)&& 1
             %% 非対称牽引物
-                %上面
+                %*Up, *Downは牽引物の上面と下面を表す   
+                %六角形
                 xUp = [-2 -1.5 0 1.5 1 0];
                 yUp = [-1 0.5 1 0.5 -0.5 -1];
                 zUp = 0.5*ones(1,6);
-                pUp = [xUp;yUp;zUp]*0.4;
-                %下面
+                pUp = [xUp;yUp;zUp]*0.5;%
+
                 xDown = [-2 -1.5 0 1.5 1 0];
                 yDown = [-1 0.5 1 0.5 -0.5 -1];
                 zDown = -0.5*ones(1,6);
-                pDown = [xDown;yDown;zDown]*0.4;
+                pDown = [xDown;yDown;zDown]*0.5;%
+
+                %四角形
+                % xUp = [2 -2 -2 2];
+                % yUp = [2 2 -2 -2];
+                % zUp = 0.1*ones(1,4);
+                % pUp = [xUp;yUp;zUp];%
+                % xDown = [2 -2 -2 2];
+                % yDown = [2 2 -2 -2];
+                % zDown = -0.1*ones(1,4);
+                % pDown = [xDown;yDown;zDown];%
+
                 %重心の計算
                 polyin = polyshape(pUp(1,:),pUp(2,:));
                 [x,y] = centroid(polyin);
                 G = [x;y;0];
+                rho = pUp-G;%重心位置から接続点までの距離
                 %接続点を頂点とする図形の重心位置
                 polyin = polyshape(pUp(1,1:N),pUp(2,1:N));
                 [x,y] = centroid(polyin);
                 Gc = [x;y;0];
-                % 重心から接続点までの距離
-                rho = pUp-G;
-                %接続点を頂点とする図形の重心位置
-                rhoc = pUp-Gc;%Gc
+                rhoc = pUp-Gc;%接続点を頂点とする図形の重心位置から接続点までの距離
+                
+                %紐の接続点が牽引物の頂点と違う場合はここで設定
+                % xUp = [2 0 -2 0];
+                % yUp = [0 2 0 -2];
+                % zUp = 0.1*ones(1,4);
+                % rho = [xUp;yUp;zUp]-G;
 
                 param.rho = rho(:,1:N);
                 param.rhoc = rhoc(:,1:N);
