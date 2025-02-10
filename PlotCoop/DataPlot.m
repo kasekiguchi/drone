@@ -12,17 +12,13 @@
 close all
 clear multiFigure option addingContents f loggers
 %選択    
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
-frmse = 10;%rmseのみ知りたい場合
-startTime = 0;
-<<<<<<< Updated upstream
-endTime = 1000;%1E3;
-=======
-endTime = 120;%1E3;
->>>>>>> Stashed changes
-fnowdata = 1;
+fF=1;%flightのみは１
+frmse = 1;%rmseのみ知りたい場合
+startTime = 10;
+endTime = 74;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
@@ -49,8 +45,13 @@ else
         loggers = [
                     % simple_log_circle_success_PC1;...
                     % simple_log_circle_success_PC2(2:end)
-                    simple_log_saddle_rotPC1;...
-                    simple_log_saddle_rotPC2(2:end)
+                    % simple_log_saddle_rotPC1;...
+                    % simple_log_saddle_rotPC2(2:end)
+                    simple_log_saddle08T12_rottm3_4sin_3PC1;...
+                    simple_log_saddle08T12_rottm4_3sin_3PC2(2:end)
+                    % simple_log_saddle_rott_Noise
+                    % simple_log_saddle_rott_noNoise
+                    % simple_log_saddle2T10_rott2_3sin_m5
                     ];
     end
     droneID = 1:length(loggers)-1;
@@ -103,7 +104,10 @@ nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"th
 nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0",["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
-nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
+nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"pi"+droneID,"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
+n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+% n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","mAll","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+n = ["t_p0","attitude0"];
 if fnowdata==1
     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
     nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","pepi"+droneID,"peqi"+droneID,"pepLi"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
@@ -112,7 +116,7 @@ if fnowdata==1
     nM = {["t_sx0" "t_sy0" "t_sz0","t_sqyaw0","t_p"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"expThree_D",["x_y","x_z","y_z","t_x","t_y","t_z"],"attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"constRef"+droneID,"minDroneDistance",["t_qroll0","t_qpitch0","t_qyaw0"]};%比較するとき複数まとめる
     % n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","x_y","x_z","y_z","t_x","t_y","t_z","mAll","mL","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
     % n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
-    n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","mAll","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
+    n = ["t_p0","t_x0","t_y0","t_z0","three_D0","error0" "t_errx0"	"t_erry0"	"t_errz0","mAll","inputTrust" "inputRoll"	"inputPitch"	"inputYaw","constRef"+droneID,"minDroneDistance","attitude0","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
     % n = ["t_p0","expThree_D","t_z","mAll","mL","t_qroll0","t_qpitch0","t_qyaw0"];%比較するとき複数まとめる
 end
 multiFigure.layout = cell(1,length(nM));
@@ -228,9 +232,9 @@ if isSaved
     filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
     if fExist
-        writematrix([strings(1,4);"<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
+        writematrix([strings(1,4);"<"+contents+">",strings(1,6);"time (s)",string(startTime)+"-"+string(endTime),strings(1,5);RMSE(:,1:7)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
     else
-        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
+        writematrix(["<"+contents+">",strings(1,6);"time (s)",string(startTime)+"-"+string(endTime),strings(1,5);RMSE(:,1:7)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
     end
     
     %% single save
@@ -399,6 +403,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 vx0{1} = ev{i}(1,:);
                 vy0{1} = ev{i}(2,:);
                 vz0{1} = ev{i}(3,:);
+                q0{1} = cQeul{i}*180/pi;
                 qroll0{1} = cQeul{i}(1,:)*180/pi;
                 qpitch0{1} = cQeul{i}(2,:)*180/pi;
                 qyaw0{1} = cQeul{i}(3,:)*180/pi;
@@ -415,6 +420,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
                 ez0{1} = sp{i}(3,:);
                 err{1} = sp{1}-ref0;%誤差
                 epL{1} = sp{1};
+                q0{1} = sq{i}*180/pi;
                 qroll0{1} = sq{i}(1,:)*180/pi;
                 qpitch0{1} = sq{i}(2,:)*180/pi;
                 qyaw0{1} = sq{i}(3,:)*180/pi;
@@ -443,13 +449,17 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             refx{j} = rxd{i}(1,:);%
             refy{j} = rxd{i}(2,:);
             refz{j} = rxd{i}(3,:);
-            % constp{j} = rconstp{i};
-            % constTargetp{j} = rconstTargetp{i};
-            % minDroneDistance{j} = rminDroneDistance{i};
+            constp{j} = rconstp{i};
+            constTargetp{j} = rconstTargetp{i};
+            minDroneDistance{j} = rminDroneDistance{i};
             err{i} = epL{i}-rxd{i}(1:3,:);%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);
             errz{j} = err{i}(3,:);
+            epi{j} = ep{i};
+            epx{j} = ep{i}(1,:);
+            epy{j} = ep{i}(2,:);
+            epz{j} = ep{i}(3,:);
             evi{j} = ev{i};
             evx{j} = ev{i}(1,:);
             evy{j} = ev{i}(2,:);
@@ -524,7 +534,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         Ci = num2cell(C(2:end));
         CDi = num2cell(lgnd.drone);
         t1 = {ones(lt(1),3).*time{1}'};
-        allData.t_p0 = {struct('x',{[t1,t1]},'y',{[{ref0'},{epL{1}'}]}), struct('x','time (s)','y','payload position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
+        allData.t_p0 = {struct('x',{[t1,t1]},'y',{[{ref0'},{epL{1}'}]}), struct('x','time (s)','y','payload position (m)'), {'$x$ ref.','$y$ ref.','$z$ ref.','$x$ Est.','$y$ Est.','$z$ Est.'},add_option([],option,addingContents)};
         allData.x_y0 = {struct('x',{[ex0,refx0]},'y',{[ey0,refy0]}), struct('x','$x$ (m)','y','$y$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
         allData.x_z0 = {struct('x',{[ex0,refx0]},'y',{[ez0,refz0]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
         allData.y_z0 = {struct('x',{[ey0,refy0]},'y',{[ez0,refz0]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc0,add_option(["aspect"],option,addingContents)};
@@ -544,10 +554,10 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.t_errx0 = {struct('x',{time(1)},'y',{errx0} ), struct('x','time (s)','y','error $x$ (m)'),C0,add_option([],option,addingContents)};
         allData.t_erry0 = {struct('x',{time(1)},'y',{erry0} ), struct('x','time (s)','y','error $y$ (m)'),C0,add_option([],option,addingContents)};
         allData.t_errz0 = {struct('x',{time(1)},'y',{errz0} ), struct('x','time (s)','y','error $z$ (m)'),C0,add_option([],option,addingContents)};
-        allData.attitude0 = {struct('x',{time(1)},'y',{[cQeul(1)',{refeul0'}]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],C0),add_option([],option,addingContents)};
-        allData.t_qroll0 = {struct('x',{time(1)},'y',{[qroll0{1}',{refeul0(1,:)'}]}), struct('x','time (s)','y','$q_{roll}$ (deg)'),Rc0,add_option([],option,addingContents)};
-        allData.t_qpitch0 = {struct('x',{time(1)},'y',{[qpitch0{1}',{refeul0(2,:)'}]}), struct('x','time (s)','y','$q_{pitch}$ (deg)'),Rc0,add_option([],option,addingContents)};
-        allData.t_qyaw0 = {struct('x',{time(1)},'y',{[qyaw0{1}',{refeul0(3,:)'}]}), struct('x','time (s)','y','$q_{yaw}$ (deg)'),Rc0,add_option([],option,addingContents)};
+        allData.attitude0 = {struct('x',{time(1)},'y',{[{refeul0'},q0(1)']}), struct('x','time (s)','y','payload attitude (deg)'), {'$\theta_{roll}$ ref.','$\theta_{pitch}$ ref.','$\theta_{yaw}$ ref.','$\theta_{roll}$ plant','$\theta_{pitch}$ plant','$\theta_{yaw}$ plant'},add_option([],option,addingContents)};
+        allData.t_qroll0 = {struct('x',{time(1)},'y',{[qroll0{1}',{refeul0(1,:)'}]}), struct('x','time (s)','y','$\theta_{roll}$ (deg)'),Rc0,add_option([],option,addingContents)};
+        allData.t_qpitch0 = {struct('x',{time(1)},'y',{[qpitch0{1}',{refeul0(2,:)'}]}), struct('x','time (s)','y','$\theta_{pitch}$ (deg)'),Rc0,add_option([],option,addingContents)};
+        allData.t_qyaw0 = {struct('x',{time(1)},'y',{[qyaw0{1}',{refeul0(3,:)'}]}), struct('x','time (s)','y','$\theta_{yaw}$ (deg)'),Rc0,add_option([],option,addingContents)};
         allData.velocity0 = {struct('x',{time(1)},'y',{ev0(1)}), struct('x','time (s)','y','velocity(m/s)'), LgndCrt(["$x$","$y$","$z$"],C0),add_option([],option,addingContents)};
         allData.t_vx0 = {struct('x',{time(1)},'y',{vx0}), struct('x','time (s)','y','$v_x$ (m/s)'),C0,add_option([],option,addingContents)};
         allData.t_vy0 = {struct('x',{time(1)},'y',{vy0}), struct('x','time (s)','y','$v_y$ (m/s)'),C0,add_option([],option,addingContents)};
@@ -632,6 +642,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             allData.("pewi"+string(i)) = {struct('x',{t2},'y',{[{pwi{i}'},{ewi{i}'}]}), struct('x','time (s)','y','drone'+string(i) +' angular velocity (rad/s)'), ["$roll_p$","$pitch_p$","$yaw_p$","$roll_e$","$pitch_e$","$yaw_e$"],add_option([],option,addingContents)};
             allData.("pewLi"+string(i)) = {struct('x',{t2},'y',{[{pwLi{i}'},{ewLi{i}'}]}), struct('x','time (s)','y','link'+string(i) +' angular velocity (rad/s)'),  ["$roll_p$","$pitch_p$","$yaw_p$","$roll_e$","$pitch_e$","$yaw_e$"],add_option([],option,addingContents)};
             %estimator
+            allData.("pi"+string(i)) = {struct('x',{t2},'y',{{epi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' position (m)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("vi"+string(i)) = {struct('x',{t2},'y',{{evi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' velocity (m/s)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("vLi"+string(i)) = {struct('x',{t2},'y',{{evLi{i}'}}), struct('x','time (s)','y','payload'+string(i) +' velocity (m/s)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("attitude"+string(i)) = {struct('x',{t2},'y',{{eqi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' attitude (rad)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
@@ -645,21 +656,23 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             % allData.("inputsum"+string(i)) = {struct('x',{{["Thrust","roll","pitch","yaw"]}},'y',{{inputsum}}), struct('x',[],'y','Value'), CDi,add_option([],option,addingContents)};
         end
         %二乗誤差平均
-        RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
+        % RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
+        RMSElog(1,1:7) = ["RMSE","x","y","z","roll","pitch","yaw"];
         RMSE = zeros(logNum,12);
         
         for i =1:logNum
             if i ==1
                 RMSE(i,1:3) = rmse(ref0,epL{1,i});
+                RMSE(i,4:6) = rmse(refeul0,[qroll0{1}; qpitch0{1}; qyaw0{1}]);
             else
                 RMSE(i,1:3) = rmse(ref{1,i-1},epL{1,i});
             end
-            RMSElog(i+1,1:4) = [C(i),RMSE(i,1:3)];
+            RMSElog(i+1,1:7) = [C(i),RMSE(i,1:6)];
             fprintf('#%s RMSE\n',C(i));
             % fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
             % fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
-            fprintf('  x\t y\t z\t \n');
-            fprintf('  %.4f    %.4f    %.4f \n',RMSElog(i+1,2:4));
+            fprintf('\tx\t y\t z\t roll\t pitch\t yaw\t \n');
+            fprintf('\t%.4f\t %.4f\t %.4f\t %.4f\t %.4f\t %.4f\t \n',RMSElog(i+1,2:7));
         end
         % for i =1:logNum
         %     refs = zeros(3,lt(i));%kはtimeの長さ

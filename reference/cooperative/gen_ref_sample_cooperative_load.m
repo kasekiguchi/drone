@@ -53,9 +53,10 @@ pitch = 4*sin(2*pi*t/T/2)*pi/180;
 % pitch = 3*pi/180;
 yaw = 0*pi/180;
 %sim
-% roll = 2*pi/180;
-% pitch = 3*sin(2*pi*t/T)*pi/180;
-% yaw = -5*pi/180;
+roll = 2*pi/180;
+pitch = 3*sin(2*pi*t/T)*pi/180;
+% pitch = 3*pi/180;
+yaw = -5*pi/180;
 % 
 % roll = 2*sin(2*pi*t/T)*pi/180;
 % pitch = 3*sin(2*pi*t/T)*pi/180;

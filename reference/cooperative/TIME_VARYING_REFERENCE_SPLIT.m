@@ -244,7 +244,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp=0
+                   constp%=0
                    constTargetp
                    constd
 
@@ -252,11 +252,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.ftakeoff = 0;%take off条件分岐用フラグ
                    obj.flanding = 0;%landing条件分岐用フラグ
                    rotm0 = obj.agent1.reference.result.rotms;     %回転行列
-                   % rhoicUnit12 = rhoic(1:2)/norm(rhoic(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   % rhoi = rhoi + constp*[rhoicUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
-                   % refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
-                   rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   rhoi = rhoi + constp*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
+                   rhoicUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
+                   rhoi = rhoi + constp*[rhoicUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
 
                elseif obj.cha =='t'
@@ -294,11 +291,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if norm(p - real_pL) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-<<<<<<< Updated upstream
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
-=======
                        obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.3)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
->>>>>>> Stashed changes
                    else 
                        obj.base_state_landing(1:2) = obj.base_state12_landing + 0.0*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
