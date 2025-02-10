@@ -28,13 +28,9 @@ addId = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 COMs = [3,12];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
-<<<<<<< Updated upstream
 % cableL=[0.896,0.896];
 cableL=[0.785,0.785];
-=======
-cableL=[0.896,0.896];
-% cableL=[0.785,0.785];
->>>>>>> Stashed changes
+
 length=cableL;
 
 refName = {
