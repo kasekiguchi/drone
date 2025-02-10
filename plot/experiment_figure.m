@@ -76,22 +76,22 @@ elseif figtype == 2
     subplot(m,n,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Position [m]"); legend({"$x$", "$y$", "$z$", "$x$.reference", "$y$.reference", "$z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    %ylim([-1.2 1.2]);
-    ylim([-inf inf]);
+    ylim([-0.8 1.2]);
+    %ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     subplot(m,n,2); plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Attitude [rad]"); legend({"$\phi$", "$\theta$", "$\psi$", "$\phi$.reference", "$\theta$.reference", "$\psi$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    %ylim([-0.2 0.2]);
-    ylim([-inf inf]);
+    ylim([-0.15 0.15]);
+    %ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     subplot(m,n,3); plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend({"$v_x$", "$v_y$", "$v_z$", "$v_x$.reference", "$v_y$.reference", "$v_z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    %ylim([-0.4 0.4]);
-    ylim([-inf inf]);
+    ylim([-0.3 0.3]);
+    %ylim([-inf inf]);
     % title("Time change of Velocity");  
     % input
     subplot(m,n,4); plot(logt, Input(1,:), "LineWidth", 1.5); hold on;

@@ -35,19 +35,21 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
     Controller_param.B = est.B;
     Controller_param.C = est.C;
 
-    %% 重み MCとは感覚ちがう。vzの重み付けない方が良い QとV逆だったらしい
+    %% 重み MCとは感覚ちがう。
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 10倍× 1/10×
-   % Controller_param.weight.V = diag([30; 20; 1]);    % 速度  10,20刻み 木山
-    Controller_param.weight.V = diag([30; 20; 1]);    % 速度  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
+   % Controller_param.weight.Q = diag([30; 20; 1]);    % 姿勢角  10,20刻み 木山
+    Controller_param.weight.Q = diag([30; 20; 1]);    % 姿勢角  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み　調整用 速度 vx10倍xの位置が-方向にゆっくり発散 vy10倍yの位置が-方向に発散 vz10倍landingみたいになる vxvy1/10× vz1/10悪くはないが…
-                                                               % 角速度10倍xyだめ　z10倍x良いyだめ　1/10×
+    Controller_param.weight.V = diag([10; 1; 1]);  % 速度 1,2刻み　調整用 速度 vx10倍xの位置が-方向にゆっくり発散 vy10倍yの位置が-方向に発散 vz10倍landingみたいになる vxvy1/10× vz1/10悪くはないが…                                
+    Controller_param.weight.W = diag([1; 1; 1]); %角速度 1,2刻み 10倍xyだめ　z10倍x良いyだめ　1/10×
+
     Controller_param.weight.Pf = Controller_param.weight.P;
+    Controller_param.weight.Qf = Controller_param.weight.Q;
     Controller_param.weight.Vf = Controller_param.weight.V;
-    Controller_param.weight.QWf = Controller_param.weight.QW;
+    Controller_param.weight.Wf = Controller_param.weight.W;
 
     %% 4inputs
     if torque == 1

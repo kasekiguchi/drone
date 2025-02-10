@@ -18,9 +18,10 @@ function [H, f] = change_equation(Param)
     B = Param.B;
     C = Param.C;
 
-    Q = blkdiag(Param.weight.P, Param.weight.V, Param.weight.QW);
+    % Q = blkdiag(Param.weight.P, Param.weight.V, Param.weight.QW);
+    Q = blkdiag(Param.weight.P, Param.weight.Q, Param.weight.V, Param.weight.W);
     R = Param.weight.R;
-    Qf = blkdiag(Param.weight.Pf, Param.weight.Vf, Param.weight.QWf);
+    Qf = blkdiag(Param.weight.Pf, Param.weight.Qf, Param.weight.Vf, Param.weight.Wf);
     Horizon = Param.H;
     Am = [];
 
