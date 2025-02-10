@@ -1,13 +1,13 @@
 %% Initialize
-tmp = matlab.desktop.editor.getActive;
-dir = fileparts(tmp.Filename);
-if ~contains(path,dir)
-    cd(erase(dir,'\mode'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-close all hidden; clear ; clc;
-userpath('clear');
-end
+% tmp = matlab.desktop.editor.getActive;
+% dir = fileparts(tmp.Filename);
+% if ~contains(path,dir)
+%     cd(erase(dir,'\mode'));
+% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+% close all hidden; clear ; clc;
+% userpath('clear');
+% end
 
 %% 20回まとめてシミュレーションする
 % clear; close all; clc;
@@ -91,8 +91,8 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 % agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
@@ -139,36 +139,26 @@ run("SimBase"); % simulation
 % end
 
 %% default
-for i = 1:te/dt
-    % if i < 20 || rem(i, 10) == 0 end
-    if time.t > 10
-        phase = 'g'; 
-    elseif time.t > 20
-        phase = 'h';
-    elseif time.t > 30
-        phase = 'j';
-    else
-        phase = 'f';
-    end
-    tic
-    agent(1).sensor.do(time, phase);
-    agent(1).estimator.do(time, phase);
-    agent(1).reference.do(time, phase);
-    agent(1).controller.do(time, phase);
-    agent(1).plant.do(time, phase);
-    logger.logging(time, phase, agent);
-    time.t = time.t + time.dt;
-    all = toc;
-    clc; disp([num2str(time.t)])
-end
+% for i = 1:te/dt
+%     % if i < 20 || rem(i, 10) == 0 end
+%     tic
+%     agent(1).sensor.do(time, phase);
+%     agent(1).estimator.do(time, phase);
+%     agent(1).reference.do(time, phase);
+%     agent(1).controller.do(time, phase);
+%     agent(1).plant.do(time, phase);
+%     logger.logging(time, phase, agent);
+%     time.t = time.t + time.dt;
+%     all = toc;
+%     clc; disp([num2str(time.t)])
+% end
 
 %%
 % set(0,'defaultAxesFontSize', 10)
 % set(0, 'DefaultLineLineWidth', 1.5);
-logger.plot({1, "p", "er"},"xrange",[time.ts,time.t],"fig_num",1);
-% % logger.save('HL_sim_test_1008_sigmoid');
-app.logger = logger;
-result_plot(app)
+% logger.plot({1, "p", "er"},"xrange",[time.ts,time.t],"fig_num",1);
+% app.logger = logger;
+% result_plot(app)
 % 
 % % 仮想入力の描画
 % imgu = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.img_input, 1:te/dt, 'UniformOutput', false));

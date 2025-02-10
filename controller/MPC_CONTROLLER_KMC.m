@@ -107,7 +107,6 @@ classdef MPC_CONTROLLER_KMC < handle
             result = obj.controller_KMC(varargin);
             disp('controller: MC,  phase: a');
         elseif phase == 't' || phase == 'l'
-            obj.state.ref = obj.generate_reference(); % for sim
             result = obj.controller_HL(varargin); % takeoff and landing -> HLC
             disp('controller: HL  phase: t or l');
         elseif phase == 'f'
@@ -161,13 +160,16 @@ classdef MPC_CONTROLLER_KMC < handle
 
       obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
 
-      obj.input.mu = obj.param.ref_input;
+      % obj.input.mu = obj.input.pre_u; % 採択入力を平均
+      obj.input.mu = obj.param.ref_input; % 目標入力
       obj.generate_input(0.1);  % 入力生成
       obj.predict();            % 状態予測
       obj.objective();          % 評価計算
       obj.normalize();          % 評価値の正規化
       obj.Resampling_IS();      % リサンプリング
       obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
+
+      % obj.Resampling_LVS();
 
       %% 評価関数の確認
       % J2 = zeros(obj.N, 2);
@@ -224,31 +226,10 @@ classdef MPC_CONTROLLER_KMC < handle
 
     %% 状態予測
     function predict(obj)
-        %-- 使えるパラメータ：obj.A, obj.B, obj.N, obj.H, obj.state.state_data, obj.current_state, obj.input.u
-        % x_0 = repmat(obj.current_state,1,1,obj.N);
-        % U = reshape(obj.input.u,[],1,obj.N);
-        % X = pagemtimes(obj.param.A,x_0)+pagemtimes(obj.param.B,U);
-        % obj.state.state_data = reshape(X,12,obj.H,[]);
-
-        % obj.state.state_data = pagemtimes(obj.param.A, obj.param.F(obj.current_state)) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
-        % obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
-
         current = repmat(obj.param.F(obj.current_state), 1, 1, obj.N);
         tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
         tmp = pagemtimes(obj.param.C, tmp_z);
         obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-
-        % tmp(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
-        % state = zeros(26, obj.H, obj.N); % Z
-        % state(:, 1, :) = current; % Z初期値
-        % for n = 1:obj.N
-        %     for h = 1:obj.H
-        %         state(:, h+1, n) = obj.A * state(:, h, n) + obj.B * obj.input.u(:, h, n);
-        %         s(:, h, n) = obj.C * state(:, h+1, n);
-        %     end
-        % end
-        % obj.state.state_data = tmpx;
-      % 
     end
 
     function objective(obj)
@@ -328,20 +309,34 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.mu(3, 1:obj.param.H, 1:obj.N) = u3;
         obj.input.mu(2, 1:obj.param.H, 1:obj.N) = u2;
         obj.input.mu(1, 1:obj.param.H, 1:obj.N) = u1;
+
+
+        % NP = obj.N;
+        % pw = obj.input.EvalNorm;
+        % u = obj.input.u;
+        % wcum = cumsum(pw);
+        % base = cumsum(pw*0+1/NP) - 1/NP;
+        % resampleID = base + rand/NP;
+        % pu = u;
+        % ind = 1;
+        % for ip = 1:NP
+        %     while(resampleID(ip) > wcum(ind))
+        %         ind = ind+1;
+        %     end
+        %     u(:, 1:end, ip) = [pu(:, 2:end, ind), pu(:, end, ind)];
+        %     pw(ip) = 1/NP;
+        % end
+        % mu = u;
     end
 
     function Resampling_IS(obj)
         % 重点サンプリング
-        NP = obj.N;
-        pw = obj.input.EvalNorm; % 正規化された評価値
-        H = obj.param.H;
-        u = obj.input.u;
+        % NP = obj.N;
+        % pw = obj.input.EvalNorm; % 正規化された評価値
+        % u = obj.input.u;
 
-        % sumUw = reshape(sum(u.*reshape(pw,1,1,[]),2), 4,NP);
-        % resampling_u = repmat(reshape(sumUw ./ sum(pw), 4, 1, NP), 1, H, 1);
-
-        obj.input.mu = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
-            ./ sum(pw), 4, 1, NP), 1, H, 1);
+        obj.input.mu = repmat(reshape(reshape(sum(obj.input.u.*reshape(obj.input.EvalNorm,1,1,[]),2), 4,obj.N)...
+            ./ sum(obj.input.EvalNorm), 4, 1, obj.N), 1, obj.param.H, 1);
     end
 
     function get_input(obj)
