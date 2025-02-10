@@ -68,7 +68,7 @@ function mojamoja(gui, P, style)
 
         if mp4
             v = VideoWriter(filename,"MPEG-4");
-            v.FrameRate = round(1/0.1);
+            v.FrameRate = round(1/0.025);
             open(v); 
             writeVideo(v, framev);
             close(v);
