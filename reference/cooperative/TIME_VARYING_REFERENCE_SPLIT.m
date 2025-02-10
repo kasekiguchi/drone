@@ -264,11 +264,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state12_takeoff = real_pL(1:2);
                    end
                    % if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
-                   if real_pL(3) >=0.3 || obj.ftakeoff == 1 %紐が60deg
+                   if real_pL(3) >=0.6 || obj.ftakeoff == 1 %紐が60deg
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.3*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*cablei*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.constPrep = 0.5*cablei;
                        obj.constPrep = 0.6;
@@ -293,7 +293,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.3)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + 0.6*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
