@@ -28,8 +28,9 @@ addId = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 COMs = [3,12];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
-cableL=[0.896,0.896];
-% cableL=[0.785,0.785];
+% cableL=[0.896,0.896];
+cableL=[0.785,0.785];
+
 length=cableL;
 
 refName = {
@@ -65,21 +66,22 @@ if isCoop == 1
     end
     
     %紐の接続点が頂点の図形の中心の場合(平面を仮定)
-    pLs = zeros(3,N-1);
-    for i = 1:N-1
-        pLs(:,i) = motive.result.rigid(1+2*i+addId).p;
-    end
-    polyin = polyshape(pLs(1,1:N),pLs(2:N));
-    [x,y] = centroid(polyin);
-    G = [x;y;motive.result.rigid(1).p(3)];
-    deltaG = G - motive.result.rigid(1).p;
-    % 重心から接続点までの距離とdeltaGとrho1rho2の内積
-    dotDeltaG = [rho(1:2,1)';rho(1:2,2)']*deltaG ;
-    rho = pLs-G;%図形重心からのrhoに変更
+    % pLs = zeros(3,N-1);
+    % for i = 1:N-1
+    %     pLs(:,i) = motive.result.rigid(1+2*i+addId).p;
+    % end
+    % polyin = polyshape(pLs(1,1:N),pLs(2:N));
+    % [x,y] = centroid(polyin);
+    % G = [x;y;motive.result.rigid(1).p(3)];
+    % deltaG = G - motive.result.rigid(1).p;
+    % % 重心から接続点までの距離とdeltaGとrho1rho2の内積
+    % dotDeltaG = [rho(1:2,1)';rho(1:2,2)']*deltaG ;
+    % rho = pLs-G;%図形重心からのrhoに変更
+    % agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho,"G",G,"dotDeltaG",dotDeltaG);
 
     rho
     agent(1) = DRONE; %DRONE.m
-    agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho,"G",G,"dotDeltaG",dotDeltaG);
+    agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);
     agent(1).plant = struct("do",@(varargin)[], "arming" ,[],"stop",[]);
     agent(1).plant.connector.serial = [];
 
@@ -90,7 +92,7 @@ if isCoop == 1
     agent(1).estimator.model.name=[];
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.8,0.8,0.2]},"Cooperative",N},agent(1));
+    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*0]},"Cooperative",N},agent(1));
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"HL",N},agent(1));
     % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     

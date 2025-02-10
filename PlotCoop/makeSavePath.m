@@ -1,9 +1,10 @@
 %% make path and folder
     %変更しない
     % ExportFolder='A:\Work2024\momose';%実験用pcのパス
-    ExportFolder='C:\きょうゆう';
-    % ExportFolder='\\Desktop-2pivavv\きょうゆう';
-    % ExportFolder='X:\Work2024\momose';
+
+    % ExportFolder='C:\きょうゆう';
+    ExportFolder='\\Desktop-2pivavv\きょうゆう';
+    ExportFolder='A:\Work2024\momose';
     % % % ExportFolder='C:\Users\acsl_students\Documents\students\workspace2024\momose';%実験用pcのパス
     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
@@ -12,11 +13,12 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付ファイル
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付フォルダ
 %変更==============================================================================
+
     % date2 = "2025_0127";%日付が変わってしまった場合は自分で変更
     % date2 = "2025_0128";%日付が変わってしまった場合は自分で変更
     date2 = "2025_0129";%日付が変わってしまった場合は自分で変更
-    % subfolder='exp';%sim or exp
-    subfolder='sim';%sim or exp
+    subfolder='exp';%sim or exp
+    % subfolder='sim';%sim or exp
     ExpSimName='drone4p1_cost_syuuron';%実験,シミュレーション名
     % ExpSimName='drone4p1_const';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容

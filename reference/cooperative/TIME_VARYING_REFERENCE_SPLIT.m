@@ -251,7 +251,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp%=0
+                   constp=0
                    constTargetp
                    constd
 
@@ -277,11 +277,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state12_takeoff = real_pL(1:2);
                    end
                    % if p(3) - real_pL(3) >=0.5*1.73*cablei || obj.ftakeoff == 1 %紐が60deg
-                   if real_pL(3) >=0.3 || obj.ftakeoff == 1 %紐が60deg
+                   if real_pL(3) >=0.6 || obj.ftakeoff == 1 %紐が60deg
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.3*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*cablei*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.constPrep = 0.5*cablei;
                        obj.constPrep = 0.6;
@@ -301,10 +301,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.base_state_landing = obj.self.sensor.result.state.pL;
                        obj.base_state12_landing = obj.self.sensor.result.state.pL(1:2);
                    end
-                   if norm(p - real_pL) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
+                   if p(3) - real_pL(3) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.0)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.3)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
                        obj.base_state_landing(1:2) = obj.base_state12_landing + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
