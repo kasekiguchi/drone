@@ -50,6 +50,7 @@ classdef MCMPC_controller < handle
         
         %-- main()的な
         function result = do(obj,varargin)
+            
             %rng default
            % restart = 0;
 %           profile on
@@ -69,7 +70,7 @@ classdef MCMPC_controller < handle
             
             %%
             obj.state.ref = obj.Reference(); % 関数の受け渡し用
-            
+            removeF = 0; removeX = []; survive = obj.N; 
             mu(1) = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             mu(2) = obj.input.u(2);    % 初期値はparamで定義
             mu(3) = obj.input.u(3);
@@ -100,7 +101,7 @@ classdef MCMPC_controller < handle
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
             obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
-
+          %  [obj.input.u, ~] = obj.Resampling_IS(); % ImportanceSampling
             obj.previous_state = obj.self.estimator.result.state.get();
             % 
             % if obj.param.t>=3.0 && obj.param.t<=10.0
@@ -118,8 +119,9 @@ classdef MCMPC_controller < handle
              if obj.state.predict_state(3, 1, :) < 0
                  obj.param.fRemove = 1;
              end
+              
             %stl 条件判断
-              removeX = find((abs(obj.state.predict_state(9, 2, :))> 1.8));
+              removeX = find((abs(obj.state.predict_state(9, 2, :))> 10));
             % %     restart =1;
             % %     obj.input.u1=obj.input.u1 * 0.9;
             % %     obj.input.u2=obj.input.u2 * 0.9;
@@ -162,26 +164,27 @@ classdef MCMPC_controller < handle
              removeF=size(removeX,1);
             
             if removeF ~= obj.N
-
                 obj.state.predict_state(:, :, removeX) = [];
                 obj.state.state_data =  obj.state.predict_state;
-                obj.N = obj.N-removeF;
-                survive = obj.N;
+                % obj.N = obj.N-removeF;
+                % survive = obj.N;
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
                 %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
                 % 評価が良くなったら標準偏差を狭めるようにしている
                 obj.input.Bestcost_pre = obj.input.Bestcost_now;
                 obj.input.Bestcost_now = Bestcost;
-                %% 
+                %%%%%
+                %resamplingします 次のいい
+               
                 
                 % 棄却数がサンプル数の半分以上なら入力増やす
                 if removeF > obj.N/2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
-                    [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
-                    %[obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
+                   %[obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+                  %  [obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
                 else
 
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
@@ -193,11 +196,13 @@ classdef MCMPC_controller < handle
                 obj.input.nextsigma = obj.input.Constsigma;
                 Bestcost = obj.param.ConstEval;
                 BestcostID = 1;
-                obj.input.AllRemove = 1
-                [obj.input.mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
-               % [obj.input.mu, ~] = obj.Resampling_IS(); % ImportanceSampling
+                obj.input.AllRemove = 1;
+                %[obj.input.u, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+                %[obj.input.u, ~] = obj.Resampling_IS(); % ImportanceSampling
                 obj.param.nextparticle_num = obj.param.Maxparticle_num;
             end
+            obj.N = obj.N-removeF;
+            survive = obj.N;
             if obj.param.fRemove ==  1
                 obj.param.fRemove = 0;
             end
@@ -292,7 +297,13 @@ classdef MCMPC_controller < handle
 
         %------------------------------------------------------
         %======================================================
-        function [MCeval, EachCost] = objective(obj, m)   % obj.~とする
+        function [MCeval, EachCost] = objective(obj, m)  
+            v1_min = 2;
+            v1_max = 4;
+            v2_min = 1;
+            v2_max = 2;
+            v1_weight = 1e2;
+            v2_weight = 1e2;% obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10
 
@@ -321,13 +332,29 @@ classdef MCMPC_controller < handle
             stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
             stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
             stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
+%%%%%set V1 <2 in 1-3s and v2>1 in 3-5s 
+%%%%%Forecasts should contain both lead and lag 
+% V(1-dt*horizon,3-dt*horizon)<2 and V(1-dt*horizon,3-dt*horizon)>1 
+            
+            Vobs = tildeXv(2);
+            if obj.param.t >1 && obj.param.t <3 
+            stageVobs = v1_weight*(v1_min-Vobs)^2+(Vobs-v1_max)^2;
+            else
+                stageVobs = 0;
+            end
+            if obj.param.t > 3 && obj.param.t <5 
+            stageVobs2 = v2_weight *(v2_min-Vobs)^2+(Vobs-v2_max)^2;
+            else
+                stageVobs2 = 0;
+            end
+%%%%%%%%%%%
             terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                 +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
                 +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-                + terminalState + constraints;
+                + terminalState + constraints+ stageVobs+stageVobs2;
             EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW)];
         end
         
@@ -404,7 +431,7 @@ classdef MCMPC_controller < handle
     function [resampling_u, pw] = Resampling_IS(obj)
         % 重点サンプリング
         NP = obj.N;
-        pw = obj.input.EvalNorm; % 正規化された評価値
+        pw = obj.input.normE; % 正規化された評価値
         H = obj.param.H;
         u = obj.input.u;
 
