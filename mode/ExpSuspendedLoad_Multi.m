@@ -100,6 +100,19 @@ if isCoop == 1
     agent(1).controller.result.input=[];
     
     agent(1).input_transform = struct("do",@(varargin)[], "result",[]);
+     %===========miyake0212   牽引物座標が機体座標より内側にあるとsuccess外側にあるとerror。
+     %一つでもエラー出ると実験しないほうが良い。牽引物と機体が入れ替わっているときのみ検出可能。牽引物と牽引物同士が入れ替わっていると検出できない。
+     %
+    check_rigid =rigid_num -1;
+    for check_i = 2:2:check_rigid
+        check_rigid_p=abs(agent(1).sensor.motive.result.rigid(check_i).p) -abs(agent(1).sensor.motive.result.rigid(check_i+1).p);% drone座標の絶対値-load座標の絶対値。xyは常に+の値になるはず。
+        if check_rigid_p(1)<0 && check_rigid_p(2)<0
+            disp("motive_error rigid"+check_i);
+        else
+            disp("motive_success rigid"+check_i);
+        end
+    end
+     %===========miyake
 end
 
 for i = firstId:N
@@ -115,7 +128,7 @@ for i = firstId:N
     agent(i).id = i;
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).parameter.set("cableL",cableL(i - firstId + 1));
-    agent(i).parameter.set("Length",length(i - firstId + 1));
+    % agent(i).parameter.set("Length",length(i - firstId + 1));
     agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
     
