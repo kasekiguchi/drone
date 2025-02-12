@@ -236,10 +236,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    obj.constPrep = constp;
                    kv = 0.05;%sim0.05速度referenceのゲイン
 
-                   constTargetp = 0.01/(minDroneDistance - 0.4)^2;%sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
-                   constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
-                   obj.constPrep = constp;
-                   kv = 0.05;%sim0.05速度referenceのゲイン
+                   % constTargetp = 0.01/(minDroneDistance - 0.4)^2;%sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
+                   % constp = obj.constPrep + obj.constPrev*dt;%現在の目標位置
+                   % obj.constPrep = constp;
+                   % kv = 0.05;%sim0.05速度referenceのゲイン
 
                    obj.constPrev = -kv*(constp - constTargetp);%最終目標位置と現在目標位置との差から現在の目標速度を計算（現在目標位置の更新のみに使用）
                    constd = constp - constTargetp;
@@ -264,9 +264,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
                    
                    %加速度目標値として制約を設定することで力の次元で制約を考慮
-                   refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
-                   rhoicUnit12 = rhoci(1:2)/norm(rhoci(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                   refi(9:10) = constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
+                   % refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
+                   % rhoicUnit12 = rhoci(1:2)/norm(rhoci(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
+                   % refi(9:10) = constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
                    % refi(9:10) = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
 
                elseif obj.cha =='t'
@@ -281,7 +281,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        obj.ftakeoff =1;%take off条件分岐用フラグ一旦入ったらここの条件を使う
                        obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + constp*alpiUnit12;
                    else
-                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_takeoff(1:2) = obj.base_state12_takeoff + 0.5*cablei*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.constPrep = 0.5*cablei;
                        obj.constPrep = 0.6;
@@ -304,9 +304,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if p(3) - real_pL(3) >= 0.5*cablei && obj.flanding==1%牽引物と機体の差のベクトルcabelの長さの0.8(少したわんだら)
                        % % if p(3) - real_pL(3)<=0.3&& obj.flanding==0%変更する
                        obj.flanding  =1;%landing条件分岐用フラグ一旦入ったらここの条件を使う
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.3)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + max(0.5*cablei*0,0.5)*alpiUnit12;%牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
                    else 
-                       obj.base_state_landing(1:2) = obj.base_state12_landing + 0.4*alpiUnit12;%紐がたわんでいる場合を含む
+                       obj.base_state_landing(1:2) = obj.base_state12_landing + 0.5*alpiUnit12;%紐がたわんでいる場合を含む
                        % obj.base_state_landing(1:2) = obj.base_state12_landing + constp*alpiUnit12;%紐がたわんでいる場合を含む
                    end
                        refi = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);

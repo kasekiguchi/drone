@@ -48,10 +48,13 @@ z = 1*lz*sin(2*w*t - pi/2)+lz_offset; % z
 % y = ly_offset;  % y
 % z = lz_offset; % z
 %exp
-roll = -3*pi/180;
-pitch = 4*sin(2*pi*t/T/2)*pi/180;
-% pitch = 3*pi/180;
-yaw = 3*pi/180;
+% roll = -3*pi/180;
+% pitch = 4*sin(2*pi*t/T/2)*pi/180;
+% % pitch = 3*pi/180;
+% yaw = 3*pi/180;
+roll = 0;
+pitch = 0;
+yaw = 0;
 %sim
 % roll = 2*pi/180;
 % pitch = 3*sin(2*pi*t/T)*pi/180;
@@ -65,7 +68,7 @@ yaw = 3*pi/180;
 % yaw = acos(cos(2*pi*t/T));
 
 
-ref.pYaw    = [x;y;z;yaw*0];%x,y,z,roll,pitch,yaw
-ref.q       =  [roll;pitch;yaw]*0;%x,y,z,roll,pitch,yaw
+ref.pYaw    = [x;y;z;yaw];%x,y,z,roll,pitch,yaw
+ref.q       =  [roll;pitch;yaw];%x,y,z,roll,pitch,yaw
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 end

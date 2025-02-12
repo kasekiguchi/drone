@@ -29,7 +29,8 @@ COMs = [3,12];%pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
-cableL=[0.785,0.785];
+% cableL=[0.785,0.785];
+cableL=[1.2,1.2];
 
 length=cableL;
 
@@ -92,7 +93,7 @@ if isCoop == 1
     agent(1).estimator.model.name=[];
 
     agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,eul(3), motive));%機体の情報のクラス，機体のidを入れる
-    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*0]},"Cooperative",N},agent(1));
+    agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",12,"orig",[0;0;0.7],"size",[0.8,0.8,0.2*0]},"Cooperative",N},agent(1));
     % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.8],"size",[0.7,0.7,0.2]},"HL",N},agent(1));
     % agent(1).reference = MY_POINT_REFERENCE(agent(1),refPointName{1});%縦ベクトルで書く,
     
@@ -128,7 +129,6 @@ for i = firstId:N
     agent(i).id = i;
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).parameter.set("cableL",cableL(i - firstId + 1));
-    % agent(i).parameter.set("Length",length(i - firstId + 1));
     agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
     
