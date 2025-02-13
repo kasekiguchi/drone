@@ -5,7 +5,7 @@
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100/5;
+te = 100/10;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -83,11 +83,9 @@ for i = 2:N+1
     %=============================================================================================
     %=推定方法を変える場合==========================================================================
     %-拡張質量システム：
-    % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass=1
+    % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass:1で質量推定，0,1以外で質量推定と推力外乱推定
     %-牽引物システム：
-    % "loadmass"=0にする．HLC_SPLIT_SUSPENDED_LOADをコメント外す
-    %-拡張質量システム+牽引物システム：
-    % 上記の両方を行う
+    % "loadmass"=0にする．
     %=============================================================================================
     agent(i) = DRONE;
     agent(i).id = i;
@@ -125,18 +123,7 @@ for i = 2:N+1
     agent(i).controller.do = @controller_do;
     agent(i).controller.result.input = [(agent(i).parameter.loadmass*0 + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
-% run("ExpBase");
 
-% R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
-% rhos = [0;0;1/2]+[[-2;-1;0],double(cellmatfun(@(A,~) A*[-2;-1;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
-% x1 = [-2 -1.5 0 1.5 1 0]*2;
-% y1 = [-1 0.5 1 0.5 -0.5 -1]*2;%+[0 0 0.3 0.1 0 -0.5];
-% z1 = ones(1,6);
-% p = [x1;y1;z1];
-% polyin = polyshape(x1,y1);
-% [x,y] = centroid(polyin);
-% G = [x;y;0.5];
-% rhos = p-G;
 
 noize_sp = normrnd(0,0.001,[3,tn])*1*0;
 noize_spT = 1*normrnd(0,0.001,[3,tn])*0;

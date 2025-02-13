@@ -32,19 +32,35 @@ Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
 
 if ~isempty(agent.plant) && isEstLoadMass
   if isEstLoadMass == 1
-      Model.name="load_mL_HL"; % print name
-      Setting.method = get_model_name("Load_mL_HL"); % model dynamicsの実体名
+      Model.name="Load_mL_HL"; % print name
+      Setting.method = get_model_name(Model.name); % model dynamicsの実体名
       Setting.dim=[25,4,21];
       Setting.num_list = [3,3,3,3,3,3,3,3,1];
       Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
       Setting.initial.mL = agent.parameter.loadmass*0+0.1;
   else
-      Model.name="load_mL_fdst_HL"; % print name
-      Setting.method = get_model_name("Load_mL_fdst_HL"); % model dynamicsの実体名
-      Setting.dim=[26,4,21];
-      Setting.num_list = [3,3,3,3,3,3,3,3,1,1];
-      Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL","fdst"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-      Setting.initial.mL = agent.parameter.loadmass*0+0;
+      % Model.name="Load_mL_fdst_HL"; % print name
+      % Setting.method = get_model_name(Model.name); % model dynamicsの実体名
+      % Setting.dim=[26,4,21];
+      % Setting.num_list = [3,3,3,3,3,3,3,3,1,1];
+      % Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL","fdst"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
+      % Setting.initial.mL = agent.parameter.loadmass*0+0.5;
+      % Setting.initial.fdst = 0;%推力外乱初期値
+      % Model.name="Load_mL_dstxy_HL"; % print name
+      % Setting.method = get_model_name(Model.name); % model dynamicsの実体名
+      % Setting.dim=[27,4,21];
+      % Setting.num_list = [3,3,3,3,3,3,3,3,1,2];
+      % Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL","dst"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
+      % Setting.initial.mL = agent.parameter.loadmass*0+0.5;
+      % Setting.initial.dst = [0;0];%推力外乱初期値
+
+      Model.name="Load_mL_dstxyz_HL"; % print name
+      Setting.method = get_model_name(Model.name); % model dynamicsの実体名
+      Setting.dim=[28,4,21];
+      Setting.num_list = [3,3,3,3,3,3,3,3,1,3];
+      Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL","mL","dst"];%paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
+      Setting.initial.mL = agent.parameter.loadmass*0+0.5;
+      Setting.initial.dst = [0;0;0];%推力外乱初期値
   end
 end
 
