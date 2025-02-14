@@ -2,75 +2,70 @@
 %ペイロードの分割モデル
 %=====================
 clc; clear; close all
-N = 4;%機体数
-ts = 0; 
-dt = 0.025;
-te = 100/2;
-tn = length(ts:dt:te);
-time = TIME(ts, dt, te);
-in_prog_func = @(app) dfunc(app);
-post_func = @(app) dfunc(app);
+N      = 4;%機体数
+ts     = 0; 
+dt     = 0.025;
+te     = 100/2;
+tn     = length(ts:dt:te);
+time   = TIME(ts, dt, te);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%分割前1,分割後N個
+in_prog_func = @(app) dfunc(app);
+post_func    = @(app) dfunc(app);
 
-%=TODO=====================================================================================
-% 複数機体のモデルを使わないでできるようにする．
-% 単機牽引モデルの状態を用いて全て計算
-%=============================================================================================
-
-%=PAYLOAD=====================================================================================
+%=PAYLOADで使うファイル=====================================================================================
+% example       : CLASS NAME / function in sample folder
 % parameter     : DRONE_PARAM_COOPERATIVE_LOAD
 % plant         : MODEL_CLASS / Model_Suspended_Cooperative_Load
-% sensor        : DIRECT_SENSOR
-% estimator     : DIRECT_ESTIMATOR
-% reference     : TIME_VARYING_REFERENCE_SPLIT / gen_ref_sample_cooperative_load Cooperative
-% controller    : CSLC / Controller_Cooperative_Load
+% sensor        : DIRECT_SENSOR, MODEL_CLASS 
+% estimator     : DIRECT_ESTIMATOR, MODEL_CLASS / Model_Suspended_Cooperative_Load
+% reference     : TIME_VARYING_REFERENCE_SPLIT  / gen_ref_sample_cooperative_load Cooperative
+% controller    : CSLC / Controller_Cooperative_Load (使う必要はない)
 %=============================================================================================
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
-agent(1) = DRONE;
+agent(1)    = DRONE;
 agent(1).id = 1;%元のシステム
 %Payload_Initial_State
-initial_state(1).p = [0; 0; 0];%ペイロード
-initial_state(1).v = [0; 0; 0];%ペイロード
-initial_state(1).O = [0; 0; 0];%ペイロードの角速度
+initial_state(1).p  = [0; 0; 0];%ペイロード
+initial_state(1).v  = [0; 0; 0];%ペイロード
+initial_state(1).O  = [0; 0; 0];%ペイロードの角速度
 initial_state(1).wi = repmat([0; 0; 0], N, 1);%ドローンの角速度
 initial_state(1).Oi = repmat([0; 0; 0], N, 1);%ドローンの角速度
-initial_state(1).a = [0;0;0];%ペイロード加速度
-initial_state(1).dO = [0;0;0];%ペイロード角加速度
+% initial_state(1).a = [0;0;0];%ペイロード加速度
+% initial_state(1).dO = [0;0;0];%ペイロード角加速度
 
-% qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
 if contains(qtype, "zup")
     initial_state(1).qi = -1 * repmat([0;0;1], N, 1);%リンクの方向ベクトル
+    pT_sgn              = -1;
 else
     initial_state(1).qi = 1 * repmat([0; 0; 1], N, 1);
+    pT_sgn              = 1;
 end
 
 if contains(qtype, "eul")
-    initial_state(1).Q = [0; 0; 0];%ペイロードの姿勢
-    %initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
+    initial_state(1).Q  = [0; 0; 0];%ペイロードの姿勢
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
-    % initial_state(1).Q = [1; 0; 0; 0];
-    initial_state(1).Q = Eul2Quat([0;0;0*pi/180]);
+    initial_state(1).Q  = Eul2Quat([0;0;0*pi/180]);
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
-    %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
-rho12 = [agent(1).parameter.rho(1:2,:);zeros(1,N)];
-rho12Unit = rho12./vecnorm(rho12);
-pTpre = rho12Unit*tan(4*pi/180) + [0;0;1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）syuronn_4deg 
-initial_state(1).qi = -reshape(pTpre./vecnorm(pTpre),[],1) ;%zup- zdown+
+agent(1).parameter  = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
+%紐qiの初期角度, rho方向への傾きを設定可能
+    degi                = 4;%紐qiの初期角度(deg)
+    rho12               = [agent(1).parameter.rho(1:2,:);zeros(1,N)];
+    rho12Unit           = rho12./vecnorm(rho12);
+    pTpre               = rho12Unit*tan(degi*pi/180) + [0;0;1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）syuronn_4deg 
+    initial_state(1).qi = pT_sgn*reshape(pTpre./vecnorm(pTpre),[],1) ;%zup- zdown+
 
-agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
-agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
-agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
+agent(1).plant      = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
+agent(1).sensor     = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
+agent(1).estimator  = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*1]*1.2},"Cooperative",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;2],"size",[2,2,1]},"Cooperative",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
+agent(1).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*1]*1.2},"Cooperative",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+agent(1).controller = [];
 
 for i = 2:N+1
     %=DRONE=====================================================================================
@@ -82,28 +77,23 @@ for i = 2:N+1
     % controller    : HLC / Controller_HL: take off and landing, CSLC / Controller_Cooperative_Load : fright
     %=============================================================================================
     %=推定方法を変える場合==========================================================================
-    %-拡張質量システム：
     % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass:1で質量推定，0,1以外で質量推定と推力外乱推定
-    %-牽引物システム：
-    % "loadmass"=0にする．
+    %-牽引物質量推定しない： isEstLoadMass = 0 
+    %-牽引物質量推定する　： isEstLoadMass = 1
+    %-紐やxy外乱を推定する： isEstLoadMass = 2
     %=============================================================================================
-    agent(i) = DRONE;
+    agent(i)    = DRONE;
     agent(i).id = i;
 %Drone_Initial_Stat
-    rho = agent(1).parameter.rho; %loadstate_rho
-    R_load = RodriguesQuaternion(initial_state(1).Q);
-    initial_state(i).q = [0; 0; 0];
-    initial_state(i).v = [0; 0; 0];
-    initial_state(i).w = [0; 0; 0];
+    rho     = agent(1).parameter.rho; %loadstate_rho
+    R_load  = RodriguesQuaternion(initial_state(1).Q);
+    initial_state(i).q  = [0; 0; 0];
+    initial_state(i).v  = [0; 0; 0];
+    initial_state(i).w  = [0; 0; 0];
     initial_state(i).vL = [0; 0; 0];
-    %初期紐向き単位ベクトル
-    % rho12 = [agent(1).parameter.rho(1:2,i-1);0];
-    % rho12Unit = rho12/norm(rho12);
-    % pTpre = rho12Unit*tan(60*pi/180) + [0;0;-1];%tanの中で角度指定（地面に垂直が0 deg = [0;0;-1]）
-    % initial_state(i).pT = pTpre/norm(pTpre) ;
     initial_state(i).pT = initial_state(1).qi(3*(i - 1)-2:3*(i-1),1);
     initial_state(i).wL = [0; 0; 0];
-    initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
+    initial_state(i).p  = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p + R_load*rho(:,i-1);
 %Generate instance
     li = agent(1).parameter.li(i-1);
@@ -111,170 +101,106 @@ for i = 2:N+1
     jx = agent(1).parameter.Ji(1,i-1);
     jy = agent(1).parameter.Ji(2,i-1);
     jz = agent(1).parameter.Ji(3,i-1);
-    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"loadmass",0,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
-    agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
-    agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),2)), ["p", "q", "pL", "pT"]));%expの流用
-    %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
-    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
-    agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
-    agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-    % agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-    agent(i).controller.do = @controller_do;
-    agent(i).controller.result.input = [(agent(i).parameter.loadmass*0 + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+    agent(i).parameter  = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"loadmass",0,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
+    agent(i).plant      = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
+    agent(i).sensor     = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
+    agent(i).estimator  = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),2)), ["p", "q", "pL", "pT"]));%expの流用
+    agent(i).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
+    agent(i).controller = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
 end
 
 
 noize_sp = normrnd(0,0.001,[3,tn])*1*0;
-noize_spT = 1*normrnd(0,0.001,[3,tn])*0;
 noize_sqDrone = 1*normrnd(0,0.0017,[3,tn])*1*0;%degで0.1くらいの標準偏差
 clc
 % for j = 1:te
 for j = 1:tn
     mL =0;mx = 0;
         for i = 1:N+1
-            if i >= 2
-                sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
-                %分割前ペイロード
-                sp = sensor1.p;
-                sR = RodriguesQuaternion(sensor1.Q);%回転行列
-                %分割後ペイロード
-                spL = sp + sR * rho(:,i-1)+noize_sp(:,j) + 0*[0.2;-0.2;0];%分割後の質量重心位置
-                spT = sensor1.qi(3*i-5:3*i-3,1)+noize_spT(:,j);%分割後の紐の方向ベクトル
-                %ドローン
-                spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+noize_sqDrone(:,j);
-
-                % %分割前ペイロード%バグがある
-                % sp = sensor1.p;
-                % sR = RodriguesQuaternion(sensor1.Q);%回転行列
-                % %分割後ペイロード
-                % spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
-                % spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
-                % %ドローン
-                % spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                % sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
-                % 
-                % % ノイズ印加
-                % spL = spL + noize_sp(:,j);
-                % spDrone = spDrone + noize_sqDrone(:,j);
-                % spT = spL - spDrone;
-                
-
-                % 単機牽引のモデルで推定する
-                % agent(i).sensor.do(time, 'f');
-                agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
-
-                load = agent(1).estimator.result.state;%推定をしていない
-                %分割前ペイロード
-                p_load = load.p;
-                R_load = RodriguesQuaternion(load.Q);%回転行列
-                dR_load = R_load*Skew(load.O);%回転行列の微分
-                wi_load = load.wi(3*i-5:3*i-3,1);%分割前のagent(i)の紐の角速度ベクトル
-                %分割後ペイロード
-                pL_agent = p_load + R_load * rho(:,i-1);%分割後の質量重心位置
-                vL_agent = load.v + dR_load * rho(:,i-1);%分割後の質量重心速度
-                pT_agent = load.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
-                dpT_agent = Skew(wi_load)*pT_agent;%分割後の紐の速度ベクトル
-                %ドローン
-                p_agent = p_load + R_load * rho(:,i-1) - agent(1).parameter.li(i-1)*pT_agent;
-                v_agent = load.v + dR_load * rho(:,i-1)- agent(1).parameter.li(i-1)*dpT_agent;
-                q_agent = Quat2Eul(load.Qi(4*i-7:4*i-4,1));
-                w_agent = load.Oi(3*i-5:3*i-3,1);
-                
-                %単機牽引モデルの状態を推定する
-                agent(i).estimator.do(time, 'f');
-                % agent(i).estimator.result.state.wL
-                % wi_load
-                %複数牽引モデルの状態をそのまま単機牽引モデルに入れる
-                % agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
-                % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
-                % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
-                % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
-                %単機牽引の真値
-                agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
-                agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
-                agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
-                agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
-
-                agent(i).reference.do(time, 'f',agent(1)); 
-                % mLi = agent(i).reference.result.state.mLi;
-                % mL = mL + mLi;
-                % mx = mx + mLi*spL;
-                % spLs(:,i-1) = spL;
-                agent(i).controller.do(time, 'f',0,0,agent(i),i);
-            else
+            if i == 1
+                %複数機牽引
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
                 agent(1).reference.do(time, 'f',agent(1)); 
                 agent(1).controller.do(time, 'f',0,0,agent(i),i);
+                input = zeros(4*N,1);
+            else
+                %単機牽引モデルに用いるsensor値
+                    sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
+                    %分割前ペイロード
+                    sp      = sensor1.p;
+                    sR      = RodriguesQuaternion(sensor1.Q);%回転行列
+                    %分割後ペイロード
+                    spL     = sp + sR*rho(:,i-1) + noize_sp(:,j);%分割後の質量重心位置
+                    spT     = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
+                    %ドローン
+                    spDrone = spL - agent(1).parameter.li(i-1)*spT;
+                    sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1))+noize_sqDrone(:,j);
+                    % 単機牽引モデルで用いるセンサー値を設定
+                    agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
+
+                %単機牽引モデルの状態を推定
+                    agent(i).estimator.do(time, 'f');
+
+                %単機牽引モデルの目標軌道
+                    agent(i).reference.do(time, 'f',agent(1));
+
+                %単機牽引モデルの入力
+                    agent(i).controller.do(time, 'f',0,0,agent(i),i);
+                    input(4*(i-1)-3:4*(i-1),1)  = agent(i).controller.result.input;% agent(1)に入れる入力
+
+                %単機牽引モデルのplantの真値
+                    load        = agent(1).estimator.result.state;%推定をしていない
+                    %分割前ペイロード
+                    p_load      = load.p;
+                    R_load      = RodriguesQuaternion(load.Q);%回転行列
+                    dR_load     = R_load*Skew(load.O);%回転行列の微分
+                    wi_load     = load.wi(3*i-5:3*i-3,1);%分割前のagent(i)の紐の角速度ベクトル
+                    %分割後ペイロード
+                    pL_agent    = p_load + R_load * rho(:,i-1);%分割後の質量重心位置
+                    vL_agent    = load.v + dR_load * rho(:,i-1);%分割後の質量重心速度
+                    pT_agent    = load.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
+                    dpT_agent   = Skew(wi_load)*pT_agent;%分割後の紐の速度ベクトル
+                    %ドローン
+                    p_agent     = p_load + R_load * rho(:,i-1) - agent(1).parameter.li(i-1)*pT_agent;
+                    v_agent     = load.v + dR_load * rho(:,i-1)- agent(1).parameter.li(i-1)*dpT_agent;
+                    q_agent     = Quat2Eul(load.Qi(4*i-7:4*i-4,1));
+                    w_agent     = load.Oi(3*i-5:3*i-3,1);
+                    %単機牽引の真値
+                    agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
+                    agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
+                    agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
+                    agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
+                    %複数牽引モデルの状態をそのまま単機牽引モデルに入れる場合(検証用)
+                    % agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
+                    % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
+                    % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
+                    % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
             end
-            % agent(i).controller.do(time, 'f',0,0,agent(i),i);
         end
-        % G = mx/mL
-        % rhos = spLs - G%紐の接続点にかかる力から求めた重心から紐までの距離（z方向は真値とずれる）
-        % errorRhos = rhos - agent(1).parameter.rho
-        % for i = 2:N+1
-        %     agent(i).reference.result.rho = rhos(:,i-1);%目標軌道を牽引物より広く取る場合
-        %     % if j >1 
-        %     %     agent(i).reference.result.rho = rhos(:,i-1);
-        %     % else
-        %     %     agent(i).reference.result.rho = rho(:,i-1);
-        %     % end
-        %     agent(i).controller.do(time, 'f',0,0,agent(i),i);
-        % end
-        input = zeros(4*N,1);
-        for i = 2:N+1
-            input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
-        end
-        agent(1).controller.result.input = input;
+        %単機牽引で求めた入力を複数機牽引のplantに入れる
+            agent(1).controller.result.input = input;
+            agent(1).plant.do(time, 'f');
         
-        %複数牽引モデルの状態をそのまま単機牽引モデルに入れる場合
-        agent(1).plant.do(time, 'f');
-        %単機牽引のモデルで推定する
-        % for i = 2:N
-        %     agent(i).plant.do(time, 'f');
-        % end
-        logger.logging(time, 'f', agent);
-        disp(time.t)
-        time.t = time.t + time.dt;
-    %pause(1)
+        %log current time reult
+            logger.logging(time, 'f', agent);
+
+        %現在時刻の表示と時刻の更新
+            disp(time.t)
+            time.t = time.t + time.dt;
 end
-% clc
 disp(time.t - time.dt)
-%%
+%% plot
 % close all
 run("DataPlot.m")
-%%
-%理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
-% close all
-% agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
-% logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
+%% movie
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 % mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);
 mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
-% 
-% %%
-% logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
-%%
-if 0
-    run("saveDataCoop.m")
-end
-%%
-function result = controller_do(varargin)
-    controller = varargin{5}.controller;
-    if strcmp(varargin{2},'f')
-        result = controller.load.do(varargin{1},varargin{5});
-    else
-        result = controller.hlc.do(varargin{1},varargin{5});
-    end
-    % result = merge_result(result,controller.load.do(varargin{5}));
-    varargin{5}.controller.result = result;
-end
-
+%% function
 function dfunc(app)
 app.logger.plot({1, "p", "er"}, "ax", app.UIAxes, "xrange", [app.time.ts, app.time.t]);
 app.logger.plot({1, "q", "e"}, "ax", app.UIAxes2, "xrange", [app.time.ts, app.time.t]);
