@@ -115,14 +115,6 @@ classdef MODEL_CLASS < dynamicprops & handle
       else
                 u = obj.self.controller.result.input;
       end
-      %複数牽引物用========================================
-      % if obj.self.plant.state.p(3) < 0
-      %     obj.param(20) = 0;
-      %     % obj.param(20) = obj.loadmass;
-      % else
-      %     obj.param(20) = obj.loadmass;
-      % end
-      %========================================
       % if isfield(opts, 'param')
       %     obj.param = opts.param;
       % end

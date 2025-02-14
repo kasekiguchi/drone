@@ -64,7 +64,7 @@ agent(1).sensor     = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant pos
 agent(1).estimator  = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
 agent(1).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*1]*1.2},"Cooperative",N},agent(1));
-agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+% agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 agent(1).controller = [];
 
 for i = 2:N+1
@@ -122,7 +122,7 @@ for j = 1:tn
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
                 agent(1).reference.do(time, 'f',agent(1)); 
-                agent(1).controller.do(time, 'f',0,0,agent(i),i);
+                agent(1).controller.result = Quat2Eul(agent(1).estimator.result.state.Qi(1:4,1));%牽引物の角度をquotからeulにするのみ
                 input = zeros(4*N,1);
             else
                 %単機牽引モデルに用いるsensor値
