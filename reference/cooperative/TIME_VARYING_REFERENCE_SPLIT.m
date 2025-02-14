@@ -251,7 +251,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % end
                    % constp = 0.6;%衝突回避するためのゲイン
                    minDroneDistance
-                   constp=0
+                   constp%=0
                    constTargetp
                    constd
 
@@ -262,6 +262,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    rhoiUnit12 = rhoi(1:2)/norm(rhoi(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
                    rhoi = rhoi + constp*[rhoiUnit12;0];%バリア関数で機体どうしの衝突を回避(0.2mくらいで無限大になるようにする．)
                    refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
+                   %外乱打ち消しreference生成．
+                   % refi(9:10) = obj.self.estimator.result.state.dst(1:2);%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
                    
                    %加速度目標値として制約を設定することで力の次元で制約を考慮
                    % refi = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算

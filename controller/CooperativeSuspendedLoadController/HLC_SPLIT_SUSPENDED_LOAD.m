@@ -72,6 +72,10 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 else 
                     P(6) = max(model.state.mL,0);
                 end
+                if isprop(model.state,"cableL")
+                    % P(7) = max(model.state.cableL,0.1);
+                    P(7) = max(min(model.state.cableL,P(7)*1.2),P(7)*0.8);
+                end
                 obj.result.mLi= P(6);
             end
             
@@ -122,12 +126,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
 
             tmp = uf + us;
             obj.result.tmp =tmp;
-            if isprop(model.state,"dstx")
+            if isprop(model.state,"dst") || isprop(model.state,"cableL")
             % if isprop(model.state,"fdst")
                 % fdst = model.state.fdst;
-                % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dstx: "+num2str(model.state.dstx,4)+" dsty: "+num2str(model.state.dsty,4))
-                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst: "+num2str(model.state.dst,4))
+                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst: "+num2str(model.state.dst',4))
                 % obj.result.input = [max(0,min(20,tmp(1) - fdst));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
+                % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst: "+num2str(model.state.cableL,4))
                 obj.result.input = [max(0,min(200,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;
             else
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4))

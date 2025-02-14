@@ -29,6 +29,8 @@ end
             model_full_name = "with_load_model_euler_for_HL";
         case "Load_mL_HL"
             model_full_name = "with_load_model_mL_euler_for_HL";
+        case "Load_mL_cableL_HL"
+            model_full_name = "with_load_model_mL_cableL_euler_for_HL";
         case "Load_mL_fdst_HL"
             model_full_name = "with_load_model_mL_fdst_euler_for_HL";
         case "Load_mL_dstxy_HL"

@@ -15,8 +15,8 @@ clear multiFigure option addingContents f loggers
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
-frmse = 10;%rmseのみ知りたい場合
-startTime = 0;
+frmse = 1;%rmseのみ知りたい場合
+startTime = 10;
 endTime = 74;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
@@ -30,9 +30,15 @@ if fnowdata==1
         logger.fExp = gui.fExp;
     end
     if ~exist("loggers","var")
+        if logger.fExp 
+            simplifyFunc = str2fund("simplifyLoggerForSingle");
+        else
+            simplifyFunc = str2func("simplifyLoggerForCoop");
+        end
         for i = 1:length(logger.target)
+            loggers{i,1} = simplifyFunc(logger,i);
             % loggers{i,1} = simplifyLoggerForCoop(logger,i);
-            loggers{i,1} = simplifyLoggerForSingle(logger,i);
+            % loggers{i,1} = simplifyLoggerForSingle(logger,i);
         end
     end
     droneID = logger.target(1:end-1);

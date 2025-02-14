@@ -80,7 +80,6 @@ x=[p;er;dp;ob;pl;dpl;pT;ol];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];
 matlabFunction(f,'file','with_load_model_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% 質量推定も可能
-% a*mL = mL*g + mu
 syms mLDummy real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
 dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
@@ -93,7 +92,7 @@ x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
 matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% 質量推定+推力外乱推定も可能
-% a*mL = mL*g + mu
+%墜落する．loadmassも推定している為干渉するのかもしれない
 syms mLDummy real
 syms fdst real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
@@ -106,7 +105,22 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;fdst];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
 matlabFunction(f,'file','with_load_model_mL_fdst_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定+x,y外乱推定も可能
+%% 質量+紐の長さの推定可能
+%推定して飛行が可能．初期位置が離れすぎると墜落．精度は質量推定と同等，実機でどうなるかは分からない
+syms mLDummy real
+syms cableLDummy real
+physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableLDummy};
+dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
+dpT  = cross(ol,pT);
+ddPT = cross(dOL,pT)+cross(ol,dpT);
+ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
+ddP  = ddPL-cableL*ddPT;
+dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+x=[p;er;dp;ob;pl;dpl;pT;ol;mL;cableL];
+f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
+matlabFunction(f,'file','with_load_model_mL_cableL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% 質量推定+x,y,z外乱推定も可能
+%z方向の外乱推定を入れた場合は墜落する．loadmassも推定している為干渉するのかもしれない
 syms mLDummy real
 syms dstx dsty dstz real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
@@ -116,10 +130,11 @@ ddPT = cross(dOL,pT)+cross(ol,dpT);
 ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL) + [dstx;dsty;dstz];
 ddP  = ddPL-cableL*ddPT;
 dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
-x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty];
-f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0];
+x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty;dstz];
+f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0;0];
 matlabFunction(f,'file','with_load_model_mL_dstxyz_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定+x,y,z外乱推定も可能
+%% 質量推定+x,y外乱推定も可能
+%外乱推定可能
 syms mLDummy real
 syms dstx dsty real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
@@ -133,6 +148,7 @@ x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0];
 matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% With load model (Extend & Euler)
+% 紐の取り付け位置考慮．今は使われていない
 syms ex ey ez real
 % physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, mL, Length, ex, ey, ez};
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, mL, cableL, ex, ey, ez};
@@ -152,6 +168,7 @@ Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0])
 simplify(f - (Fl+Gl*U))
 matlabFunction(f,'file','euler_with_load_model','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% With load model (Extend & Euler & Parameter Estimation)
+% 紐の取り付け位置を考慮．今は使われていない
 syms Length real
 syms ex ey ez real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mL, cableL};
@@ -172,6 +189,7 @@ Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0])
 simplify(f - (Fl+Gl*U))
 matlabFunction(f,'file','euler_with_load_model_parameter_estimation','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% With load model (Extend & Euler & Parameter Estimation ex-ey)
+% 紐の取り付け位置を推定．今は使われていない
 syms Length real
 syms ex ey ez real
 syms exDummy eyDummy real

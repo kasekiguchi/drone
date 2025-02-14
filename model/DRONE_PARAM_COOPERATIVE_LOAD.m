@@ -63,12 +63,12 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 xUp = [-2 -1.5 0 1.5 1 0];
                 yUp = [-1 0.5 1 0.5 -0.5 -1];
                 zUp = 0.5*ones(1,6);
-                pUp = [xUp;yUp;zUp]*0.5;%
+                pUp = [xUp;yUp;zUp]*0.4;%
 
                 xDown = [-2 -1.5 0 1.5 1 0];
                 yDown = [-1 0.5 1 0.5 -0.5 -1];
                 zDown = -0.5*ones(1,6);
-                pDown = [xDown;yDown;zDown]*0.5;%
+                pDown = [xDown;yDown;zDown]*0.4;%
 
                 %四角形
                 % xUp = [2 -2 -2 2];
