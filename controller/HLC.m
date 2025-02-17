@@ -53,9 +53,10 @@ classdef HLC < handle
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
+      %% take offの最初のroll,pitch,yawの入力を0にするプログラム．これによってtを押したときの機体の動きが抑制される
          % cha = varargin{1,3}; %HL 
          cha = varargin{1,1}{1,2}; %KMPC
-
+         
         if strcmp(cha,'t')
             if obj.flag_anti_spike < 10
                 tmp = [tmp(1);0;0;0];
@@ -63,6 +64,7 @@ classdef HLC < handle
             end
         end
 
+%%
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
 %       state_monte = obj.self.estimator.result.state;

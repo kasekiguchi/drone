@@ -28,7 +28,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 agent.controller = HLC(agent,Controller_HL(dt));
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか)
-%agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,"exp_ref.mat",5,1));
+%agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,"exp_ref.mat",5,1)); データセット取得用
 run("ExpBase");
 
 function post(app)
@@ -39,10 +39,12 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 
+%%
 dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1)); %計算時間表示
 t = app.logger.data(0,'t',[]);
 figure(100)
 plot(t(1:end-1),dt);
+%%
 
 Graphplot(app)
 end

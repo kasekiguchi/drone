@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20250207_iflight_Exp_KMPC_newdata_hovering_[1000,1000,1000,200],330.mat");
+load("hovering.mat"); % ここに保存したファイル名を入力してグラフを出力
 
 %%
 figtype = 2;

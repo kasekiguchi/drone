@@ -43,7 +43,7 @@ classdef TIME_VARYING_REFERENCE < handle
         function result = do(obj, varargin)  
            %Param={time,FH}
            obj.cha = varargin{2};
-           if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
+           if obj.cha=='f'&& ~isempty(obj.t) %flightからreferenceの時間を開始
                 t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
            else
                 obj.t=varargin{1}.t;
@@ -61,11 +61,11 @@ classdef TIME_VARYING_REFERENCE < handle
         end
         function show(obj, logger)
             rp = logger.data(1,"p","r");
-            plot3(rp(:,1), rp(:,2), rp(:,3));                     % xy平面の軌道を描く
+            plot3(rp(:,1), rp(:,2), rp(:,3)); % xy平面の軌道を描く
             daspect([1 1 1]);
             hold on
             ep = logger.data(1,"p","e");
-            plot3(ep(:,1), ep(:,2), ep(:,3));       % xy平面の軌道を描く
+            plot3(ep(:,1), ep(:,2), ep(:,3)); % xy平面の軌道を描く
             legend(["reference", "estimate"]);
             title('reference and estimated trajectories');
             xlabel("x [m]");

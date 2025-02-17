@@ -10,7 +10,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_KMPC(varargin)
     % u_trans_param.gain2 =[700;700;700;400]; %hov,p2p[800,800,800,500]
     % u_trans_param.th_offset2 = 332.5; %hov,p2p332.5
 
-    % iflight 6cell
+    % iflight 6cell ゲイン調整の際はここを変更する
     u_trans_param.gain2 =[1000;1000;1000;200]; %hov,p2p[800,800,800,500]
     u_trans_param.th_offset2 = 330;
 

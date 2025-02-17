@@ -1,4 +1,7 @@
-function [] = Graphplot(app)
+%%
+%事例研用
+%%
+    function [] = Graphplot(app)
     opengl software
     
     %フライトフェーズ-------------
@@ -100,7 +103,7 @@ function [] = Graphplot(app)
     hold off
     title('Angular velocity w of agent1');
 
-        % x-y
+    % x-y
     subplot(row,line,5);
     plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
     daspect([1 1 1])

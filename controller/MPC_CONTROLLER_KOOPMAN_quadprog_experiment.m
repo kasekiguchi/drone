@@ -98,7 +98,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
                 obj.result.input = var(1:4, 1); % 印加する入力 4入力
             end
 
-            %%
+           %%
            % cha = vara{2}; %KMPC
            % 
            %  if strcmp(cha,'f')

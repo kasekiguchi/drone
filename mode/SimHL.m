@@ -33,8 +33,8 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
 %%
-logger = LOGGER("20241024_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_good.mat");
-logger.plot({1, "q", "er"});
+% logger = LOGGER("20241024_Exp_HL_circleT=12_[300,300,300,20],350_[5000,10000,2000,10],0.0001_good.mat");
+% logger.plot({1, "q", "er"});
 %%
 function dfunc(app)
 app.logger.plot({1, "p1-p2-p3", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
