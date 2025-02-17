@@ -130,7 +130,7 @@ flg.bilinear = 0;
 flg.normalize = 0;
 flg.without_pos = 0;
 flg.hermite = 1;
-flg.weight = 1 % 重み付き最小二乗法
+flg.weight = 0 % 重み付き最小二乗法
 A = diag([1 1.00001 1]); % pitchのみに重み
 % A = diag([1.00001 1.00001 1.00001]); % qに重み
 Qp = eye(3); Qq = A; Qv = eye(3); Qw = A;
@@ -139,27 +139,31 @@ flg.weight_Qisobe = blkdiag(Qp, Qq, Qv, Qw);
 % flg.weight_Qisobe = blkdiag(eye(3), eye(3)*1.00001, eye(3), eye(3)*1.00001); % for isobe
 flg.weight_Qhermite = 1;
 
-F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato';
 % exp_data = 'Exp_Kato_Kiyama';
-% exp_data = 'Exp_Kiyama_Error';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased_weight10'); % 保存先
+% exp_data = 'Exp_Kato25';
+exp_data = 'Exp_Kato15';
+FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset_z_3m.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
+% load('Koopman_Linearization\Integration_Dataset\2025ver2_iFlight_Dataset_xyz200_z100.mat');
+load('Koopman_Linearization\Integration_Dataset\2025ver_iFlight_Dataset_xyz100_z50.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
+
+F = @quaternions_all_00; % 改造用
 
 % データのかさまし
 flg.increased = 1;

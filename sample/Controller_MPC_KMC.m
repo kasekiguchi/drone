@@ -5,9 +5,6 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.dt_drone = Controller.dt;
 
     %% MPC param
-    Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 10;
-    Controller.particle_num = 5000;
     % Controller.input.Initsigma = 1*[2,1,1,1];
     % Controller.input.Constsigma = 100 * [0.01, 1,1,1];
     % Controller.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
@@ -17,10 +14,9 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.input.range = [[10;30;30;10], [0.1;0.1;0.1;0.1]]; % max min
     Controller.input.Bestcost_now = [1e5, 1e3];
 
-    Controller.input.Initsigma = [0.5;0.00002;0.00001;0.00001]; % default 0.1
     Controller.input.Constsigma = 5.0*[1;1;1;1];
-    Controller.input.Maxsigma = 1.0 * [1;1.5;1.5;1.5];
-    Controller.input.Minsigma = 0.01 * [1;1;1;1];
+
+    
     % Controller.input.Maxinput = 1.5 * [1;1;1;1];
 
     %% common param
@@ -57,10 +53,10 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller.weight.P = diag([1;1;10]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = 100 * diag([1;1;1]);    % 速度  10,20刻み  30;20;10
-    Controller.weight.V = diag([1;1;1]); % 15良い気がする
-    Controller.weight.W = diag([1;1;1]);  % 姿勢角，角速度　1,2刻み 
+    Controller.weight.P = diag([1;1;100]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = diag([1;1;1]);    % 速度  10,20刻み  30;20;10
+    Controller.weight.V = diag([1;1;100]); % 15良い気がする
+    Controller.weight.W = diag([1000;1000;1]);  % 姿勢角，角速度　1,2刻み 
     Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
@@ -68,6 +64,17 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.weight.Vf = Controller.weight.V;
     Controller.weight.Qf = Controller.weight.Q;
     Controller.weight.Wf = Controller.weight.W;
+
+    Controller.input.Initsigma = [0.5;1e-3;1e-3;1e-3]; % default 0.1
+    Controller.input.Maxsigma = [1;1e-3;1e-3;1e-3];
+    Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
+
+    Controller.dt = 0.1; % MPCステップ幅
+    Controller.H = 20;
+    Controller.particle_num = 1000;
+
+    Controller.test.sigma = 1; % 標準偏差を固定
+    Controller.test.input = 2; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
 
     %% input
     Controller.input.u = [Controller.m * 9.81;0;0;0]; % 総推力，トルク

@@ -7,11 +7,15 @@ cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
-loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+% loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
 % loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 % loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
 % loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+
+% KMC
+% loadfilename{1} = '2025-02-12_Exp_Kato25_code00_saddle';
+loadfilename{1} = '2025-02-12_Exp_Kato15_code00_saddle';
 
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';

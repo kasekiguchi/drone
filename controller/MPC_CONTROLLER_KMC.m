@@ -70,7 +70,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.input.mu = param.ref_input;
 
       % Initialize input
-      obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.result.input = obj.param.ref_input;
       obj.input.pre_u = obj.result.input;
       obj.input.U = zeros(self.estimator.model.dim(2),1);
 
@@ -169,18 +169,6 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.Resampling_IS();      % リサンプリング
       obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
-      % obj.Resampling_LVS();
-
-      %% 評価関数の確認
-      % J2 = zeros(obj.N, 2);
-      % x = obj.state.state_data(:,:,obj.input.BestcostID(1));
-      % r = obj.state.ref;
-      % u = obj.input.u(:,:,obj.input.BestcostID(1));
-      % % J1 = calc_J(x, r, u, obj.Weight, obj.WeightR, obj.H);
-      % J2 = objective_1sample(obj, x, u);
-      % J = obj.input.Bestcost_now(1);
-      % [J, J2(1)]
-
       %% 値の保存
       obj.result.bestcostID = obj.input.BestcostID;
       obj.result.bestcost = obj.input.Bestcost_now;
@@ -205,8 +193,8 @@ classdef MPC_CONTROLLER_KMC < handle
             obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
             obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
             0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
-        fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f", ...
-            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2));
+        fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f \t sigma: %f", ...
+            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2), obj.input.sigma(1));
         fprintf("\n");
     end
 
@@ -221,7 +209,12 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        if obj.param.test.input == 1
+            obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        elseif obj.param.test.input == 2
+            % obj.input.u(1,:,:) = obj.param.ref_input(1) * ones(1, obj.H, obj.N);
+            obj.input.u(2,:,:) = zeros(1, obj.H, obj.N); obj.input.u(4,:,:) = zeros(1, obj.H, obj.N);
+        end
     end
 
     %% 状態予測
@@ -349,7 +342,9 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
-        % obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        if obj.param.test.sigma ~= 1
+            obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        end
         % obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))'));
         obj.input.BestcostID = BestcostID;
     end
