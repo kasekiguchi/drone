@@ -2,35 +2,28 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TIME_VARYING_REFERENCE()
     properties
-        param
-        func % 時間関数のハンドル
-        funcRotms
-        self
-%         agent1 % cooprative情報
-        ref_set
-        baseflighttime=[];
-        cha='s';
-        com % 使用制御モデル->"Cooperative"or"Suspended"or"Split"
-        dfunc
-        result
-        N
-        P
-        Pdagger
-        toR
-        ftakeoff = 0
-        flanding = 0
-        base_time_takeoff
-        base_time_landing
-        base_state_takeoff
-        base_state_landing
-        base_state12_takeoff
-        base_state12_landing
-        te_takeoff = 25% goal time
-        zd_takeoff = 0.8 % goal altitude
-        te_landing = 20% goal time
-        agent1
-        constPrep
-        constPrev
+        self                    % agent(i)を格納
+        agent1                  % agent(1)を格納
+        func                    % 時間関数のハンドル
+        funcRotms               % rhoiを目標角度に合わせる回転行列
+        cha='s'                 % コマンドの値
+        com                     % 使用制御モデル->"Cooperative"or"Split"
+        result                  % do method の返り値を格納
+        N                       % 機体数
+        ftakeoff = 0            % take off のフラグ
+        flanding = 0            % landing のフラグ
+        base_time_takeoff       % take off開始時刻
+        base_time_landing       % landing開始時刻
+        base_state_takeoff      % take offの初期位置
+        base_state_landing      % landingの初期位置
+        base_state12_takeoff    % take offのxy初期位置
+        base_state12_landing    % landingのxy初期値
+        te_takeoff = 25         % take offで目標高度に達するまでの時間goal time
+        zd_takeoff = 0.8        % take offの目標高度goal altitude
+        te_landing = 20         % landingの時間goal time
+        base_time_flight=[];    % 目標軌道に追従し始めたときの時刻
+        constPrep               % 前時刻の制約の位置
+        constPrev               % 前時刻の制約の速度
 
     end
 
@@ -45,47 +38,32 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 args
                 agent1
             end     
-            obj.agent1=agent1;
-            obj.self = self;
-            obj.N = args{4};
-            obj.P = self.parameter.get("all","row");
-
-            gen_func_name = str2func(args{1});
-            param_for_gen_func = args{2};
+            obj.agent1          = agent1;               % agent(1)の格納
+            obj.self            = self;                 % agent(i)の格納
+            obj.N               = args{4};              % 機体数Nの格納
+            obj.com             = args{3};              % 対象になるシステムの格納
+            gen_func_name       = str2func(args{1});    % referenceの関数の格納
+            param_for_gen_func  = args{2};              % referenceの関数のに代入する値の格納
             
             if length(args) > 2
-                if strcmp(args{3}, "Cooperative")%ペイロードの目標軌道
-                    obj.ref_set.method          = args{1};
-                    obj.ref_set.orig            = param_for_gen_func;
-                    temp                        = gen_func_name(param_for_gen_func{:});
-                    [obj.func,obj.funcRotms]    = gen_ref_for_HL_Cooperative_Load(temp);
-                    obj.result.state            = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));
-                    obj.result.state.set_state("xd",obj.func(0));
-                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                if strcmp(args{3}, "Cooperative")% 牽引物の目標軌道
+                    [obj.func,obj.funcRotms]    = gen_ref_for_HL_Cooperative_Load(gen_func_name(param_for_gen_func{:}));% 目標値の関数を格納
+                    obj.result.state            = STATE_CLASS(struct('state_list', ["xd", "p"], 'num_list', [27, 3]));% stateクラスを格納（保存したい変数を設定）
+                    obj.result.state.set_state("xd",obj.func(0));                           % 目標値の初期値を設定
+                    obj.result.state.set_state("p",obj.self.reference.result.state.xd(1:3));% 目標位置の初期値を設定（特に使わない）
 
-                elseif strcmp(args{3}, "Split")%分割後の目標軌道
-                    obj.com             = args{3};
-                    obj.result.state    = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance", "constp","constTargetp"], 'num_list', [28, 3, 1, 1, 1]));  
-                    obj.result.state.set_state("xd",zeros(28,1));
-                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                    obj.result.state.set_state("minDroneDistance",0);
-                    obj.result.state.set_state("constp",0);
-                    obj.result.state.set_state("constTargetp",0);
-                    P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],obj.agent1.parameter.rho));
-                    obj.Pdagger = pinv(P);
+                elseif strcmp(args{3}, "Split")% 分割後の牽引物の目標軌道
+                    obj.result.state    = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance", "constp","constTargetp"], 'num_list', [28, 3, 1, 1, 1]));  % stateクラスを格納（保存したい変数を設定）
+                    obj.result.state.set_state("xd",zeros(28,1));                           % 目標値の初期値を設定
+                    obj.result.state.set_state("p",obj.self.reference.result.state.xd(1:3));% 目標位置の初期値を設定（特に使わない）
+                    obj.result.state.set_state("minDroneDistance",0);                       % 機体間距離の最小値
+                    obj.result.state.set_state("constp",0);                                 % 制約の初期値
+                    obj.result.state.set_state("constTargetp",0);                           % 制約の目標値
                     
-                    if class(obj.agent1.sensor) == "MOTIVE"
-                        obj.toR=eye(3);
-                    else
-                        if obj.agent1.estimator.model.state.type ==3 
-                            obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
-                        else
-                            obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
-                        end
-                    end
                 end
-            else
-                temp.pYaw = gen_func_name(param_for_gen_func{:});
+            else %上記以外のreference関数を複数機牽引用に修正
+                temp.pYaw = gen_func_name(param_for_gen_func{:}); %位置をyaw角の目標値
+                    % 回転の時間関数を設定
                     if ~isfield(temp,"q")
                         syms t
                         roll   = 0;
@@ -94,25 +72,26 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                         temp.q = [roll;pitch;yaw];%roll,pitch,yaw
                         clear t
                     end
-                     [obj.func,obj.funcRotms] = gen_ref_for_HL_Cooperative_Load(temp);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3])); 
+                [obj.func,obj.funcRotms] = gen_ref_for_HL_Cooperative_Load(temp);% 目標値の関数を格納
+                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [28, 3, 3, 3]));% 目標値の初期値を設定
             end
         end
 
-        function result = do(obj, varargin)%chaによって単機のtakeoffやlandingに切り換えられるようにする．普通のTIME_VARYING_REFERENCEを参考にする
-           dt       = varargin{1}.dt;
-           obj.cha  = varargin{2};
+        function result = do(obj, varargin)
+           dt       = varargin{1}.dt;   % 刻み時間
+           obj.cha  = varargin{2};      % phase
 
            %flightからreferenceの時間を開始
-           if obj.cha=='f'&& isempty(obj.baseflighttime)
-                obj.baseflighttime  =  varargin{1}.t;
-                t = obj.baseflighttime;
+           if obj.cha=='f'&& isempty(obj.base_time_flight)
+                obj.base_time_flight  =  varargin{1}.t;
+                t = obj.base_time_flight;
            elseif obj.cha=='f'
-                t = varargin{1}.t - obj.baseflighttime;
+                t = varargin{1}.t - obj.base_time_flight;
            else
                 t = 0;
            end
-           
+
+           %refernceの計算
            if strcmp(obj.com, "Split")
                %================================================
                % ~0は分割前ペイロード，~iは分割後のペイロードを表す
@@ -120,22 +99,19 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %機体の番号
                    id       = obj.self.id - 1;                    
                %parameter
-                   cablei   = obj.self.parameter.get("cableL");                           %紐の長さ
-                   rli      = sqrt(2)*obj.self.parameter.get("lx");                           %機体のロータまでの長さ
-                   rhoi     = obj.agent1.parameter.rho(:,id);%ペイロードの中心位置からリンクまでの距離
-                   rhoci    = obj.agent1.parameter.rhoc(:,id);%紐の接続位置が頂点の多角形の重心からリンクまでの距離
-               %reference
-                   ref0     = obj.agent1.reference.result.state.xd(1:24);     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
+                   cablei   = obj.self.parameter.get("cableL");             % 紐の長さ
+                   rli      = sqrt(2)*obj.self.parameter.get("lx");         % 機体のロータまでの長さ
+                   rhoi     = obj.agent1.parameter.rho(:,id);               % ペイロードの中心位置からリンクまでの距離
+                   rhoci    = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
+               %reference 
+                   ref0     = obj.agent1.reference.result.state.xd(1:24);   % 分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
 
                %紐接合部の目標軌道を算出
-               %機体位置
-                   p = obj.self.estimator.result.state.p;
+                   p            = obj.self.estimator.result.state.p;    % 機体位置
                    if isprop(obj.self.sensor.result.state,"real_pL")
-                       %牽引物位置
-                       real_pL  = obj.self.sensor.result.state.real_pL;
+                       real_pL  = obj.self.sensor.result.state.real_pL; % 牽引物位置
                    else
-                       %simのため%牽引物位置
-                       real_pL  = obj.self.sensor.result.state.pL;
+                       real_pL  = obj.self.sensor.result.state.pL;      % simのための牽引物位置
                    end
                    %いらないかも
                    alpi12       = real_pL(1:2) - obj.agent1.sensor.result.state.p(1:2);

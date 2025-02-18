@@ -1,4 +1,5 @@
 function Model = Model_Suspended_Cooperative_Load(dt,initial,id,N,type)
+%plantの複数機牽引モデルのパラメータを設定
 arguments
   dt
   initial

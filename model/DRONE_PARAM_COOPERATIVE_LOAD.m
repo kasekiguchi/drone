@@ -1,12 +1,11 @@
 classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
-    % ドローンの物理パラメータ管理用クラス
+    % 機体の物理パラメータ管理用クラス
     % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
     % 前：ｘ軸，　左：y軸，　上：ｚ軸
     % motor configuration 
     % T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
     % T2, T3 の回転方向は軸 zb,  T1, T4 : -zb      [1,0,0,1] で 正のyaw回転
-    % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 
      
     properties
@@ -14,7 +13,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
         N % number of agents
         m0 % load mass
         J0 % load inertia
-        rho % 
+        rho 
         li
         mi
         Ji
@@ -27,30 +26,28 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
     methods
         function obj = DRONE_PARAM_COOPERATIVE_LOAD(name,N,type,param)
             arguments
-                % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
-                N = 6;%修正必要modeの値と同じにする
-                type = "struct";
-                % parameters : 5 + 8*N
-                param.g = 9.81;
-                %六角中
-                param.m0 = 1.200;%分割前のペイロード
-                param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
-                % param.J0 = [0.35;0.47;0.45];%非対称牽引物
-                % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物\
-                %四角中
-                % param.m0 = 3.900;%分割前のペイロード実験牽引物四角
-                % param.J0 = [2^2*0.1^2;2^2*0.1^2;2*0.02^2]* 3.900/3;%非対称牽引物正方形
+                N
+                type                = "struct";
+                param.g             = 9.81;
+                %六角柱
+                param.m0            = 1.200;%分割前の牽引物
+                param.J0            = [0.15;0.15;0.25];%分割前牽引物慣性モーメント
+                % param.J0            = [0.35;0.47;0.45];%非対称牽引物
+                % param.J0            = [0.2262;0.3434;0.4735];%非対称牽引物
+                %四角柱
+                % param.m0            = 3.900;%分割前の牽引物実験牽引物四角
+                % param.J0            = [2^2*0.1^2;2^2*0.1^2;2*0.02^2]* 3.900/3;%非対称牽引物正方形
 
-                param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
-                param.li = 2*ones(N,1);%2*ones(N,1);%紐の長さ
-                param.mi = 0.800*ones(N,1)';%ドローンの重さ
-                param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
-                param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.rho           = [];%分割前の重心位置から紐がついてるところ前での距離
+                param.li            = 2*ones(N,1);%2*ones(N,1);%紐の長さ
+                param.mi            = 0.800*ones(N,1)';%機体の重さ
+                param.Ji            = repmat([0.082 0.082 0.1377]',1,N);%機体の慣性モーメント
+                param.additional    = []; % プロパティに無いパラメータを追加する場合
             end
-            isRegularHexagon = 0;
+            %% 牽引物
+            isRegularHexagon = 0;%正六角柱の牽引物にするか
             if ~isRegularHexagon
-            %% 非対称牽引物
             %*Up, *Downは牽引物の上面と下面を表す   
             %六角形
                 xUp     = [-2 -1.5 0 1.5 1 0];
@@ -73,14 +70,14 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % zDown = -0.1*ones(1,4);
                 % pDown = [xDown;yDown;zDown];%
 
-            %重心の計算
+            %牽引物形状の重心の計算
                 polyin  = polyshape(pUp(1,:),pUp(2,:));
-                [x,y]   = centroid(polyin);
+                [x,y]   = centroid(polyin);%x,y平面上の重心
                 G       = [x;y;0];
                 rho     = pUp-G;%重心位置から接続点までの距離
             %接続点を頂点とする図形の重心位置
                 polyin  = polyshape(pUp(1,1:N),pUp(2,1:N));
-                [x,y]   = centroid(polyin);
+                [x,y]   = centroid(polyin);%x,y平面上の重心
                 Gc      = [x;y;0];
                 rhoc    = pUp-Gc;%接続点を頂点とする図形の重心位置から接続点までの距離
                 
@@ -118,11 +115,11 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 grid on
                 grid minor
                 set(gca,"TickLabelInterpreter","latex","fontsize",16)
-                xlabel('$x$ (m)','Interpreter','latex')%,"FontSize",18)
-                ylabel('$y$ (m)','Interpreter','latex')%,"FontSize",18)
-                zlabel('$z$ (m)','Interpreter','latex')%,"FontSize",18)
+                xlabel('$x$ (m)','Interpreter','latex')
+                ylabel('$y$ (m)','Interpreter','latex')
+                zlabel('$z$ (m)','Interpreter','latex')
                 
-                input("Confirm the figure and press Enter.")
+                input("Confirm the figure and press Enter.")%enter keyを押すまでプログラムを止める
                 close
             else
             %正六角形
@@ -133,7 +130,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 end
               %回転行列を求める
               R = Rodrigues([0;0;1],2*pi/N);
-              %ペイロードの重心位置からリンクまでの距離
+              %牽引物の重心位置からリンクまでの距離
               param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
 
