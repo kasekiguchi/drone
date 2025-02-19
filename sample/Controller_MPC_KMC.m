@@ -74,7 +74,7 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.particle_num = 1000;
 
     Controller.test.sigma = 1; % 標準偏差を固定
-    Controller.test.input = 2; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
+    Controller.test.input = 1; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
 
     %% input
     Controller.input.u = [Controller.m * 9.81;0;0;0]; % 総推力，トルク

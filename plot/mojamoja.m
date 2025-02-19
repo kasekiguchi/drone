@@ -31,13 +31,12 @@ function mojamoja(gui, P, style)
             case 'xy'; d1 = 1; d2 = 2; label1 = 'x [m]'; label2 = 'y [m]';
             case 'xz'; d1 = 1; d2 = 3; label1 = 'x [m]'; label2 = 'z [m]';
             case 'yz'; d1 = 2; d2 = 3; label1 = 'y [m]'; label2 = 'z [m]';
-            otherwise; error('NO TYPE');
+            otherwise; error('NO TYPE. xy or xz or yz');
         end
         
         % 初期化
         filename = strrep(strrep(strcat('./plot/Mov/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
         f=figure(3);
-        xlabel(label1, 'FontSize', 15); ylabel(label2, 'FontSize', 15);
         daspect([1 1 1]); % 現在位置からのサイズ
         
         framev(1:length(Ti)-1) = struct('cdata', [], 'colormap', []);
@@ -74,8 +73,9 @@ function mojamoja(gui, P, style)
             text(0.85, 0.55, strcat('input ', num2str(result.u(:,j))), 'Units', 'normalized');
 
             hold off;
-            ylim([min(data2(:,result.idx(j)))-5e-4 max(data2(:,result.idx(j)))+5e-4]); 
-            xlim([min(data1(:,result.idx(j)))-5e-4 max(data1(:,result.idx(j)))+5e-4]); 
+            ylim([min(data2(1,result.idx(j)))-5e-4 max(data2(1,result.idx(j)))+5e-4]); 
+            xlim([min(data1(1,result.idx(j)))-5e-4 max(data1(1,result.idx(j)))+5e-4]); 
+            xlabel(label1, 'FontSize', 15); ylabel(label2, 'FontSize', 15);
             drawnow;
             framev(j) = getframe(f);
         end

@@ -257,19 +257,6 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
         % obj.Weight:12*12*200, obj.WeightR:4*4*200
         u = obj.input.u; % 入力:4，ホライズン:10，サンプル:200
         x = obj.state.state_data; % 状態数:12，ホライズン:10，サンプル:200，状態（z, z', x, x',x'' ,x''' ,y ,y' ,y'' ,y''' ,yaw ,yaw'）
-        % J = zeros(13,obj.N);
-        % for n = 1:obj.N
-        %     for h = 1:obj.H
-        %         for k = 1:12
-        %             J(k,n) = J(k,n) + x(k,h,n)'*obj.Weight(k,k,n)*x(k,h,n) + u(:,h,n)'*obj.WeightR(:,:,n)*u(:,h,n);
-        %         end
-        %     end
-        %     J(13,n) = sum(J(:,n));
-        % end
-        % obj.input.Evaluationtra = [J(13,:); sum(J(1:2,:)); sum(J(3:6,:)); sum(J(7:10,:)); sum(J(11:12,:))]';
-
-        % U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
-        % Z = obj.state.error_data;
 
         %% ホライズンで重み大きく
         k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
@@ -354,9 +341,6 @@ classdef MPC_CONTROLLER_HLMC_akanuma < handle
         pw = obj.input.EvalNorm; % 正規化された評価値
         H = obj.param.H;
         u = obj.input.u;
-
-        % sumUw = reshape(sum(u.*reshape(pw,1,1,[]),2), 4,NP);
-        % resampling_u = repmat(reshape(sumUw ./ sum(pw), 4, 1, NP), 1, H, 1);
 
         resampling_u = repmat(reshape(reshape(sum(u.*reshape(pw,1,1,[]),2), 4,obj.N)...
             ./ sum(pw), 4, 1, NP), 1, H, 1);

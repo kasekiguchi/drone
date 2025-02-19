@@ -1,11 +1,11 @@
-%%
+%% modeファイルから実行時に必要 ====================
 clc
 tmp = matlab.desktop.editor.getActive;
 cd(strcat(fileparts(tmp.Filename), '../../'));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-%%
-clc;
+%% ==================================================
+
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -24,10 +24,11 @@ agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.sensor = DIRECT_SENSOR(agent, 0.0);
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory", {[0;0;1]}, "HL"});
-agent.controller = MPC_CONTROLLER_HL(agent, Controller_MPC_HL(agent));
-run("SimBase");
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
+agent.controller = MPC_CONTROLLER_MC(agent, Controller_MPC_MC(agent));
+run("ExpBase");
 
 %% modeファイル内でプログラムを回す
 for i = 1:400
@@ -46,20 +47,11 @@ end
 %% 途中で止めた時もセクション実行でグラフ出せる
 logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
-% function dfunc(app)
-% app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
-% % figtype = 2; % 1:それぞれ, 2:subplot
-% % savefigure;
-% flg.figtype = 0; % 0:subplot
-% flg.savefig = 0;
-% flg.animation_save = 0;
-% flg.animation = 0;
-% flg.timerange = 1;
-% flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
-% phase = 1; % 1:flight, 2:all
-% fig = FIGURE_EXP(struct('logger',app.logger,'fExp',0),struct('flg',flg,'phase',phase,'filename','0710'));
-% fig.make_mpc_plot();
-% end
+%%
+function dfunc(app)
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+% mojamoja(app); % もじゃもじゃプロット
+end
