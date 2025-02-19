@@ -2,14 +2,14 @@
 %牽引物の分割モデル
 %=====================
 clc; clear; close all
-N      = 4;%機体数
-ts     = 0;%初期時刻
-dt     = 0.025;%刻み時間
-te     = 100/2;%シミュレーション時間
-tn     = length(ts:dt:te);%mainloopで繰り返す回数
-time   = TIME(ts, dt, te);%時刻のクラス
-motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
-logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%logをとるクラス%分割前1,分割後N個
+N            = 4;%機体数
+ts           = 0;%初期時刻
+dt           = 0.025;%刻み時間
+te           = 100/2;%シミュレーション時間
+tn           = length(ts:dt:te);%mainloopで繰り返す回数
+time         = TIME(ts, dt, te);%時刻のクラス
+motive       = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
+logger       = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%logをとるクラス%分割前1,分割後N個
 in_prog_func = @(app) dfunc(app);%gui関連
 post_func    = @(app) dfunc(app);%gui関連
 

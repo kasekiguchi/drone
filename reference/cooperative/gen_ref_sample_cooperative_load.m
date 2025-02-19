@@ -5,11 +5,6 @@ arguments
     param.size = [1 1 0] % 各軸の振幅    
 end
 
-%必要パラメーター
-% [x0d;dx0d;ddx0d;dddx0d;o0d;do0d;r0d],[3,3,3,3,3,3,4]
-% x0d;dx0d;ddx0d;dddx0d 牽引物の位置とその微分
-% r0d : 牽引物の姿勢を表すクォータニオン
-% o0d, do0d ：牽引物の角速度・角加速度
 syms t real 
 
 T = param.freq;
@@ -47,15 +42,18 @@ z = 1*lz*sin(2*w*t - pi/2)+lz_offset; % z
 % x = lx_offset;  % x
 % y = ly_offset;  % y
 % z = lz_offset; % z
-%exp
+
+% ANGLE
+% exp
 % roll = -3*pi/180;
 % pitch = 4*sin(2*pi*t/T/2)*pi/180;
 % % pitch = 3*pi/180;
 % yaw = 3*pi/180;
-roll = 0;
-pitch = 0;
-yaw = 0;
-%sim
+roll    = 0;
+pitch   = 0;
+yaw     = 0;
+
+% sim
 % roll = 2*pi/180;
 % pitch = 3*sin(2*pi*t/T)*pi/180;
 % % pitch = 3*pi/180;
