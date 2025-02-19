@@ -51,7 +51,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.WeightF = blkdiag(weight.Pf, weight.Qf, weight.Vf, weight.Wf);
       obj.WeightR = weight.R;  % 目標入力
       obj.WeightRp = weight.RP; % 前ステップとの入力
-
+      obj.V1_weight = blkdiag(weight.)
       % HL. A, B行列定義 z, x, y, yawの順番
       obj.A = param.A;
       obj.B = param.B;
@@ -233,6 +233,12 @@ classdef MPC_CONTROLLER_KMC < handle
     end
 
     function objective(obj)
+        v1_min = 2;
+        v1_max = 4;
+        v2_min = 1;
+        v2_max = 2;
+        v1_weight = 1e2;
+        v2_weight = 1e2;
         U = obj.input.u;
         X = obj.state.state_data;
 
@@ -248,15 +254,34 @@ classdef MPC_CONTROLLER_KMC < handle
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
         stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
-
         stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
-
+        stageVobs = 0;
+        stageVobs2 = 0;
+        
+        if obj.param.t >1 && obj.param.t <3 
+            stageVobs = k .*tildeX.*pagemtimes(v1_weight,tildeX(8,:,:));
+        end
+        
+        if obj.param.t > 3 && obj.param.t <5
+            stageVobs2 = k .*tildeX.*pagemtimes(v2_weight,tildeX(8,:,:));
+        end
+         % Vobs = tildeX(8,:,:);
+         %    if obj.param.t >1 && obj.param.t <3 
+         %    stageVobs = v1_weight*(v1_min-Vobs)^2+(Vobs-v1_max)^2;
+         %    else
+         %        stageVobs = 0;
+         %    end
+         %    if obj.param.t > 3 && obj.param.t <5 
+         %    stageVobs2 = v2_weight *(v2_min-Vobs)^2+(Vobs-v2_max)^2;
+         %    else
+         %       stageVobs2 = 0;
+         %    end
         %% 人工ポテンシャル場法
         % Jconst = Constraints(obj);
         % Jconst(:,1) = {zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N)};
         %% ステージコストとターミナルコストを合計
-        costX = stageStateX + terminalState;
+        costX = stageStateX + terminalState+stageVobs+stageVobs2;%+stageVobs+stageVobs2;
 
         obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1);
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);

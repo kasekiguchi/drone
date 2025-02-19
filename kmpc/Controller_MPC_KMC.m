@@ -5,7 +5,7 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.dt_drone = Controller.dt;
 
     %% MPC param
-    Controller.dt = 0.1; % MPCステップ幅
+    Controller.dt = 0.025; % MPCステップ幅
     Controller.H = 10;
     Controller.particle_num = 5000;
     % Controller.input.Initsigma = 1*[2,1,1,1];
@@ -63,11 +63,13 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     Controller.weight.W = diag([1;1;1]);  % 姿勢角，角速度　1,2刻み 
     Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-
+    
     Controller.weight.Pf = Controller.weight.P;
     Controller.weight.Vf = Controller.weight.V;
     Controller.weight.Qf = Controller.weight.Q;
     Controller.weight.Wf = Controller.weight.W;
+
+    %%v1_v2 weight
 
     %% input
     Controller.input.u = [Controller.m * 9.81;0;0;0]; % 総推力，トルク

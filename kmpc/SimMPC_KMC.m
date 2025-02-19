@@ -45,7 +45,7 @@ end
 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.6]},"HL"});
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
-run("SimBase");
+run("ExpBase");
 %%
 if ~modeType
     phase = 'f'

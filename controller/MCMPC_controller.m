@@ -336,17 +336,17 @@ classdef MCMPC_controller < handle
 %%%%%Forecasts should contain both lead and lag 
 % V(1-dt*horizon,3-dt*horizon)<2 and V(1-dt*horizon,3-dt*horizon)>1 
             
-            Vobs = tildeXv(2);
-            if obj.param.t >1 && obj.param.t <3 
-            stageVobs = v1_weight*(v1_min-Vobs)^2+(Vobs-v1_max)^2;
-            else
-                stageVobs = 0;
-            end
-            if obj.param.t > 3 && obj.param.t <5 
-            stageVobs2 = v2_weight *(v2_min-Vobs)^2+(Vobs-v2_max)^2;
-            else
-                stageVobs2 = 0;
-            end
+            % Vobs = tildeXv(2);
+            % if obj.param.t >1 && obj.param.t <3 
+            % stageVobs = v1_weight*(v1_min-Vobs)^2+(Vobs-v1_max)^2;
+            % else
+             %    stageVobs = 0;
+            % end
+            % if obj.param.t > 3 && obj.param.t <5 
+            % stageVobs2 = v2_weight *(v2_min-Vobs)^2+(Vobs-v2_max)^2;
+            % else
+             %   stageVobs2 = 0;
+            % end
 %%%%%%%%%%%
             terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                 +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
