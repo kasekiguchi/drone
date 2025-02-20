@@ -19,13 +19,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_time_landing       % landing開始時刻
         base_state_takeoff      % take offの初期位置
         base_state_landing      % landingの初期位置
-        base_state12_takeoff    % take offのxy初期位置
-        base_state12_landing    % landingのxy初期値
+        copy_state_takeoff      % take offの紐接続点の初期位置
+        copy_state_landing      % landingのxy初期値
         te_takeoff = 12         % take offで目標高度に達するまでの時間goal time
         zd_takeoff = 0.8        % take offの目標高度goal altitude
         zd_takeoff_now          % take offの目標高度goal altitude
         te_landing = 20         % landingの時間goal time
-        base_time_flight=[];    % 目標軌道に追従し始めたときの時刻
+        base_time_flight=[]     % 目標軌道に追従し始めたときの時刻
+        mLlanding               % landingになったときの牽引物質量
         constPrep               % 前時刻の制約の位置
         constPrev               % 前時刻の制約の速度
 
@@ -110,23 +111,23 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    rhoci        = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % sensor
                    sp0          = obj.agent1.sensor.result.rigid(1).p;          % 牽引物のセンサー値
+                   spL          = obj.self.sensor.result.state.pL;              % 分割後の牽引物センサー値
+                   if isprop(obj.self.sensor.result.state,"real_pL")
+                       real_spL  = obj.self.sensor.result.state.real_pL;         % 牽引物位置
+                   else
+                       real_spL  = obj.self.sensor.result.state.pL;              % simのための牽引物位置
+                   end
                % estimator
                    epDronei     = obj.self.estimator.result.state.p;            % 機体位置
+                   emL          = obj.self.estimator.result.state.mL;           %分割後牽引物の質量
                % reference 
                    spDrones     = obj.agent1.reference.result.spDrones;         % 全ての機体位置
                    ref0         = obj.agent1.reference.result.state.xd(1:24);   % 分割前の牽引物目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
                    rotms        = obj.agent1.reference.result.rotms;            % rhoiを目標位置に向ける回転行列
-
-               %紐接合部の目標軌道を算出
-                   if isprop(obj.self.sensor.result.state,"real_pL")
-                       real_pL  = obj.self.sensor.result.state.real_pL;         % 牽引物位置
-                   else
-                       real_pL  = obj.self.sensor.result.state.pL;              % simのための牽引物位置
-                   end
                    %いらないかも
                    % alpi12       = real_pL(1:2) - obj.agent1.sensor.result.state.p(1:2);
                    % alpiUnit12   = alpi12/norm(alpi12);%牽引物が垂直に傾かないと仮定
-               %衝突回避reference生成用ゲイン 
+               %衝突回避reference生成用
                    droneDistance        = vecnorm(spDrones - epDronei);          % 自身と相手との距離
                    sortedDroneDistance  = sort(droneDistance);                  % 小さい順に並べ替え
                    minDroneDistance     = sortedDroneDistance(2)  - 2*rli;      %1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
@@ -165,31 +166,31 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % refi(9:10)     = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
                 %take off
                    elseif obj.cha =='t'
-                       obj.flanding                     = 0;                                            %landing条件分岐用フラグ
-                       takeOffTime                      = varargin{1}.t-obj.base_time_takeoff;          % takeoffになってからの時間
-                       %初期値
-                       if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff               % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
-                           obj.base_time_takeoff        = varargin{1}.t;                                % takeoffになった時間
-                           obj.base_state12_takeoff     = real_pL(1:2);                                 % 初期の紐接続点のx,y位置
-                           % 質量推定が終わるまでのとき
-                           if isempty(obj.base_state_takeoff) 
-                               obj.zd_takeoff_now       = sp0(3) + 0.05;                                % 目標高度設定
-                               obj.base_state_takeoff   = [real_pL(1:2);p(3)-cablei];                   % 初期位置
-                           %推定終わってから目標高度に行くとき
-                           else 
-                               obj.zd_takeoff_now       = obj.zd_takeoff;                               % 目標高度設定
-                               obj.base_state_takeoff   = real_pL;                                      % 初期位置
+                       obj.flanding                     = 0;                                                    % landing条件分岐用フラグ
+                       takeOffTime                      = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
+                       %初期値 
+                       if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff                       % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
+                           obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
+                           obj.copy_state_takeoff       = real_spL;                                             % 初期の紐接続点のx,y位置
+                           % 質量推定が終わるまでのとき  
+                           if isempty(obj.base_state_takeoff)   
+                               obj.zd_takeoff_now       = sp0(3) + 0.05;                                        % 目標高度設定
+                               obj.base_state_takeoff   = [real_spL(1:2);p(3)-cablei];                          % 初期位置,紐の長さ分下に埋まっているという設定
+                           %推定終わってから目標高度に行くとき       
+                           else         
+                               obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
+                               obj.base_state_takeoff   = real_spL;                                             % 初期位置
                            end
                        end
                        % 更新
-                       exrhoi                           = 0.5;                                          % rho方向に延ばす距離
+                       exrhoi                           = 0.5;                                                  % rho方向に延ばす距離
                        % 紐が張る機体の高度になったか(紐の長さとexrhoiから求まる高度に牽引物の高さを加えた高度より機体が高いか)
-                       if p(3) >= sqrt(cablei^2 - exrhoi^2) + real_pL(3) || obj.ftakeoff == 1 
-                           obj.ftakeoff                 = 1;                                            %take off条件分岐用フラグ
-                           obj.base_state_takeoff(1:2)  = obj.base_state12_takeoff + constp*rhoiUnit12; % rhoiUnit12方向に延長
+                       if p(3) >= sqrt(cablei^2 - exrhoi^2) + obj.copy_state_takeoff(3) || obj.ftakeoff == 1 
+                           obj.ftakeoff                 = 1;                                                    % take off条件分岐用フラグ
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長
                        % 紐がたわんでいる場合
                        else
-                           obj.base_state_takeoff(1:2)  = obj.base_state12_takeoff + exrhoi*rhoiUnit12; % rho方向に延ばす距離
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + exrhoi*rhoiUnit12(1:2); % rho方向に延ばす距離
                            obj.constPrep                = exrhoi;
                            obj.constPrev                = 0;
                        end
@@ -201,22 +202,22 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            obj.self.input_transform.param.th_offset_tl = th_offset_takeoff + (th_offset-th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
                 %landing
                    elseif obj.cha =='l'
-                       obj.ftakeoff                     = 0;                                            %take off条件分岐用フラグ
-                       % 初期値
-                       if isempty(obj.base_state_landing) 
-                           obj.base_time_landing        = varargin{1}.t;                                % landingになった時間
-                           obj.base_state_landing       = obj.self.sensor.result.state.pL;              % 初期位置
-                           obj.base_state12_landing     = obj.self.sensor.result.state.pL(1:2);         % x,y方向の初期位置
-                       end
-                       % 更新
-                       exrhoi                           = 0.5;                                          % rhoi方向に延ばす距離
-                       % 牽引物質量が小さくなったらにする
-                       if p(3) - real_pL(3) >= 0.5*cablei && obj.flanding==1                            
-                           obj.flanding                 = 1;                                            % landing条件分岐用フラグ一旦入ったらここの条件を使う
-                           obj.base_state_landing(1:2)  = obj.base_state12_landing + constp*rhoi;       %牽引物が高い場合に紐の長さ的に目標位置に届かない可能性を考慮
-                       %紐がたわんでいる場合
+                       obj.ftakeoff                     = 0;                                                    %take off条件分岐用フラグ
+                       % 初期値        
+                       if isempty(obj.base_state_landing)       
+                           obj.base_time_landing        = varargin{1}.t;                                        % landingになった時間
+                           obj.base_state_landing       = spL;                                                  % 初期位置
+                           obj.copy_state_landing       = spL;                                                      % landing開始時の紐の接続位置の初期位置
+                           obj.mLlanding                = emL;                                                  % landingになった時の質量
+                        end     
+                       % 更新     
+                       exrhoi                           = 0.5;                                                  % rhoi方向に延ばす距離
+                       % 牽引物質量が小さくなったら制約を固定値にする     
+                       if emL < obj.mLlanding*0.9 ||obj.flanding == 1                                    
+                           obj.flanding                 = 1;                                                    % landing条件分岐用フラグ一旦入ったらここの条件を使う
+                           obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + exrhoi*rhoiUnit12(1:2); % rhoiUnit12方向に延長
                        else 
-                           obj.base_state_landing(1:2)  = obj.base_state12_landing + exrhoi*rhoi;
+                           obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長         
                        end
                        % 目標値
                            refi                 = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);

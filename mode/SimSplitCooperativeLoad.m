@@ -66,20 +66,20 @@ post_func    = @(app) dfunc(app);%gui関連
 
 %単機牽引モデルの設定
 for i = 2:N+1
-    %=DRONE=====================================================================================
+    %=DRONE================================================================================================================
     % parameter     : DRONE_PARAM_SUSPENDED_LOAD
     % plant         : MODEL_CLASS / Model_Suspended_Load
     % sensor        : DIRECT_SENSOR
-    % estimator     : EKF
+    % estimator     : EKF / Estimator_EKF
     % reference     : TIME_VARYING_REFERENCE_SPLIT / Case_study_trajectory
-    % controller    : HLC / Controller_HL: take off and landing, CSLC / Controller_Cooperative_Load : fright
-    %=============================================================================================
-    %=推定方法を変える場合==========================================================================
+    % controller    : HLC_SPLIT_SUSPENDED_LOAD / Controller_HL_Suspended_Load
+    %========================================================================================================================
+    %=推定方法を変える場合=====================================================================================================
     % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass:1で質量推定，0,1以外で質量推定と推力外乱推定
     %-牽引物質量推定しない： isEstLoadMass = 0 
     %-牽引物質量推定する　： isEstLoadMass = 1
     %-紐やxy外乱を推定する： isEstLoadMass = 2
-    %=============================================================================================
+    %========================================================================================================================
 %Drone_Initial_Stat
     rho     = agent(1).parameter.rho; %牽引物上の点から紐の接続点までの距離
     R_load  = RodriguesQuaternion(initial_state(1).Q);%牽引物座標からのグローバル座標への回転行列
