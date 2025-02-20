@@ -31,12 +31,12 @@ end
 [numU, ~] = size(U);
 
 
-QP_solve()
+output = QP_solve(X, Y, Xlift, Ylift, U, numX, numU); % 最適化による行列の算出
 
 % output = A, B, C
 end
 
-function QP_solve(X, Y, Xlift, Ylift, U)
+function mat = QP_solve(X, Y, Xlift, Ylift, U, numX, numU)
     % Ylift - AXlift - BU
     % X - CXlift
     
@@ -53,7 +53,13 @@ function QP_solve(X, Y, Xlift, Ylift, U)
 
 
     %% A, B
-    fun = @(A, B) Ylift - A*Xlift - B*U;
+    % fun = @(A, B) Ylift - A*Xlift - B*U;
+    fun = @(AB) Ylift - AB(1:numX, 1:numX)*Xlift - AB(1:numX, numX+1:numX+numU)*U;
+    x0 = [eye(numX), zeros(numX, numU)]; % 初期値
+    A = []; b = []; % 線形不等式制約
+    Aeq = []; beq = []; % 線形等式制約
+    lb = []; ub = []; % 下限，上限
+    nonlcon = @const; % 非線形制約
     sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options);
 
 

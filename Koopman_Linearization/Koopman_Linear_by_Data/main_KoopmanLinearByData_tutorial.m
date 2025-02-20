@@ -141,23 +141,23 @@ flg.weight_Qhermite = 1;
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato';
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kato25';
-exp_data = 'Exp_Kato15';
+% exp_data = 'Exp_Kato15';
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset_z_3m.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
 % load('Koopman_Linearization\Integration_Dataset\2025ver2_iFlight_Dataset_xyz200_z100.mat');
-load('Koopman_Linearization\Integration_Dataset\2025ver_iFlight_Dataset_xyz100_z50.mat');
+% load('Koopman_Linearization\Integration_Dataset\2025ver_iFlight_Dataset_xyz100_z50.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
@@ -167,9 +167,9 @@ F = @quaternions_all_00; % 改造用
 
 % データのかさまし
 flg.increased = 1;
-if flg.increased
-    Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
-end
+% if flg.increased
+%     Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
+% end
 
 % 正規化
 % flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
@@ -186,8 +186,8 @@ if size(Data.X,1)==13 %特に気にしなくていい
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-disp(FileName); 
-fprintf('pause: '); for i = 1:5; pause(1); fprintf('%d, ', i); end; fprintf('\n'); % 5秒待機タイマー
+% disp(FileName); 
+% fprintf('pause: '); for i = 1:5; pause(1); fprintf('%d, ', i); end; fprintf('\n'); % 5秒待機タイマー
 
 % Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
@@ -199,7 +199,8 @@ else
     if flg.without_pos
         est = KL(Data.X(4:end,:),Data.U,Data.Y(4:end,:),F,flg); % 位置を観測量に入れないときのKL
     else 
-        est = KL(Data.X,Data.U,Data.Y,F,flg); 
+        % est = KL(Data.X,Data.U,Data.Y,F,flg); 
+        est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
 
         % 誤差モデル
         % Datae = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat', 'Data');
