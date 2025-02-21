@@ -1,18 +1,18 @@
 classdef FOR_LOAD < SENSOR_CLASS
       properties
-        result              % 現在時刻の結果
-        rigid_num           % 剛体番号
-        self                % agent
-        tt0                 % takeoffの開始時間
-        tl0                 % landingの開始時間
-        tte = 10;           % センサー値を何秒で100%使うか
-        tle = 5;            % センサー値を何秒で0%使うか
-        ratet = 1/tte^2;    % 二次関数で0-1の間で変化するための定数
-        ratel = 1/tte^2;    % 二次関数で0-1の間で変化するための定数
-        inispL              % 初期の牽引物位置
-        isAir = []          % 機体が一定高度より高くなっている
-        isGround = []       % 地面判定の初期化
-        cableL_landing      % landing開始時の機体と牽引物の距離
+        result                  % 現在時刻の結果
+        rigid_num               % 剛体番号
+        self                    % agent
+        tt0                     % takeoffの開始時間
+        tl0                     % landingの開始時間
+        tte         = 10;       % センサー値を何秒で100%使うか
+        tle         = 5;        % センサー値を何秒で0%使うか
+        ratet       = 1/tte^2;  % 二次関数で0-1の間で変化するための定数
+        ratel       = 1/tte^2;  % 二次関数で0-1の間で変化するための定数
+        inispL                  % 初期の牽引物位置
+        isAir       = []        % 機体が一定高度より高くなっている
+        isGround    = []        % 地面判定の初期化
+        cableL_landing          % landing開始時の機体と牽引物の距離
     end
     
     methods

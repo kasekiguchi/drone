@@ -44,6 +44,7 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
     methods
         function obj = DRONE_PARAM_SUSPENDED_LOAD(name,param)
             % 現在のモデルでは[mass, jx, jy, jz, gravity, loadmass, cableL]のみしか使われていない．
+            % 機体の長さLx, Lyは条件分岐で使われる
             arguments
                 %
                 name % DIATONE

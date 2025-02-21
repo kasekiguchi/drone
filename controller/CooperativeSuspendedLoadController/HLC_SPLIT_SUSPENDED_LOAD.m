@@ -11,9 +11,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
     
     methods
         function obj = HLC_SPLIT_SUSPENDED_LOAD(self,param)
-            obj.self = self;    % agent
-            obj.param = param;  % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
-            obj.result.input = [(self.parameter.loadmass + self.parameter.mass)*self.parameter.gravity;0;0;0];% 初期入力
+            obj.self            = self;    % agent
+            obj.param           = param;  % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
+            obj.result.input    = [(self.parameter.loadmass + self.parameter.mass)*self.parameter.gravity;0;0;0];% 初期入力
         end
         
         function result = do(obj,varargin)
