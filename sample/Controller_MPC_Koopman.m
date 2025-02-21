@@ -20,10 +20,10 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
   % load("2025KatoGUI3ver.iFlight_Dataset_xyz100_z50_est.mat",'est') %vzから算出したzで学習、総推力 加藤データ(iFlightで取得(2回目:est修正後))
   % load("2025ver.iFlight_Dataset_xyz200_z100_est.mat",'est') %vzから算出したzで学習、総推力 (木山データ＋加藤データ(1回目))
   % load("2025ver2.iFlight_Dataset_xyz200_z100_est.mat",'est') %vzから算出したzで学習、総推力 (木山データ＋加藤データ(2回目))
-% load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
-% load("EstimationResult_2024-06-10_Exp_Kiyama_code03_2.mat", "est");
-% load("EstimationResult_2024-06-10_code02_Exp_Kiyama_code03_2.mat", "est");
-% load("code03.mat", "est");
+  % load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
+  % load("EstimationResult_2024-06-10_Exp_Kiyama_code03_2.mat", "est");
+  % load("EstimationResult_2024-06-10_code02_Exp_Kiyama_code03_2.mat", "est"); 
+  % load("code03.mat", "est");
 
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -39,7 +39,7 @@ function Controller = Controller_MPC_Koopman(~) %%#codegen
    % Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 木山
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み 調整用 10倍× 1/10×
    % Controller_param.weight.Q = diag([30; 20; 1]);    % 姿勢角  10,20刻み 木山
-    Controller_param.weight.Q = diag([30; 20; 1]);    % 姿勢角  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
+    Controller_param.weight.Q = diag([60; 20; 1]);    % 姿勢角  10,20刻み　調整用 yaw,pitchのみ10倍× rollのみ10倍悪くない　rollのみ1/10× yaw,pitchのみ1/10悪くない
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 木山

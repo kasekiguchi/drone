@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("hovering.mat"); % ここに保存したファイル名を入力してグラフを出力
+load("20250123_Exp_HL_circleT=12_[700,700,700,20],335,[500,1000,200,1],0.001_great.mat"); % ここに保存したファイル名を入力してグラフを出力
 
 %%
 figtype = 2;
@@ -76,21 +76,21 @@ elseif figtype == 2
     subplot(m,n,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Position [m]"); legend({"$x$", "$y$", "$z$", "$x$.reference", "$y$.reference", "$z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    ylim([-0.8 1.2]);
+    ylim([-0.2 1.2]);
     %ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     subplot(m,n,2); plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Attitude [rad]"); legend({"$\phi$", "$\theta$", "$\psi$", "$\phi$.reference", "$\theta$.reference", "$\psi$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    ylim([-0.15 0.15]);
+    ylim([-0.04 0.03]);
     %ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     subplot(m,n,3); plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend({"$v_x$", "$v_y$", "$v_z$", "$v_x$.reference", "$v_y$.reference", "$v_z$.reference"}, 'Interpreter' , 'latex' ,"Location","best");
     grid on; xlim([logt(1), logt(end)]); 
-    ylim([-0.3 0.3]);
+    ylim([-0.15 0.15]);
     %ylim([-inf inf]);
     % title("Time change of Velocity");  
     % input
@@ -160,7 +160,7 @@ yaw = rmse(Ref(6,:),Est(6,:))
 vx = rmse(Ref(7,:),Est(7,:)) %速度
 vy = rmse(Ref(8,:),Est(8,:))
 vz = rmse(Ref(9,:),Est(9,:))
-%%
+%% 計算時間
 figure(100)
 plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
 xlim([-inf inf])

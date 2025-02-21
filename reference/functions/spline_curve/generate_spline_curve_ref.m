@@ -24,11 +24,11 @@ function ref = generate_spline_curve_ref(te,filename,order,isManualSetting)
         % wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
         % wp_z  = ones(pointN-2,1);
 
-        % only z-directional
+        % only z-directional z方向の上下移動の軌道
         % wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), zeros(pointN-2,1)]));
         % wp_z  = max(0.5, min(1.5, round(0.5*randn(pointN-2,1)+1,3)));
 
-        % xyz-directional
+        % xyz-directional xyz方向のランダムな軌道
         wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
         wp_z  = max(0.5, min(1.5, round(0.5*randn(pointN-2,1)+1,3)));
 
