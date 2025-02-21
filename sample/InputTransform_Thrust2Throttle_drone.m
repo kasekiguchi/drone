@@ -9,11 +9,10 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
      
      % th_offset : hovering throttle
      % gain : [roll pitch yaw throttle]
-     u_trans_param.th_offset = 331;
-     u_trans_param.th_offset_tl =331;%340で飛ぶはずだけど…  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
-     u_trans_param.th_offset_f = 331;
-     u_trans_param.gain_tl =[300;300;300;20];%機体が微振動するときは[270;270;270;20]とかに下げる．根本的には制御周期が遅い．
-     u_trans_param.gain_f =[300;300;300;20];%同じく　
+     u_trans_param.th_offset    = 331;
+     u_trans_param.th_offset_tl = 331;%340で飛ぶはずだけど…  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
+     u_trans_param.gain         = [300;300;300;20];%同じく　
+     u_trans_param.gain_tl      = [300;300;300;20];%機体が微振動するときは[270;270;270;20]とかに下げる．根本的には制御周期が遅い．
 
 
      %単純HL用↓ masterにマージするとき自動で切り替わるようにしないとスロットルゲインおかしくなる．
@@ -25,8 +24,8 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
      %単純HL用↑
     
     %単機牽引用↓
-    u_trans_param.th_offset = 340;%331;%tlとfで分けている理由はtlとfで異なったコントローラー・機体質量を扱えるようにするため．
-    u_trans_param.th_offset_tl =260;  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
-    u_trans_param.gain_tl =[270;270;270;20];%　
-    u_trans_param.gain_f =[270;270;270;20];%　　　
+    u_trans_param.th_offset     = 340;%331;%tlとfで分けている理由はtlとfで異なったコントローラー・機体質量を扱えるようにするため．
+    u_trans_param.th_offset_tl  = 260;  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
+    u_trans_param.gain          = [270;270;270;20];%　
+    u_trans_param.gain_tl       = [270;270;270;20];%　　　
 end

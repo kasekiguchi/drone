@@ -25,7 +25,7 @@ methods
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
-        obj.hover_thrust_force =P(1) * P(9);%機体質量×重力加速度(牽引物含んでないので注意．将来的には牽引物質量を含んだ方が良いかも．
+        obj.hover_thrust_force = P(1) * P(9);%機体質量×重力加速度(牽引物含んでないので注意．将来的には牽引物質量を含んだ方が良いかも．
         obj.state = state_copy(self.estimator.result.state);
     end
 
@@ -33,8 +33,8 @@ methods
         %% u = [uroll, upitch, uthr, uyaw]
         % [Input] varargin : time, cha, logger, env, agent, i
 
-        cha = varargin{2};
-        input = varargin{5}.controller.result.input;
+        cha     = varargin{2};
+        input   = varargin{5}.controller.result.input;
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
         end
@@ -42,31 +42,31 @@ methods
         obj.flight_phase = cha;
 
         if cha == 't' || cha == 'f' || cha == 'l'
-            wh = obj.self.estimator.result.state.w; % estimated state
-            obj.self.estimator.model.do(varargin{:}); % one step prediction using current input
-            whn = obj.self.estimator.model.state.w; % predicted state
+            wh  = obj.self.estimator.result.state.w;    % estimated state
+            obj.self.estimator.model.do(varargin{:});   % one step prediction using current input
+            whn = obj.self.estimator.model.state.w;     % predicted state
             obj.self.estimator.model.state.set_state(obj.self.estimator.result.state.get); % restore estimator.model
             if cha == 'f'
-                gain = obj.param.gain_f;
-                th_offset = obj.param.th_offset;
+                gain        = obj.param.gain;
+                th_offset   = obj.param.th_offset;
             else
-                gain = obj.param.gain_tl;
-                th_offset = obj.param.th_offset_tl;
+                gain        = obj.param.gain_tl;
+                th_offset   = obj.param.th_offset_tl;
             end
-            T_thr = input(1); % thrust, torque input 
-
-            uroll = gain(1) * (whn(1) - wh(1));
-            upitch = gain(2) * (whn(2) - wh(2));
+            % thrust, torque input 
+            T_thr           = input(1); 
+            uroll           = gain(1) * (whn(1) - wh(1));
+            upitch          = gain(2) * (whn(2) - wh(2));
+            uyaw            = gain(3) * (whn(3) - wh(3));
 
             % apply gain to (thrust - hovering_thrust)
-            uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset);%各スロットル値での推力が大まかに分かれば改善できる．
-            uyaw = gain(3) * (whn(3) - wh(3));
-            uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
-            upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-            uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
-            obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
+            uthr            = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset);%各スロットル値での推力が大まかに分かれば改善できる．
+            uroll           = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+            upitch          = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
+            uyaw            = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
+            obj.result      = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
         else
-            obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
+            obj.result      = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
         end
 
         u = obj.result;

@@ -11,8 +11,8 @@ end
 % 単機機体, 単機牽引モデルのとき
 if firstId == 1
     for i = firstId:N
-        takeoff_ref{i} = TAKEOFF_REFERENCE(agent(i),[]);    % take off reference
-        landing_ref{i} = LANDING_REFERENCE(agent(i),dt,0.1);% landing reference
+        takeoff_ref{i}  = TAKEOFF_REFERENCE(agent(i),[]);    % take off reference
+        landing_ref{i}  = LANDING_REFERENCE(agent(i),dt,0);  % landing reference
     end
 % 複数機牽引モデルのとき
 else

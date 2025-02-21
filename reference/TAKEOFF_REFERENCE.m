@@ -16,9 +16,9 @@ classdef TAKEOFF_REFERENCE < handle
   methods
     function obj = TAKEOFF_REFERENCE(self,varargin)
       % generate takeoff reference w.r.t. position and velocity
-      obj.self = self;
-      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
-      obj.th_offset0 = obj.self.input_transform.param.th_offset_tl;
+      obj.self          = self;
+      obj.result.state  = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
+      obj.th_offset0    = obj.self.input_transform.param.th_offset_tl;
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
