@@ -25,7 +25,7 @@ methods
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
-        obj.hover_thrust_force =P(1) * P(9);
+        obj.hover_thrust_force =P(1) * P(9);%機体質量×重力加速度(牽引物含んでないので注意．将来的には牽引物質量を含んだ方が良いかも．
         obj.state = state_copy(self.estimator.result.state);
     end
 
@@ -59,7 +59,7 @@ methods
             upitch = gain(2) * (whn(2) - wh(2));
 
             % apply gain to (thrust - hovering_thrust)
-            uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset); 
+            uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset);%各スロットル値での推力が大まかに分かれば改善できる．
             uyaw = gain(3) * (whn(3) - wh(3));
             uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
             upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;

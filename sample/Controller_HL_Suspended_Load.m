@@ -17,24 +17,24 @@ function Controller = Controller_HL_Suspended_Load(dt,agent)
         Controller.F4 = lqrd(A2,B2,diag([10,1]),0.1,dt);                        % yaw方向サブシステム, h4^(i) i = 0~1
     else
         % exp用
-        Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);             %位置z、速度z
-        Controller.F4=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                %yawの位置、速度、100,1,1
-        %↓関口
-        % 謎lqrdとやっていることは同じな感じする確認
-        At = A6;
-        Bt = B6;
-        f2 = lqr(At,Bt,diag([150000,250000,10000,1,0.001,0.001]),0.08);         %質量推定用
-        % f2 = lqr(At,Bt,diag([150000,250000,10000,1,0.001,0.001]),0.008);      %very good
-        % f2 = lqr(At,Bt,diag([200000,350000,50000,1,0.001,0.001]),0.008);      安定
-        % f2 = lqr(At,Bt,diag([150000,200000,50000,1,0.001,0.001]),0.008);      安定
-        pc = eig(At-Bt*f2);
-        tt = 0.025;
-        pd = exp(pc*tt);
-        sysc = ss(At,Bt,eye(6),0);
-        sysd = c2d(sysc,tt);
-        [Ad,Bd, ~,~] = ssdata(sysd);
-        Controller.F2 = place(Ad,Bd,pd);%[ 101.6973  254.1684  237.2560  126.4411   43.0970    9.1920];
-        Controller.F3 = Controller.F2;
+        Controller.F1 = lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);             %位置z、速度z
+        Controller.F2 = lqrd(A6,B6,diag([150000,250000,10000,1,0.001,0.001]),0.08,dt);%より制御周期速くなると0.008とかが良くなると思う．
+        Controller.F3 = lqrd(A6,B6,diag([150000,250000,10000,1,0.001,0.001]),0.08,dt);
+        Controller.F4 = lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                %yawの位置、速度、100,1,1
+
+ %        %↓ゲイン調整・確認用
+ %        At = A6;
+ %        Bt = B6;
+ %        f2 = lqr(At,Bt,diag([150000,250000,10000,1,0.001,0.001]),0.08);         %質量推定用
+ %        pc = eig(At-Bt*f2);
+ %        tt = 0.025;
+ %        pd = exp(pc*tt);
+ %        sysc = ss(At,Bt,eye(6),0);
+ %        sysd = c2d(sysc,tt);
+ %        [Ad,Bd, ~,~] = ssdata(sysd);
+ %        Controller.F2 = place(Ad,Bd,pd);
+ %        Controller.F3 = Controller.F2;
+ %        %↑ゲイン調整・確認用
     end
     
     Controller.dt = dt;
