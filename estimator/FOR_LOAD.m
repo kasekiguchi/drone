@@ -31,7 +31,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         
         function result = do(obj,varargin)
             %   param : optional
-            t           = varargin{1}{1}.t;                                     % 現在時刻
+            tc          = varargin{1}{1}.t;                                     % 現在時刻
             cha         = varargin{1}{2};                                       % phase
             sp          = obj.self.sensor.motive.result.state.p;                % 機体位置
             sq          = obj.self.sensor.motive.result.state.q;                % 機体角度
@@ -50,11 +50,12 @@ classdef FOR_LOAD < SENSOR_CLASS
                 if sp(3)> obj.inispL(3) + 0.3 || obj.isAir
                     obj.isAir   = 1;
                     if isempty(obj.tt0)
-                        obj.tt0 = t;
+                        obj.tt0 = tc;
                     end
-                    t           = min((t - obj.tt0),obj.tte);                    %takeoffの経過時間がセンサ値使用率100%になる時間を越えないようにする
+                    t           = min((tc - obj.tt0),obj.tte);                   %takeoffの経過時間がセンサ値使用率100%になる時間を越えないようにする
                     k           = obj.ratet*t^2;                                 %センサ値反映割合
                     spL(1:2)    = sp(1:2) + k*(spL(1:2) - sp(1:2));              %牽引物位置と機体位置の差に反映割合をかけてセンサ値を反映
+                    spL(3)      = ipL(3);
                 %閾値を越えなかったら機体の真下に牽引物がいることにする
                 else
                     spL         = ipL;
@@ -83,9 +84,9 @@ classdef FOR_LOAD < SENSOR_CLASS
                 % 地面についた判定になったらセンサ値を使い始める
                 if obj.isGround
                     if isempty(obj.tl0)
-                        obj.tl0 = t;
+                        obj.tl0 = tc;
                     end
-                    t           = min(t - obj.tl0, obj.tle);                    % landingの経過時間がセンサ値使用率0%になる時間を越えないようにする
+                    t           = min(tc - obj.tl0, obj.tle);                   % landingの経過時間がセンサ値使用率0%になる時間を越えないようにする
                     k           = -obj.ratel*t^2 + 1;                           % センサ値反映割合
                     spL(1:2)    = sp(1:2) + k*(spL(1:2) - sp(1:2));             % 牽引物位置と機体位置の差に反映割合をかけてセンサ値を反映
                     spL(3)      = ipL(3);

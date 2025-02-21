@@ -9,11 +9,11 @@ end
 Model.id                = id;                                       %牽引物番号
 Model.name              = "load"; % print name          
 Model.type              = "Suspended_Load_Model";                   % model name
-            
-Setting.method          = get_model_name("Load_HL");                % model dynamicsの実体名
+%plantのモデル
+Setting.method          = get_model_name("Load_HL");                % model dynamicsの実体名(状態方程式の関数ファイルを設定)
 Setting.dim             = [24,4,21];                                %それぞれ状態、入力、物理パラメータの数
 Setting.num_list        = [3,3,3,3,3,3,3,3];                        % 状態のベクトルの次元(それぞれ3次元)
-Setting.state_list      =  ["p","q","v","w","pL","vL","pT","wL"];   % 状態の種類
+Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL"];    % 状態の種類
 Setting.initial         = initial;                                  %状態の初期値
 % 紐の方向ベクトルの初期値が定義されていない場合
 if ~isfield(Setting.initial,"pT")
@@ -21,20 +21,12 @@ if ~isfield(Setting.initial,"pT")
     Setting.initial.pL  = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;
 end
 Setting.initial.vL      = [0;0;0];                                  % 牽引物速度exp用
-Setting.initial.wL      = [0;0;0];                                  % 紐のかく速度exp用
+Setting.initial.wL      = [0;0;0];                                  % 紐の角速度exp用
 Setting.dt              = dt;                                       % 刻み時間
 Setting.param           = agent.parameter.get;                      % モデルの物理パラメータ設定
 
-% EKFで使うモデルの設定isEstLoadMassの値とmodelnameによって変更
+% EKFで使うモデルがplantと異なる場合の設定isEstLoadMassの値とmodelnameによって変更
 if ~isempty(agent.plant) && isEstLoadMass
-  if isEstLoadMass == 1
-      Model.name="Load_mL_HL";                                                              % model name
-      Setting.method                  = get_model_name(Model.name);                         % model dynamicsの実体名
-      Setting.dim                     = [25,4,21];
-      Setting.num_list                = [3,3,3,3,3,3,3,3,1];
-      Setting.state_list              = ["p","q","v","w","pL","vL","pT","wL","mL"];         % paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-      Setting.initial.mL              = agent.parameter.loadmass*0+0.1;
-  else
       modelName = "Load_mL_HL";
       % modelName = "Load_mL_cableL_HL";
       % modelName = "Load_mL_fdst_HL";
@@ -58,9 +50,8 @@ if ~isempty(agent.plant) && isEstLoadMass
               Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL","cableL"];% paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
               Setting.initial.mL      = agent.parameter.loadmass*0+0;                       % 初期牽引物質量
               Setting.initial.cableL  = agent.parameter.cableL;                             % 初期紐の長さ
-          % 牽引物質量と推力外乱      
+          % 牽引物質量と推力外乱%墜落する．loadmassも推定している為干渉するのかもしれない       
           case "Load_mL_fdst_HL"        
-            %墜落する．loadmassも推定している為干渉するのかもしれない       
               Model.name              = modelName; % print name     
               Setting.method          = get_model_name(Model.name);                         % model dynamicsの実体名
               Setting.dim             = [26,4,21];      
@@ -90,7 +81,6 @@ if ~isempty(agent.plant) && isEstLoadMass
               Setting.initial.mL      = agent.parameter.loadmass*0+0.5;                     % 初期牽引物質量
               Setting.initial.dst     = [0;0;0];                                            % 外乱初期値
       end
-  end
 end
 
 Model.param = Setting;

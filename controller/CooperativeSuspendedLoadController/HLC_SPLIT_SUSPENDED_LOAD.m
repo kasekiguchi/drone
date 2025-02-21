@@ -33,12 +33,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 xd      = ref.state.get();
             end
         % yaw角の定義域の問題を回避
-            yaw         = model.state.q(3);             % 機体yaw角
-            yawd        = ref(4);                       % 目標yaw角
-            yawUnit     = [cos(yaw);sin(yaw);0];        % yawの方向ベクトル
-            yawdUnit    = [cos(yawd);sin(yawd);0];      % yawdの方向ベクトル
-            deltaYaw    = sgn(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit);% 目標角度からみた機体角度との誤差
-            xd(4)       = yaw - deltaYaw;               %機体yaw角度から誤差分引いて目標yaw角を求める
+            yaw         = model.state.q(3);                                     % 機体yaw角
+            yawd        = ref(4);                                               % 目標yaw角
+            yawUnit     = [cos(yaw);sin(yaw);0];                                % yawの方向ベクトル
+            yawdUnit    = [cos(yawd);sin(yawd);0];                              % yawdの方向ベクトル
+            deltaYaw    = sgn(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit); % 目標角度からみた機体角度との誤差
+            xd(4)       = yaw - deltaYaw;                                       % 機体yaw角度から誤差分引いて目標yaw角を求める
         %目標値の格納
             xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
         %物理パラメータ
@@ -51,7 +51,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                             obj.cableL_landing = sp - spL;                      % landing開始時の機体と牽引物の距離
                     end
                     if isempty(obj.mLlanding)
-                        obj.mLlanding   = model.state.mL;                       %landing開始時の質量
+                        obj.mLlanding   = model.state.mL;                       % landing開始時の質量
                     end
                     % 推定質量がobj.mLlandingの半分以上またはlanding開始時の機体と牽引物の距離のz方向の半分の長さより現在の差の距離の方が短い場合の時は推定値を使い続ける
                     if model.state.mL < obj.mLlanding*0.5 || model.state.p(3) - model.state.p(3) < obj.cableL_landing(3)*0.9 || obj.isGround == 1
@@ -59,11 +59,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                         p(6)            = 0;                                    % 地面についたら質量は0とする
                     % 地面についた判定出ないなとき
                     else
-                        p(6)            = min(model.state.mL, obj.mLlanding);   %傾いて着陸した時に推定が吹っ飛ばないように制限
+                        p(6)            = min(model.state.mL, obj.mLlanding);   % 傾いて着陸した時に推定が吹っ飛ばないように制限
                     end
                 % landing以外のとき
                 else 
-                    P(6)                = max(model.state.mL,0);                %推定質量の下限を0に設定
+                    P(6)                = max(model.state.mL,0);                % 推定質量の下限を0に設定
                 end
                 % 紐の長さを推定するとき
                 if isprop(model.state,"cableL")
@@ -94,14 +94,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);             % yaw方向サブシステムの仮想状態
             
             uf              = Uf_SuspendedLoad(x,xd',vf,P);             % 第一層の仮想入力の実入力(推力)への変換
-            % h234          = H234_SuspendedLoad(x,xd',vf,vs',P);        %ただの単位行列なのでなくてもいい
-            invbeta2        = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);  %第二層のbetaの逆行列
-            vs_alpha2       = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);  %第二層のvs - alpha
-            us              = [0;invbeta2*vs_alpha2];                   %第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
-
-            
-            tmp             = uf + us;                                  %実入力へ変換
-            obj.result.tmp  = tmp;                                      %入力に制限を付けてない値を格納
+            % h234            = H234_SuspendedLoad(x,xd',vf,vs',P);       % ただの単位行列なのでなくてもいい
+            invbeta2        = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のbetaの逆行列
+            vs_alpha2       = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のvs - alpha
+            us              = [0;invbeta2*vs_alpha2];                   % 第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
+            tmp             = uf + us;                                  % 実入力へ変換
+            obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
 
             % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
             if isprop(model.state,"dst") || isprop(model.state,"cableL")

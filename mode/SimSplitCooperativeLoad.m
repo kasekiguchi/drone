@@ -66,7 +66,7 @@ post_func    = @(app) dfunc(app);%gui関連
 
 %単機牽引モデルの設定
 for i = 2:N+1
-    %=DRONE================================================================================================================
+    %=DRONE==================================================================================================================
     % parameter     : DRONE_PARAM_SUSPENDED_LOAD
     % plant         : MODEL_CLASS / Model_Suspended_Load
     % sensor        : DIRECT_SENSOR
@@ -75,10 +75,9 @@ for i = 2:N+1
     % controller    : HLC_SPLIT_SUSPENDED_LOAD / Controller_HL_Suspended_Load
     %========================================================================================================================
     %=推定方法を変える場合=====================================================================================================
-    % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass:1で質量推定，0,1以外で質量推定と推力外乱推定
-    %-牽引物質量推定しない： isEstLoadMass = 0 
-    %-牽引物質量推定する　： isEstLoadMass = 1
-    %-紐やxy外乱を推定する： isEstLoadMass = 2
+    % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass)
+    %-牽引物質量や外乱などを推定しない： isEstLoadMass = 0 
+    %-牽引物質量や外乱などを推定する　： isEstLoadMass = 1
     %========================================================================================================================
 %Drone_Initial_Stat
     rho     = agent(1).parameter.rho; %牽引物上の点から紐の接続点までの距離
@@ -200,5 +199,5 @@ mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);%保存
 function dfunc(app)
 app.logger.plot({1, "p", "er"}, "ax", app.UIAxes, "xrange", [app.time.ts, app.time.t]);
 app.logger.plot({1, "q", "e"}, "ax", app.UIAxes2, "xrange", [app.time.ts, app.time.t]);
-appb.logger.plot({1, "input", ""}, "ax", app.UIAxes3, "xrange", [app.time.ts, app.time.t]);
+app.logger.plot({1, "input", ""}, "ax", app.UIAxes3, "xrange", [app.time.ts, app.time.t]);
 end

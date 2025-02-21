@@ -9,32 +9,32 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
     % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 
     properties
-        parameter % 制御モデル用パラメータ
-        parameter_name % 物理パラメータの名前
-        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
-        mass % DIATONE
-        Lx 
-        Ly 
-        lx 
-        ly 
-        jx 
-        jy 
-        jz 
-        gravity
-        km1    
-        km2    
-        km3    
-        km4    
-        k1    
-        k2
-        k3    
-        k4
-        rotor_r
-        loadmass
-        cableL
-        ex
-        ey
-        ez
+        parameter       % 制御モデル用パラメータ
+        parameter_name  % 物理パラメータの名前
+        model_error     % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
+        mass            % 機体質量
+        Lx              % 機体x方向長さ
+        Ly              % 機体y方向長さ
+        lx              % 機体重心からロータまでのx方向長さ
+        ly              % 機体重心からロータまでのy方向長さ
+        jx              % x軸回りの機体の慣性モーメント
+        jy              % y軸回りの機体の慣性モーメント
+        jz              % z軸回りの機体の慣性モーメント
+        gravity         % 重力加速度
+        km1             % 1つめのロータのロータ定数
+        km2             % 2つめのロータのロータ定数
+        km3             % 3つめのロータのロータ定数
+        km4             % 4つめのロータのロータ定数
+        k1              % 1つめのロータの推力定数
+        k2              % 2つめのロータの推力定数
+        k3              % 3つめのロータの推力定数
+        k4              % 4つめのロータの推力定数
+        rotor_r         % ロータの半径
+        loadmass        % 牽引物質量
+        cableL          % 紐の長さ
+        ex              % 機体への紐の接続点のx方向位置 (通常のモデルでは使わない)
+        ey              % 機体への紐の接続点のy方向位置 (通常のモデルでは使わない)
+        ez              % 機体への紐の接続点のz方向位置 (通常のモデルでは使わない)
         % T = k*w^2
         % T : thrust , w : angular velocity of rotor
         % M = km * T = km* k * w^2
@@ -43,98 +43,59 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
 
     methods
         function obj = DRONE_PARAM_SUSPENDED_LOAD(name,param)
+            % 現在のモデルでは[mass, jx, jy, jz, gravity, loadmass, cableL]のみしか使われていない．
             arguments
                 %
                 name % DIATONE
-                param.parameter_name = [];
-%                 param.mass = 0.5236;
-%====================百瀬シミュレーション↓
-                param.mass = 0.800;%ドローンの質量
-                param.Lx = 0.195;
-                param.Ly = 0.195;
-                param.lx = 0.195/2;%0.05;
-                param.ly = 0.195/2;%0.05;
-                param.jx = 0.0820;
-                param.jy = 0.0820;
-                param.jz = 0.1377;
-                param.gravity = 9.81;
-                param.km1 = 0.0301; % ロータ定数
-                param.km2 = 0.0301; % ロータ定数
-                param.km3 = 0.0301; % ロータ定数
-                param.km4 = 0.0301; % ロータ定数
-                param.k1 = 0.000008;          % 推力定数
-                param.k2 = 0.000008;          % 推力定数
-                param.k3 = 0.000008;          % 推力定数
-                param.k4 = 0.000008;          % 推力定数
-                param.rotor_r = 0.0392;
-                param.loadmass = 0.200;
-                % param.loadmass = 0.086;
-                param.cableL = 1;
-                param.ex = 0.5;
-                param.ey = 0.5;
-                param.ez = 0;
- %====================百瀬シミュレーション↑
-
-%===================↓三宅実験
-% 6セル
-                % param.mass = 0.745;%0.73
-                % param.Lx = 0.175;
-                % param.Ly = 0.175;
-                % param.lx = 0.175/2;%0.05;
-                % param.ly = 0.175/2;%0.05;
-                % param.jx = 0.06;
-                % param.jy = 0.06;
-                % param.jz = 0.06;
-                % param.gravity = 9.81;
-                % param.km1 = 0.0301; % ロータ定数
-                % param.km2 = 0.0301; % ロータ定数
-                % param.km3 = 0.0301; % ロータ定数
-                % param.km4 = 0.0301; % ロータ定数
-                % param.k1 = 0.000008;          % 推力定数
-                % param.k2 = 0.000008;          % 推力定数
-                % param.k3 = 0.000008;          % 推力定数
-                % param.k4 = 0.000008;          % 推力定数
-                % param.rotor_r = 0.0392;
-                % % param.loadmass =0.0725;% 0.0773;%0.0725;
-                % %param.loadmass = 0.0864;%中身ねじ
-                % param.loadmass = 0.09%　　中身電池
-                % param.cableL = 0.91;%0.61灰色
-                % % param.cableL =0.41; %0.54;%0.46;
-                % % param.ex = 0.0735417984963207;
-                % %param.ey = 0.0628671906594029;
-                % param.ex = 0.0;%
-                % param.ey = 0.0;
-                % param.ez = 0;%0.037;
-
-%===================↑三宅実験
-                % param.ex = 0.0735417984963207;
-                % param.ey = 0.0628671906594029;
-                % param.ez = 0.037;
-                param.model_error = [];
+                param.parameter_name    = [];
+                param.mass              = 0.800;
+                param.Lx                = 0.195;
+                param.Ly                = 0.195;
+                param.lx                = 0.195/2;
+                param.ly                = 0.195/2;
+                param.jx                = 0.0820;
+                param.jy                = 0.0820;
+                param.jz                = 0.1377;
+                param.gravity           = 9.81;
+                param.km1               = 0.0301;
+                param.km2               = 0.0301;
+                param.km3               = 0.0301;
+                param.km4               = 0.0301;
+                param.k1                = 0.000008;
+                param.k2                = 0.000008;
+                param.k3                = 0.000008;
+                param.k4                = 0.000008;
+                param.rotor_r           = 0.0392;
+                param.loadmass          = 0.200;
+                param.cableL            = 1;
+                param.ex                = 0;
+                param.ey                = 0;
+                param.ez                = 0;
+                param.model_error       = [];
             end
-        obj.mass = param.mass;
-        obj.Lx = param.Lx;
-        obj.Ly = param.Ly;
-        obj.lx = param.lx;
-        obj.ly = param.ly;
-        obj.jx = param.jx;
-        obj.jy = param.jy;
-        obj.jz = param.jz;
-        obj.gravity = param.gravity;
-        obj.km1 = param.km1;
-        obj.km2 = param.km2;    
-        obj.km3 = param.km3;    
-        obj.km4 = param.km4;
-        obj.k1 = param.k1;
-        obj.k2 = param.k2;
-        obj.k3 = param.k3;
-        obj.k4 = param.k4;
-        obj.rotor_r = param.rotor_r;
-        obj.loadmass = param.loadmass;
-        obj.cableL = param.cableL;
-        obj.ex = param.ex;
-        obj.ey = param.ey;
-        obj.ez = param.ez;
+        obj.mass        = param.mass;
+        obj.Lx          = param.Lx;
+        obj.Ly          = param.Ly;
+        obj.lx          = param.lx;
+        obj.ly          = param.ly;
+        obj.jx          = param.jx;
+        obj.jy          = param.jy;
+        obj.jz          = param.jz;
+        obj.gravity     = param.gravity;
+        obj.km1         = param.km1;
+        obj.km2         = param.km2;    
+        obj.km3         = param.km3;    
+        obj.km4         = param.km4;
+        obj.k1          = param.k1;
+        obj.k2          = param.k2;
+        obj.k3          = param.k3;
+        obj.k4          = param.k4;
+        obj.rotor_r     = param.rotor_r;
+        obj.loadmass    = param.loadmass;
+        obj.cableL      = param.cableL;
+        obj.ex          = param.ex;
+        obj.ey          = param.ey;
+        obj.ez          = param.ez;
         if isempty(param.parameter_name)
             obj.parameter_name = string(properties(obj)');
             obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
