@@ -239,7 +239,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
     
         %% 制約 STL
-        obj.constraints_STL(tildeX);
+        % obj.constraints_STL(tildeX);
     end
 
     function constraints_STL(obj, tildeX)

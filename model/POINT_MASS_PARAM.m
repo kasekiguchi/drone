@@ -18,6 +18,7 @@ classdef POINT_MASS_PARAM < PARAMETER_CLASS
                 param.B = [zeros(3);eye(3)];
                 param.C = [eye(3),zeros(3)];
                 param.D = zeros(3);
+                % param.mass = 
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
         end        

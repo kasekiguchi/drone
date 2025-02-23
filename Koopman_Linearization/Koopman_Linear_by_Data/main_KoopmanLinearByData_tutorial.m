@@ -146,13 +146,14 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kato25';
 % exp_data = 'Exp_Kato15';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased_3'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
 load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_90k.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset_z_3m.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
@@ -167,9 +168,9 @@ F = @quaternions_all_00; % 改造用
 
 % データのかさまし
 flg.increased = 1;
-% if flg.increased
-%     Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
-% end
+if flg.increased
+    Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
+end
 
 % 正規化
 % flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
