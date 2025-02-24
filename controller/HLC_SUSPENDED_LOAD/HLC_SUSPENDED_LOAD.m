@@ -15,6 +15,10 @@ classdef HLC_SUSPENDED_LOAD < handle
         ms
         estimate_load_mass
         flag_anti_spike=0
+        elf
+        isGround = 0
+        mLlanding
+        cableL_landing
         % preT
     end
     
@@ -23,95 +27,109 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));    
-            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass*0)*self.parameter.gravity;0;0;0];
-            obj.fmc_options = optimoptions(@fmincon,'Display','off');
-            obj.vdro_pre = 0;
-            obj.vL_pre = 0;
-            obj.aidrns=zeros(3,20);
-            obj.ais =zeros(3,20);
-            obj.ms = ones(1,10)*0.4;
+            % obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass*0)*self.parameter.gravity;0;0;0];
+            % obj.fmc_options = optimoptions(@fmincon,'Display','off');
+            % obj.vdro_pre = 0;
+            % obj.vL_pre = 0;
+            % obj.aidrns=zeros(3,20);
+            % obj.ais =zeros(3,20);
+            % obj.ms = ones(1,10)*0.4;
             % obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         
         function result=do(obj,varargin)
-            % tStart = tic;
             if isscalar(varargin)
-                agent = varargin{1};
+                agent   = varargin{1};
             else
-                agent = varargin;
+                agent   = varargin;
             end
-            % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
-            model = obj.self.estimator.result;
-            ref = obj.self.reference.result;
-            x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
-            % pT = model.state.pT
-            % wL = model.state.wL
-            % theta = acos(-[0,0,1]*pT)*180/pi
-            % h0=-pT(3)-cos(10*pi/180)
-            % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0
-            % xq    = [model.state.getq('4');x(4:end)]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            Param       = obj.param;                    % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
+            model       = obj.self.estimator.result;    % 推定した状態
+            ref         = obj.self.reference.result;    % 目標値
+            x           = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+        % 目標値を取得
             if isprop(ref.state,'xd')
-                xd = ref.state.xd; % 20次元の目標値に対応するよう
+                xd      = ref.state.xd;                 % 20次元の目標値に対応する用
             else
-                xd = ref.state.get();
+                xd      = ref.state.get();
             end
-            Param= obj.param;
-            %P = Param.P;
-            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-           
-            %      %EKFで質量推定
-            if obj.self.estimator.model.name == "load_mL_HL"
-                P(15) = model.state.mL;
-                obj.result.mLi=max(P(15),0);
-                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+        % yaw角の定義域の問題を回避
+            yaw         = model.state.q(3);                                     % 機体yaw角
+            yawd        = ref(4);                                               % 目標yaw角
+            yawUnit     = [cos(yaw);sin(yaw);0];                                % yawの方向ベクトル
+            yawdUnit    = [cos(yawd);sin(yawd);0];                              % yawdの方向ベクトル
+            deltaYaw    = sgn(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit); % 目標角度からみた機体角度との誤差
+            xd(4)       = yaw - deltaYaw;                                       % 機体yaw角度から誤差分引いて目標yaw角を求める
+        %目標値の格納
+            xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
+        %物理パラメータ
+            P           = obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]);
+        %拡張質量システムのekfで牽引物の質量を求める場合
+            if contains(obj.self.estimator.model.name,"Load_mL")
+                %landingのとき
+                if varargin{2} == "l"
+                    if isempty(obj.cableL_landing)
+                            obj.cableL_landing = sp - spL;                      % landing開始時の機体と牽引物の距離
+                    end
+                    if isempty(obj.mLlanding)
+                        obj.mLlanding   = model.state.mL;                       % landing開始時の質量
+                    end
+                    % 推定質量がobj.mLlandingの半分未満またはlanding開始時の機体と牽引物の距離のz方向の長さより現在の差の距離の方が短い場合の時は質量0
+                    if model.state.mL < obj.mLlanding*0.5 || model.state.p(3) - model.state.p(3) < obj.cableL_landing(3)*0.9 || obj.isGround == 1
+                        obj.isGround    = 1;                                    % この分岐に一回でも入ったら入り続けるようにフラグ立てる
+                        p(6)            = 0;                                    % 地面についたら質量は0とする
+                    % 地面についた判定出ないなとき
+                    else
+                        p(6)            = min(model.state.mL, obj.mLlanding);   % 傾いて着陸した時に推定が吹っ飛ばないように制限
+                    end
+                % landing以外のとき
+                else 
+                    P(6)                = max(model.state.mL,0);                % 推定質量の下限を0に設定
+                end
+                % 紐の長さを推定するとき
+                if isprop(model.state,"cableL")
+                    % P(7) = max(model.state.cableL,0.1);
+                    P(7)                = max(min(model.state.cableL,P(7)*1.2),P(7)*0.8);
+                end
+                obj.result.mLi          = P(6);
             end
-            
-            F1 = Param.F1;
-            F2 = Param.F2;
-            F3 = Param.F3;
-            F4 = Param.F4;
-            xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
-            if isfield(Param,'dt')
-                dt = Param.dt;
-                vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
-            else
-                vf = Vf_SupendedLoad(x,xd',P,F1);
-            end
-            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',P);
-            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
-            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
-            % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
-            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
-            
 
-            uf = Uf_SuspendedLoad(x,xd',vf,P);
-            % toc(tStart)
-            %usの計算
-                % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
-                invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-                % toc(tStart)
-                vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
-                % toc(tStart)
-                us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
-            % cha = agent{2};
-            % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
-            % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-            %      % if obj.flag_anti_spike < 5
-            %      %   tmp =[uf(1);0;0;0];
-            %      %   obj.flag_anti_spike=obj.flag_anti_spike+1;
-            %      % else
-            %         tmp = uf + us;
-            %      % end
-            % else
-            %     % tmp = tmpHL;
-            %     tmp = uf + us;
-            % end
-            tmp = uf + us;
-            obj.result.tmp =tmp;
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
-            obj.self.controller.result.input = obj.result.input;%tmp;
-            result = obj.result;  
+        % 階層型線形化による入力計算
+            % 仮想入力のゲイン
+            F1              = Param.F1;                                 % z方向サブシステムのゲイン
+            F2              = Param.F2;                                 % x方向サブシステムのゲイン
+            F3              = Param.F3;                                 % y方向サブシステムのゲイン
+            F4              = Param.F4;                                 % yaw方向サブシステムのゲイン
+            % 第一層のz方向サブシステムの仮想入力の計算
+            if isfield(Param,'dt')
+                dt          = Param.dt;                                 % 現在時刻の刻み時間
+                vf          = Vfd_SuspendedLoad(dt,x,xd',P,F1);         % 実験で刻み時間が変わったときに対応
+            else
+                vf          = Vf_SupendedLoad(x,xd',P,F1);              % 刻み時間は一定
+            end
             
+            vs              = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);    % 第二層x,y,yawサブシステムの仮想入力の計算
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);             % z方向サブシステムの仮想状態
+            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);             % x方向サブシステムの仮想状態
+            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);             % y方向サブシステムの仮想状態
+            % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);             % yaw方向サブシステムの仮想状態
+            
+            uf              = Uf_SuspendedLoad(x,xd',vf,P);             % 第一層の仮想入力の実入力(推力)への変換
+            % h234            = H234_SuspendedLoad(x,xd',vf,vs',P);       % ただの単位行列なのでなくてもいい
+            invbeta2        = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のbetaの逆行列
+            vs_alpha2       = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のvs - alpha
+            us              = [0;invbeta2*vs_alpha2];                   % 第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
+            tmp             = uf + us;                                  % 実入力へ変換
+            obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
+
+            % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
+            if isprop(model.state,"loadmass")
+                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4))
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
+            else
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
+            end
+            result = obj.result;  
         end
         function show(obj)
             obj.result

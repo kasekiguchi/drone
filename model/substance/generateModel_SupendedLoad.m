@@ -55,10 +55,8 @@ simplify(f - (Fl+Gl*U))
 matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 matlabFunction(f,'file','with_load_model','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-% matlabFunction(Fl,'file','FL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
-% matlabFunction(Gl,'file','GL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
-% matlabFunction(f,'file','with_load_model2','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% plant用ドローンの位置と速度も計測できるようになっている
+%% plant,estimator用角度がクオータニオン．ドローンの位置と速度も計測できるようになっている
+% euler出ないと上手く推定できないので今は使われていない．
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mL, cableL};
 dol  = cross(-pT,u1*Rb0*e3)/(m*cableL);
 dpT  = cross(ol,pT);
@@ -70,7 +68,7 @@ dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
 matlabFunction(f,'file','with_load_model_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% estimate用ドローンの位置と速度も計測できるようになっている
+%% plant,estimator用ドローンの位置と速度も計測できるようになっている
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mL, cableL};
 ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
 dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
@@ -79,7 +77,7 @@ ddP  = ddPL-cableL*ddPT;
 x=[p;er;dp;ob;pl;dpl;pT;ol];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];
 matlabFunction(f,'file','with_load_model_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定も可能
+%% estimator用質量推定も可能
 syms mLDummy real
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
 dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
@@ -91,7 +89,7 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
 matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定+推力外乱推定も可能
+%% estimator用質量推定+推力外乱推定も可能
 %墜落する．loadmassも推定している為干渉するのかもしれない
 syms mLDummy real
 syms fdst real
@@ -105,7 +103,7 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;fdst];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
 matlabFunction(f,'file','with_load_model_mL_fdst_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量+紐の長さの推定可能
+%% estimator用質量+紐の長さの推定可能
 %推定して飛行が可能．初期位置が離れすぎると墜落．精度は質量推定と同等，実機でどうなるかは分からない
 syms mLDummy real
 syms cableLDummy real
@@ -119,7 +117,7 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;cableL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
 matlabFunction(f,'file','with_load_model_mL_cableL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定+x,y,z外乱推定も可能
+%% estimator用質量推定+x,y,z外乱推定も可能
 %z方向の外乱推定を入れた場合は墜落する．loadmassも推定している為干渉するのかもしれない
 syms mLDummy real
 syms dstx dsty dstz real
@@ -133,7 +131,7 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty;dstz];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0;0];
 matlabFunction(f,'file','with_load_model_mL_dstxyz_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% 質量推定+x,y外乱推定も可能
+%% estimator用質量推定+x,y外乱推定も可能
 %外乱推定可能
 syms mLDummy real
 syms dstx dsty real
@@ -147,10 +145,9 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0];
 matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% With load model (Extend & Euler)
+%% plant,estimator用With load model (Extend & Euler)
 % 紐の取り付け位置考慮．今は使われていない
 syms ex ey ez real
-% physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, mL, Length, ex, ey, ez};
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, mL, cableL, ex, ey, ez};
 e3=[0;0;1];
 e1=[1;0;0];
@@ -167,7 +164,7 @@ Fl= subs(f,U,[0;0;0;0]);
 Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
 simplify(f - (Fl+Gl*U))
 matlabFunction(f,'file','euler_with_load_model','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% With load model (Extend & Euler & Parameter Estimation)
+%% plant,estimator用With load model (Extend & Euler & Parameter Estimation)
 % 紐の取り付け位置を考慮．今は使われていない
 syms Length real
 syms ex ey ez real
@@ -188,7 +185,7 @@ Fl= subs(f,U,[0;0;0;0]);
 Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
 simplify(f - (Fl+Gl*U))
 matlabFunction(f,'file','euler_with_load_model_parameter_estimation','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% With load model (Extend & Euler & Parameter Estimation ex-ey)
+%% plant,estimator用With load model (Extend & Euler & Parameter Estimation ex-ey)
 % 紐の取り付け位置を推定．今は使われていない
 syms Length real
 syms ex ey ez real

@@ -25,10 +25,6 @@ x=[q;ob;pl;dpl;pT;ol];
 physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, mL, cableL];
 f = FL(x,physicalParam);
 g = GL(x,physicalParam);
-% physicalParam = [m, jx, jy, jz, gravity, mL, cableL];
-% f = FL2(x,physicalParam);
-% g = GL2(x,physicalParam);
-%g= [g1 g2 g3 g4];
 physicalParam = [m, jx, jy, jz, gravity,mL,cableL];
 %% 1st layer
 clc

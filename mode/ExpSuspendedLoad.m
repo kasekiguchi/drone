@@ -33,7 +33,6 @@ agent = DRONE;
   agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", 5));%有線プロポ
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.parameter.set("cableL",0.992);%0.992,0.647,p0.613,0.460
-agent.parameter.set("Length",0.992);%0.992,0.647,p0.613,0.460
 agent.parameter.set("loadmass",0.0968);%0.968
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent,1)), ["p", "q", "pL", "pT"]));
 
