@@ -26,37 +26,15 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Susp
 agent.sensor = DIRECT_SENSOR(agent, 0.002);
 % agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
-agent.controller.do = @controller_do;
+agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
 agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass*0)*agent.parameter.gravity;0;0;0];
-
+% take off landing の設定
 run("ExpBase");
-%%
-% clc
-% for i = 1:time.te
-%     if i < 20 || rem(i, 10) == 0, i, end
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     agent(1).controller.do(time, 'f',0,0,agent,1);
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-% end
 
 %%
 % logger.plot({1,"plant.result.state.pL","p"})
 % mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 % mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
-%%
-function result = controller_do(varargin)
-controller = varargin{5}.controller;
-result = controller.hlc.do(varargin);
-result = merge_result(result,controller.load.do(varargin));
-varargin{5}.controller.result = result;
-end
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

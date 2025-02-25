@@ -106,6 +106,9 @@ for i = 2:N+1
     agent(i).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%目標軌道のクラス設定
     agent(i).controller = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));%単機牽引モデルのコントローラクラス設定
 end
+% take off landing の設定
+run("ExpBase");
+
 %観測値に加えるガウスノイズ
     noize_sp = normrnd(0,0.001,[3,tn])*1*0;%機体位置
     noize_sqDrone = 1*normrnd(0,0.0017,[3,tn])*1*0;%紐の接続点，degで0.1くらいの標準偏差

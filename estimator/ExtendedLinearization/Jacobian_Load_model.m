@@ -1,4 +1,4 @@
-function out1 = Jacobian_load_model(in1,p1)
+function out1 = Jacobian_Load_model(in1,p1)
 %Jacobian_load_model
 %    OUT1 = Jacobian_load_model(IN1,P1)
 

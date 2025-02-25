@@ -17,7 +17,7 @@ if firstId == 1
 % 複数機牽引モデルのとき
 else
     for i = 1:N
-        takeoff_ref{i}  = agent(i).reference;               % take off reference
-        landing_ref{i}  = agent(i).reference;               % landing reference
+        takeoff_ref{i}  = agent(i).reference;                % take off reference
+        landing_ref{i}  = agent(i).reference;                % landing reference
     end
 end
