@@ -53,8 +53,8 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                     if isempty(obj.mLlanding)
                         obj.mLlanding   = model.state.mL;                       % landing開始時の質量
                     end
-                    % 推定質量がobj.mLlandingの半分以上またはlanding開始時の機体と牽引物の距離のz方向の半分の長さより現在の差の距離の方が短い場合の時は推定値を使い続ける
-                    if model.state.mL < obj.mLlanding*0.5 || model.state.p(3) - model.state.p(3) < obj.cableL_landing(3)*0.9 || obj.isGround == 1
+                    % 推定質量がobj.mLlandingの90%未満またはlanding開始時の機体と牽引物の距離のz方向の90%の長さより現在の差の距離の方が短い場合の時は牽引物質量0
+                    if model.state.mL < obj.mLlanding*0.9 || model.state.p(3) - model.state.p(3) < obj.cableL_landing(3)*0.9 || obj.isGround == 1
                         obj.isGround    = 1;                                    % この分岐に一回でも入ったら入り続けるようにフラグ立てる
                         p(6)            = 0;                                    % 地面についたら質量は0とする
                     % 地面についた判定出ないなとき
