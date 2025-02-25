@@ -62,7 +62,7 @@ post_func    = @(app) dfunc(app);%gui関連
     agent(1).estimator  = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype))));%推定のクラスを設定，plantの状態をそのまま取得
     % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
     agent(1).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;0.8],"size",[0.8,0.8,0.2*1]*1.2},"Cooperative",N},agent(1));%目標軌道のクラスを設定
-    agent(1).controller = [];%コントローラのクラスを設定．単機牽引モデルで設計するので必要ない． agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+    agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));%コントローラのクラスを設定．単機牽引モデルで設計するので必要ない． 
 
 %単機牽引モデルの設定
 for i = 2:N+1
@@ -102,7 +102,7 @@ for i = 2:N+1
     agent(i).parameter  = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"loadmass",0,"jx",jx,"jy",jy,"jz",jz);%単機牽引モデルのパラメータクラス設定（複数モデルの機体と同じパラメータに設定）
     agent(i).plant      = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%単機牽引モデルのプラントクラス設定id,dt,type,initial,varargin
     agent(i).sensor     = DIRECT_SENSOR(agent(i),0.0); %単機牽引モデルのクラス設定 sensor to capture plant position : second arg is noise
-    agent(i).estimator  = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),2)), ["p", "q", "pL", "pT"]));%単機牽引モデルの推定クラス設定（EKF）
+    agent(i).estimator  = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),1)), ["p", "q", "pL", "pT"]));%単機牽引モデルの推定クラス設定（EKF）
     agent(i).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%目標軌道のクラス設定
     agent(i).controller = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));%単機牽引モデルのコントローラクラス設定
 end
@@ -122,7 +122,7 @@ for tc = 1:tn
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
                 agent(1).reference.do(time, 'f',agent(1)); 
-                agent(1).controller.result = Quat2Eul(agent(1).estimator.result.state.Qi(1:4,1));%牽引物の角度をquotからeulにするのみ
+                agent(1).controller.result.Qeul = Quat2Eul(agent(1).estimator.result.state.Q);%牽引物の角度をquotからeulにするのみ描画
                 input = zeros(4*N,1);
         else
             %単機牽引モデルに用いるsensor値

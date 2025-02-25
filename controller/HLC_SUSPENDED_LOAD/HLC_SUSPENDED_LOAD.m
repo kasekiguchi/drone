@@ -55,11 +55,11 @@ classdef HLC_SUSPENDED_LOAD < handle
             end
         % yaw角の定義域の問題を回避
             yaw         = model.state.q(3);                                     % 機体yaw角
-            yawd        = ref(4);                                               % 目標yaw角
+            yawd        = xd(4);                                                % 目標yaw角
             yawUnit     = [cos(yaw);sin(yaw);0];                                % yawの方向ベクトル
             yawdUnit    = [cos(yawd);sin(yawd);0];                              % yawdの方向ベクトル
-            deltaYaw    = sgn(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit); % 目標角度からみた機体角度との誤差
-            xd(4)       = yaw - deltaYaw;                                       % 機体yaw角度から誤差分引いて目標yaw角を求める
+            deltaYaw    = sign(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit);% 目標角度からみた機体角度との誤差
+            xd(4)       = yaw - deltaYaw(3);                                    % 機体yaw角度から誤差分引いて目標yaw角を求める
         %目標値の格納
             xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
         %物理パラメータ
@@ -123,7 +123,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
 
             % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
-            if isprop(model.state,"loadmass")
+            if isprop(model.state,"mL")
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4))
                 obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
             else

@@ -55,10 +55,10 @@ z = 1*lz*sin(2*w*t - pi/2)+lz_offset; % z
     yaw     = 0;
 
 % sim
-    % roll = 2*pi/180;
-    % pitch = 3*sin(2*pi*t/T)*pi/180;
-    % % pitch = 3*pi/180;
-    % yaw = -5*pi/180;
+    roll = 2*pi/180;
+    pitch = 3*sin(2*pi*t/T)*pi/180;
+    % pitch = 3*pi/180;
+    yaw = -5*pi/180;
     % 
     % roll = 2*sin(2*pi*t/T)*pi/180;
     % pitch = 3*sin(2*pi*t/T)*pi/180;

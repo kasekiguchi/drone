@@ -18,9 +18,12 @@ classdef TAKEOFF_REFERENCE < handle
       % generate takeoff reference w.r.t. position and velocity
       obj.self          = self;
       obj.result.state  = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
-      % exp用
-      if isprop(obj.self.input_transform,"param") 
-        obj.th_offset0    = obj.self.input_transform.param.th_offset_tl;
+      % simのとき
+      if ~isprop(obj.self.input_transform,"param") 
+        % addprop(obj.self.input_transform,"param");
+        obj.self.input_transform.param.th_offset_tl = [];
+        obj.th_offset0  = 0;
+        obj.th_offset   = 0;
       end
     end
     function  result= do(obj,varargin)
@@ -29,11 +32,10 @@ classdef TAKEOFF_REFERENCE < handle
         obj.base_time           = varargin{1}.t;
         obj.base_state          = obj.self.estimator.result.state.p;
         % 単位牽引用
-        if isfield(obj.self.sensor,"forload")
+        if contains(obj.self.estimator.model.name,"Load")||contains(obj.self.estimator.model.name,"load")
             obj.base_state(3)   = obj.self.sensor.result.state.pL(3);
         end
         obj.result.state.xd     = [obj.base_state;zeros(17,1)];
-        obj.th_offset           = obj.self.input_transform.param.th_offset;
       end
       obj.result.state.xd       = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time); % 5次の多項式補完によって目標高度を生成
       obj.result.state.p        = obj.result.state.xd(1:3,1);

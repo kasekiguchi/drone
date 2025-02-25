@@ -8,7 +8,7 @@ classdef LANDING_REFERENCE < handle
     base_state
     base_time
     isGround
-    te = 20
+    te = 10
     th_offset% =250
     th_offset0% = 260;%勝手に+20ぐらいされる
   end
@@ -20,9 +20,11 @@ classdef LANDING_REFERENCE < handle
       obj.result.state  = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
       obj.dt            = varargin{1};
       obj.vd            = varargin{2};
-      % exp用
-      if isprop(obj.self.input_transform,"param")
-        obj.th_offset0    = obj.self.input_transform.param.th_offset_tl;
+      % sim用
+      if ~isprop(obj.self.input_transform,"param")
+        obj.self.input_transform.param.th_offset_tl = [];
+        obj.th_offset0  = 0;
+        obj.th_offset   = 0;
       end
     end
     function  result= do(obj,varargin)
@@ -30,13 +32,12 @@ classdef LANDING_REFERENCE < handle
       if isempty(obj.result.state.xd) % first take
         obj.base_time           = varargin{1}.t;
         obj.base_state          = obj.self.estimator.result.state.p; % x,y : current position, z : reference using at flight phase
-        if isfield(obj.self.sensor,"forload")
+        if contains(obj.self.estimator.model.name,"Load")||contains(obj.self.estimator.model.name,"load")
             obj.base_state      = obj.self.estimator.result.state.pL; % 牽引用
         end
         obj.result.state.xd     = [obj.base_state;zeros(17,1)];
-        obj.th_offset           = obj.self.input_transform.param.th_offset;
       end
-      % 単機牽引用．牽引物が地面についたら機体の長さの2倍x軸方向正に進んだ場所を目標値とする
+      % 単機牽引用．牽引物が地面についたら機体の長さの2倍x軸方向正に進んだ場所を目標値とする(simはしない)
       if isempty(obj.isGround) && isfield(obj.self.sensor,"forload")
           if obj.self.sensor.forload.isGround
               obj.isGround      = 1;

@@ -26,8 +26,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         zd_takeoff_now          % take offの目標高度goal altitude
         te_landing = 20         % landingの時間goal time
         base_time_flight=[]     % 目標軌道に追従し始めたときの時刻
-        constPrep               % 前時刻の制約の位置
-        constPrev               % 前時刻の制約の速度
+        constPrep = 0           % 前時刻の制約の位置
+        constPrev = 0           % 前時刻の制約の速度
 
     end
 
@@ -54,12 +54,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     [obj.func,obj.funcRotms]    = gen_ref_for_HL_Cooperative_Load(gen_func_name(param_for_gen_func{:}));% 目標値の関数を格納
                     obj.result.state            = STATE_CLASS(struct('state_list', ["xd", "p"], 'num_list', [27, 3]));% stateクラスを格納（保存したい変数を設定）
                     obj.result.state.set_state("xd",obj.func(0));                           % 目標値の初期値を設定
-                    obj.result.state.set_state("p",obj.self.reference.result.state.xd(1:3));% 目標位置の初期値を設定（特に使わない）
+                    obj.result.state.set_state("p",obj.result.state.xd(1:3));               % 目標位置の初期値を設定（特に使わない）
 
                 elseif strcmp(args{3}, "Split")% 分割後の牽引物の目標軌道
                     obj.result.state    = STATE_CLASS(struct('state_list', ["xd", "p", "minDroneDistance", "constp","constTargetp"], 'num_list', [28, 3, 1, 1, 1]));  % stateクラスを格納（保存したい変数を設定）
                     obj.result.state.set_state("xd",zeros(28,1));                           % 目標値の初期値を設定
-                    obj.result.state.set_state("p",obj.self.reference.result.state.xd(1:3));% 目標位置の初期値を設定（特に使わない）
+                    obj.result.state.set_state("p",obj.result.state.xd(1:3));               % 目標位置の初期値を設定（特に使わない）
                     obj.result.state.set_state("minDroneDistance",0);                       % 機体間距離の最小値
                     obj.result.state.set_state("constp",0);                                 % 制約の初期値
                     obj.result.state.set_state("constTargetp",0);                           % 制約の目標値
@@ -109,17 +109,19 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    rhoiUnit12   = [rhoi(1:2)/norm(rhoi(1:2));0];                % rhoiをx-y平面に射影したベクトルの単位ベクトル
                    rhoci        = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % sensor
-                   sp0          = obj.agent1.sensor.result.rigid(1).p;          % 牽引物のセンサー位置
-                   sq0          = obj.agent1.sensor.result.rigid(1).q;          % 牽引物のセンサー角度
-                   spL          = obj.self.sensor.result.state.pL;              % 分割後の牽引物センサー値
-                   if isprop(obj.self.sensor.result.state,"real_pL")
-                       real_spL  = obj.self.sensor.result.state.real_pL;        % 牽引物位置
+                   spL       = obj.self.sensor.result.state.pL;                 % 分割後の牽引物センサー値
+                   if isa(obj.self.sensor,"MOTIVE")
+                       real_spL = obj.self.sensor.result.state.real_pL;         % 牽引物位置
+                       sp0      = obj.agent1.sensor.result.rigid(1).p;          % 牽引物のセンサー位置
+                       sq0      = obj.agent1.sensor.result.rigid(1).q;          % 牽引物のセンサー角度
                    else
-                       real_spL  = obj.self.sensor.result.state.pL;             % simのための牽引物位置
+                       real_spL = obj.self.sensor.result.state.pL;              % simのための牽引物位置
+                       sp0      = obj.agent1.sensor.result.state.p;             % 牽引物のセンサー位置
+                       sq0      = Quat2Eul(obj.agent1.sensor.result.state.Q);   % 牽引物のセンサー角度
                    end
                % estimator
                    epDronei     = obj.self.estimator.result.state.p;            % 機体位置
-                   emL          = obj.self.estimator.result.state.mL;           %分割後牽引物の質量
+                   emL          = obj.self.estimator.result.state.mL;           % 分割後牽引物の質量
                % reference 
                    spDrones     = obj.agent1.reference.result.spDrones;         % 全ての機体位置
                    ref0         = obj.agent1.reference.result.state.xd(1:24);   % 分割前の牽引物目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]
@@ -179,7 +181,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満になったら)       
                            elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180
                                obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
-                               obj.base_state_takeoff   = real_spL;                                             % 初期位置
+                               obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);real_spL(3)];            % 初期位置
                            end
                        end
                        % 更新
@@ -222,7 +224,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            refi                         = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
                        % landingのプロポの推力値を計算
                            th_offset                    = obj.self.input_transform.param.th_offset;
-                           th_offset_landing            = 260;% th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
+                           th_offset_landing            = 340;%260 th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
                            obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                 % stop, arming
                    else
@@ -266,7 +268,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %log
                    obj.result.state.xd  = [xd;q];    %角度を最後に追加
                    obj.result.rotms     = rotms;     %目標値の回転列
-                   obj.result.spDrones   = spDrones; %機体
+                   obj.result.spDrones  = spDrones; %機体
                    obj.result.state.p   = xd(1:3);
            end
            result = obj.result;% 戻り値
