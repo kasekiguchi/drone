@@ -49,11 +49,11 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 %
                 name % DIATONE
                 param.parameter_name    = [];
-                param.mass              = 0.800;
-                param.Lx                = 0.195;
-                param.Ly                = 0.195;
-                param.lx                = 0.195/2;
-                param.ly                = 0.195/2;
+                param.mass              = 0.780;
+                param.Lx                = 0.175;
+                param.Ly                = 0.175;
+                param.lx                = 0.175/2;
+                param.ly                = 0.175/2;
                 param.jx                = 0.0820;
                 param.jy                = 0.0820;
                 param.jz                = 0.1377;
