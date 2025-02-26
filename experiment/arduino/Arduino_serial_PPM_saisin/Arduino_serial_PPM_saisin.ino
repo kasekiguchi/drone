@@ -92,6 +92,7 @@ void loop()
 {
   //receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
     if (!isEmergency && !isLanding)
+    // if (digitalRead(EM_PIN) == HIGH && digitalRead(EM_PIN) == LOW)
     {
       receive_serial();
     }
@@ -115,6 +116,7 @@ void loop()
       }
       // else if (fReset == true && (digitalRead(EM_PIN) == false && digitalRead(EM_PIN) == false)) // reset可能の状態で非常停止ボタンを戻したらリセット
       else if (fReset == true &&digitalRead(EM_PIN) == false)
+      //else if (fReset == true & &digitalRead(EM_PIN) == LOW) どちらかの要素が認識されないことがある
       {
         software_reset();
       }

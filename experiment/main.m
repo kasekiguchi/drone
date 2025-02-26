@@ -11,7 +11,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 agent = DRONE;
 %agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM22"));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM16"));
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5"));
 % COM：機体番号（ArduinoのCOM番号）
     %pause(1.45)
     % % 途中で一時停止しないとArduinoが信号を送信しない，原因:前の文章でCOMを指定しているので，それが読み込めないうちに進むと信号が送れない
@@ -35,18 +35,41 @@ agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial",
     % msg=gen_msg([500,42,42,42,42,42,42,42]);
     %agent.plant.connector.sendData(msg)
 
+%一定の値を送り続ける
+% pause(1.45)
+%     Command = 0;
+%     sy = 0;
+%     while Command <= 10000
+%         pause(0.005)
+%         % if Command < 100
+%         msg=gen_msg([500,500,0,500,700,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
+%         agent.plant.connector.sendData(msg)
+%         % elseif Command >= 100
+%         % msg=gen_msg([500,500,50,500,700,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
+%         % agent.plant.connector.sendData(msg)
+%         % end
+%         Command = Command + 1;
+% 
+%     end
 
+%おかしな値を送信
 pause(1.45)
     Command = 0;
     sy = 0;
     while Command <= 10000
         pause(0.005)
         % if Command < 100
-        msg=gen_msg([500,500,0,500,700,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
-        agent.plant.connector.sendData(msg)
+        % msg=gen_msg([1000,500,0,500,700,0,0,1000,0]); % チャンネル数が多い
+        % msg=gen_msg([100000,50000,20000,500,700000,0,0,0]); % 想定より値が多い
+        % msg=gen_msg([-1500,500,-2000,500,700,0,0,0]); %値小さい
+        % msg=gen_msg([NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN]); % 値がない
+        % msg=gen_msg([inf,500,0,500,700,0,0,0]); % 値が無限
+        % msg=gen_msg(["a",500,0,500,700,0,0,0]); % 文字入り
+        msg=gen_msg([1000,500,0,500,700,0,0]); % チャンネルが少ない
+        % agent.plant.connector.sendData(msg)
         % elseif Command >= 100
         % msg=gen_msg([500,500,50,500,700,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
-        % agent.plant.connector.sendData(msg)
+        agent.plant.connector.sendData(msg)
         % end
         Command = Command + 1;
 
