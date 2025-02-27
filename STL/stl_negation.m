@@ -1,6 +1,7 @@
-function result = stl_negation(data)
+function constraints = stl_negation(varargin)
 
-result = ~data;
+constraints =  0 == 1;
+
 end
 
 
