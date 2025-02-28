@@ -44,7 +44,7 @@ check_rigid = rigid_num; % とりあえずそのまま持ってくる.剛体中�
     % グラフの設定
     xlabel('X座標');
     ylabel('Y座標');
-    title('Motiveのセンサー結果');
+    title('Motiveのセンサー結果 Enterで閉じる');
     legend('Location', 'northeastoutside'); % 凡例を外側に表示
     legend show;
     hold off;

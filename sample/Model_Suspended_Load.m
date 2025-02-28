@@ -17,8 +17,8 @@ Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL"];    % 状態の�
 Setting.initial         = initial;                                  %状態の初期値
 % 紐の方向ベクトルの初期値が定義されていない場合
 if ~isfield(Setting.initial,"p")
-    Setting.initial.p  = Setting.initial.pL - agent.parameter.cableL*Setting.initial.pT;
-    Setting.initial.v = [0; 0; 0];
+    Setting.initial.p   = Setting.initial.pL - agent.parameter.cableL*Setting.initial.pT;
+    Setting.initial.v   = [0; 0; 0];
 end
 Setting.initial.vL      = [0;0;0];                                  % 牽引物速度exp用
 Setting.initial.wL      = [0;0;0];                                  % 紐の角速度exp用

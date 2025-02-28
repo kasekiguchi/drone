@@ -20,14 +20,14 @@ N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [5,3];                           % pc1 lenovo割り当てる順番に設定
+COMs                = [3,12];                           % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
 % cableL=[0.785,0.785];
-cableL              = [1.2,1.2];
+cableL              = [0.822,0.887];
 
 % 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定
 refName         = {
@@ -95,7 +95,7 @@ if isCoop == 1
 
     % コントローラは単機モデルで設計するのでここでは行わない
     agent(1).controller.do              = @(varargin)[];
-    agent(1).controller.result.input    =[];
+    agent(1).controller.result.input    = [];
 
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
     agent(1).input_transform            = struct("do",@(varargin)[], "result",[]);
@@ -113,22 +113,24 @@ for i = firstId:N
     eul                         = Quat2Eul(initial_state.q);                % クオータニオンからオイラー角に変更
     initial_state.v             = [0; 0; 0];                                % 機体の初期速度
     initial_state.w             = [0; 0; 0];                                % 機体の初期角加速度
+    initial_state.pL            = [0; 0; 0];                                % 牽引物の初期位置
+    initial_state.pT            = [0; 0; 0];                                % 紐の方向の初期位置
         
     agent(i)                    = DRONE; % モデルクラスファイルを設定このクラスのプロパティに以下のものを設定
     agent(i).id                 = i; %機体ののidを代入．これを単機牽引モデルのidとする．
     agent(i).parameter          = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).parameter.set("cableL",cableL(i - firstId + 1));
     agent(i).plant              = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state, "serial", COMs(i))); %プロポ有線　プロポとの接続
-    
+     
     %　推定の設定：機体の位置と角度，牽引物の位置，紐の単位方向ベクトルを観測値として用いる
     agent(i).estimator          = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state, i,agent(i),1)),  ["p", "q", "pL", "pT"]));
-    
+
     % sensor [2*i-firstId, 2*i-(firstId-1)],firstId=1 or 2:機体1，牽引物1,機体2，牽引物2...の順番の場合,[i,i+N]：機体...,牽引物...
     % 各組ごとにmotiveから全ての剛体情報を持ってきているので重くなる原因になるかも?2組4剛体だったら問題ないと思う．各組毎に剛体情報更新するので精度はいいと思う
     agent(i).sensor.motive      = MOTIVE(agent(i), Sensor_Motive(2*i-firstId +addId,eul(3), motive));    %機体の情報のクラス，機体のidを入れる
     agent(i).sensor.forload     = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)+addId));  %牽引物の情報のクラス，牽引物のidを入れる
     agent(i).sensor.do          = @sensor_do;
-
+   
     % referenceの設定
     %複数機による牽引の場合の位置はagent(1)で設定した位置からrhoずらした値とする．それ以外はagent(1)と同様
     if isCoop
