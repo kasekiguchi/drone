@@ -95,7 +95,7 @@ if isCoop == 1
 
     % コントローラは単機モデルで設計するのでここでは行わない
     agent(1).controller.do              = @(varargin)[];
-    agent(1).controller.result.input    = [];
+    agent(1).controller.result.input    = [0;0;0;0];
 
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
     agent(1).input_transform            = struct("do",@(varargin)[], "result",[]);

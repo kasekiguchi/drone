@@ -149,7 +149,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    
                    % 制約に関する情報の表示
                    minDroneDistance
-                   constp%=0 % 制約入れない場合は0を代入
+                   constp=0 % 制約入れない場合は0を代入
                    constTargetp
                    constd
                 %flight
@@ -168,20 +168,23 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % refi(9:10)     = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
                 %take off
                    elseif obj.cha =='t'
+                       %初期目標位置がおかしい
+                       %
                        obj.flanding                     = 0;                                                    % landing条件分岐用フラグ
                        takeOffTime                      = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                        %初期値 
                        if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff                       % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
                            obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
-                           obj.copy_state_takeoff       = real_spL;                                             % 初期の紐接続点のx,y位置
                            % 質量推定が終わるまでのとき  
                            if isempty(obj.base_state_takeoff)   
                                obj.zd_takeoff_now       = sp0(3) + 0.05;                                        % 目標高度設定
                                obj.base_state_takeoff   = [real_spL(1:2);epDronei(3)-cablei];                   % 初期位置,紐の長さ分下に埋まっているという設定
+                               obj.copy_state_takeoff   = real_spL;                                             % 初期の紐接続点の実際のx,y,z位置
                            %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満になったら)       
                            elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180
                                obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
                                obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);real_spL(3)];            % 初期位置
+                               obj.copy_state_takeoff   = obj.base_state_takeoff;                               % 初期の紐接続点の実際のx,y,z位置
                            end
                        end
                        % 更新
