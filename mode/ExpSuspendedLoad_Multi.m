@@ -20,7 +20,7 @@ N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [3,12];                           % pc1 lenovo割り当てる順番に設定
+COMs                = [5,3];                           % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
@@ -54,6 +54,7 @@ if isCoop == 1
     % 牽引物の剛体位置から各紐の接続点までの方向ベクトルを計算
     for i = 1:N-1
         rho(:,i)    = motive.result.rigid(1+2*i+addId).p - motive.result.rigid(1).p;
+        disp("rho "+num2str(i)+" :"+num2str(rho(:,i)')) % rhoの計算結果を描画
     end
     
     %紐の接続点が頂点の図形の中心の場合(平面を仮定)
@@ -69,7 +70,7 @@ if isCoop == 1
     % dotDeltaG = [rho(1:2,1)';rho(1:2,2)']*deltaG ;
     % rho = pLs-G;%図形重心からのrhoに変更
     % agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho,"G",G,"dotDeltaG",dotDeltaG);
-    disp("rho : "+num2str(rho)) % rhoの計算結果を描画
+    
 
     % 牽引物のagentを設定．必要なものはセンサー値のみなのでそれ以外は共通プログラムと辻褄が合うように空の配列などを設定
     agent(1)            = DRONE; 
@@ -99,78 +100,7 @@ if isCoop == 1
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
     agent(1).input_transform            = struct("do",@(varargin)[], "result",[]);
 
-%miyake0225↓
-plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる．
-%miyake0225↑
-    %miyake削除
-% %===========miyake0212   牽引物座標が機体座標より内側にあるとsuccess外側にあるとerror。
-%      %一つでもエラー出ると実験しないほうが良い。牽引物と機体が入れ替わっているときのみ検出可能。牽引物と牽引物同士が入れ替わっていると検出できない。
-%      %
-%     check_rigid =rigid_num -1;
-%     for check_i = 2:2:check_rigid
-%         check_rigid_p=abs(agent(1).sensor.motive.result.rigid(check_i).p) -abs(agent(1).sensor.motive.result.rigid(check_i+1).p);% drone座標の絶対値-load座標の絶対値。xyは常に+の値になるはず。
-%         if check_rigid_p(1)<0 && check_rigid_p(2)<0
-%             disp("motive_error rigid"+check_i);
-%         else
-%             disp("motive_success rigid"+check_i);
-%         end
-%     end
-%      %===========miyake
-%       %===========miyake0217
-% % 初期設定
-% check_rigid = rigid_num; % とりあえずそのまま持ってくる
-% %agent(1).sensor.motive.result.rigid = struct('p', cell(1, check_rigid));
-% %for i = 1:check_rigid
-% %    agent(1).sensor.motive.result.rigid(i).p = [randi([0, 10]), randi([0, 10])]; % 例としてランダムな座標を設定
-% %end
-%     check_position = struct('p', cell(1, check_rigid));
-%     for check_i = 1:check_rigid %将来的に幾何中心をmotiveではなく計算や任意の値にするとき用
-%         check_position(check_i).p = agent(1).sensor.motive.result.rigid(check_i).p;
-%     end
-% 
-%     % グラフの初期化
-%     fig = figure;
-%     hold on;
-% 
-%     % プロットのループ
-%     for check_i = 1:check_rigid
-%         x = check_position(check_i).p(1);
-%         y = check_position(check_i).p(2);
-% 
-%         if check_i == 1
-%             % 最初の点を星で表示(牽引物幾何中心のはず)
-%             plot(x, y, 'p', 'MarkerSize', 10, 'DisplayName', ['Point ' num2str(check_i)]);
-%             text(x + 0.2, y, num2str(check_i), 'FontSize', 12, 'Color', 'black'); % 番号を表示
-%         elseif mod(check_i, 2) == 0
-%             % check_iが偶数のときDroneとして表示
-%             plot(x, y, 's', 'MarkerSize', 10, 'DisplayName', ['Quadcopter ' num2str(check_i)]);
-%             text(x + 0.2, y, ['Drone ' num2str(check_i)], 'FontSize', 12, 'Color', 'black'); % 番号を表示
-% 
-%             if check_i + 1 <= check_rigid
-%                 % 次の奇数の座標へ矢印を表示(単機牽引のロープの方向)
-%                 next_x = check_position(check_i + 1).p(1);
-%                 next_y = check_position(check_i + 1).p(2);
-%                 quiver(x, y, next_x - x, next_y - y, 0, 'MaxHeadSize', 0.5, 'Color', 'k');
-%             end
-%         elseif check_i >= 3 && mod(check_i, 2) == 1
-%             % check_iが3以上で奇数のとき丸で表示(牽引物接続点のはず)
-%             plot(x, y, 'o', 'MarkerSize', 10, 'DisplayName', ['Point ' num2str(check_i)]);
-%             text(x + 0.2, y, num2str(check_i), 'FontSize', 12, 'Color', 'black'); % 番号を表示
-%         end
-%     end
-% 
-%     % グラフの設定
-%     xlabel('X座標');
-%     ylabel('Y座標');
-%     title('Motiveのセンサー結果:Enterでclose');
-%     legend('Location', 'northeastoutside'); % 凡例を外側に表示
-%     legend show;
-%     hold off;
-% 
-%     % キー押下時のコールバック関数を設定
-%     set(motive_fig, 'KeyPressFcn', @(src, event) key_press_callback(src, event, fig));
-% %===========miyake
-%miyake削除↑
+    plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
 end
 
 % 単機牽引モデルのクラスの設定
