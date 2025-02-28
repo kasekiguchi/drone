@@ -58,36 +58,36 @@ function mat = QP_solve(X, Y, Xlift, Ylift, U, numX, numU, lambda_AB)
     'OptimalityTolerance', 1e-4, ...
     'ConstraintTolerance', 1e-12, ...
     'MaxFunctionEvaluations', 5e5, ...
-    'MaxIterations', 20);
+    'MaxIterations', 10);
 
     %-- A, B :fun = @(A, B) Ylift - A*Xlift - B*U;
     fun = @(AB) norm(Ylift - AB(1:numX, 1:numX)*Xlift - AB(1:numX, numX+1:numX+numU)*U, "fro") + norm(AB) + norm(AB,2); 
     x0 = [eye(numX), zeros(numX, numU)]; % 初期値
-    % A = []; b = []; % 線形不等式制約
-    % Aeq = []; beq = []; % 線形等式制約
-    % lb = []; ub = []; % 下限，上限
-    % nonlcon = @const_AB; % 非線形制約
-    [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
-    sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, [], options);
+    A = []; b = []; % 線形不等式制約
+    Aeq = []; beq = []; % 線形等式制約
+    lb = []; ub = []; % 下限，上限
+    nonlcon = @const_AB_fmincon; % 非線形制約
+    % [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
+    sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options);
     mat.A = sol(1:numX, 1:numX);
     mat.B = sol(1:numX, numX+1:numX+numU);
 
     %-- C: 
-    fun =  @(C) norm(X - C*Xlift, "fro"); % frobenius norm
-     x0 = [eye(12), zeros(12,numX-12)];
-    A = []; b = []; % 線形不等式制約
-    Aeq = []; beq = []; % 線形等式制約
-    lb = []; ub = []; % 下限，上限
-    nonlcon = @const_C; % 非線形制約
-    sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, [], options);
-    mat.C = sol;
+    % fun =  @(C) norm(X - C*Xlift, "fro"); % frobenius norm
+    %  x0 = [eye(12), zeros(12,numX-12)];
+    % A = []; b = []; % 線形不等式制約
+    % Aeq = []; beq = []; % 線形等式制約
+    % lb = []; ub = []; % 下限，上限
+    % nonlcon = @const_C; % 非線形制約
+    % sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, [], options);
+    % mat.C = sol;
 
     %% PART2: QPに変換しよう
-    % options = optimoptions('quadprog','Display','iter');
+    options = optimoptions('quadprog','Display','iter');
     % % A = []; b = []; % 線形不等式制約
     % % Aeq = []; beq = []; % 線形等式制約
     % % lb = []; ub = []; % 下限，上限
-    % x0A = eye(numX); x0B = zeros(numX, numU); x0C = [eye(12), zeros(12,numX-12)];
+    % x0A = eye(numX); x0B = zeros(numX, numU); 
     % %-- A, B
     % [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
     % % A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
@@ -101,16 +101,31 @@ function mat = QP_solve(X, Y, Xlift, Ylift, U, numX, numU, lambda_AB)
     % mat.A = reshape(opt(1:numX*numX), numX, numX);
     % mat.B = reshape(opt(numX*numX+1:end), numX, numU);
     % 
-    % %-- C
-    % % [A,b,Aeq,beq,lb,ub] = const_C(Xlift, Ylift, U, numX, numU);
-    % A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
-    % H = kron(Xlift * Xlift', eye(12));
-    % H = (H + H') / 2;
-    % f = -(X * Xlift');
-    % f = f(:);
-    % x0 = [x0C(:)];
-    % opt = quadprog(H, f, A, b, Aeq, beq,lb, ub, x0, options);
-    % mat.C = reshape(opt, 12, numX);
+    %-- C
+    % [A,b,Aeq,beq,lb,ub] = const_C(Xlift, Ylift, U, numX, numU);
+    A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
+    x0C = [eye(12), zeros(12,numX-12)];
+    H = kron(Xlift * Xlift', eye(12));
+    H = (H + H') / 2;
+    f = -(X * Xlift');
+    f = f(:);
+    x0 = [x0C(:)];
+    opt = quadprog(H, f, A, b, Aeq, beq,lb, ub, x0, options);
+    mat.C = reshape(opt, 12, numX);
+end
+
+function [c, ceq] = const_AB_fmincon(x)
+% c(x) <= 0
+% ceq(x) = 0
+% x = [A, B]
+dt = 0.025;
+c = [];
+ceq = [];
+for i = 1:12
+    ceq = [ceq, x(i,i)-1];
+end
+ceq = [ceq, x(1, 7)-dt, x(2, 8)-dt, x(3, 9)-dt]; % vel -> pos
+ceq = [ceq, x(4,10)-dt, x(5,11)-dt, x(6,12)-dt]; % ang vel -> ang
 end
 
 %% 制約（拘束）

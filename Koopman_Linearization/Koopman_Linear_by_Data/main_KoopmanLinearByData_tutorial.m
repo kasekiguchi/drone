@@ -146,7 +146,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kato25';
 % exp_data = 'Exp_Kato15';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased_3'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code23_', Exp_tra, '_1_optim'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -164,13 +164,13 @@ if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
-F = @quaternions_all_00; % 改造用
+F = @quaternions_all_23; % 改造用
 
 % データのかさまし
 flg.increased = 1;
-if flg.increased
-    Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
-end
+% if flg.increased
+%     Data = data_increased(Data, [0.0001, 0.0001, 0], 10);
+% end
 
 % 正規化
 % flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
