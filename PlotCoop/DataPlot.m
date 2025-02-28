@@ -348,7 +348,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             rai{i}=zero3;rmui{i}=zero3;rdwi{i}=zero3;raidrn{i}=zero3;
              cQeul{i}=zero3;cQeul{i}=zero3;cQeul{i}=zero3;eO{i}=zero3;eO{i}=zero3;eO{i}=zero3;ep{i}=zero3;
              eQ{i} = zero3;pQ{i} = zero3;eO{i} = zero3;pO{i} = zero3;edO{i} = zero3;ea{i} = zero3;
-             constp{i}=zero1;constTargetp{i}=zero1;minDroneDistance{i}=zero1;
+             constp{i}=zero1;constTargetp{i}=zero1;minDroneDistance{i}=zero1;mAll{i}=zero1;mLi{i}=zero1;
         end
         for j = 1:length(fieldLog)
             fieldVar = fieldnames(loggers{i}.(fieldLog{j}));

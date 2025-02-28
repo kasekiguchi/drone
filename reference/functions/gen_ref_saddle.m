@@ -18,7 +18,7 @@ ly_offset = origin(2);% 3.5;
 lz = scale(3);% 1;
 lz_offset=origin(3);% 1;
 w = 2*pi/T; % T秒で一周
-yaw = 0*2*pi*t/T;
+yaw = 2*pi*t/T;
 ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
 ly*sin(w*t + phase)+ly_offset; % y
 lz*sin(2*w*t + phase/2)+lz_offset; % z

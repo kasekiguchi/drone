@@ -46,33 +46,32 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
             % 現在のモデルでは[mass, jx, jy, jz, gravity, loadmass, cableL]のみしか使われていない．
             % 機体の長さLx, Lyは条件分岐で使われる
             arguments
-                %
-                name % DIATONE
-                param.parameter_name    = [];
-                param.mass              = 0.780;
-                param.Lx                = 0.175;
-                param.Ly                = 0.175;
-                param.lx                = 0.175/2;
-                param.ly                = 0.175/2;
-                param.jx                = 0.0820;
-                param.jy                = 0.0820;
-                param.jz                = 0.1377;
-                param.gravity           = 9.81;
-                param.km1               = 0.0301;
-                param.km2               = 0.0301;
-                param.km3               = 0.0301;
-                param.km4               = 0.0301;
-                param.k1                = 0.000008;
-                param.k2                = 0.000008;
-                param.k3                = 0.000008;
-                param.k4                = 0.000008;
-                param.rotor_r           = 0.0392;
-                param.loadmass          = 0.200;
-                param.cableL            = 1;
-                param.ex                = 0;
-                param.ey                = 0;
-                param.ez                = 0;
-                param.model_error       = [];
+                name % DIATONE% 物理パラメータの名前
+                param.parameter_name    = [];       
+                param.mass              = 0.780;    % 機体質量
+                param.Lx                = 0.175;    % 機体x方向長さ
+                param.Ly                = 0.175;    % 機体y方向長さ
+                param.lx                = 0.175/2;  % 機体重心からロータまでのx方向長さ
+                param.ly                = 0.175/2;  % 機体重心からロータまでのy方向長さ
+                param.jx                = 0.0820;   % x軸回りの機体の慣性モーメント
+                param.jy                = 0.0820;   % y軸回りの機体の慣性モーメント
+                param.jz                = 0.1377;   % z軸回りの機体の慣性モーメント
+                param.gravity           = 9.81;     % 重力加速度
+                param.km1               = 0.0301;   % 1つめのロータのロータ定数
+                param.km2               = 0.0301;   % 2つめのロータのロータ定数
+                param.km3               = 0.0301;   % 3つめのロータのロータ定数
+                param.km4               = 0.0301;   % 4つめのロータのロータ定数
+                param.k1                = 0.000008; % 1つめのロータの推力定数
+                param.k2                = 0.000008; % 2つめのロータの推力定数
+                param.k3                = 0.000008; % 3つめのロータの推力定数
+                param.k4                = 0.000008; % 4つめのロータの推力定数
+                param.rotor_r           = 0.0392;   % ロータの半径
+                param.loadmass          = 0.200;    % 牽引物質量
+                param.cableL            = 1;        % 紐の長さ
+                param.ex                = 0;        % 機体への紐の接続点のx方向位置 (通常のモデルでは使わない)
+                param.ey                = 0;        % 機体への紐の接続点のy方向位置 (通常のモデルでは使わない)
+                param.ez                = 0;        % 機体への紐の接続点のz方向位置 (通常のモデルでは使わない)
+                param.model_error       = [];       % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
             end
         obj.mass        = param.mass;
         obj.Lx          = param.Lx;
