@@ -1,5 +1,5 @@
 %=====================
-%牽引物の分割モデル
+%牽引物の分割モデルguiは使わないすべてこのファイルで完結
 %=====================
 clc; clear; close all
 N            = 4;%機体数
@@ -122,7 +122,7 @@ for tc = 1:tn
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
                 agent(1).reference.do(time, 'f',agent(1)); 
-                agent(1).controller.result.Qeul = Quat2Eul(agent(1).estimator.result.state.Q);%牽引物の角度をquotからeulにするのみ描画
+                agent(1).controller.result.Qeul = Quat2Eul(agent(1).estimator.result.state.Q);%牽引物の角度をquotからeulにするのみ使用
                 input = zeros(4*N,1);
         else
             %単機牽引モデルに用いるsensor値
@@ -195,8 +195,8 @@ disp(time.t - time.dt)
 run("DataPlot.m")
 %% movie
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);%dataフォルダに保存される
-mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);%保存されない
+mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);%dataフォルダに保存される
+% mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);%保存されない
 
 %% function
 function dfunc(app)

@@ -5,13 +5,13 @@ classdef FOR_LOAD < SENSOR_CLASS
         self                    % agent
         tt0                     % takeoffの開始時間
         tl0                     % landingの開始時間
-        tte         = 10;       % センサー値を何秒で100%使うか
-        tle         = 5;        % センサー値を何秒で0%使うか
-        ratet       = 1/tte^2;  % 二次関数で0-1の間で変化するための定数
-        ratel       = 1/tte^2;  % 二次関数で0-1の間で変化するための定数
+        tte         = 10        % センサー値を何秒で100%使うか
+        tle         = 5         % センサー値を何秒で0%使うか
+        ratet                   % 二次関数で0-1の間で変化するための定数
+        ratel                   % 二次関数で0-1の間で変化するための定数
         inispL                  % 初期の牽引物位置
-        isAir       = []        % 機体が一定高度より高くなっている
-        isGround    = []        % 地面判定の初期化
+        isAir       = 0         % 機体が一定高度より高くなっている
+        isGround    = 0         % 地面判定の初期化
         cableL_landing          % landing開始時の機体と牽引物の距離
     end
     
@@ -65,7 +65,7 @@ classdef FOR_LOAD < SENSOR_CLASS
                 %地面についたかの判定
                 if isempty(obj.isGround)
                     % 牽引物質量推定を行っている場合
-                    if isfield(obj.self.estimator.reult.state,"mL")
+                    if isprop(obj.self.estimator.result.state,"mL")
                         %コントローラクラスで地面についた判定があるか
                         if obj.self.controller.isGround
                             obj.isGround        = 1;

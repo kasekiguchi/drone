@@ -49,7 +49,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 %landingのとき
                 if varargin{2} == "l"
                     if isempty(obj.cableL_landing)
-                        obj.cableL_landing = sp - spL;                          % landing開始時の機体と牽引物の距離
+                        obj.cableL_landing = model.state.p - model.state.pL;                          % landing開始時の機体と牽引物の距離
                     end
                     if isempty(obj.mLlanding)
                         obj.mLlanding   = model.state.mL;                       % landing開始時の質量
@@ -110,7 +110,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 obj.result.input = [max(0,min(200,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
             else
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4))
-                obj.result.input = [max(0,min(200,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
             end
             result = obj.result;  
         end
