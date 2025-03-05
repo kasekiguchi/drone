@@ -63,7 +63,7 @@ methods
         time = varargin{1}.t;
         
         % delta_u = tmp(1)*sin(2*pi*time/5);
-        delta_u = 0.7*sin(2*pi*time/5);
+        delta_u = 1.1*sin(2*pi*time/5);
         total_thrust = tmp(1) + delta_u;
         
         obj.result.delta_u = delta_u;
