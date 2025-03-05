@@ -128,24 +128,22 @@ classdef HLC_SUSPENDED_LOAD < handle
             % obj.result.aa = toc;
             % tmp             = uf + us;                                  % 実入力へ変換
             % obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
-
-            P = [P,0,0];
+            dst = model.state.dst;
+            P = [P,dst'];
             dt              = Param.dt;                                 % 現在時刻の刻み時間
             vf              = Vfd_SuspendedLoadxyDst(dt,x,xd',F1);         % 実験で刻み時間が変わったときに対応
             vs              = Vs_SuspendedLoadxyDst(x,xd',vf,P,F2,F3,F4);    % 第二層x,y,yawサブシステムの仮想入力の計算
             uf              = Uf_SuspendedLoadxyDst(x,xd',vf,P);             % 第一層の仮想入力の実入力(推力)への変換
-            h234            = H234_SuspendedLoadxyDst(x,xd',vf,P);       % ただの単位行列なのでなくてもいい
+            % h234            = H234_SuspendedLoadxyDst(x,xd',vf,P);       % ただの単位行列なのでなくてもいい
             tic
             beta2           = Beta2_SuspendedLoadxyDst(x,xd',vf,P);  % 第二層のbetaの逆行列
-            % toc
-            % tic
             vs_alpha2       = Vs_alpha2_SuspendedLoadxyDst(x,xd',vf,vs',P);  % 第二層のvs - alpha
-            % toc
-            % tic
-            us              = [0;beta2\vs_alpha2];                   % 第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
+            us              = beta2\vs_alpha2;                   % 第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
             obj.result.aa=toc;
-            tmp             = uf + us;                                  % 実入力へ変換
+            tmp             = [uf(1);us];                                  % 実入力へ変換
             obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
+
+            
 
 
             % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
