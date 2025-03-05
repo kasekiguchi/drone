@@ -111,7 +111,7 @@ methods
         
     
         if obj.data_gen_mode
-            obj.result.delta_u = 0.001*sin(2*pi*rand(1))*obj.Pn_u + [9.81*(0.4-0.5884)+rand(1);0.0;0.0;0.0];
+            obj.result.delta_u = 0.001*sin(2*pi*rand(1))*obj.Pn_u + [9.81*(0.4-0.6)+rand(1);0.0;0.0;0.0];
             % obj.result.input = obj.result.gened_u;
         else
             obj.Pn_p_cur(1:3) = obj.Pn_p_cur(1:3) - obj.Pa_p_pre(1:3);

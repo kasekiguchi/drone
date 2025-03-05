@@ -11,8 +11,8 @@ end
 
 
 
-log = load('Data\test_p2p.mat');
-log_ = load('Data\test_p2p2.mat');
+log = load('Data\test_30.mat');
+log_ = load('Data\test_30_nominal.mat');
 %% logを開く
 % Pn = simplify_MEC_Logger(log.log);
 
@@ -30,18 +30,19 @@ Pa_ = DataStructure(logger);
 delta_p = Pa.ref_p - Pa.p;
 delta_p_ = Pa_.ref_p - Pa_.p;
 L = length(delta_p_);
+data_range = 600:1200;
 
 disp("#############################")
-fprintf("x:MEC : %f \n",sum(abs(delta_p(1,:)))/L)
-fprintf("x:nom : %f \n",sum(abs(delta_p_(1,:)))/L)
-fprintf("y:MEC : %f \n",sum(abs(delta_p(2,:)))/L)
-fprintf("y:nom : %f \n",sum(abs(delta_p_(2,:)))/L)
-fprintf("z:MEC : %f \n",sum(abs(delta_p(3,:)))/L)
-fprintf("z:nom : %f \n",sum(abs(delta_p_(3,:)))/L)
+fprintf("x:MEC : %f \n",sum(abs(delta_p(1,data_range)))/L)
+fprintf("x:nom : %f \n",sum(abs(delta_p_(1,data_range)))/L)
+fprintf("y:MEC : %f \n",sum(abs(delta_p(2,data_range)))/L)
+fprintf("y:nom : %f \n",sum(abs(delta_p_(2,data_range)))/L)
+fprintf("z:MEC : %f \n",sum(abs(delta_p(3,data_range)))/L)
+fprintf("z:nom : %f \n",sum(abs(delta_p_(3,data_range)))/L)
 disp("#############################")
-fprintf("x : %f \n",(sum(abs(delta_p(1,:)))-sum(abs(delta_p_(1,:))))/sum(abs(delta_p_(1,:))))
-fprintf("y : %f \n",(sum(abs(delta_p(2,:)))-sum(abs(delta_p_(2,:))))/sum(abs(delta_p_(2,:))))
-fprintf("z : %f \n",(sum(abs(delta_p(3,:)))-sum(abs(delta_p_(3,:))))/sum(abs(delta_p_(3,:))))
+fprintf("x : %f \n",(sum(abs(delta_p(1,data_range)))-sum(abs(delta_p_(1,data_range))))/sum(abs(delta_p_(1,data_range))))
+fprintf("y : %f \n",(sum(abs(delta_p(2,data_range)))-sum(abs(delta_p_(2,data_range))))/sum(abs(delta_p_(2,data_range))))
+fprintf("z : %f \n",(sum(abs(delta_p(3,data_range)))-sum(abs(delta_p_(3,data_range))))/sum(abs(delta_p_(3,data_range))))
 disp("#############################")
 
 mean_z = mean(Pa.p(3,400*2/10:end));
@@ -55,7 +56,7 @@ legend = ["MEC", "nominal";
           "MEC", "nominal";
           "MEC", "nominal"];
 
-create_y234_LinkedSubplots(t,delta_p, delta_p_, label, legend, title)
+create_y234_LinkedSubplots(t,delta_p, delta_p_, label, legend, title, data_range)
 
 % 2. グラフのフォーマット調整
 set(gca, 'FontSize', 10);  % 軸のフォントサイズを調整
@@ -89,14 +90,14 @@ function data = DataStructure(logger)
     % ref_w = c.w; wのリファレンスは存在しません
 end
 
-function create_y234_LinkedSubplots(t, delta_p, delta_p_, label, leg, title)
+function create_y234_LinkedSubplots(t, delta_p, delta_p_, label, leg, title, data_range)
     % サンプルデータの作成（データが渡されている場合は省略可能）
     
     % 2×2のサブプロットを作成
     ax1 = subplot(2, 2, 1);  % 左上
     hold on;
-    plot(t, delta_p(1,:), 'LineWidth', 1.5);
-    plot(t, delta_p_(1,:), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p(1,data_range), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p_(1,data_range), 'LineWidth', 1.5);
     xlabel(label(1));
     ylabel(label(2));
     legend(leg(1,1:2));
@@ -106,8 +107,8 @@ function create_y234_LinkedSubplots(t, delta_p, delta_p_, label, leg, title)
 
     ax2 = subplot(2, 2, 2);  % 右上
     hold on;
-    plot(t, delta_p(2,:), 'LineWidth', 1.5);
-    plot(t, delta_p_(2,:), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p(2,data_range), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p_(2,data_range), 'LineWidth', 1.5);
     xlabel(label(3));
     ylabel(label(4));
     legend(leg(2,1:2));
@@ -117,8 +118,8 @@ function create_y234_LinkedSubplots(t, delta_p, delta_p_, label, leg, title)
 
     ax3 = subplot(2, 2, 3);  % 左下
     hold on;
-    plot(t, delta_p(3,:), 'LineWidth', 1.5);
-    plot(t, delta_p_(3,:), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p(3,data_range), 'LineWidth', 1.5);
+    plot(t(data_range), delta_p_(3,data_range), 'LineWidth', 1.5);
     xlabel(label(5));
     ylabel(label(6));
     legend(leg(3,1:2));

@@ -425,11 +425,24 @@ end
 function quadruple_plot2(t,Pa,label,leg,title)
     % グラフを描画するためのサブプロットを作成
     
+
+    colors1 = [0.1 0.45 0.8;  % 青 (x)
+          0.85 0.35 0.2;  % オレンジ (y)
+          0.9 0.7 0.2];   % 黄 (z)
+
+colors2 = [0.3 0.55 0.75;  % 落ち着いた青
+            0.8 0.45 0.3;   % 落ち着いたオレンジ
+            0.8 0.7 0.4];   % 落ち着いた黄
+
     % 1つ目のグラフ
     subplot(2, 2, 1);
     hold on
-    plot(t, Pa.p,"LineWidth",1.5);
-    plot(t, Pa.ref_p,"LineWidth",1.5,"Linestyle","--");
+    for i =1:3
+    plot(t, Pa.p(i,:),"LineWidth",1.5, "Color",colors1(i,:));
+    end
+    for i =1:3
+    plot(t, Pa.ref_p(i,:),"LineWidth",1.5,"Linestyle","--", "Color",colors2(i,:));
+    end
     xlabel(label(1));
     ylabel(label(2));
     ylim([-3,3])
@@ -440,8 +453,12 @@ function quadruple_plot2(t,Pa,label,leg,title)
     % 2つ目のグラフ
     subplot(2, 2, 2);
     hold on
-    plot(t, Pa.v,"LineWidth",1.5);
-    plot(t, Pa.ref_v,"LineWidth",1.5,"Linestyle","--");
+    for i =1:3
+    plot(t, Pa.v(i,:),"LineWidth",1.5, "Color",colors1(i,:));
+    end
+    for i =1:3
+    plot(t, Pa.ref_v(i,:),"LineWidth",1.5,"Linestyle","--", "Color",colors2(i,:));
+    end
     xlabel(label(3));
     ylabel(label(4));
     legend(leg(2,:))
@@ -451,8 +468,11 @@ function quadruple_plot2(t,Pa,label,leg,title)
     % 3つ目のグラフ
     subplot(2, 2, 3);
     hold on
-    plot(t, Pa.q,"LineWidth",1.5);
-    plot(t, Pa.ref_q(3,:),"LineWidth",1.5,"Linestyle","--");
+    for i =1:3
+    plot(t, Pa.q(i,:),"LineWidth",1.5, "Color",colors1(i,:));
+    end
+
+    plot(t, Pa.ref_q(3,:),"LineWidth",1.5,"Linestyle","--", "Color",colors2(i,:));
     xlabel(label(5));
     ylabel(label(6));
     % ylim([-pi pi]);
@@ -462,7 +482,9 @@ function quadruple_plot2(t,Pa,label,leg,title)
 
     subplot(2, 2, 4);
     hold on
-    plot(t, Pa.w,"LineWidth",1.5);
+    for i =1:3
+    plot(t, Pa.w(i,:),"LineWidth",1.5, "Color",colors1(i,:));
+    end
     xlabel(label(7));
     ylabel(label(8));
     legend(leg(4,:))

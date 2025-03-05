@@ -16,7 +16,7 @@ for j = 1:1
     clear data
     ts = 0; % initial time
     dt = 0.025; % sampling period
-    te = 1950; % terminal time
+    te = 10; % terminal time
     time = TIME(ts,dt,te); % instance of time class
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -39,7 +39,8 @@ for j = 1:1
     agent(2).plant = MODEL_CLASS(agent(2),Model_EulerAngle(dt, initial_state, 2)); % Model_Quat13
 
     agent(1).estimator = EKF(agent(1), Estimator_EKF(agent(1),dt,MODEL_CLASS(agent(1),Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-    agent(2).estimator = EKF(agent(2), Estimator_EKF(agent(2),dt,MODEL_CLASS(agent(2),Model_EulerAngle(dt, initial_state, 2)),["p", "q"]));
+    % agent(2).estimator = EKF(agent(2), Estimator_EKF(agent(2),dt,MODEL_CLASS(agent(2),Model_EulerAngle(dt, initial_state, 2)),["p", "q"]));
+    agent(2).estimator = EKF_4_MEC_learning(agent(2), Estimator_EKF(agent(2),dt,MODEL_CLASS(agent(2),Model_EulerAngle(dt, initial_state, 2)),["p", "q"]));
     
     % agent(2).estimator = NN_ESTIMATOR(agent(2), Estimator_NN(agent(2),dt,MODEL_CLASS(agent(2),Model_EulerAngle(dt, initial_state, 2)),["p", "q"]));
 
@@ -49,8 +50,8 @@ for j = 1:1
 
     num = j;
     reference_file = strcat("Exp_2_4_", num2str(num));
-    % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
-    % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
+    agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
+    agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
     % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
     % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
     % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_p2p",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
@@ -61,8 +62,8 @@ for j = 1:1
     % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0,"i",j},"HL"});
     % agent(1).reference = TIME_VARYING_REFERENCE(agent(1),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5],"i",j},"HL"});
     % agent(2).reference = TIME_VARYING_REFERENCE(agent(2),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5],"i",j},"HL"});
-    agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
-    agent(2).reference = MY_WAY_POINT_REFERENCE(agent(2),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
+    % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
+    % agent(2).reference = MY_WAY_POINT_REFERENCE(agent(2),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
     % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
     agent(1).controller = FUNCTIONAL_HLC(agent(1),Controller_FHL(dt));
     agent(2).controller = FUNCTIONAL_MECNNC(agent(2),Controller_FHLMECNN(dt));
@@ -118,7 +119,8 @@ for j = 1:1
     end
     logger = [logger1 logger2];
     % save(strcat("Data\learning_data\data", num2str(j), ".mat"),"logger")
-    save("Data\sprine","logger")
+    save("Data\test","logger")
+    % save("Data\sprine","logger")
     
     % save('Data\MEC_Pn_u_delta_u_1780.mat')
     % save('Data\MEC_Pn_u.mat')

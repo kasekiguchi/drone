@@ -49,7 +49,7 @@ for i = 1:j
 end
 
 clearvars -except p q v w Reference rotmat uHL z1 z2 z3 z4 input
-save('Data\data_Pn.mat')
+save('Data\data_Pn_07.mat')
 
 % 保存する変数を初期化
 z1 = [];
@@ -65,7 +65,7 @@ ref_q = [];
 ref_p = [];
 ref_v = [];
 
-
+j2 = 40;
 j = j2;
 % 繰り返し文でデータを読み込み、連結
 for i = 1:j
@@ -91,7 +91,7 @@ for i = 1:j
 end
 
 clearvars -except p q v w Reference rotmat uHL z1 z2 z3 z4 input
-save('Data\data_Pa.mat')
+save('Data\data_Pa_07.mat')
 
 function data = DataStructure(logger)
     c=logger.controller;
