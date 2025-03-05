@@ -1052,3 +1052,4 @@ Log*
 *.prj
 /codegen/
 assemblypath.txt
+Data/
