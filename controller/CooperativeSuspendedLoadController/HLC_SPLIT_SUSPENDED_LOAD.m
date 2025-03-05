@@ -49,7 +49,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 %landingのとき
                 if varargin{2} == "l"
                     if isempty(obj.cableL_landing)
-                        obj.cableL_landing = model.state.p - model.state.pL;                          % landing開始時の機体と牽引物の距離
+                        obj.cableL_landing = model.state.p - model.state.pL;    % landing開始時の機体と牽引物の距離
                     end
                     if isempty(obj.mLlanding)
                         obj.mLlanding   = model.state.mL;                       % landing開始時の質量

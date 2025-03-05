@@ -55,6 +55,23 @@ simplify(f - (Fl+Gl*U))
 matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 matlabFunction(f,'file','with_load_model','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% 質量推定+x,y外乱込みのモデル(コントローラ設計用)
+syms dstx dsty real
+physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, mL, cableL,dstx,dsty};
+dol  = cross(-pT,u1*Rb0*e3)/(m*cableL); % ケーブル角加速度
+dpT  = cross(ol,pT); % 機体から見たケーブル上の単位長さの位置の速度
+ddpT = cross(dol,pT)+cross(ol,dpT); % 単位長さの位置の加速度
+ddpl  = [0;0;-gravity]+(dot(pT,u1*Rb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL) + [dstx;dsty;0]; % 牽引物体の加速度
+ddp  = ddpl-cableL*ddpT;
+dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];%ケーブルの張力は未考慮
+
+x=[q;ob;pl;dpl;pT;ol];
+f=[dq;dob;dpl;ddpl;dpT;dol];
+Fl = subs(f,U,[0;0;0;0]);
+Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
+simplify(f - (Fl+Gl*U))
+matlabFunction(Fl,'file','FLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+matlabFunction(Gl,'file','GLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 %% plant,estimator用角度がクオータニオン．ドローンの位置と速度も計測できるようになっている
 % euler出ないと上手く推定できないので今は使われていない．
 physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mL, cableL};
@@ -144,7 +161,14 @@ ddP  = ddPL-cableL*ddPT;
 dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0];
-matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+% matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+
+physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, mL, cableL];
+Fl = subs(f,U,[0;0;0;0]);
+Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
+simplify(f - (Fl+Gl*U))
+matlabFunction(Fl,'file','FLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+matlabFunction(Gl,'file','GLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 %% plant,estimator用With load model (Extend & Euler)
 % 紐の取り付け位置考慮．今は使われていない
 syms ex ey ez real
