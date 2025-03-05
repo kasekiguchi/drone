@@ -39,7 +39,7 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 name % DIATONE
                 type = "row";
                 % param.mass = 0.5884;
-                param.mass = 0.60;
+                param.mass = 0.75;
                 param.Lx = 0.16;
                 param.Ly = 0.16;
                 param.lx = 0.16/2;%0.05;
