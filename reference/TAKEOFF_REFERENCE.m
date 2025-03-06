@@ -7,10 +7,10 @@ classdef TAKEOFF_REFERENCE < handle
     ts
     te = 15;%10;%15;%15は1.5m用
     % zd = 1.35; % goal altitude
-    zd = 0.7;% goal altitude
+    zd = 0.5;% goal altitude
     result
     th_offset
-    th_offset0% = 250;%iflight
+    th_offset0
   end
 
   methods
@@ -20,10 +20,13 @@ classdef TAKEOFF_REFERENCE < handle
       obj.result.state  = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
       % simのとき
       if ~isprop(obj.self.input_transform,"param") 
-        % addprop(obj.self.input_transform,"param");
         obj.self.input_transform.param.th_offset_tl = [];
         obj.th_offset0  = 0;
         obj.th_offset   = 0;
+      % exp
+      else
+        obj.th_offset0  = obj.self.input_transform.param.th_offset_tl;%iflight
+        obj.th_offset   = obj.self.input_transform.param.th_offset;
       end
     end
     function  result= do(obj,varargin)

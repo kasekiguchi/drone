@@ -9,8 +9,8 @@ classdef LANDING_REFERENCE < handle
     base_time
     isGround
     te = 10
-    th_offset% =250
-    th_offset0% = 260;%勝手に+20ぐらいされる
+    th_offset
+    th_offset0
   end
 
   methods
@@ -25,6 +25,9 @@ classdef LANDING_REFERENCE < handle
         obj.self.input_transform.param.th_offset_tl = [];
         obj.th_offset0  = 0;
         obj.th_offset   = 0;
+      else
+        obj.th_offset0  = obj.self.input_transform.param.th_offset_tl;%iflight
+        obj.th_offset   = obj.self.input_transform.param.th_offset;
       end
     end
     function  result= do(obj,varargin)
@@ -73,6 +76,7 @@ classdef LANDING_REFERENCE < handle
         end
       elseif t> obj.te
         Zd      = zeros(1,5);
+        Zd(1)   = -obj.self.parameter.get("cableL");
       end
       Xd(1:3,1) = obj.base_state(1:3);
       Xd(3,1)   = Zd(1);

@@ -48,11 +48,11 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
             arguments
                 name % DIATONE% 物理パラメータの名前
                 param.parameter_name    = [];       
-                param.mass              = 0.780;    % 機体質量
-                param.Lx                = 0.175;    % 機体x方向長さ
-                param.Ly                = 0.175;    % 機体y方向長さ
-                param.lx                = 0.175/2;  % 機体重心からロータまでのx方向長さ
-                param.ly                = 0.175/2;  % 機体重心からロータまでのy方向長さ
+                param.mass              = 0.762;    % 機体質量
+                param.Lx                = 0.195;    % 機体x方向長さ
+                param.Ly                = 0.195;    % 機体y方向長さ
+                param.lx                = 0.195/2;  % 機体重心からロータまでのx方向長さ
+                param.ly                = 0.195/2;  % 機体重心からロータまでのy方向長さ
                 param.jx                = 0.0820;   % x軸回りの機体の慣性モーメント
                 param.jy                = 0.0820;   % y軸回りの機体の慣性モーメント
                 param.jz                = 0.1377;   % z軸回りの機体の慣性モーメント

@@ -202,8 +202,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 目標値
                            refi                         = obj.gen_ref_for_take_off(takeOffTime);
                        % take offのプロポの推力値を計算
-                           th_offset                    = obj.self.input_transform.param.th_offset;
-                           th_offset_takeoff            = 260;% th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
+                           th_offset                    = obj.self.input_transform.param.th_offset;%目標オフセット
+                           th_offset_takeoff            = obj.self.input_transform.param.th_offset_tl;%takeoff開始時のオフセット
                            obj.self.input_transform.param.th_offset_tl = th_offset_takeoff + (th_offset-th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
                 %landing
                    elseif obj.cha =='l'
@@ -226,8 +226,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 目標値
                            refi                         = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
                        % landingのプロポの推力値を計算
-                           th_offset                    = obj.self.input_transform.param.th_offset;
-                           th_offset_landing            = 340;%260 th_offset_takeoff = obj.self.input_transform.param.th_offset_tl;
+                           th_offset                    = obj.self.input_transform.param.th_offset;%landing開始時のオフセット(flightと同様)
+                           th_offset_landing            = obj.self.input_transform.param.th_offset_tl;%目標オフセット
                            obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
                 % stop, arming
                    else

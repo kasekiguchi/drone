@@ -43,15 +43,13 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         %目標値の格納
             xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
         %物理パラメータ
-            P           = obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]);
+            P           = [obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]),0,0];
         %拡張質量システムのekfで牽引物の質量を求める場合
             if contains(obj.self.estimator.model.name,"Load_mL")
                 %landingのとき
                 if varargin{2} == "l"
-                    if isempty(obj.cableL_landing)
+                    if isempty(obj.cableL_landing) || isempty(obj.mLlanding)
                         obj.cableL_landing = model.state.p - model.state.pL;    % landing開始時の機体と牽引物の距離
-                    end
-                    if isempty(obj.mLlanding)
                         obj.mLlanding   = model.state.mL;                       % landing開始時の質量
                     end
                     % 推定質量がobj.mLlandingの90%未満またはlanding開始時の機体と牽引物の距離のz方向の90%の長さより現在の差の距離の方が短い場合の時は牽引物質量0
@@ -63,8 +61,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                         p(6)            = min(model.state.mL, obj.mLlanding);   % 傾いて着陸した時に推定が吹っ飛ばないように制限
                     end
                 % landing以外のとき
-                else 
+                else
                     P(6)                = max(model.state.mL,0);                % 推定質量の下限を0に設定
+                    if isfield(model.state,"dst")
+                        P(end-1:end)    = model.state.dst';
+                    end
                 end
                 % 紐の長さを推定するとき
                 if isprop(model.state,"cableL")
