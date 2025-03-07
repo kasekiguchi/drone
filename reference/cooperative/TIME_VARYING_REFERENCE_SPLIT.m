@@ -25,6 +25,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         zd_takeoff = 0.8        % take offの目標高度goal altitude
         zd_takeoff_now          % take offの目標高度goal altitude
         te_landing = 20         % landingの時間goal time
+        isGround                % 地面についたか
         base_time_flight=[]     % 目標軌道に追従し始めたときの時刻
         constPrep = 0           % 前時刻の制約の位置
         constPrev = 0           % 前時刻の制約の速度
@@ -219,7 +220,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 推定質量がlanding開始時の90%未満またはlanding開始時の機体と牽引物の距離のz方向の90%の長さより現在の差の距離の方が短い場合の時は制約を固定値にする     
                        % フラグはコントローラクラスで生成．一度フラグがたったら同じ分岐に入り続ける
                        if obj.self.controller.isGround
-                           obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + exrhoi*rhoiUnit12(1:2); % rhoiUnit12方向に延長
+                           if ~obj.isGround
+                               obj.isGround = 1;
+                               obj.base_state_landing(1:2)  = real_spL(1:2) + exrhoi*rhoiUnit12(1:2); % rhoiUnit12方向に延長
+                           end
                        else 
                            obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長         
                        end

@@ -106,36 +106,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             F2              = Param.F2;                                 % x方向サブシステムのゲイン
             F3              = Param.F3;                                 % y方向サブシステムのゲイン
             F4              = Param.F4;                                 % yaw方向サブシステムのゲイン
-            
-            % % 第一層のz方向サブシステムの仮想入力の計算(前使っていたやつ)
-            % P = P(1:7);
-            % if isfield(Param,'dt')
-            %     dt          = Param.dt;                                 % 現在時刻の刻み時間
-            %     vf          = Vfd_SuspendedLoad(dt,x,xd',P,F1);         % 実験で刻み時間が変わったときに対応
-            % else
-            %     vf          = Vf_SupendedLoad(x,xd',P,F1);              % 刻み時間は一定
-            % end
-            % 
-            % vs              = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);    % 第二層x,y,yawサブシステムの仮想入力の計算
-            % % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);             % z方向サブシステムの仮想状態
-            % % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);             % x方向サブシステムの仮想状態
-            % % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);             % y方向サブシステムの仮想状態
-            % % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);             % yaw方向サブシステムの仮想状態
-            % 
-            % uf              = Uf_SuspendedLoad(x,xd',vf,P);             % 第一層の仮想入力の実入力(推力)への変換
-            % % h234            = H234_SuspendedLoad(x,xd',vf,vs',P);       % ただの単位行列なのでなくてもいい
-            % tic
-            % invbeta2        = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のbetaの逆行列
-            % % toc
-            % % tic
-            % vs_alpha2       = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);  % 第二層のvs - alpha
-            % % toc
-            % % tic
-            % us              = [0;invbeta2*vs_alpha2];                   % 第二層の実入力（roll,pitch,yawのトルク）への変換：bate^(-1)*(vs - alpha)%h234*invbeta2*a2;
-            % obj.result.aa = toc;
-            % tmp             = uf + us;                                  % 実入力へ変換
-            % obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
-
 
             % obj.result.Z1 = Z1_SuspendedLoadxyDst(x,xd',vf,P);             % z方向サブシステムの仮想状態
             % obj.result.Z2 = Z2_SuspendedLoadxyDst(x,xd',vf,P);             % x方向サブシステムの仮想状態
@@ -156,7 +126,7 @@ classdef HLC_SUSPENDED_LOAD < handle
 
             % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
             if isprop(model.state,"mL")
-                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" xydst: "+num2str(P(end-1:end),4))
+                disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst:(x,y) "+num2str(P(end-1:end),4))
                 obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
             else
                 obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
