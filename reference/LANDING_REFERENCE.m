@@ -8,7 +8,7 @@ classdef LANDING_REFERENCE < handle
     base_state
     base_time
     isGround
-    te = 10
+    te = 15
     th_offset
     th_offset0
   end
@@ -45,12 +45,13 @@ classdef LANDING_REFERENCE < handle
           if obj.self.sensor.forload.isGround
               obj.isGround      = 1;
               obj.base_state(1) = obj.self.estimator.result.state.pL(1) + obj.self.parameter.Lx*2;
+              obj.base_state(2) = obj.self.estimator.result.state.pL(2);
           end
       end
       obj.result.state.xd       = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time);
       obj.result.state.p        = obj.result.state.xd(1:3,1);
       obj.result.state.v        = obj.result.state.xd(5:7,1);
-      obj.self.input_transform.param.th_offset_tl_tmp = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+      obj.self.input_transform.param.th_offset_tl = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
       result                    = obj.result;
     end
     function Xd = gen_ref_for_landing(obj,t)

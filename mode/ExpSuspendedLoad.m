@@ -41,7 +41,7 @@ agent.sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load(2));%[1,1+N]%for
 agent.sensor.do = @sensor_do;
 
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.5],"size",[1,1,0.2]*1},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;0.5],"size",[1,1,0.2*0]*1},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;0.5]},"Suspended"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;0.4],"g",[0;1;0.4],"h",[-1;1;0.4],"j",[-1;0;0.4],"k",[-1;-1;0.4]),10});
 agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));

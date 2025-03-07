@@ -25,7 +25,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     
     %単機牽引用↓
     u_trans_param.th_offset     = 331;%331;%tlとfで分けている理由はtlとfで異なったコントローラー・機体質量を扱えるようにするため．
-    u_trans_param.th_offset_tl  = 260;  %テークオフとランディング初期オフセット。
+    u_trans_param.th_offset_tl  = 270;  %テークオフとランディング初期オフセット。
     u_trans_param.gain          = [300;300;300;20];%　
     u_trans_param.gain_tl       = [300;300;300;20];%　　　
 end
