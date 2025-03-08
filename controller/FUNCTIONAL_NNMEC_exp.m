@@ -1,4 +1,4 @@
-classdef FUNCTIONAL_HLC < handle
+classdef FUNCTIONAL_NNMEC_exp < handle
 % クアッドコプター用階層型線形化を使った入力算出
 properties
     self
@@ -7,11 +7,12 @@ properties
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf
     Vs
+    NNMEC
 end
 
 methods
 
-    function obj = FUNCTIONAL_HLC(self, param)
+    function obj = FUNCTIONAL_NNMEC_exp(self, param)
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
@@ -60,12 +61,14 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
 
-        % time = varargin{1}.t;
-        % obj.result.delta_u = tmp(1)*sin(2*pi*time/5);
-        % total_thrust = tmp(1) + delta_u;
-        % obj.result.input = [max(0,min(10,total_thrust));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        time = varargin{1}.t;
+        
+        obj.result.delta_u = tmp(1)*sin(2*pi*time/5);
+        total_thrust = tmp(1) + delta_u;
 
-        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.xa-obj.xn), "double")';
+
+        obj.result.input = [max(0,min(10,total_thrust));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
 
         
 

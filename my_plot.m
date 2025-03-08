@@ -21,28 +21,28 @@ log = load('Data\learning_data\data6.mat');
 % flag = "GUI";
 
 %% MEC
-flag = "MEC";
-
-log = load('Data\test.mat');
-
-% log = load('Data\MEC_Pn_u_delta_u_1780.mat');
-logger = simplifyLogger(log.logger(1,1), flag);
-
-Pn = DataStructure(logger);
-
-logger = simplifyLogger(log.logger(1,2), flag);
-
-% logger = simplifyLogger(log.log);
-t = logger.t;
-Pa = DataStructure(logger);
-Pa.delta_u = logger.controller.delta_u;
-
+% flag = "MEC";
+% 
+% log = load('Data\test.mat');
+% 
+% % log = load('Data\MEC_Pn_u_delta_u_1780.mat');
+% logger = simplifyLogger(log.logger(1,1), flag);
+% 
+% Pn = DataStructure(logger);
+% 
+% logger = simplifyLogger(log.logger(1,2), flag);
+% 
+% % logger = simplifyLogger(log.log);
+% t = logger.t;
+% Pa = DataStructure(logger);
+% Pa.delta_u = logger.controller.delta_u;
+% 
 
 %% offline estimation
 
 % flag = "offline";
-% log = load("Data/10s_offline10_Log(31-Jan-2025_11_22_07).mat");
-% logger = simplifyLogger(log.log(1,1) flag);
+% log = load("Data/test.mat");
+% logger = simplifyLogger(log.logger(1,1), flag);
 % t = logger.t;
 
 

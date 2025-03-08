@@ -111,6 +111,12 @@ u = [u1;u2;u3;u4];
 matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_torque_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 %matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 
+%% ZOH実装
+
+
+
+
+
 %% Calculate Jacobian matrix
 % jacobianA = jacobian(fp+gp*[u1;u2;u3;u4],xp);
 % matlabFunction(jacobianA,'file','JacobiA.m','vars',{xp u cell2sym(physicalParam)},'outputs',{'a'});
