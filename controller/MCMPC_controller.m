@@ -354,7 +354,7 @@ classdef MCMPC_controller < handle
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-                + terminalState + constraints+ stageVobs+stageVobs2;
+                + terminalState + constraints;%+ stageVobs+stageVobs2;
             EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW)];
         end
         

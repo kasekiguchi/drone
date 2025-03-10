@@ -35,7 +35,7 @@ agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-for i = 1:400
+for i = 1:100
     if i < 20 || rem(i, 10) == 0; end
     tic
     
@@ -55,6 +55,7 @@ end
 %logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 logger.plot({1,"p","er"},{1, "q", "er"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
+save("Data\test", "logger")
 
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

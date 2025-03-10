@@ -41,51 +41,39 @@ classdef MPC_CONTROLLER_KMC < handle
       n = 12; % 状態数
       obj.input = param.input; %入力関連のみ
       
-      obj.P = obj.self.parameter.get();
-      obj.N = param.particle_num; 
-      obj.H = param.H;
+      obj.P = obj.self.parameter.get(); % ドローンのパラメータ（質量，ロータ間距離，慣性モーメントなど）
+      obj.N = param.particle_num; % サンプル数
+      obj.H = param.H; % ホライズン
       
       % 重みの配列サイズ変換
-      weight = param.weight;
-      obj.Weight = blkdiag(weight.P, weight.Q, weight.V, weight.W);
+      weight = param.weight; % 重みを変数に保存
+      obj.Weight = blkdiag(weight.P, weight.Q, weight.V, weight.W); % blkdiagで配列同士を結合
       obj.WeightF = blkdiag(weight.Pf, weight.Qf, weight.Vf, weight.Wf);
       obj.WeightR = weight.R;  % 目標入力
       obj.WeightRp = weight.RP; % 前ステップとの入力
-      
-      % HL. A, B行列定義 z, x, y, yawの順番
-      obj.A = param.A;
-      obj.B = param.B;
-      obj.C = param.C;
-      % obj.A = repmat(param.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
-      % obj.B = repmat(param.B,1,1,obj.N);
-      % obj.C = repmat(param.C,1,1,obj.N);
 
-      % Initialize parameter
+      % MPCパラメータ初期化 = メモリの確保
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
-      obj.state.state_data = zeros(n,obj.H, obj.N);
+      obj.state.state_data = zeros(n,obj.H, obj.N); 
       obj.input.Evaluationtra = zeros(obj.N, 2);
       obj.input.sigma = param.input.Initsigma;
       obj.input.mu = param.ref_input;
 
-      % Initialize input
-      obj.result.input = zeros(self.estimator.model.dim(2),1);
-      obj.input.pre_u = obj.result.input;
-      obj.input.U = zeros(self.estimator.model.dim(2),1);
+      % 入力の初期化
+      obj.result.input = obj.param.ref_input; % 目標入力 初期時刻にresultを定義しておかないと実行時にエラー出る
+      obj.input.pre_u = obj.result.input; % 前入力
 
-      % Extended Coefficient Matrix ベクトル化
+      % A, B行列定義 z, x, y, yawの順番ベクトル化
       obj.model = ExtendedCoefficientMatrix({param.A,param.B,obj.H,param.state_size}); % 一括計算 2025/1/21確認
-      % obj.param.A = repmat(obj.model.A, 1, 1, obj.N);
-      % obj.param.B = repmat(obj.model.B, 1, 1, obj.N);
-      % obj.param.C = repmat(param.C, obj.H, obj.H, obj.N);
       obj.param.A = obj.model.A;
       obj.param.B = obj.model.B;
-      % obj.param.C = obj.model.C; % ECM()に統合も可能
-      C = repmat({obj.C}, 1, obj.H);
+      C = repmat({obj.param.C}, 1, obj.H); 
       obj.param.C = blkdiag(C{:});
 
-      % QP change equation
+      %% 勾配MPCとの併用を見据えてのQP(Quadratic Programming:二次計画法)の式変換
+      %-- M2鬼澤がやっていたと思う
       % Q = reshape(obj.Weight(:,:,1), obj.param.state_size, []);
       % Qf = reshape(obj.WeightF(:,:,1), obj.param.state_size, []);
       % R = reshape(obj.WeightR(:,:,1), obj.param.input_size, []);
@@ -95,29 +83,25 @@ classdef MPC_CONTROLLER_KMC < handle
 
     %-- main()的な
     function result = do(obj,varargin)
-        tic
-        %%initialize
         time = varargin{1};
         phase = varargin{2};
         obj.param.t = time.t;
         %% phaseによるcontrollerの選択
-        % result: controllerで算出された入力
-        if phase == 'a'
+        if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
             result = obj.controller_KMC(varargin);
             disp('controller: MC,  phase: a');
-        elseif phase == 't' || phase == 'l'
-            result = obj.controller_HL(varargin); % takeoff and landing -> HLC
+        elseif phase == 't' || phase == 'l' % takeoff | landing
+            result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
             disp('controller: HL  phase: t or l');
-        elseif phase == 'f'
-            obj.state.ref = obj.generate_reference();
+        elseif phase == 'f' % flight
+            obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
             result = obj.controller_KMC(varargin);
             disp('controller: MC  phase: f');
         end 
-        toc
     end
     
-    function result = controller_HL(obj,varargin)
+    function result = controller_HL(obj,varargin) % HLCそのままもってきた．もしアップデートされたら逐次更新
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
         xd = ref.state.xd;
@@ -154,7 +138,6 @@ classdef MPC_CONTROLLER_KMC < handle
     end
 
     function result = controller_KMC(obj,varargin)
-        tic
       obj.param.t = varargin{1}{1}.t; % 現在時刻
       obj.param.te = varargin{1}{1}.te; % 終了時間(default : 10s)
 
@@ -169,19 +152,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.Resampling_IS();      % リサンプリング
       obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
-      % obj.Resampling_LVS();
-
-      %% 評価関数の確認
-      % J2 = zeros(obj.N, 2);
-      % x = obj.state.state_data(:,:,obj.input.BestcostID(1));
-      % r = obj.state.ref;
-      % u = obj.input.u(:,:,obj.input.BestcostID(1));
-      % % J1 = calc_J(x, r, u, obj.Weight, obj.WeightR, obj.H);
-      % J2 = objective_1sample(obj, x, u);
-      % J = obj.input.Bestcost_now(1);
-      % [J, J2(1)]
-
-      %% 値の保存
+      %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
       obj.result.bestcostID = obj.input.BestcostID;
       obj.result.bestcost = obj.input.Bestcost_now;
       obj.result.sigma = obj.input.sigma;
@@ -189,7 +160,6 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.result.path = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
       %%
       result = obj.result;
-      toc
     end
 
     function show(obj)
@@ -205,8 +175,8 @@ classdef MPC_CONTROLLER_KMC < handle
             obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
             obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
             0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
-        fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f", ...
-            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2));
+        fprintf("t: %f \t input: %f %f %f %f \t J: %f \t Ju: %f \t sigma: %f", ...
+            obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1), obj.result.bestcost(2), obj.input.sigma(1));
         fprintf("\n");
     end
 
@@ -221,7 +191,13 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        if obj.param.test.input == 1
+            obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
+        elseif obj.param.test.input == 2
+            % obj.input.u(1,:,:) = obj.param.ref_input(1) * ones(1, obj.H, obj.N); 
+            % obj.input.u(2,:,:) = zeros(1, obj.H, obj.N); obj.input.u(4,:,:) = zeros(1, obj.H, obj.N);
+            obj.input.u(3,:,:) = zeros(1, obj.H, obj.N); obj.input.u(4,:,:) = zeros(1, obj.H, obj.N);
+        end
     end
 
     %% 状態予測
@@ -233,7 +209,6 @@ classdef MPC_CONTROLLER_KMC < handle
     end
 
     function objective(obj)
-       
         U = obj.input.u;
         X = obj.state.state_data;
 
@@ -249,43 +224,42 @@ classdef MPC_CONTROLLER_KMC < handle
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
         stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
+
         stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
-        stageVobs = obj.constraints_STL(tildeX);
-        
+
         %% 人工ポテンシャル場法
         % Jconst = Constraints(obj);
         % Jconst(:,1) = {zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N)};
+        
         %% ステージコストとターミナルコストを合計
-        costX = stageStateX + terminalState+stageVobs;%
+        costX = stageStateX + terminalState;
 
-        obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1)+ sum(reshape(stageVobs, obj.H, []))';
+        obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1);
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
-        % 
-        % obj.input.Evaluationtra(:,2:4) = ones(obj.N, 3) * 1e3;
+    
+        %% 制約 STL
+     %     obj.constraints_STL(tildeX);
     end
-    function stageVobs =  constraints_STL(obj, tildeX)
-        v1_min = 0.02;
-        v1_max = 0.02;
+
+    function constraints_STL(obj, tildeX)
+        v1_min = 0.0;
+        v1_max = 0.8;
         v2_min = 0.01;
         v2_max = 0.01;
         v1_weight = 1e4;
         v2_weight = 1e4;
-        stageVobs1 =0;
-        stageVobs2 =0;
         Vobs = tildeX(9,:,:);
-        if obj.param.t >1 && obj.param.t <3
-            stageVobs1 = v1_weight.* ((v1_min-Vobs).^2+(Vobs-v1_max).^2);
-            %obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs1, obj.H, []))';
-            
+        if obj.param.t >0 && obj.param.t <2 
+            stageVobs = v1_weight .* ((v1_min-Vobs).^2+ (Vobs-v1_max).^2);
+            obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs, obj.H, []))';
         end
-        if obj.param.t > 5 && obj.param.t <7
-            stageVobs2 = v2_weight .*((v2_min-Vobs).^2+(Vobs-v2_max).^2);
-            %obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs2, obj.H, []))';
-        end
-        stageVobs = stageVobs1 +stageVobs2;
+        % if obj.param.t > 5 && obj.param.t <7 
+        %     stageVobs2 = v2_weight .*((v2_min-Vobs).^2+(Vobs-v2_max).^2);
+        %     obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs2, obj.H, []))';
+        % end
     end
-        
+
     function normalize(obj)
       NP = obj.N;
       pw = obj.input.Evaluationtra(:,1); % 全評価値に対してのほうが性能よさそう
@@ -371,7 +345,9 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
-        % obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        if obj.param.test.sigma ~= 1
+            obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        end
         % obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))'));
         obj.input.BestcostID = BestcostID;
     end
