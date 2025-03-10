@@ -103,8 +103,8 @@ for i = 2:N+1
     agent(i).plant      = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%単機牽引モデルのプラントクラス設定id,dt,type,initial,varargin
     agent(i).sensor     = DIRECT_SENSOR(agent(i),0.0); %単機牽引モデルのクラス設定 sensor to capture plant position : second arg is noise
     agent(i).estimator  = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),1)), ["p", "q", "pL", "pT"]));%単機牽引モデルの推定クラス設定（EKF）
-    agent(i).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%目標軌道のクラス設定
     agent(i).controller = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));%単機牽引モデルのコントローラクラス設定
+    agent(i).reference  = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%目標軌道のクラス設定
 end
 % take off landing の設定
 run("ExpBase");

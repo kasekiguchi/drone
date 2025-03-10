@@ -14,7 +14,7 @@ clear multiFigure option addingContents f loggers
 %選択    
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 frmse = 10;%rmseのみ知りたい場合
 startTime = 0;
 endTime = 74;

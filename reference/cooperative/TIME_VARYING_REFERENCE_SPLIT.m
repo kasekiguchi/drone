@@ -15,8 +15,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         N                       % 機体数
         ftakeoff = 0            % take off のフラグ
         flanding = 0            % landing のフラグ
-        base_time_takeoff = 0   % take off開始時刻
-        base_time_landing = 0   % landing開始時刻
+        th_offset         = 0   %目標オフセット
+        th_offset_takeoff = 0   %takeoff開始時のオフセット
+        th_offset_landing = 0   %landing開始時のオフセット
+        base_time_takeoff       % take off開始時刻
+        base_time_landing       % landing開始時刻
         base_state_takeoff      % take offの初期位置
         base_state_landing      % landingの初期位置
         copy_state_takeoff      % take offの紐接続点の初期位置
@@ -43,12 +46,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 args
                 agent1
             end     
-            obj.agent1          = agent1;               % agent(1)の格納
-            obj.self            = self;                 % agent(i)の格納
-            obj.N               = args{4};              % 機体数Nの格納
-            obj.com             = args{3};              % 対象になるシステムの格納
-            gen_func_name       = str2func(args{1});    % referenceの関数の格納
-            param_for_gen_func  = args{2};              % referenceの関数のに代入する値の格納
+            obj.agent1              = agent1;               % agent(1)の格納
+            obj.self                = self;                 % agent(i)の格納
+            obj.N                   = args{4};              % 機体数Nの格納
+            obj.com                 = args{3};              % 対象になるシステムの格納
+            gen_func_name           = str2func(args{1});    % referenceの関数の格納
+            param_for_gen_func      = args{2};              % referenceの関数のに代入する値の格納
             
             if length(args) > 2
                 if strcmp(args{3}, "Cooperative")% 牽引物の目標軌道
@@ -64,6 +67,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state.set_state("minDroneDistance",0);                       % 機体間距離の最小値
                     obj.result.state.set_state("constp",0);                                 % 制約の初期値
                     obj.result.state.set_state("constTargetp",0);                           % 制約の目標値
+                    if isa(obj.self.input_transform,"THRUST2THROTTLE_DRONE")
+                        obj.th_offset           = obj.self.input_transform.param.th_offset;%目標オフセット
+                        obj.th_offset_takeoff   = obj.self.input_transform.param.th_offset_tl;%takeoff開始時のオフセット
+                        obj.th_offset_landing   = obj.self.input_transform.param.th_offset_tl;%landing開始時のオフセット
+                    end
                     
                 end
             else %上記以外のreference関数を複数機牽引用に修正
@@ -108,7 +116,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    rli          = sqrt(2)*obj.self.parameter.get("lx");         % 機体のロータまでの長さ
                    rhoi         = obj.agent1.parameter.rho(:,id);               % 牽引物の中心位置からリンクまでの距離
                    rhoiUnit12   = [rhoi(1:2)/norm(rhoi(1:2));0];                % rhoiをx-y平面に射影したベクトルの単位ベクトル
-                   rhoci        = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
+                   % rhoci        = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % sensor
                    spL       = obj.self.sensor.result.state.pL;                 % 分割後の牽引物センサー値
                    if isa(obj.self.sensor.motive,"MOTIVE")
@@ -172,10 +180,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        %初期目標位置がおかしい
                        %
                        obj.flanding                     = 0;                                                    % landing条件分岐用フラグ
+                       if isempty(obj.base_time_takeoff)
+                           obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
+                       end
                        takeOffTime                      = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                        %初期値 
                        if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff                       % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
-                           obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
                            % 質量推定が終わるまでのとき  
                            if isempty(obj.base_state_takeoff)   
                                obj.zd_takeoff_now       = sp0(3) + 0.05;                                        % 目標高度設定
@@ -183,6 +193,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                                obj.copy_state_takeoff   = real_spL;                                             % 初期の紐接続点の実際のx,y,z位置
                            %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満になったら)       
                            elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180
+                               obj.base_time_takeoff    = varargin{1}.t;                                        % takeoffになった時間
+                               takeOffTime              = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                                obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
                                obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);real_spL(3)];            % 初期位置
                                obj.copy_state_takeoff   = obj.base_state_takeoff;                               % 初期の紐接続点の実際のx,y,z位置
@@ -203,9 +215,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 目標値
                            refi                         = obj.gen_ref_for_take_off(takeOffTime);
                        % take offのプロポの推力値を計算
-                           th_offset                    = obj.self.input_transform.param.th_offset;%目標オフセット
-                           th_offset_takeoff            = obj.self.input_transform.param.th_offset_tl;%takeoff開始時のオフセット
-                           obj.self.input_transform.param.th_offset_tl = th_offset_takeoff + (th_offset-th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
+                           obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
                 %landing
                    elseif obj.cha =='l'
                        obj.ftakeoff                     = 0;                                                    %take off条件分岐用フラグ
@@ -214,7 +224,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            obj.base_time_landing        = varargin{1}.t;                                        % landingになった時間
                            obj.base_state_landing       = spL;                                                  % landing開始時の紐の接続位置の初期位置
                            obj.copy_state_landing       = spL;                                                  % landing開始時の紐の接続位置の初期位置コピー
-                        end     
+                       end     
+                       landingTime                      = varargin{1}.t - obj.base_time_landing;                % landingになってからの時間
                        % 更新     
                        exrhoi                           = 0.5;                                                  % rhoi方向に延ばす距離
                        % 推定質量がlanding開始時の90%未満またはlanding開始時の機体と牽引物の距離のz方向の90%の長さより現在の差の距離の方が短い場合の時は制約を固定値にする     
@@ -228,11 +239,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長         
                        end
                        % 目標値
-                           refi                         = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time_landing);
+                           refi                         = obj.gen_ref_for_landing(landingTime);
                        % landingのプロポの推力値を計算
-                           th_offset                    = obj.self.input_transform.param.th_offset;%landing開始時のオフセット(flightと同様)
-                           th_offset_landing            = obj.self.input_transform.param.th_offset_tl;%目標オフセット
-                           obj.self.input_transform.param.th_offset_tl_tmp = th_offset - (th_offset-th_offset_landing)*min(obj.te_landing,varargin{1}.t-obj.base_time_landing)/obj.te_landing;
+                           obj.self.input_transform.param.th_offset_tl = obj.th_offset - (obj.th_offset-obj.th_offset_landing)*min(obj.te_landing,landingTime)/obj.te_landing;
                 % stop, arming
                    else
                        refi = zeros(28,1); 

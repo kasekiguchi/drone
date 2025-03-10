@@ -47,6 +47,7 @@ check_rigid = rigid_num; % とりあえずそのまま持ってくる.剛体中�
     title('Motiveのセンサー結果 Enterで閉じる');
     legend('Location', 'northeastoutside'); % 凡例を外側に表示
     legend show;
+    grid on
     hold off;
 
     % キー押下時のコールバック関数を設定

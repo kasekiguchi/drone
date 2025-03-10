@@ -27,7 +27,7 @@ COMs                = [3,12];                           % pc1 lenovo割り当て
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
 % cableL=[0.785,0.785];
-cableL              = [0.822,0.887];
+cableL              = [0.81,0.78];
 
 % 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定
 refName         = {
@@ -48,7 +48,7 @@ isCoop  = mod(rigid_num,2); % 複数機牽引であるかの判別(剛体数が�
 if isCoop == 1
     firstId = 2;
     COMs            = ["",COMs];                            % プロポのcom番号
-    rigids          = motive.result.rigid.p;                % 位置の剛体情報を取得
+    rigids          = motive.result.rigid(1).p;                % 位置の剛体情報を取得
     eul             = Quat2Eul(motive.result.rigid(1).q);   % 牽引物の角度を取得しクオータニオンからオイラー角に変換
     rho             = zeros(3,N-1);
     % 牽引物の剛体位置から各紐の接続点までの方向ベクトルを計算
@@ -98,7 +98,7 @@ if isCoop == 1
     agent(1).controller.result.input    = [0;0;0;0];
 
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
-    agent(1).input_transform            = struct("do",@(varargin)[], "result",[]);
+    agent(1).input_transform            = struct("do",@(varargin)[], "result",zeros(1,8));
 
     plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
 end
@@ -131,7 +131,13 @@ for i = firstId:N
     agent(i).sensor.forload     = FOR_LOAD(agent(i), Estimator_Suspended_Load(2*i-(firstId-1)+addId));  %牽引物の情報のクラス，牽引物のidを入れる
     agent(i).sensor.do          = @sensor_do;
    
-    % referenceの設定
+    % コントローラの設定，初期入力は機体と牽引物質量が釣り合う推力のみでトルクは全て0
+    agent(i).controller         = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
+    
+    % 設計した入力をプロポの値に変換
+    agent(i).input_transform    = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); 
+
+    % referenceの設定(refernceの前にTHRUST2THROTTLE_DRONEを定義)
     %複数機による牽引の場合の位置はagent(1)で設定した位置からrhoずらした値とする．それ以外はagent(1)と同様
     if isCoop
         agent(i).reference      = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));
@@ -143,12 +149,6 @@ for i = firstId:N
         % agent(i).reference    = TIME_VARYING_REFERENCE(agent(i),refName{i});
         % agent(i).reference    = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent(i),refName{i});
     end
-    % コントローラの設定，初期入力は機体と牽引物質量が釣り合う推力のみでトルクは全て0
-    % 複数の単機牽引モデルではHLC_SUSPENDED_LOADでもいいかも
-    agent(i).controller         = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
-    
-    % 設計した入力をプロポの値に変換
-    agent(i).input_transform    = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); 
 end
 
 %log
