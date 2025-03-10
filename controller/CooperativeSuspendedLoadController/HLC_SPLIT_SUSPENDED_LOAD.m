@@ -72,10 +72,10 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                     end
                 end
                 % 紐の長さを推定するとき
-                if isprop(model.state,"cableL")
-                    % P(7) = max(model.state.cableL,0.1);
-                    P(7)                = max(min(model.state.cableL,P(7)*1.2),P(7)*0.8);
-                end
+                % if isprop(model.state,"cableL")
+                %     % P(7) = max(model.state.cableL,0.1);
+                %     P(7)                = max(min(model.state.cableL,P(7)*1.2),P(7)*0.8);
+                % end
                 obj.result.mLi          = P(6);
             end
 
