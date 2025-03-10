@@ -15,12 +15,12 @@ motive.getData([], []);                                 % get data from Motive �
 rigid_num           = motive.result.rigid_num;          % 剛体数
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-handlingModelNum    = 1:2;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
+handlingModelNum    = 3:4;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
 N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [3,12];                           % pc1 lenovo割り当てる順番に設定
+COMs                = [3,4];                           % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
@@ -29,7 +29,7 @@ COMs                = [3,12];                           % pc1 lenovo割り当て
 % cableL=[0.785,0.785];
 cableL              = [0.81,0.78];
 
-% 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定
+% 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定+
 refName         = {
                     {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
                     {"My_Case_study_trajectory",{[-1,-1,1]},"HL"}
