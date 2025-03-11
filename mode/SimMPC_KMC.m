@@ -51,7 +51,7 @@ else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で
 end
 
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%

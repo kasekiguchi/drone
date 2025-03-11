@@ -3,9 +3,9 @@ function ref = bezier_curve4(X0,te)
 syms t real
 
 P0 = X0;        % start point
-P1 = [8, 8, 10];    % control point1 z hovering  move in x y)
-P2 = [5, 5, 5];     % control point2 (slow down)
-P3 = [2, 2, 2];     % control point3 (speed down)
+P1 = [1, 1, 1];    % control point1 z hovering  move in x y)
+P2 = [0.5, 0.5, 0.5];     % control point2 (slow down)
+P3 = [0.2, 0.2, 0.2];     % control point3 (speed down)
 P4 = [0,0,0];     %  end point
 
 T_total = 10;  % total time 10s
