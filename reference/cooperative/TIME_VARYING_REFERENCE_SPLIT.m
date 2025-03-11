@@ -24,7 +24,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_state_landing      % landingの初期位置
         copy_state_takeoff      % take offの紐接続点の初期位置
         copy_state_landing      % landingのxy初期値
-        te_takeoff = 10         % take offで目標高度に達するまでの時間goal time
+        te_takeoff = 15         % take offで目標高度に達するまでの時間goal time
         zd_takeoff = 0.7        % take offの目標高度goal altitude
         zd_takeoff_now          % take offの目標高度goal altitude
         te_landing = 20         % landingの時間goal time
