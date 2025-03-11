@@ -21,11 +21,13 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
         pDown
         G
         rhoc
+        rhoini
     end
 
     methods
         function obj = DRONE_PARAM_COOPERATIVE_LOAD(name,N,type,param)
             arguments
+                % 実験の時はrho,rhoini,(rhocはまだ未完成)のみ用いる
                 name % DIATONE
                 N
                 type                = "struct";
@@ -40,7 +42,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % param.J0            = [2^2*0.1^2;2^2*0.1^2;2*0.02^2]* 3.900/3;%非対称牽引物正方形
 
                 param.rho           = [];%分割前の重心位置から紐がついてるところ前での距離
-                param.rhoc           = zeros(3,N-1);%接続点を頂点とする図形の重心位置から接続点までの距離
+                param.rhoc          = zeros(3,N-1);%接続点を頂点とする図形の重心位置から接続点までの距離
                 param.li            = 2*ones(N,1);%2*ones(N,1);%紐の長さ
                 param.mi            = 0.800*ones(N,1)';%機体の重さ
                 param.Ji            = repmat([0.082 0.082 0.1377]',1,N);%機体の慣性モーメント
@@ -48,7 +50,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             %% 牽引物
             isRegularHexagon = 0;%正六角柱の牽引物にするか
-            if ~isRegularHexagon && isempty(param.rho) %expの時は出ないようにしよう
+            if ~isRegularHexagon && isempty(param.rho) %sim
             %*Up, *Downは牽引物の上面と下面を表す   
             %六角形
                 xUp     = [-2 -1.5 0 1.5 1 0];
@@ -91,6 +93,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
 
                 param.rho   = rho(:,1:N);
                 param.rhoc  = rhoc(:,1:N);
+                param.rhoini= rho(:,1:N);
                 param.pUp   = pUp;
                 param.pDown = pDown;
                 param.G     = G;

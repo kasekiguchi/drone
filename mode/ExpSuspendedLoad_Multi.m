@@ -15,19 +15,19 @@ motive.getData([], []);                                 % get data from Motive �
 rigid_num           = motive.result.rigid_num;          % 剛体数
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-handlingModelNum    = 3:4;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
+handlingModelNum    = 1:2;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
 N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [3,4];                           % pc1 lenovo割り当てる順番に設定
+COMs                = [3,12];                            % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
 % cableL=[0.785,0.785];
-cableL              = [0.81,0.78];
+cableL              = [0.768,0.747];
 
 % 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定+
 refName         = {
@@ -51,9 +51,17 @@ if isCoop == 1
     rigids          = motive.result.rigid(1).p;                % 位置の剛体情報を取得
     eul             = Quat2Eul(motive.result.rigid(1).q);   % 牽引物の角度を取得しクオータニオンからオイラー角に変換
     rho             = zeros(3,N-1);
+    rhoini          = zeros(3,N-1);
     % 牽引物の剛体位置から各紐の接続点までの方向ベクトルを計算
+    % (牽引物の角度をすべて0にしないといけない改良方法は回転行列でrhoを調整)
     for i = 1:N-1
-        rho(:,i)    = motive.result.rigid(1+2*i+addId).p - motive.result.rigid(1).p;
+        %初期値の牽引物の傾きから求まるrho。takeoffで用いる
+        rhoini(:,i)    = motive.result.rigid(1+2*i+addId).p - motive.result.rigid(1).p;
+        %初期値の牽引物の傾きのままrhoを生成。結果描画の際はmotiveの剛体の向きとの差を考慮しないと正しい牽引物角度で描画できない
+        rho(:,i) = rhoini(:,i);
+        %motiveの牽引物の剛体に向きを合わせる場合
+        % rho(:,i) = eul2rotm(flip(eul'))'*rhoini(:,i);
+        
         disp("rho "+num2str(i)+" :"+num2str(rho(:,i)')) % rhoの計算結果を描画
     end
     
@@ -74,7 +82,7 @@ if isCoop == 1
 
     % 牽引物のagentを設定．必要なものはセンサー値のみなのでそれ以外は共通プログラムと辻褄が合うように空の配列などを設定
     agent(1)            = DRONE; 
-    agent(1).parameter  = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho);      %rhoや機体数の情報を設定
+    agent(1).parameter  = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, "zup","rho",rho,"rhoini",rhoini);      %rhoや機体数の情報を設定
     agent(1).plant      = struct("do",@(varargin)[], "arming" ,[],"stop",[]);
     agent(1).plant.connector.serial = [];
 
@@ -100,7 +108,7 @@ if isCoop == 1
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
     agent(1).input_transform            = struct("do",@(varargin)[], "result",zeros(1,8));
 
-    plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
+    % plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
 end
 
 % 単機牽引モデルのクラスの設定

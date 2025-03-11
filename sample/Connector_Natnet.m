@@ -10,7 +10,7 @@ ClientIP        = resolvehost(hostname,"address");  % client ip (matlabのPC) �
 ClientIP        = '192.168.1.3';                    % client ipなぶちゃん
 % ClientIP      = '192.168.1.2';                    % client ip粉砕
 % ClientIP      = '192.168.1.6';                    % client ipチハ
-ClientIP      = '192.168.1.11';                    % client ipチハ
+% ClientIP      = '192.168.1.10';                    % client ipチハ
 % NATNET_CONNECTORクラスでmotiveから情報を取ってくるnatnet.pファイルを設定
 motive=NATNET_CONNECTOR("HostIP",HostIP,"ClientIP",ClientIP); 
 end

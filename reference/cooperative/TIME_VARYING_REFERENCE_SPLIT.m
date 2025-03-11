@@ -24,7 +24,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_state_landing      % landingの初期位置
         copy_state_takeoff      % take offの紐接続点の初期位置
         copy_state_landing      % landingのxy初期値
-        te_takeoff = 10         % take offで目標高度に達するまでの時間goal time
+        te_takeoff = 15         % take offで目標高度に達するまでの時間goal time
         zd_takeoff = 0.7        % take offの目標高度goal altitude
         zd_takeoff_now          % take offの目標高度goal altitude
         te_landing = 20         % landingの時間goal time
@@ -116,13 +116,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    rli          = sqrt(2)*obj.self.parameter.get("lx");         % 機体のロータまでの長さ
                    rhoi         = obj.agent1.parameter.rho(:,id);               % 牽引物の中心位置からリンクまでの距離
                    rhoiUnit12   = [rhoi(1:2)/norm(rhoi(1:2));0];                % rhoiをx-y平面に射影したベクトルの単位ベクトル
-                   % rhoci        = obj.agent1.parameter.rhoc(:,id);              % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
+                   rhoini       = obj.agent1.parameter.rhoini(:,id);            % 牽引物の初期角度分傾いた中心位置からリンクまでの距離(takeoffで使用)
+                   rhoiniUnit12 = [rhoini(1:2)/norm(rhoini(1:2));0];            % rhoiniをx-y平面に射影したベクトルの単位ベクトル
+                   % rhoci        = obj.agent1.parameter.rhoc(:,id);            % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % sensor
                    spL       = obj.self.sensor.result.state.pL;                 % 分割後の牽引物センサー値
                    if isa(obj.self.sensor.motive,"MOTIVE")
                        real_spL = obj.self.sensor.result.state.real_pL;         % 牽引物位置
                        sp0      = obj.agent1.sensor.result.rigid(1).p;          % 牽引物のセンサー位置
-                       sq0      = obj.agent1.sensor.result.rigid(1).q;          % 牽引物のセンサー角度
+                       sq0      = Quat2Eul(obj.agent1.sensor.result.rigid(1).q);% 牽引物のセンサー角度
                    else
                        real_spL = obj.self.sensor.result.state.pL;              % simのための牽引物位置
                        sp0      = obj.agent1.sensor.result.state.p;             % 牽引物のセンサー位置
@@ -177,8 +179,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % refi(9:10)     = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
                 %take off
                    elseif obj.cha =='t'
-                       %初期目標位置がおかしい
-                       %
+                       % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。もしくは改良する必要制あり
                        obj.flanding                     = 0;                                                    % landing条件分岐用フラグ
                        if isempty(obj.base_time_takeoff)
                            obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
@@ -188,11 +189,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff                       % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
                            % 質量推定が終わるまでのとき  
                            if isempty(obj.base_state_takeoff)   
-                               obj.zd_takeoff_now       = sp0(3) + 0.05;                                        % 目標高度設定
+                               obj.zd_takeoff_now       = sp0(3) + 0.1;                                        % 目標高度設定
                                obj.base_state_takeoff   = [real_spL(1:2);epDronei(3)-cablei];                   % 初期位置,紐の長さ分下に埋まっているという設定
                                obj.copy_state_takeoff   = real_spL;                                             % 初期の紐接続点の実際のx,y,z位置
                            %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満になったら)       
-                           elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180
+                           elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180 && abs(obj.zd_takeoff_now - sp0(3)) < 0.02
                                obj.base_time_takeoff    = varargin{1}.t;                                        % takeoffになった時間
                                takeOffTime              = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                                obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
@@ -205,10 +206,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 紐が張る機体の高度になったか(紐の長さとexrhoiから求まる高度に牽引物の高さを加えた高度より機体が高いか)
                        if epDronei(3) >= sqrt(cablei^2 - exrhoi^2) + obj.copy_state_takeoff(3) || obj.ftakeoff == 1 
                            obj.ftakeoff                 = 1;                                                    % take off条件分岐用フラグ
-                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + constp*rhoiniUnit12(1:2);% rhoiUnit12方向に延長
                        % 紐がたわんでいる場合
                        else
-                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + exrhoi*rhoiUnit12(1:2); % rho方向に延ばす距離
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + exrhoi*rhoiniUnit12(1:2);% rho方向に延ばす距離
                            obj.constPrep                = exrhoi;
                            obj.constPrev                = 0;
                        end
@@ -218,6 +219,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
                 %landing
                    elseif obj.cha =='l'
+                       % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。
+                       % 二段階に分けて高度0付近までflightと同じような目標軌道生成を行い、その後各単機牽引でlandigに変更するのもあり
                        obj.ftakeoff                     = 0;                                                    %take off条件分岐用フラグ
                        % 初期値        
                        if isempty(obj.base_state_landing)       
