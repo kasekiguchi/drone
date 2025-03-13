@@ -191,7 +191,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        if obj.param.test.input == 1
+        if obj.param.test.input == 0
             obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
         elseif obj.param.test.input == 2
             % obj.input.u(1,:,:) = obj.param.ref_input(1) * ones(1, obj.H, obj.N); 
