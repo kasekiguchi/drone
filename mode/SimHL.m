@@ -12,7 +12,7 @@ end
 %% 20回まとめてシミュレーションする
 clear; close all; clc;
 Data.X = []; Data.Y = []; Data.U = [];
-for j = 1:3 %%%%%%%%%%%%  number of random references
+for j = 1:100 %%%%%%%%%%%%  number of random references
     fprintf('Initializing... N:%d \n', j);
     clear logger
     ts = 0; % initial time

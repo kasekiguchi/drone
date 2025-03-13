@@ -12,7 +12,7 @@ flg.weight = 0 % 重み付き最小二乗法
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-exp_data = 'Exp_Kyomo';    %zのみ速度から
+exp_data = 'Exp_Kyomo1';    %zのみ速度から
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
