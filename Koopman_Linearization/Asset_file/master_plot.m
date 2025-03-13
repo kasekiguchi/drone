@@ -1,0 +1,890 @@
+%修論用の検証をまとめて計算する
+clear
+close all
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダパス
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+
+%%
+%-- 生成したモデル
+loadfilename{1} = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+% loadfilename{1} = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+% loadfilename{1} = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
+% loadfilename{1} = '2025-01-20_Exp_Kiyama_code10_saddle_increased_weight';
+% loadfilename{1} = '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+
+% KMC
+% loadfilename{1} = '2025-02-12_Exp_Kato25_code00_saddle';
+% loadfilename{1} = '2025-02-21_Exp_Kiyama_code00_saddle_increased_3';
+% loadfilename{1} = '2025-03-11_Exp_Kiyama_code00_saddle';
+
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
+loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+
+cd('Koopman_Linearization/Figure_output/');
+
+args.title = 0;
+
+% 0入力検証
+% ii:状態数
+args.ii = 4; args.jj = 3; args.Fontsize = 18; args.N = 31;
+% 実機フィッティング
+flg.ylimHold = 0; % 指定した値にylimを固定
+flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
+flg.division = 0; % plotResult_division仕様にするか
+flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
+flg.rmse = 0; % subplotにRMSE表示
+flg.only_rmse = 0; % コマンドウィンドウに表示
+flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
+args.save_fig = 0;     % 1：出力したグラフをfigで保存する
+flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+args.startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
+args.stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+args.ref_tra = 'saddle';
+%% 個別
+load(strcat(loadfilename{1}, '.mat'), 'est'); 
+[F, code] = select_observable(loadfilename{1});
+g = input_0_verify(args, flg, est, loadfilename{1}, F);
+experiment_fitting(args, flg, loadfilename, F)
+save_fig(args, flg, loadfilename, g, code);
+cd('../../');
+%% まとめて
+% file = {'2025-01-12_Exp_Kiyama_code00_saddle_increased';
+%     '2025-01-13_Exp_Kiyama_code02_saddle_increased';
+%     '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10';
+%     '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10'};
+% for m = 1:size(file,1)
+%     clear est
+%     loadfilename{1} = file{m};
+%     load(strcat(loadfilename{1}, '.mat'), 'est'); 
+%     [F, code] = select_observable(loadfilename);
+%     g = input_0_verify(args, flg, est, loadfilename{1}, F);
+%     experiment_fitting(args, flg, loadfilename, F)
+%     save_fig(args, flg, loadfilename, g, code);
+%     fprintf(strcat('Saved ', code, '\n'));
+%     pause(1);
+% end
+
+%% どれかだけ
+% savename = strcat('saddle_shpaed_trajectory_pos', '.pdf'); 
+% f(1) = figure(5);
+% exportgraphics(f(1), savename, 'ContentType', 'vector', 'Resolution', 300);
+%%
+function save_fig(args, flg, loadfilename, g, code)
+    if args.save_fig && flg.figtype
+        % figure -> hundle
+        for i = 1:4; f(i) = figure(i); f(i).Position = ([680 458 560 350]); end
+        type = ['p', 'q', 'v', 'w'];
+
+        % ちょっとフィッティング検証のグラフ変更
+
+        %-- make folder and move folder
+        if ~isfolder(loadfilename{1}); mkdir(loadfilename{1}); end
+        cd(strcat('./', loadfilename{1}, '/'));
+        if ~isfolder('png'); mkdir('png'); mkdir('pdf'); end
+        %-- save
+        savefile = strcat('code', code);
+        for i = 1:4; saveas(i, strcat('./png/',savefile, '_', type(i),'.png')); end; fprintf('saved png\n');
+        for i = 1:4; exportgraphics(f(i), strcat('./pdf/', savefile, '_', type(i),'.pdf'), 'ContentType', 'vector', 'Resolution', 300); end; fprintf('saved pdf\n');
+
+        if flg.figtype == 0
+            saveas(100, strcat('./jpg/', 'input0_', loadfilename{1},'.jpg'));
+        else
+            s = {'p1','p2','p3','q1','q2','q3','v1','v2','v3','w1','w2','w3'};
+            for i = 1:12
+                savename = strcat('pdf/code', num2str(code), '_0input_', s{i}, '.pdf'); exportgraphics(g(i), savename, 'ContentType', 'vector', 'Resolution', 300);
+            end
+        end
+        cd('../');
+    else
+        fprintf('Not saved\n');
+    end
+end
+
+function f = input_0_verify(args, flg, est, filename, F)
+ii = args.ii; jj = args.jj; Fontsize = args.Fontsize; N = args.N;
+start_num = 1; % 単体で利用時はステップ数
+step_num = start_num + N;
+% thrust = 0.5884*9.81065*ones(1, step_num); % m = iFlight:0.730, eachine:0.5884
+thrust = zeros(1, step_num); % m = iFlight:0.730, eachine:0.5884
+torque = zeros(3, step_num);
+Est = zeros(12,1);
+% Est = [-0.0249 0.0105 1.0006 -0.0084 -0.0330 -0.0030 -0.0895 0.0299 -0.0009 -0.0321 -0.1606 -0.0195]';
+mode = 100; % 1:00, 2:10, 3:hermite, 0:free, F:@quaternions_all
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est}, mode, F);
+
+if mode == 2
+p = [0;0;0];
+for i = 2:step_num+1
+    p(:,i) = p(:,i-1) + 0.025 * X(4:6,i-1); 
+end
+X = [p; X];
+end
+
+% plot
+% step_num = step_num-start_num+1;
+set(0,'defaultAxesFontSize',Fontsize);
+set(0,'defaultTextFontsize',Fontsize);
+set(0,'defaultLineLineWidth',Fontsize*0.1);
+set(0,'defaultLineMarkerSize',Fontsize);
+
+% ylimsetting = [0 1.5; -0.15 0; -25 0];
+% if args.save_fig; f = figure(5); else; f = figure(100); end
+if ~flg.figtype; f = figure(100); end 
+if args.title; sgtitle(strrep(filename, '_', '-')); else; sgtitle(""); end
+
+% 理想
+ideal_z = 1/2 * 9.81065 * (0.025*N)^2;
+ideal_vz = 9.81065 * (0.025*N);
+
+
+label_x = {'$$p_x$$', '$$p_y$$', '$$p_z$$', '$$q_{\mathrm{roll}}$$', '$$q_{\mathrm{pitch}}$$', '$$q_{\mathrm{yaw}}$$', '$$v_x$$', '$$v_y$$', '$$v_z$$', '$$\omega_{\mathrm{roll}}$$', '$$\omega_{\mathrm{pitch}}$$', '$$\omega_{\mathrm{yaw}}$$'};
+% ylimsetting = [-0.01 0.01; -0.01 0.01; -0.1 0.1; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; % p,q,v,w,(z),(vz)
+ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -ideal_z 0.1; -ideal_vz 0.1]; 
+% ylimsetting = [-0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05; -0.05 0.05]; % thrustあり
+fprintf('0input verification result. max value = \n');
+format long
+arr = 1:ii*jj; idx = 0; m = 5;
+for i = 1:ii
+    for j = 1:jj
+        idx = idx + 1;
+        if idx == 3 || idx == 9
+            ylimset = ylimsetting(m,:);
+            m = m + 1;
+        else
+            ylimset = ylimsetting(i,:);
+        end
+        if flg.without_pos && idx > 9; break; end
+        if flg.figtype == 0
+            subplot(ii,jj,idx);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimset); xlim([-inf inf]);
+            text(0.65, 0.1, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
+            xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+        else
+            f(idx) = figure(idx+100);
+            plot(0:step_num,X(idx,:)); grid on; ylim(ylimset); xlim([-inf inf]);
+            text(0.65, 0.12, num2str(round(max(abs(X(idx,:))), 5)), 'Units', 'normalized', 'FontSize', Fontsize + 10);
+            xlabel('Step'); ylabel(label_x{idx}, 'Interpreter', 'latex', 'FontSize', Fontsize + 10);
+            f(idx).Position = [100 100 500 200];
+            ytickformat('%,.2f');
+            pbaspect([1.000000000000000   0.373568763593945   0.373568763593945]);
+        end
+        fprintf(strcat(num2str(round(max(abs(X(idx,:))), 5)), ','));
+    end
+    % fprintf('\n')
+end
+fprintf('\n')
+% f.WindowState = 'maximized';
+end
+
+function experiment_fitting(args, flg, loadfilename, F)
+% save_fig = args.save_fig;
+startTime = args.startTime;
+stepnum = args.stepnum;
+ref_tra = args.ref_tra;
+
+if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
+else;                             m = 2; n = 3; end
+
+WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
+if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
+    WhichRef = 1;
+end
+disp(loadfilename{1});
+
+%% plot range
+%何ステップまで表示するか
+%ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
+% stepN = 121; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+RMSE.Posylim = 0.1^2;
+RMSE.Atiylim = 0.0175^2;
+
+% stepnum = 3; %ステップ数，xの範囲を設定 default: 1
+if stepnum == 0
+    stepN = 31;
+    if flg.xlimHold == 1
+        xlimHold = [0,0.5];
+    end
+    xmax = 0.5;
+elseif stepnum == 1
+    stepN = 55;
+    if flg.xlimHold == 1
+        xlimHold = [0,0.8];
+    end
+    xmax = 0.8;
+elseif stepnum == 2
+    stepN = 91;
+    if flg.xlimHold == 1
+        xlimHold = [0,1.5];
+    end
+    xmax = 1.5;
+else
+    stepN = 121;
+    if flg.xlimHold == 1
+        xlimHold = [0,2];
+    end
+    xmax = 2;
+end
+
+% flg.ylimHoldがtrueのときのplot y範囲
+if flg.ylimHold == 1
+    ylimHold.p = [-1.5, 1.5];
+    ylimHold.q = [-0.2, 0.8];
+    ylimHold.v = [-3, 4];
+    ylimHold.w = [-1.5, 2];
+end
+
+%% Font size(グラフの軸ラベルや凡例の大きさを調整できる)
+Fsize.label = 18;
+Fsize.lgd = 18;
+Fsize.luler = 18;
+
+%% load(基本いじる必要は無い)
+HowmanyFile = size(loadfilename,2);
+for i = 1:HowmanyFile
+file{i} = load(loadfilename{i});
+file{i}.name = loadfilename{i};
+file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
+file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2str(i),'_{pitch}$'),append('$data',num2str(i),'_{yaw}$')};
+file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
+file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
+
+% if ~isfield(file{i}.simResult,'initTindex')
+    file{i}.simResult.initTindex = 1;
+% end
+
+if i == 1
+    indexcheck = file{i}.simResult.initTindex
+elseif indexcheck ~= file{i}.simResult.initTindex
+        disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
+        dammy = input('Enterで無視して続行します');
+end
+end
+
+% クープマンモデルの時間変換
+% [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, 0.025);
+
+%% 任意の時間からの推定を行う
+try
+% F = @quaternions_all; % 読み込んだデータと観測量を合わせる
+% 実験データがreferenceになっている場合、dtは時刻によって様々に変化する
+% dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
+% dt = diff(file{WhichRef}.simResult.reference.T);
+% startTimeを超えたインデックスからstepNステップ
+startIdx = find(file{WhichRef}.simResult.reference.T>=startTime, 1, 'first');
+tlength = file{WhichRef}.simResult.initTindex + startIdx:file{WhichRef}.simResult.initTindex+stepN-1 + startIdx;
+simResult.Z(:,startIdx) = F([file{WhichRef}.simResult.reference.X(:,startIdx);file{WhichRef}.simResult.reference.U(:,startIdx)]); %検証用データの初期値を観測量に通して次元を合わせてる
+simResult.Xhat(:,startIdx) = file{WhichRef}.simResult.reference.X(:,startIdx);
+for j = startIdx:startIdx+stepN
+    simResult.Z(:,j+1) = file{1}.est.A * simResult.Z(:,j) + file{1}.est.B * file{WhichRef}.simResult.U(:,j); 
+    if flg.without_pos
+        dt = file{WhichRef}.simResult.reference.T(j+1) - file{WhichRef}.simResult.reference.T(j);
+        [file{1}.est.A,file{1}.est.B,file{1}.est.C] = AB_transfer(file{1}.est.A, file{1}.est.B, file{1}.est.C, 0.025, dt);
+        simResult.Xhat(4:end,j+1) = file{1}.est.C * simResult.Z(:,j+1);
+        simResult.Xhat(1:3,j+1) = simResult.Xhat(1:3,j) + dt * simResult.Xhat(7:9,j+1);
+    else
+        simResult.Xhat(:,j+1) = file{1}.est.C * simResult.Z(:,j+1);
+    end
+end
+
+file{1}.simResult.state.p = simResult.Xhat(1:3,:);
+file{1}.simResult.state.q = simResult.Xhat(4:6,:);
+file{1}.simResult.state.v = simResult.Xhat(7:9,:);
+file{1}.simResult.state.w = simResult.Xhat(10:12,:);
+
+catch
+    open("quaternions_all.m");
+    error('Number of observales is different.');
+end
+%% 時間の設定 [0, 0.8]等の time[sec]を設定できるようにする
+if ~flg.xlimHold
+    timeRange = file{WhichRef}.simResult.reference.T(tlength);
+else
+    timeRange = linspace(0, xmax, stepN);
+    % timeRange = file{WhichRef}.simResult.reference.T(tlength) - startTime;
+end
+%%
+% 凡例に特別な名前をつける時はここで指定, ない時は勝手に番号をふります
+file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
+file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
+file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
+file{1}.lgdname.w = {'$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{3,{\rm case1}}$'};
+
+columnomber = size(file,2)+1;
+
+% マーカーに特別なものをつける時はここで指定
+file{1}.markerSty = ':o'; % 点線と丸印
+
+newcolors = [0 0.4470 0.7410
+             0.8500 0.3250 0.0980
+             0.4660 0.6740 0.1880]; %グラフの色指定
+
+%% Calculate RMSE
+i = 1;
+% rmse(予測値, 観測値, 2) = [3*1](=x,y,z)
+% position
+error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
+result.p.rmse = rmse(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)', 2);
+% velocity
+error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
+result.v.rmse = rmse(file{i}.simResult.state.v(:,tlength), file{WhichRef}.simResult.reference.est.v(tlength,:)',2);
+% attitude
+error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
+result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
+% angular velocity
+error_w = file{i}.simResult.state.w(:,tlength) - file{WhichRef}.simResult.reference.est.w(tlength,:)';
+result.w.rmse = rmse(file{i}.simResult.state.w(:,tlength), file{WhichRef}.simResult.reference.est.w(tlength,:)',2);
+
+%%
+Co = ctrb(file{1}.est.A,file{1}.est.B);
+Ob = obsv(file{1}.est.A,file{1}.est.C);
+fprintf("file: %s \n", strcat(strrep(loadfilename{1},'EstimationResult_2024-','')));
+fprintf("Number of Observables: %d \n", size(simResult.Z(:,1),1));
+fprintf("Number of Control rank: %d \n", rank(Co));
+fprintf("Estimation begin time: %.4f \n", startTime);
+fprintf("Estimation time: %.2f \n", xmax);
+fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
+fprintf("Velocity RMSE : v_x=%.4f, v_y=%.4f, v_z=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
+fprintf("Attitude RMSE : q_roll=%.4f, q_pitch=%.4f, q_yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+fprintf("Attitude angular vel. RMSE : w_roll=%.4f, w_pitch=%.4f, w_yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
+
+fprintf("====================================\n");
+result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
+fprintf("Position MAPE : x=%.4f, y=%.4f, z=%.4f \n", result.p.mape(1), result.p.mape(2), result.p.mape(3))
+
+disp(["p_max: "+ num2str(round(max(abs(error_p), [], 2)',5))]);
+disp(["v_max: "+ num2str(round(max(abs(error_v), [], 2)',5))]);
+disp(["q_max: "+ num2str(round(max(abs(error_q), [], 2)',5))]);
+disp(["w_max: "+ num2str(round(max(abs(error_w), [], 2)',5))]);
+if flg.only_rmse
+    % dammy
+    fprintf("Excel RMSE.P: %.4f %.4f %.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
+else
+if ~flg.division % plotResult
+i = 1;
+%% P
+% strrep _を "【空白】"に置換
+if args.title; fig_title = strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra);
+else; fig_title = ''; end
+if flg.figtype; figure(1);
+else; fig = figure(1); sgtitle(fig_title); subplot(m,n,1); end 
+% Referenceをplot
+colororder(newcolors)
+plot(timeRange, file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2); % 精度検証用データ
+% Referenceの凡例をtmpに保存
+lgdtmp = {'$x_d$','$y_d$','$z_d$'};
+hold on
+grid on
+% 推定したA, B, Cを使った状態推定の結果
+% 入力されたファイル数分ループ
+plot(timeRange, file{1}.simResult.state.p(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+% file{i}に凡例が保存されている場合実行
+if isfield(file{1},'lgdname')
+    if isfield(file{1}.lgdname,'p')
+        % file{i}の凡例名をtmpに保存
+        lgdtmp = [lgdtmp,file{1}.lgdname.p];
+    end
+end
+% xlim, ylimの設定
+if flg.xlimHold == 1
+    if ~isfield(xlimHold,'p')
+        xlim(xlimHold);
+    else
+        xlim(xlimHold.p);
+    end
+end
+if flg.ylimHold == 1
+    if ~isfield(ylimHold,'p')
+        ylim(ylimHold);
+    else
+        ylim(ylimHold.p);
+    end
+end
+% tmpに保存された凡例を表示
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd.NumColumns = columnomber;
+set(gca,'FontSize',Fsize.luler);
+xlabel('time [sec]','FontSize',Fsize.label);
+ylabel('Position [m]','FontSize',Fsize.label);
+hold off
+ytickformat('%.2f');
+
+%% Q
+if flg.figtype; figure(2);
+else; subplot(m,n,2); end
+colororder(newcolors)
+plot(timeRange, file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',2);
+if size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 3
+    lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
+elseif size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 4
+    lgdtmp = {'$q_{0,r}$','$q_{1,r}$','$q_{2,r}$','$q_{3,r}$'};
+end
+hold on
+grid on
+
+plot(timeRange , file{i}.simResult.state.q(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'q')
+        lgdtmp = [lgdtmp,file{i}.lgdname.q];
+    end
+end
+
+if flg.xlimHold == 1
+    if ~isfield(xlimHold,'q')
+        xlim(xlimHold);
+    else
+        xlim(xlimHold.q); % xlimHold.pになっていた
+    end
+end
+if flg.ylimHold == 1
+    if ~isfield(ylimHold,'q')
+        ylim(ylimHold);
+    else
+        ylim(ylimHold.q);
+    end
+end
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd.NumColumns = columnomber;
+set(gca,'FontSize',Fsize.luler);
+xlabel('time [sec]','FontSize',Fsize.label);
+ylabel('Attitude [rad]','FontSize',Fsize.label);
+hold off
+ytickformat('%.2f');
+
+%% V
+if flg.figtype; figure(3);
+else; subplot(m,n,3); end
+colororder(newcolors)
+plot(timeRange, file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',2);
+lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
+hold on
+grid on
+
+plot(timeRange , file{i}.simResult.state.v(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'v')
+        lgdtmp = [lgdtmp,file{i}.lgdname.v];
+    end
+end
+
+if flg.xlimHold == 1
+    if ~isfield(xlimHold,'v')
+        xlim(xlimHold);
+    else
+        xlim(xlimHold.v);
+    end
+end
+if flg.ylimHold == 1
+    if ~isfield(ylimHold,'v')
+        ylim(ylimHold);
+    else
+        ylim(ylimHold.v);
+    end
+end
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+set(gca,'FontSize',Fsize.luler);
+xlabel('time [sec]','FontSize',Fsize.label);
+ylabel('Velocity [m/s]','FontSize',Fsize.label);
+lgd.NumColumns = columnomber;
+hold off
+ytickformat('%.2f');
+
+%% W
+if flg.figtype; figure(4);
+else; subplot(m,n,4); end
+colororder(newcolors)
+% lgd = ('$\omega_{\phi d}$','$\omega_{\theta d}$','$\omega_{\psi d}$','$\hat{\omega}_\phi$','$\hat{\omega}_\theta$','$\hat{\omega}_\psi$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+plot(timeRange, file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',2);
+lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
+hold on
+grid on
+plot(timeRange, file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'w')
+        lgdtmp = [lgdtmp,file{i}.lgdname.w];
+    end
+end
+
+if flg.xlimHold == 1
+    if ~isfield(xlimHold,'w')
+        xlim(xlimHold);
+    else
+        xlim(xlimHold.w);
+    end
+end
+if flg.ylimHold == 1
+    if ~isfield(ylimHold,'w')
+        ylim(ylimHold);
+    else
+        ylim(ylimHold.w);
+    end
+end
+set(gca,'FontSize',Fsize.luler);
+xlabel('time [sec]','FontSize',Fsize.label);
+ylabel('Angular Velocity [rad/s]','FontSize',Fsize.label);
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd.NumColumns = columnomber;
+hold off
+ytickformat('%.2f');
+
+%% referenceの確認
+if flg.confirm_ref && ~args.save_fig
+    if flg.figtype; figure(5);
+    else; subplot(m, n, 5); end
+    plot(file{WhichRef}.simResult.reference.T, file{WhichRef}.simResult.reference.X(1:3,:), 'LineWidth', 2); hold on;
+    xregion(startTime, startTime + xmax, FaceColor="b",EdgeColor=[0.4 0 0.7]);
+    legend('x', 'y', 'z', 'verification range', 'Location', 'southeast', 'FontSize', 12); grid on;
+    xlabel('Time [s]', 'FontSize', 15);
+    ylabel('Position [m]', 'FontSize', 15);
+    ytickformat('%.2f');
+    % daspect([1 1 1]);
+
+    if flg.figtype; figure(6); else; subplot(m, n, 6); end
+    plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), '--', 'LineWidth', 2);
+    xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
+    ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
+    zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
+    grid on; hold on;
+
+    plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2, 'Color', 'red');
+    xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
+    ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
+    zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
+    hold off;
+    ytickformat('%.2f');
+end
+
+%% RMSE
+if ~flg.figtype && flg.rmse; subplot(m,n,6)
+FS = 12;
+text(0.05,0.9,strcat('RMSE.p = ', num2str(result.p.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.05,0.6,strcat('RMSE.v = ', num2str(result.v.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.05,0.3,strcat('RMSE.q = ', num2str(result.q.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.9,strcat('MAX.p = ', num2str(result.p.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.6,strcat('MAX.v = ', num2str(result.v.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.3,strcat('MAX.q = ', num2str(result.q.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.9,strcat('MIN.p = ', num2str(result.p.min,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.6,strcat('MIN.v = ', num2str(result.v.min,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.3,strcat('MIN.q = ', num2str(result.q.min,3)),'FontSize',FS, 'Units','normalized');
+end
+%%
+if ~flg.figtype; fig.WindowState = 'maximized'; end
+
+else % plotResult_division
+
+for graph_num = 1:3 % 1 = x, 2 = y, 3 = z
+    figure(graph_num)
+    colororder(newcolors)
+    plot(timeRange,file{WhichRef}.simResult.reference.est.p(tlength,graph_num)','LineWidth',2);
+    hold on
+    grid on
+    if graph_num == 1
+        plot(timeRange , file{i}.simResult.state.p(graph_num,tlength),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$x_{d}$','$\hat{x}_{case1}$','$\hat{x}_{\rm case2}$','$\hat{x}_{\rm case3}$','$\hat{x}_{\rm case4}$','$\hat{x}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Position x [m]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 2
+        plot(timeRange , file{i}.simResult.state.p(graph_num,tlength),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$y_{d}$','$\hat{y}_{case1}$','$\hat{y}_{\rm case2}$','$\hat{y}_{\rm case3}$','$\hat{y}_{\rm case4}$','$\hat{y}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Position y [m]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 3
+        plot(timeRange , file{i}.simResult.state.p(graph_num,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$z_{d}$','$\hat{z}_{case1}$','$\hat{z}_{\rm case2}$','$\hat{z}_{\rm case3}$','$\hat{z}_{\rm case4}$','$\hat{z}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Position z [m]','FontSize',Fsize.label,'Interpreter','latex');
+    end
+    % xlim, ylimの設定
+    if flg.xlimHold == 1
+        if ~isfield(xlimHold,'p')
+            xlim(xlimHold);
+        else
+            xlim(xlimHold.p);
+        end
+    end
+    if flg.ylimHold == 1
+        if ~isfield(ylimHold,'p') % ylimHold.pがなかったら
+            ylim(ylimHold);
+        else
+            ylim(ylimHold.p1);
+        end
+    end
+    hold off
+end
+
+%% Q
+for graph_num = 1:3 
+    figure(graph_num + 3)
+    colororder(newcolors)
+    plot(timeRange,file{WhichRef}.simResult.reference.est.q(tlength,graph_num)','LineWidth',2);
+    hold on
+    grid on
+    if graph_num == 1
+        plot(timeRange , file{i}.simResult.state.q(graph_num,tlength),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\phi_d$','$\hat{\phi}_{\rm case1}$','$\hat{\phi}_{\rm case2}$','$\hat{\phi}_{\rm case3}$','$\hat{\phi}_{\rm case4}$','$\hat{\phi}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Attitude $\phi$ [rad]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 2
+        plot(timeRange , file{i}.simResult.state.q(graph_num,tlength),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\theta_d$','$\hat{\theta}_{\rm case1}$','$\hat{\theta}_{\rm case2}$','$\hat{\theta}_{\rm case3}$','$\hat{\theta}_{\rm case4}$','$\hat{\theta}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Attitude $\theta$ [rad]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 3
+        plot(timeRange , file{i}.simResult.state.q(graph_num,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\psi_d$','$\hat{\psi}_{\rm case1}$','$\hat{\psi}_{\rm case2}$','$\hat{\psi}_{\rm case3}$','$\hat{\psi}_{\rm case4}$','$\hat{\psi}_{\rm case5}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Attitude $\psi$ [rad]','FontSize',Fsize.label,'Interpreter','latex');
+    end
+    % xlim, ylimの設定
+    if flg.xlimHold == 1
+        if ~isfield(xlimHold,'q')
+            xlim(xlimHold);
+        else
+            xlim(xlimHold.q);
+        end
+    end
+    if flg.ylimHold == 1
+        if ~isfield(ylimHold,'q')
+            ylim(ylimHold);
+        else
+            ylim(ylimHold.q);
+        end
+    end
+    hold off
+end
+
+%% v
+for graph_num = 1:3 
+    figure(graph_num + 6)
+    colororder(newcolors)
+    plot(timeRange,file{WhichRef}.simResult.reference.est.v(tlength,graph_num)','LineWidth',2);
+    hold on
+    grid on
+    if graph_num == 1
+        plot(timeRange , file{i}.simResult.state.v(graph_num,tlength),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$v_{xd}$','$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{x,{\rm case2}}$','$\hat{v}_{x,{\rm case3}}$','$\hat{v}_{x,{\rm case4}}$','$\hat{v}_{x,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label);
+        ylabel('Velocity $v_x$ [m/s]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 2
+        plot(timeRange , file{i}.simResult.state.v(graph_num,tlength),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$v_{yd}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{y,{\rm case2}}$','$\hat{v}_{y,{\rm case3}}$','$\hat{v}_{y,{\rm case4}}$','$\hat{v}_{y,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label);
+        ylabel('Velocity $v_y$ [m/s]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 3
+        plot(timeRange , file{i}.simResult.state.v(graph_num,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$v_{zd}$','$\hat{v}_{z,{\rm case1}}$','$\hat{v}_{z,{\rm case2}}$','$\hat{v}_{z,{\rm case3}}$','$\hat{v}_{z,{\rm case4}}$','$\hat{v}_{z,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Velocity $v_z$ [m/s]','FontSize',Fsize.label,'Interpreter','latex');
+    end
+    % xlim, ylimの設定
+    if flg.xlimHold == 1
+        if ~isfield(xlimHold,'q')
+            xlim(xlimHold);
+        else
+            xlim(xlimHold.q);
+        end
+    end
+    if flg.ylimHold == 1
+        if ~isfield(ylimHold,'q')
+            ylim(ylimHold);
+        else
+            ylim(ylimHold.q);
+        end
+    end
+    hold off
+end
+
+%% w
+for graph_num = 1:3 
+    figure(graph_num + 9)
+    colororder(newcolors)
+    plot(timeRange,file{WhichRef}.simResult.reference.est.w(tlength,graph_num)','LineWidth',2);
+    hold on
+    grid on
+    if graph_num == 1
+        plot(timeRange , file{i}.simResult.state.w(graph_num,tlength),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\omega_{1 d}$','$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{1,{\rm case2}}$','$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{1,{\rm case4}}$','$\hat{\omega}_{1,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label);
+        ylabel('Angular Velocity $\omega_{1 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 2
+        plot(timeRange , file{i}.simResult.state.w(graph_num,tlength),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\omega_{2 d}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{2,{\rm case2}}$','$\hat{\omega}_{2,{\rm case3}}$','$\hat{\omega}_{2,{\rm case4}}$','$\hat{\omega}_{2,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label);
+        ylabel('Angular Velocity $\omega_{2 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
+    elseif graph_num == 3
+        plot(timeRange , file{i}.simResult.state.w(graph_num,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
+        lgdtmp = {'$\omega_{3 d}$','$\hat{\omega}_{3,{\rm case1}}$','$\hat{\omega}_{3,{\rm case2}}$','$\hat{\omega}_{3,{\rm case3}}$','$\hat{\omega}_{3,{\rm case4}}$','$\hat{\omega}_{3,{\rm case5}}$'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        set(gca,'FontSize',Fsize.luler);
+        xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
+        ylabel('Angular Velocity $\omega_{3 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
+    end
+    % xlim, ylimの設定
+    if flg.xlimHold == 1
+        if ~isfield(xlimHold,'q')
+            xlim(xlimHold);
+        else
+            xlim(xlimHold.q);
+        end
+    end
+    if flg.ylimHold == 1
+        if ~isfield(ylimHold,'q')
+            ylim(ylimHold);
+        else
+            ylim(ylimHold.q);
+        end
+    end
+    hold off
+end
+end % flg.divisionのif
+
+end % flg.only_rmse
+end
+
+function state = input_state(param,mode,F)
+%一定推力を印加したときの状態遷移
+    thrust = param{5};
+    torque = param{6};
+    step = param{4};
+    U = [thrust; torque];
+
+    A = param{1};
+    B = param{2};
+    C = param{3};
+
+    z0 = [param{7}; [0.5844*9.81;0;0;0]];
+    if mode == 0
+        Z = quaternions_all(z0);
+    elseif mode == 1
+        Z = obs1(param{7});
+    elseif mode == 2
+        Z = obs2(param{7}(4:end));
+    elseif mode == 3
+        Z = quaternions_all(z0);
+    elseif mode == 14
+        Z = hermite_code14(z0);
+    elseif mode == 100
+        Z = F(z0);
+    end
+
+    try
+        for i = 1:step
+            Z(:,i+1) = A * Z(:,i) + B * U(:,i);
+        end
+        state = C * Z; 
+    catch
+        open('quaternions_all.m');
+        error('観測量の次元が一致しません');
+    end
+end
+
+function [P1,P2,P3,Q1,Q2,Q3,V1,V2,V3,W1,W2,W3] = common(x)
+    P1 = x(1,1);
+    P2 = x(2,1);
+    P3 = x(3,1);
+    Q1 = x(4,1); % roll
+    Q2 = x(5,1); % pitch
+    Q3 = x(6,1); % yaw
+    V1 = x(7,1);
+    V2 = x(8,1);
+    V3 = x(9,1);
+    W1 = x(10,1);
+    W2 = x(11,1);
+    W3 = x(12,1);
+end
+
+function z1 = obs1(x)
+[P1,P2,P3,Q1,Q2,Q3,V1,V2,V3,W1,W2,W3] = common(x);
+R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
+R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
+R33 = (cos(Q2).*cos(Q1));
+common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
+            R13;
+            R23;
+            R33;
+            1];
+isobe_z = [W1*W2;
+            W2*W3;
+            W3*W1;
+            W2*cos(Q1);
+            W3*sin(Q1);
+            W1*cos(Q2)/cos(Q1);
+            W2*sin(Q1)/cos(Q2);
+            W3*cos(Q1)/cos(Q2);
+            W2*sin(Q1)*sin(Q2)/cos(Q1);
+            W3*cos(Q1)*sin(Q2)/cos(Q1)
+            ];
+z1 = [common_z; isobe_z];
+end
+
+function z2 = obs2(x)
+Q1 = x(1,1); % roll
+Q2 = x(2,1); % pitch
+Q3 = x(3,1); % yaw
+V1 = x(4,1);
+V2 = x(5,1);
+V3 = x(6,1);
+W1 = x(7,1);
+W2 = x(8,1);
+W3 = x(9,1);
+R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
+R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
+R33 = (cos(Q2).*cos(Q1));
+common_except_pos_z = [Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
+            R13;
+            R23;
+            R33;
+            1]; % 位置を除いたcommon_z
+isobe_z = [W1*W2;
+            W2*W3;
+            W3*W1;
+            W2*cos(Q1);
+            W3*sin(Q1);
+            W1*cos(Q2)/cos(Q1);
+            W2*sin(Q1)/cos(Q2);
+            W3*cos(Q1)/cos(Q2);
+            W2*sin(Q1)*sin(Q2)/cos(Q1);
+            W3*cos(Q1)*sin(Q2)/cos(Q1)
+            ];
+z2 = [common_except_pos_z; isobe_z];
+end

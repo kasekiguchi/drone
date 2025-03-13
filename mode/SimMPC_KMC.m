@@ -33,8 +33,8 @@ initial_state.w = [0; 0; 0];
 
 %%
 %model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
- model_file = '2025-01-12_Exp_Kiyama_code00_saddle_increased.mat';
-% model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
+ model_file = '2025-03-13_Exp_Kyomo_code00_saddle.mat';
+%model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
 % model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
 %model_file = '2025-02-14_Exp_Kato15_code00_saddle_increased';
@@ -51,7 +51,7 @@ else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で
 end
 
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%

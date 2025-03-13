@@ -207,24 +207,26 @@ classdef MCMPC_controller < handle
                 obj.param.fRemove = 0;
             end
             obj.input.u = obj.result.input;
+%%%%%%
+%dataset に 軽い
 
-            obj.result.input_v = [0;0;0;0];
-            obj.result.removeF = removeF;
-            obj.result.removeX = removeX;
-            obj.result.survive = survive;
-            obj.result.COG = obj.state.COG;
-
-            obj.result.BestcostID = BestcostID;
-            obj.result.bestcost = Bestcost;
-            obj.result.contParam = obj.param;
-            obj.result.fRemove = obj.param.fRemove;
-            obj.result.path = obj.state.state_data;
-            obj.result.sigma = obj.input.sigma;
-            obj.result.variable_N = obj.N; 
-            obj.result.Evaluationtra = obj.input.Evaluationtra;
-            obj.result.Evaluationtra_norm = obj.input.normE;
-            obj.result.eachcost = eachCost(BestcostID, :);
-            
+            % obj.result.input_v = [0;0;0;0];
+            % obj.result.removeF = removeF;
+            % obj.result.removeX = removeX;
+            % obj.result.survive = survive;
+            % obj.result.COG = obj.state.COG;
+            % 
+            % obj.result.BestcostID = BestcostID;
+            % obj.result.bestcost = Bestcost;
+            % obj.result.contParam = obj.param;
+            % obj.result.fRemove = obj.param.fRemove;
+            % obj.result.path = obj.state.state_data;
+            % obj.result.sigma = obj.input.sigma;
+            % obj.result.variable_N = obj.N; 
+            % obj.result.Evaluationtra = obj.input.Evaluationtra;
+            % obj.result.Evaluationtra_norm = obj.input.normE;
+            % obj.result.eachcost = eachCost(BestcostID, :);
+            % 
             %% 情報表示
             if exist("exitflag") ~= 1
                 exitflag = NaN;
@@ -337,7 +339,7 @@ classdef MCMPC_controller < handle
 % V(1-dt*horizon,3-dt*horizon)<2 and V(1-dt*horizon,3-dt*horizon)>1 
             
             % Vobs = tildeXv(2);
-            % if obj.param.t >1 && obj.param.t <3 
+            % if obj.param.t >0 && obj.param.t <3 
             % stageVobs = v1_weight*(v1_min-Vobs)^2+(Vobs-v1_max)^2;
             % else
              %    stageVobs = 0;

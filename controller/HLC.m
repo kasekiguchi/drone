@@ -52,6 +52,15 @@ classdef HLC < handle
       % max,min are applied for the safty
       obj.result.inputv = [vf(1), vs(1:3)]';
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+       est_print = obj.self.estimator.result.state;
+            fprintf("==================================================================\n")
+            fprintf("==================================================================\n")
+            fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+                    est_print.p(1), est_print.p(2), est_print.p(3),...
+                    est_print.v(1), est_print.v(2), est_print.v(3),...
+                    est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
+           
+            fprintf("\n");
       result = obj.result;
     end
   end

@@ -35,7 +35,7 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     %SICE 重み
-    Controller_param.P = diag([10000.0; 10000.0; 10000.0]);    % 座標   1000 1000 10000
+    Controller_param.P = diag([10000.0; 10000.0; 30000.0]);    % 座標   1000 1000 10000
     Controller_param.V = diag([1000.0; 1000.0; 1000.0]);    % 速度
     Controller_param.R = diag([1.0; 100.0; 100.0; 100.0]); % 入力
     Controller_param.RP = 0 * diag([1.0,; 1000.0; 1000.0; 1000.0]);  % 1ステップ前の入力との差    0*(無効化)
