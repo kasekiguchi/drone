@@ -180,6 +180,4 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
         data.T(:,i) = [data.t(i,:)];
         end
     end
-
 end
-

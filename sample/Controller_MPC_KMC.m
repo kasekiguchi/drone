@@ -36,6 +36,7 @@ function Controller = Controller_MPC_KMC(dt, model, agent)
     % Controller.C = model{3};
 
     % 観測量の選択
+    model = '00';
     [Controller.F, Controller.code] = select_observable(model);
 
     % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い

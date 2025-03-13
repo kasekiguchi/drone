@@ -56,7 +56,7 @@ activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\',FileName);
 
-%% Defining Koopman Operator
+%% データセットの結合
 %<使用している観測量>
 % F = @(x) [x;1]; % 状態変数+定数項1
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
@@ -146,7 +146,8 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kato25';
 % exp_data = 'Exp_Kato15';
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra, '_increased'); % 保存先
+code = '00';
+FileName = strcat(FileName_common, exp_data, '_', 'code', code, '_', Exp_tra, '_increased'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -163,7 +164,8 @@ if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
-F = @quaternions_all_00; % 改造用
+% F = @quaternions_all_00; % 改造用
+[F, ~] = select_observable(code);
 
 % データのかさまし
 flg.increased = 1;
