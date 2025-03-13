@@ -35,7 +35,7 @@ run("ExpBase");
 
 %% 保存 v7.3
 log = gui.logger;
-save("Data\exp12_hovering_19_36.mat", "log", "-v7.3");
+% save("Data\exp12_hovering_19_36.mat", "log", "-v7.3");
 
 % imgu = cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.input_v, 1:te/dt, 'UniformOutput', false));
 % figure(10); plot([1:te/dt] .* dt, imgu); legend('z', 'x', 'y', 'yaw');

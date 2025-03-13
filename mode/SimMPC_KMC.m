@@ -25,7 +25,7 @@ in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 1, 1, z
+initial_state.p = arranged_position([0, 0], 1, 1, 0.6); % [x, y], 1, 1, z
 % initial_state.q = [1; 0; 0; 0];
 initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
@@ -36,8 +36,9 @@ initial_state.w = [0; 0; 0];
 % model_file = '2025-01-12_Exp_Kiyama_code00_saddle_increased.mat';
 % model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
-model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
+% model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
 % model_file = '2025-02-14_Exp_Kato15_code00_saddle_increased';
+model_file = '2025-02-21_Exp_Kiyama_code00_saddle_1';
 
 %%
 agent = DRONE;
@@ -49,7 +50,7 @@ if modeType; agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % guiか�
 else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 end
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.6]},"HL"});
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%

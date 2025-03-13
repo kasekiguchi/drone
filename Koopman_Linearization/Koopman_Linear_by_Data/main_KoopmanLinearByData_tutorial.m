@@ -146,14 +146,14 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kato_Kiyama';
 % exp_data = 'Exp_Kato25';
 % exp_data = 'Exp_Kato15';
-code = '00';
-FileName = strcat(FileName_common, exp_data, '_', 'code', code, '_', Exp_tra, '_increased'); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code23_', Exp_tra, '_1_optim'); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kato_Exp_Dataset.mat');
 load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_90k.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kato_Kiyama_Exp_Dataset_z_3m.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential_correct.mat')
@@ -164,8 +164,7 @@ if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
-% F = @quaternions_all_00; % 改造用
-[F, ~] = select_observable(code);
+F = @quaternions_all_23; % 改造用
 
 % データのかさまし
 flg.increased = 1;
