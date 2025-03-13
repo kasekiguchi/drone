@@ -56,7 +56,7 @@ activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\',FileName);
 
-%% Defining Koopman Operator
+%% データセットの結合
 %<使用している観測量>
 % F = @(x) [x;1]; % 状態変数+定数項1
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用

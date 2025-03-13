@@ -1,5 +1,9 @@
 function [F, code] = select_observable(file)
-    code = cell2mat(append(extract(file, 27), extract(file, 28))); % codeの抽出
+    if length(file) ~= 2
+        code = cell2mat(append(extract(file, 27), extract(file, 28))); % codeの抽出
+    else
+        code = file;
+    end
     switch code
         case '00'; F = @quaternions_all_00;
         case '02'; F = @quaternions_all_02;
