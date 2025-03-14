@@ -17,7 +17,7 @@ fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 frmse = 10;%rmseのみ知りたい場合
 startTime = 0;
-endTime = 74;
+endTime = 7400;
 fnowdata = 1;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用

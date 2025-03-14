@@ -14,6 +14,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         result                  % do method の返り値を格納
         N                       % 機体数
         ftakeoff = 0            % take off のフラグ
+        f2ndTakeOffPhase = 0    % take offの二段階目になった時のフラグ
         flanding = 0            % landing のフラグ
         th_offset         = 0   %目標オフセット
         th_offset_takeoff = 0   %takeoff開始時のオフセット
@@ -192,13 +193,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                                obj.zd_takeoff_now       = sp0(3) + 0.1;                                        % 目標高度設定
                                obj.base_state_takeoff   = [real_spL(1:2);epDronei(3)-cablei];                   % 初期位置,紐の長さ分下に埋まっているという設定
                                obj.copy_state_takeoff   = real_spL;                                             % 初期の紐接続点の実際のx,y,z位置
-                           %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満になったら)       
-                           elseif abs(sq0(1:2)) < 1*ones(2,1)*pi/180 && abs(obj.zd_takeoff_now - sp0(3)) < 0.02
+                           %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満かつ目標高さとの誤差0.02 m以上)       
+                           elseif abs([sq0(1:2);obj.zd_takeoff_now - sp0(3)]) < [1*ones(2,1)*pi/180;0.02] 
+                               obj.f2ndTakeOffPhase     = 1;
                                obj.base_time_takeoff    = varargin{1}.t;                                        % takeoffになった時間
                                takeOffTime              = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
-                               obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
-                               obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);real_spL(3)];            % 初期位置
+                               obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);obj.zd_takeoff_now];     % 初期位置（一段階目の目標高度から始める）
                                obj.copy_state_takeoff   = obj.base_state_takeoff;                               % 初期の紐接続点の実際のx,y,z位置
+                               obj.zd_takeoff_now       = obj.zd_takeoff;                                       % 目標高度設定
                            end
                        end
                        % 更新
@@ -216,7 +218,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        % 目標値
                            refi                         = obj.gen_ref_for_take_off(takeOffTime);
                        % take offのプロポの推力値を計算
+                       if obj.f2ndTakeOffPhase
                            obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
+                       end
                 %landing
                    elseif obj.cha =='l'
                        % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。

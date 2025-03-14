@@ -6,7 +6,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         tt0                     % takeoffの開始時間
         tl0                     % landingの開始時間
         tte         = 10        % センサー値を何秒で100%使うか
-        tle         = 5         % センサー値を何秒で0%使うか
+        tle         = 15         % センサー値を何秒で0%使うか
         ratet                   % 二次関数で0-1の間で変化するための定数
         ratel                   % 二次関数で0-1の間で変化するための定数
         inispL                  % 初期の牽引物位置

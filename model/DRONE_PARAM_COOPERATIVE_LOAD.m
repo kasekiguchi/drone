@@ -43,6 +43,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
 
                 param.rho           = [];%分割前の重心位置から紐がついてるところ前での距離
                 param.rhoc          = zeros(3,N-1);%接続点を頂点とする図形の重心位置から接続点までの距離
+                param.rhoini        = zeros(3,N-1);
                 param.li            = 2*ones(N,1);%2*ones(N,1);%紐の長さ
                 param.mi            = 0.800*ones(N,1)';%機体の重さ
                 param.Ji            = repmat([0.082 0.082 0.1377]',1,N);%機体の慣性モーメント

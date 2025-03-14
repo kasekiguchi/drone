@@ -20,14 +20,14 @@ N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [3,12];                            % pc1 lenovo割り当てる順番に設定
+COMs                = [3,12];                           % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
 % cableL=[0.785,0.785];
-cableL              = [0.768,0.747];
+cableL              = [0.969,0.875];
 
 % 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定+
 refName         = {
@@ -108,7 +108,7 @@ if isCoop == 1
     % 入力のプロポの値への変換も単機モデルでするのでここで行わない
     agent(1).input_transform            = struct("do",@(varargin)[], "result",zeros(1,8));
 
-    % plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
+    plot_and_close(rigid_num,agent);%Motive入れ替わり対策グラフ．plot_and_close.mで設定してる
 end
 
 % 単機牽引モデルのクラスの設定

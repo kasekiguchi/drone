@@ -17,7 +17,7 @@ function Controller = Controller_HL_Suspended_Load(dt,agent)
         Controller.F4 = lqrd(A2,B2,diag([10,1]),0.1,dt);                        % yaw方向サブシステム, h4^(i) i = 0~1
     else
         % exp用
-        Controller.F1 = lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);             %位置z、速度z
+        Controller.F1 = lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);             %位置z、速度z
         Controller.F2 = lqrd(A6,B6,diag([150000,250000,10000,1,0.001,0.001]),0.08,dt);%より制御周期速くなると0.008とかが良くなると思う．
         Controller.F3 = lqrd(A6,B6,diag([150000,250000,10000,1,0.001,0.001]),0.08,dt);
         Controller.F4 = lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                %yawの位置、速度、100,1,1
