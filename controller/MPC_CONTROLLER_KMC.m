@@ -191,7 +191,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
-        if obj.param.test.input == 0
+        if obj.param.test.input == 1
             obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
         elseif obj.param.test.input == 2
             % obj.input.u(1,:,:) = obj.param.ref_input(1) * ones(1, obj.H, obj.N); 
@@ -239,25 +239,33 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
     
         %% 制約 STL
-        % obj.constraints_STL(tildeX);
+         obj.constraints_STL(tildeX);
     end
 
     function constraints_STL(obj, tildeX)
         v1_min = 0.02;
-        v1_max = 0.02;
+        v1_max = 0.05;
         v2_min = 0.01;
-        v2_max = 0.01;
-        v1_weight = 1e4;
-        v2_weight = 1e4;
-        Vobs = tildeX(9,:,:);
-        if obj.param.t >1 && obj.param.t <3 
-            stageVobs = v1_weight.* ((v1_min-Vobs).^2+(Vobs-v1_max).^2);
-            obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs, obj.H, []))';
+        v2_max = 0.05;
+        v1_weight = diag([1e2;1e2;0]);
+        v2_weight = diag([1e2;1e2;0]);
+        Vobs = tildeX(1:3,:,:);
+        if obj.param.t >0 && obj.param.t <10 
+            % stageVobs = v1_weight.*((v1_min-Vobs).^2+(Vobs-v1_max).^2);
+            % obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs, obj.H, []))';
+            stageVobs = pagemtimes(v1_weight,((v1_min-Vobs).^2+(Vobs-v1_max).^2));
+            V_step_sum = sum(stageVobs, 2);
+            V_final = sum(squeeze(V_step_sum), 1)'; 
+            obj.input.Evaluationtra(:,1) =obj.input.Evaluationtra(:,1)+V_final;
         end
-        if obj.param.t > 5 && obj.param.t <7 
-            stageVobs2 = v2_weight .*((v2_min-Vobs).^2+(Vobs-v2_max).^2);
-            obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs2, obj.H, []))';
-        end
+        % if obj.param.t >4 && obj.param.t <7
+        %     % stageVobs2 = v2_weight .*((v2_min-Vobs).^2+(Vobs-v2_max).^2);
+        %     % obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs2, obj.H, []))';
+        %     stageVobs2 = pagemtimes(v2_weight,((v2_min-Vobs).^2+(Vobs-v2_max).^2));
+        %     V_step_sum2 = sum(stageVobs2, 2);
+        %     V_final2 = sum(squeeze(V_step_sum2), 1)'; 
+        %     obj.input.Evaluationtra(:,1) =obj.input.Evaluationtra(:,1)+V_final2;
+        % end
     end
 
     function normalize(obj)
