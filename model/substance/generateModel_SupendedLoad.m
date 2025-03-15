@@ -106,48 +106,6 @@ dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
 matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% estimator用質量推定+推力外乱推定も可能
-%墜落する．loadmassも推定している為干渉するのかもしれない
-syms mLDummy real
-syms fdst real
-physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
-dOL = cross(-pT,(u1+fdst)*ERb0*e3)/(m*cableL);
-dpT  = cross(ol,pT);
-ddPT = cross(dOL,pT)+cross(ol,dpT);
-ddPL = [0;0;-gravity]+(dot(pT,(u1+fdst)*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
-ddP  = ddPL-cableL*ddPT;
-dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
-x=[p;er;dp;ob;pl;dpl;pT;ol;mL;fdst];
-f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
-matlabFunction(f,'file','with_load_model_mL_fdst_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% estimator用質量+紐の長さの推定可能
-%推定して飛行が可能．初期位置が離れすぎると墜落．精度は質量推定と同等，実機でどうなるかは分からない
-syms mLDummy real
-syms cableLDummy real
-physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableLDummy};
-dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
-dpT  = cross(ol,pT);
-ddPT = cross(dOL,pT)+cross(ol,dpT);
-ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
-ddP  = ddPL-cableL*ddPT;
-dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
-x=[p;er;dp;ob;pl;dpl;pT;ol;mL;cableL];
-f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
-matlabFunction(f,'file','with_load_model_mL_cableL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%% estimator用質量推定+x,y,z外乱推定も可能
-%z方向の外乱推定を入れた場合は墜落する．loadmassも推定している為干渉するのかもしれない
-syms mLDummy real
-syms dstx dsty dstz real
-physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
-dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
-dpT  = cross(ol,pT);
-ddPT = cross(dOL,pT)+cross(ol,dpT);
-ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL) + [dstx;dsty;dstz];
-ddP  = ddPL-cableL*ddPT;
-dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
-x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty;dstz];
-f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0;0];
-matlabFunction(f,'file','with_load_model_mL_dstxyz_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% estimator用質量推定+x,y外乱推定も可能
 %外乱推定可能
 syms mLDummy real
@@ -161,14 +119,52 @@ ddP  = ddPL-cableL*ddPT;
 dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0];
-% matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(f,'file','with_load_model_mL_dstxy_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 
-physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, mL, cableL];
-Fl = subs(f,U,[0;0;0;0]);
-Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
-simplify(f - (Fl+Gl*U))
-matlabFunction(Fl,'file','FLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
-matlabFunction(Gl,'file','GLxyDst','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+%% 以下のものは動かなかったモデル
+%% estimator用質量推定+推力外乱推定も可能
+%墜落する．loadmassも推定している為干渉するのかもしれない
+% syms mLDummy real
+% syms fdst real
+% physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
+% dOL = cross(-pT,(u1+fdst)*ERb0*e3)/(m*cableL);
+% dpT  = cross(ol,pT);
+% ddPT = cross(dOL,pT)+cross(ol,dpT);
+% ddPL = [0;0;-gravity]+(dot(pT,(u1+fdst)*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
+% ddP  = ddPL-cableL*ddPT;
+% dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+% x=[p;er;dp;ob;pl;dpl;pT;ol;mL;fdst];
+% f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
+% matlabFunction(f,'file','with_load_model_mL_fdst_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'}); %% estimator用質量+紐の長さの推定可能
+%% 推定して飛行が可能．初期位置が離れすぎると墜落．精度は質量推定と同等，実機でどうなるかは分からない
+% syms mLDummy real
+% syms cableLDummy real
+% physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableLDummy};
+% dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
+% dpT  = cross(ol,pT);
+% ddPT = cross(dOL,pT)+cross(ol,dpT);
+% ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
+% ddP  = ddPL-cableL*ddPT;
+% dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+% x=[p;er;dp;ob;pl;dpl;pT;ol;mL;cableL];
+% f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0];
+% matlabFunction(f,'file','with_load_model_mL_cableL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% estimator用質量推定+x,y,z外乱推定も可能
+% %z方向の外乱推定を入れた場合は墜落する．loadmassも推定している為干渉するのかもしれない
+% syms mLDummy real
+% syms dstx dsty dstz real
+% physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r,mLDummy, cableL};
+% dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
+% dpT  = cross(ol,pT);
+% ddPT = cross(dOL,pT)+cross(ol,dpT);
+% ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL) + [dstx;dsty;dstz];
+% ddP  = ddPL-cableL*ddPT;
+% dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+% x=[p;er;dp;ob;pl;dpl;pT;ol;mL;dstx;dsty;dstz];
+% f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0;0;0;0];
+% matlabFunction(f,'file','with_load_model_mL_dstxyz_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+
+%% ここ以下は永久先輩の時に作成されたもの
 %% plant,estimator用With load model (Extend & Euler)
 % 紐の取り付け位置考慮．今は使われていない
 syms ex ey ez real

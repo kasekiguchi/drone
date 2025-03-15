@@ -203,7 +203,7 @@ clc
     matlabFunction(subs(beta2, [xdReff vInput1f], [XDf V1vf]),'file','Beta2_SuspendedLoadxyDst.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'beta2'});
     %以下はとても重い
     v2_a2 = subs([V2;V3;V4] - alpha2, [xdReff vInput1f], [XDf V1vf]);
-    matlabFunction(v2_a2,'file','V2_alpha2_SuspendedLoadxyDst.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'v2_alpha2'});
+    matlabFunction(v2_a2,'file','Vs_alpha2_SuspendedLoadxyDst.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'v2_alpha2'});
 
 %理想のfunctionだけどUsが重すぎるので分割している．
     % matlabFunction(subs(H(:,1)*(-alpha1+v1(t)), [xdRef vInput1], [XD V1v]),'file','Uf_SuspededLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'U1'});

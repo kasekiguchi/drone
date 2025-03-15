@@ -87,7 +87,7 @@ classdef FOR_LOAD < SENSOR_CLASS
                     end
                 end
                 sfG = obj.isGround
-                % 地面についた判定になったらセンサ値を使い始める
+                % 地面についた判定になったらセンサ値を使い始める%検証2
                 % if obj.isGround
                     if isempty(obj.tl0)
                         obj.tl0 = tc;
