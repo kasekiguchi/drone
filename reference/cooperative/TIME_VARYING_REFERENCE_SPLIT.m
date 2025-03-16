@@ -13,12 +13,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         com                     % 使用制御モデル->"Cooperative"or"Split"
         result                  % do method の返り値を格納
         N                       % 機体数
-        ftakeoff = 0            % take off のフラグ
-        f2ndTakeOffPhase = 0    % take offの二段階目になった時のフラグ
-        flanding = 0            % landing のフラグ
-        th_offset         = 0   %目標オフセット
-        th_offset_takeoff = 0   %takeoff開始時のオフセット
-        th_offset_landing = 0   %landing開始時のオフセット
+        isTakeoff         = 0   % take off のフラグ
+        is2ndTakeOffPhase = 0   % take offの二段階目になった時のフラグ
+        isLanding         = 0   % landing のフラグ
+        th_offset         = 0   % 目標オフセット
+        th_offset_takeoff = 0   % takeoff開始時のオフセット
+        th_offset_landing = 0   % landing開始時のオフセット
         base_time_takeoff       % take off開始時刻
         base_time_landing       % landing開始時刻
         base_state_takeoff      % take offの初期位置
@@ -27,10 +27,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         copy_state_landing      % landingのxy初期値
         te_takeoff = 15         % take offで目標高度に達するまでの時間goal time
         zd_takeoff = 0.7        % take offの目標高度goal altitude
-        zd_takeoff_now          % take offの目標高度goal altitude
+        zd_takeoff_now          % take offの現在目標高度を格納goal altitude
         te_landing = 20         % landingの時間goal time
         isGround                % 地面についたか
-        base_time_flight=[]     % 目標軌道に追従し始めたときの時刻
+        base_time_flight = []   % 目標軌道に追従し始めたときの時刻
         constPrep = 0           % 前時刻の制約の位置
         constPrev = 0           % 前時刻の制約の速度
 
@@ -144,7 +144,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %衝突回避reference生成用
                    droneDistance        = vecnorm(spDrones - epDronei);          % 自身と相手との距離
                    sortedDroneDistance  = sort(droneDistance);                  % 小さい順に並べ替え
-                   minDroneDistance     = sortedDroneDistance(2)  - 2*rli;      %1が自分の位置との差のため2番目が相手との最小値そこから機体の大きさrliを考慮
+                   minDroneDistance     = sortedDroneDistance(2)  - 2*rli;      %1が自分の位置との差のため2番目が相手との最小値．そこから機体の大きさrliを考慮
                    
                    constTargetp         = 0.1/(minDroneDistance - 0.4)^2;       % sim0.1,0.4,exp0.2,0.15衝突回避するためのゲイン(最終目標位置):定数/((機体間の最小距離-2*機体のロータまでの長さ)　- 閾値)^2
                    constp               = obj.constPrep + obj.constPrev*dt;     % 現在の目標位置
@@ -166,36 +166,28 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    constd
                 %flight
                    if obj.cha == 'f'
-                       obj.ftakeoff = 0;                                            % take off条件分岐用フラグ
-                       obj.flanding = 0;                                            % landing条件分岐用フラグ
-                       rhoi         = rhoi + constp*rhoiUnit12;                     % バリア関数で機体どうしの衝突を回避
-                       refi         = ref0 + sum(rotms.*repmat(rhoi',24,1),2);      % 5階微分までの回転行列とrhoの掛け算をまとめて計算
-                       %外乱打ち消しreference生成．
-                       % refi(9:10) = obj.self.estimator.result.state.dst(1:2);%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
-                       
-                       %加速度目標値として制約を設定することで力の次元で制約を考慮
-                       % refi           = ref0 + sum(rotm0.*repmat(rhoi',24,1),2);%5階微分までの回転行列とrhoの掛け算をまとめて計算
-                       % rhoicUnit12    = rhoci(1:2)/norm(rhoci(1:2));%衝突回避用のxy方向のrhoの単位ベクトル
-                       % refi(9:10)     = constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
-                       % refi(9:10)     = 1*rhoicUnit12;%constp*rhoicUnit12;%バリア関数で機体どうしの衝突を回避(閾値で無限大)
+                       obj.isTakeoff = 0;                                       % take off条件分岐用フラグ
+                       obj.isLanding = 0;                                       % landing条件分岐用フラグ
+                       rhoi         = rhoi + constp*rhoiUnit12;                 % バリア関数で機体どうしの衝突を回避
+                       refi         = ref0 + sum(rotms.*repmat(rhoi',24,1),2);  % 5階微分までの回転行列とrhoの掛け算をまとめて計算
                 %take off
                    elseif obj.cha =='t'
                        % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。もしくは改良する必要制あり
-                       obj.flanding                     = 0;                                                    % landing条件分岐用フラグ
+                       obj.isLanding                    = 0;                                                    % landing条件分岐用フラグ
                        if isempty(obj.base_time_takeoff)
                            obj.base_time_takeoff        = varargin{1}.t;                                        % takeoffになった時間
                        end
                        takeOffTime                      = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                        %初期値 
                        if isempty(obj.base_state_takeoff) || takeOffTime > obj.te_takeoff                       % 初期位置がないまたは，takeoffが終わる時間を過ぎたか
-                           % 質量推定が終わるまでのとき  
+                           % 質量推定が終わるまでのとき，一旦低い高度でホバリング
                            if isempty(obj.base_state_takeoff)   
-                               obj.zd_takeoff_now       = sp0(3) + 0.1;                                        % 目標高度設定
+                               obj.zd_takeoff_now       = sp0(3) + 0.1;                                         % 目標高度設定(牽引物の高さ+機体の全高)
                                obj.base_state_takeoff   = [real_spL(1:2);epDronei(3)-cablei];                   % 初期位置,紐の長さ分下に埋まっているという設定
                                obj.copy_state_takeoff   = real_spL;                                             % 初期の紐接続点の実際のx,y,z位置
                            %推定終わってから目標高度に行くとき(牽引物roll,pitch角が1deg未満かつ目標高さとの誤差0.02 m以上)       
                            elseif abs([sq0(1:2);obj.zd_takeoff_now - sp0(3)]) < [1*ones(2,1)*pi/180;0.02] 
-                               obj.f2ndTakeOffPhase     = 1;
+                               obj.is2ndTakeOffPhase     = 1;
                                obj.base_time_takeoff    = varargin{1}.t;                                        % takeoffになった時間
                                takeOffTime              = varargin{1}.t - obj.base_time_takeoff;                % takeoffになってからの時間
                                obj.base_state_takeoff   = [obj.base_state_takeoff(1:2);obj.zd_takeoff_now];     % 初期位置（一段階目の目標高度から始める）
@@ -204,28 +196,28 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                            end
                        end
                        % 更新
-                       exrhoi                           = 0.5;                                                  % rho方向に延ばす距離
-                       % 紐が張る機体の高度になったか(紐の長さとexrhoiから求まる高度に牽引物の高さを加えた高度より機体が高いか)
-                       if epDronei(3) >= sqrt(cablei^2 - exrhoi^2) + obj.copy_state_takeoff(3) || obj.ftakeoff == 1 
-                           obj.ftakeoff                 = 1;                                                    % take off条件分岐用フラグ
-                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + constp*rhoiniUnit12(1:2);% rhoiUnit12方向に延長
+                       extValue                         = 0.5;                                                  % rho方向に延ばす距離
+                       % 紐が張る機体の高度になったか(紐の長さとextValueから求まる機体の最大高度に紐接続点の初期高さを加えた高度より機体が高いか)
+                       if epDronei(3) >= sqrt(cablei^2 - extValue^2) + obj.copy_state_takeoff(3) || obj.isTakeoff == 1 
+                           obj.isTakeoff                = 1;                                                        % take off条件分岐用フラグ
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + constp*rhoiniUnit12(1:2);   % rhoiUnit12方向に延長
                        % 紐がたわんでいる場合
                        else
-                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + exrhoi*rhoiniUnit12(1:2);% rho方向に延ばす距離
-                           obj.constPrep                = exrhoi;
+                           obj.base_state_takeoff(1:2)  = obj.copy_state_takeoff(1:2) + extValue*rhoiniUnit12(1:2); % rho方向に延ばす距離
+                           obj.constPrep                = extValue;
                            obj.constPrev                = 0;
                        end
                        % 目標値
                            refi                         = obj.gen_ref_for_take_off(takeOffTime);
                        % take offのプロポの推力値を計算
-                       if obj.f2ndTakeOffPhase
+                       if ~obj.is2ndTakeOffPhase
                            obj.self.input_transform.param.th_offset_tl = obj.th_offset_takeoff + (obj.th_offset-obj.th_offset_takeoff)*min(obj.te_takeoff,takeOffTime)/obj.te_takeoff;
                        end
                 %landing
                    elseif obj.cha =='l'
-                       % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。
+                       % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。(takeoffも同様だが初期目標高度が低いためあまり影響がない)
                        % 二段階に分けて高度0付近までflightと同じような目標軌道生成を行い、その後各単機牽引でlandigに変更するのもあり
-                       obj.ftakeoff                     = 0;                                                    %take off条件分岐用フラグ
+                       obj.isTakeoff                    = 0;                                                    %take off条件分岐用フラグ
                        % 初期値        
                        if isempty(obj.base_state_landing)       
                            obj.base_time_landing        = varargin{1}.t;                                        % landingになった時間
@@ -234,13 +226,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        end     
                        landingTime                      = varargin{1}.t - obj.base_time_landing;                % landingになってからの時間
                        % 更新     
-                       exrhoi                           = 0.5;                                                  % rhoi方向に延ばす距離
+                       extValue                         = 0.5;                                                  % rhoi方向に延ばす距離
                        % 推定質量がlanding開始時の90%未満またはlanding開始時の機体と牽引物の距離のz方向の90%の長さより現在の差の距離の方が短い場合の時は制約を固定値にする     
                        % フラグはコントローラクラスで生成．一度フラグがたったら同じ分岐に入り続ける
                        if obj.self.controller.isGround
                            if ~obj.isGround
                                obj.isGround = 1;
-                               obj.base_state_landing(1:2)  = real_spL(1:2) + exrhoi*rhoiUnit12(1:2); % rhoiUnit12方向に延長
+                               rhoiLandingUnit12 = norm([spL(1:2) - sp0(1:2);0]);%地面についている状態でのrhoiのx,y方向(landingに入った時の位置と着陸した時の位置が違うことがあるため)
+                               obj.base_state_landing(1:2) = real_spL(1:2) + extValue*rhoiLandingUnit12(1:2);   % rhoiUnit12方向に延長
                            end
                        else 
                            obj.base_state_landing(1:2)  = obj.copy_state_landing(1:2) + constp*rhoiUnit12(1:2); % rhoiUnit12方向に延長         

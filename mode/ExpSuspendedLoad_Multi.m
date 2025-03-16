@@ -48,7 +48,7 @@ isCoop  = mod(rigid_num,2); % 複数機牽引であるかの判別(剛体数が�
 if isCoop == 1
     firstId = 2;
     COMs            = ["",COMs];                            % プロポのcom番号
-    rigids          = motive.result.rigid(1).p;                % 位置の剛体情報を取得
+    rigids          = motive.result.rigid(1).p;             % 位置の剛体情報を取得
     eul             = Quat2Eul(motive.result.rigid(1).q);   % 牽引物の角度を取得しクオータニオンからオイラー角に変換
     rho             = zeros(3,N-1);
     rhoini          = zeros(3,N-1);
