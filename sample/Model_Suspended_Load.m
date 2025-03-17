@@ -28,10 +28,7 @@ Setting.param           = agent.parameter.get;                      % モデル�
 % EKFで使うモデルがplantと異なる場合の設定isEstLoadMassの値とmodelnameによって変更
 if ~isempty(agent.plant) && isEstLoadMass
       modelName = "Load_mL_HL";
-      % modelName = "Load_mL_cableL_HL";
-      % modelName = "Load_mL_fdst_HL";
       % modelName = "Load_mL_dstxy_HL";
-      % modelName = "Load_mL_dstxyz_HL";
       switch modelName
           % 牽引物質量推定
           case "Load_mL_HL"
@@ -41,25 +38,6 @@ if ~isempty(agent.plant) && isEstLoadMass
               Setting.num_list        = [3,3,3,3,3,3,3,3,1];        
               Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL"];         % paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
               Setting.initial.mL      = agent.parameter.loadmass*0+0.2;                       % 初期牽引物質量
-          % 牽引物質量と紐の長さを推定       
-          case "Load_mL_cableL_HL"      
-              Model.name              = modelName;                                          % print name
-              Setting.method          = get_model_name(Model.name);                         % model dynamicsの実体名
-              Setting.dim             = [26,4,21];
-              Setting.num_list        = [3,3,3,3,3,3,3,3,1,1];
-              Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL","cableL"];% paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-              Setting.initial.mL      = agent.parameter.loadmass*0+0;                       % 初期牽引物質量
-              Setting.initial.cableL  = agent.parameter.cableL;                             % 初期紐の長さ
-          % 牽引物質量と推力外乱%墜落する．loadmassも推定している為干渉するのかもしれない       
-          case "Load_mL_fdst_HL"        
-              Model.name              = modelName; % print name     
-              Setting.method          = get_model_name(Model.name);                         % model dynamicsの実体名
-              Setting.dim             = [26,4,21];      
-              Setting.num_list        = [3,3,3,3,3,3,3,3,1,1];
-              Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL","fdst"];  % paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-              Setting.initial.mL      = agent.parameter.loadmass*0+0.5;                     % 初期牽引物質量
-              Setting.initial.fdst    = 0;                                                  % 推力外乱初期値
-          % 牽引物にかかるx,y方向の外乱推定
           case "Load_mL_dstxy_HL"
               % 外乱推定可能
               %xyの外乱を定常外乱として考慮しているモデルを階層型線形化すればいいかも
@@ -70,16 +48,6 @@ if ~isempty(agent.plant) && isEstLoadMass
               Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL","dst"];   % paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
               Setting.initial.mL      = agent.parameter.loadmass*0+0;%初期牽引物質量
               Setting.initial.dst     = [0;0];%外乱初期値
-          % 牽引物にかかるx,y,z方向の外乱推定
-          case "Load_mL_dstxyz_HL"
-              %z方向の外乱推定を入れた場合は墜落する．loadmassも推定している為干渉するのかもしれない
-              Model.name              = modelName;                                          % print name
-              Setting.method          = get_model_name(Model.name);                         % model dynamicsの実体名
-              Setting.dim             = [28,4,21];
-              Setting.num_list        = [3,3,3,3,3,3,3,3,1,3];
-              Setting.state_list      = ["p","q","v","w","pL","vL","pT","wL","mL","dst"];   % paramのmLはモデルではmLDummyの変数に入れられモデルには使われない
-              Setting.initial.mL      = agent.parameter.loadmass*0+0.5;                     % 初期牽引物質量
-              Setting.initial.dst     = [0;0;0];                                            % 外乱初期値
       end
 end
 

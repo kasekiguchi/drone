@@ -168,8 +168,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    if obj.cha == 'f'
                        obj.isTakeoff = 0;                                       % take off条件分岐用フラグ
                        obj.isLanding = 0;                                       % landing条件分岐用フラグ
-                       rhoi         = rhoi + constp*rhoiUnit12;                 % バリア関数で機体どうしの衝突を回避
-                       refi         = ref0 + sum(rotms.*repmat(rhoi',24,1),2);  % 5階微分までの回転行列とrhoの掛け算をまとめて計算
+                       rhoi          = rhoi + constp*rhoiUnit12;                % バリア関数で機体どうしの衝突を回避
+                       refi          = ref0 + sum(rotms.*repmat(rhoi',24,1),2); % 5階微分までの回転行列とrhoの掛け算をまとめて計算
                 %take off
                    elseif obj.cha =='t'
                        % 紐の長さが違う場合はリファレンスが高度0になるまでの時間が異なるため注意。もしくは改良する必要制あり
