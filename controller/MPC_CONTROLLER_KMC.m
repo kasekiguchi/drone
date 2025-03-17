@@ -164,34 +164,19 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.input.mu = obj.input.pre_u; % 採択入力を平均
       %%%%%%%%%%%%%%%%%%%%%%%qp
      
-      %%obj.previous_input = repmat(obj.input.pre_u, 1, obj.param.H);%qp-mpc
-      % obj.options = optimoptions('fmincon');
-      % obj.options = optimoptions(obj.options,'MaxIterations',         1.e+12); % 最大反復回数
-      % obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-      % 
-      % obj.options.Algorithm = 'sqp';  % 逐次二次計画法
-      % obj.options.Display = 'none';   % 計算結果の表示
-      % 
-      % %% conditions
-      % fun = @obj.objectiveqp;
-      % x0 = obj.previous_input;
-      % A = []; b = []; Aeq = []; beq = [];
-      % lb = repmat(obj.param.input_min, 1,obj.param.H); % min
-      % ub = repmat(obj.param.input_max, 1,obj.param.H); % max
-      % nonlcon = [];
-      % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
-      % obj.previous_input = var;
-      % obj.result.input = var(:, 1); % 算出された入力
+     
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% データ表示用
-            obj.input.u = obj.result.input; 
-      obj.input.mu = obj.param.ref_input; % 目標入力
+     obj.QP_MPC();
+      obj.input.u = obj.result.input; 
+      obj.input.mu = obj.param.ref_input;
+      % 目標入力
       obj.generate_input(0.1);  % 入力生成
       obj.predict();            % 状態予測
-      obj.objectivemc();          % 評価計算
-      obj.normalize();          % 評価値の正規化
-      obj.Resampling_IS();      % リサンプリング
-    %  obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
+     %  obj.objectivemc();          % 評価計算
+     %  obj.normalize();          % 評価値の正規化
+     %  obj.Resampling_IS();      % リサンプリング
+     % obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
       % obj.result.bestcostID = obj.input.BestcostID;
@@ -283,23 +268,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
         obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1);
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
-      obj.previous_input = repmat(U,1,obj.param.H,obj.N);
-      obj.options = optimoptions('fmincon');
-      obj.options = optimoptions(obj.options,'MaxIterations',         1.e+12); % 最大反復回数
-      obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-      obj.options.Algorithm = 'sqp';  % 逐次二次計画法
-      obj.options.Display = 'none';   % 計算結果の表示
-
-      %% conditions
-      fun = @obj.objectiveqp;
-      x0 = obj.previous_input;
-      A = []; b = []; Aeq = []; beq = [];
-      lb = repmat(obj.param.input_min, obj.N,obj.param.H); % min
-      ub = repmat(obj.param.input_max,  obj.N,obj.param.H); % max
-      nonlcon = [];
-      [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
-      obj.previous_input = var;
-      obj.result.input = var(:, 1); % 算出された入力
+     
         %% 制約 STL
         % obj.constraints_STL(tildeX);
     end
@@ -418,6 +387,26 @@ classdef MPC_CONTROLLER_KMC < handle
             xr(10:12, h+1) = [0;0;0];
             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
         end
+    end
+    function QP_MPC(obj)
+        obj.previous_input = repmat(obj.input.pre_u, 1, obj.param.H);%qp-mpc
+        obj.options = optimoptions('fmincon');
+        obj.options = optimoptions(obj.options,'MaxIterations',1.e+12); % 最大反復回数
+        obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+
+        obj.options.Algorithm = 'sqp';  % 逐次二次計画法
+        obj.options.Display = 'none';   % 計算結果の表示
+
+        % conditions
+        fun = @obj.objectiveqp;
+        x0 = obj.previous_input;
+        A = []; b = []; Aeq = []; beq = [];
+        lb = repmat(obj.param.input_min, 1,obj.param.H); % min
+        ub = repmat(obj.param.input_max, 1,obj.param.H); % max
+        nonlcon = [];
+        [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+        obj.previous_input = var;
+        obj.result.input = var(:, 1); % 算出された入力
     end
     function [eval] = objectiveqp(obj,x)   % obj.~とする
             U = x;
