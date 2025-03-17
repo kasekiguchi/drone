@@ -40,7 +40,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
       n = 12; % 状態数
       obj.input = param.input; %入力関連のみ
-      
+      obj.modelf = obj.self.plant.method;
       obj.P = obj.self.parameter.get(); % ドローンのパラメータ（質量，ロータ間距離，慣性モーメントなど）
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
@@ -72,6 +72,21 @@ classdef MPC_CONTROLLER_KMC < handle
       C = repmat({obj.param.C}, 1, obj.H); 
       obj.param.C = blkdiag(C{:});
 
+      %qp 定義
+       obj.param.P = 1e6 * diag([1e6; 1e6; 1e4]);    % 座標   1000 1000 10000
+      obj.param.V = 1e6 * diag([1e2; 1e2; 1e4]);    % 速度
+      obj.param.R = 0.1 * diag([1.0; 1e3; 1e3; 1e3]); % 入力
+      obj.param.RP = 0 * diag([1.0; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
+      obj.param.Q = 1e3 * diag([1e1; 1e1; 1e1]);  % 姿勢角
+      obj.param.W = diag([1e1; 1e1; 1e1]);  % 角速度
+
+      obj.param.Pf = diag([1e2; 1e2; 1e4]); % 6
+      obj.param.Vf = diag([1e2; 1e2; 1e3]); % 6
+      obj.param.Qf = diag([1e1; 1e1; 1]); % 7,8
+      obj.param.Wf = diag([1; 1; 1]);
+      obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
+      obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
+
       %% 勾配MPCとの併用を見据えてのQP(Quadratic Programming:二次計画法)の式変換
       %-- M2鬼澤がやっていたと思う
       % Q = reshape(obj.Weight(:,:,1), obj.param.state_size, []);
@@ -86,6 +101,7 @@ classdef MPC_CONTROLLER_KMC < handle
         time = varargin{1};
         phase = varargin{2};
         obj.param.t = time.t;
+        
         %% phaseによるcontrollerの選択
         if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
@@ -96,6 +112,7 @@ classdef MPC_CONTROLLER_KMC < handle
             disp('controller: HL  phase: t or l');
         elseif phase == 'f' % flight
             obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
+              % result = obj.controller_HL(varargin); 
             result = obj.controller_KMC(varargin);
             disp('controller: MC  phase: f');
         end 
@@ -112,7 +129,7 @@ classdef MPC_CONTROLLER_KMC < handle
         F3 = obj.param.F3;
         F4 = obj.param.F4;
         xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
-
+        
         % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
         % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
         Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
@@ -134,6 +151,7 @@ classdef MPC_CONTROLLER_KMC < handle
         tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
         % max,min are applied for the safty
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+         obj.result.bestcost = obj.input.Bestcost_now;
         result = obj.result;
     end
 
@@ -144,17 +162,40 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
 
       % obj.input.mu = obj.input.pre_u; % 採択入力を平均
+      %%%%%%%%%%%%%%%%%%%%%%%qp
+     
+      %%obj.previous_input = repmat(obj.input.pre_u, 1, obj.param.H);%qp-mpc
+      % obj.options = optimoptions('fmincon');
+      % obj.options = optimoptions(obj.options,'MaxIterations',         1.e+12); % 最大反復回数
+      % obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+      % 
+      % obj.options.Algorithm = 'sqp';  % 逐次二次計画法
+      % obj.options.Display = 'none';   % 計算結果の表示
+      % 
+      % %% conditions
+      % fun = @obj.objectiveqp;
+      % x0 = obj.previous_input;
+      % A = []; b = []; Aeq = []; beq = [];
+      % lb = repmat(obj.param.input_min, 1,obj.param.H); % min
+      % ub = repmat(obj.param.input_max, 1,obj.param.H); % max
+      % nonlcon = [];
+      % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+      % obj.previous_input = var;
+      % obj.result.input = var(:, 1); % 算出された入力
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %% データ表示用
+            obj.input.u = obj.result.input; 
       obj.input.mu = obj.param.ref_input; % 目標入力
       obj.generate_input(0.1);  % 入力生成
       obj.predict();            % 状態予測
-      obj.objective();          % 評価計算
+      obj.objectivemc();          % 評価計算
       obj.normalize();          % 評価値の正規化
       obj.Resampling_IS();      % リサンプリング
-      obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
+    %  obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
-      obj.result.bestcostID = obj.input.BestcostID;
-      obj.result.bestcost = obj.input.Bestcost_now;
+      % obj.result.bestcostID = obj.input.BestcostID;
+       obj.result.bestcost = obj.input.Bestcost_now;
       obj.result.sigma = obj.input.sigma;
       obj.result.Evaluationtra = obj.input.Evaluationtra;
       obj.result.path = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
@@ -202,13 +243,18 @@ classdef MPC_CONTROLLER_KMC < handle
 
     %% 状態予測
     function predict(obj)
+        if obj.param.code  == '26'
+        current = repmat(obj.param.F([obj.current_state;obj.param.ref_input]), 1, 1, obj.N);
+        else
         current = repmat(obj.param.F(obj.current_state), 1, 1, obj.N);
+        end
         tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
         tmp = pagemtimes(obj.param.C, tmp_z);
         obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-    end
+    end 
+ 
 
-    function objective(obj)
+    function objectivemc(obj)
         U = obj.input.u;
         X = obj.state.state_data;
 
@@ -237,14 +283,30 @@ classdef MPC_CONTROLLER_KMC < handle
 
         obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]), obj.N, 1);
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]), obj.N, 1);
-    
+      obj.previous_input = repmat(U,1,obj.param.H,obj.N);
+      obj.options = optimoptions('fmincon');
+      obj.options = optimoptions(obj.options,'MaxIterations',         1.e+12); % 最大反復回数
+      obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+      obj.options.Algorithm = 'sqp';  % 逐次二次計画法
+      obj.options.Display = 'none';   % 計算結果の表示
+
+      %% conditions
+      fun = @obj.objectiveqp;
+      x0 = obj.previous_input;
+      A = []; b = []; Aeq = []; beq = [];
+      lb = repmat(obj.param.input_min, obj.N,obj.param.H); % min
+      ub = repmat(obj.param.input_max,  obj.N,obj.param.H); % max
+      nonlcon = [];
+      [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+      obj.previous_input = var;
+      obj.result.input = var(:, 1); % 算出された入力
         %% 制約 STL
-         obj.constraints_STL(tildeX);
+        % obj.constraints_STL(tildeX);
     end
 
     function constraints_STL(obj, tildeX)
-        v1_min = 0.02;
-        v1_max = 0.05;
+        v1_min = 0.00;
+        v1_max = 1;
         v2_min = 0.01;
         v2_max = 0.05;
         v1_weight = diag([1e2;1e2;0]);
@@ -357,5 +419,23 @@ classdef MPC_CONTROLLER_KMC < handle
             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
         end
     end
+    function [eval] = objectiveqp(obj,x)   % obj.~とする
+            U = x;
+            X(:,1) = obj.current_state;
+            for L = 2:obj.param.H
+                X(:,L) = X(:,L-1) + obj.param.dt * obj.modelf(X(:,L-1), U(:,L-1), obj.P);
+            end
+
+            tildeX = X - obj.state.ref(1:12,:);
+            tildeUpre = U - obj.input.u;
+            tildeUref = U - obj.state.ref(13:16,:);
+
+            stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
+            stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
+            stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
+            terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
+
+            eval = stageState + stageInputPre + stageInputRef + terminalState;
+        end
   end
 end

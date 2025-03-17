@@ -8,11 +8,11 @@ clear; clc;
 flg.bilinear = 0; % 双線形モデル
 flg.normalize = 0; % 正規化
 flg.without_pos = 0; % 位置無観測量
-flg.weight = 0 % 重み付き最小二乗法
+flg.weight = 0; % 重み付き最小二乗法
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-exp_data = 'Exp_Kyomo1';    %zのみ速度から
+exp_data = 'Exp_Kyomo';    %zのみ速度から
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
@@ -26,6 +26,7 @@ end
 
 %-- 観測量は固まったら分けた方が快速
 F = @quaternions_all_00; % 個別用
+%F = @quaternions_all_26;
 % F = @quaternions_all; % 2024 全観測量
 
 % データのかさまし
@@ -54,7 +55,7 @@ else
         est = KL(Data.X(4:end,:),Data.U,Data.Y(4:end,:),F,flg); % 位置を観測量に入れないときのKL
     else 
         est = KL(Data.X,Data.U,Data.Y,F,flg); 
-        % est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
+         %est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
     end%クープマン線形化の具体的な計算をしてる部分
 end
 

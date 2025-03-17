@@ -44,7 +44,7 @@ if flg.weight
     % Q_hermite = blkdiag(Q_hermite_k1_k2, Q_hermite_k3_k4);
     % Q = blkdiag(Q_isobe, Q_hermite);
 
-    Q = blkdiag(flg.weight_Qisobe, eye(26-12)); % 00
+    %Q = blkdiag(flg.weight_Qisobe, eye(26-12)); % 00
     % Q = blkdiag(flg.weight_Qisobe, eye(36-12)); % 02
     % Q = blkdiag(flg.weight_Qisobe(4:end,4:end), eye(23-9)); % 10
 
@@ -52,7 +52,7 @@ if flg.weight
     % Q = blkdiag(flg.weight_Qisobe, eye(4), eye(256), eye(256)*flg.weight_Qhermite);
 
     % code26, code27
-    % Q = blkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
+    Q = bTlkdiag(flg.weight_Qisobe, eye(14), eye(256)*flg.weight_Qhermite);
     
     % code28
     % Q = blkdiag(flg.weight_Qisobe, eye(14), eye(32)*flg.weight_Qhermite);

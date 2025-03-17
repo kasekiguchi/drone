@@ -26,8 +26,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 %agent.reference = LANDING_REFERENCE(agent,{dt},{0.5}); cannot run
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1],te},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"}); %use landing reference need v ★the point is start point
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1],te},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"}); %use landing reference need v ★the point is start point
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
 agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 %STL関連 Initialize  and send the object into the classdef to change the parament

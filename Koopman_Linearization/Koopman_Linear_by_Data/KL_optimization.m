@@ -11,13 +11,13 @@ tic
 %Xlift,Yliftを計算する
 remi = round(size(X,2) / 5); j = 0;
 for i = 1:size(X,2)%1:Data.num
-    if flg.hermite
+    % if flg.hermite
         dx = [X(:,i);U(:,i)]; % hermite
         dy = [Y(:,i);U(:,i)];
-    else
-        dx = X(:,i); % ふつう
-        dy = Y(:,i);
-    end
+    % else
+    %     dx = X(:,i); % ふつう
+    %     dy = Y(:,i);
+    % end
     Xlift(:,i) = F(dx); 
     Ylift(:,i) = F(dy);
     if rem(i, remi) == 0

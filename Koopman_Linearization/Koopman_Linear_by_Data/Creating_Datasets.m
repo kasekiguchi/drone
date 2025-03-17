@@ -44,7 +44,7 @@ fprintf('\n＜データセットの結合を行います＞\n')
 tic
 % Data.HowmanyDataset = 10;
 if ~exist('loading_filename')
-    loading_filename = 'test'; % 適当に
+    loading_filename = 'momo'; % 適当に
     Data.HowmanyDataset = 100;     % 適当に 
 end% ここだけ実行時
 setting.vxyz = str2double(input('\n＜速度からx,y,zを算出して学習に使用しますか？＞\n 0:zのみ 1:x,y,zで使用する：','s'));
@@ -62,7 +62,7 @@ for i = 1:Data.HowmanyDataset
     Data.U = [Data.U, Dataset.U];
     Data.Y = [Data.Y, Dataset.Y];
     disp(append('loading data number:',num2str(i),...
-        ', now data:',num2str(Dataset.N),...
+        ', now data:',num2str(Dataset.N),...landing_ref
         ', all data:',num2str(size(Data.X,2))))
 end
 

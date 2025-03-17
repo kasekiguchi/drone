@@ -25,8 +25,8 @@ z_0 = X0(3);
 % z = 1;
 
 %% circle
-% x = 0;
-% y = 0;
+% x = cos(t);
+% y = sin(t);
 % z = 1;
 %%
 % x = 1/(1+exp(-t + te/2));
@@ -38,16 +38,16 @@ z_0 = X0(3);
 % y = 1;
 % z = -1/(1+exp(-t + 5)) + 1;
 
-% landing use exp funcution
-% z = -20/(1+exp(-t + 5));
-% x = -0.01975*15*t*t;
-% y = -0.00625*15*t*t;
+% % landing use exp funcution
+% z = -2/(1+exp(-t + 5));
+% x = -0.01975*1.5*t*t;
+% y = -0.00625*1.5*t*t;
 
 %ref = @(t)curve_interpolation_9order(t,10,X0,V0,0,0); %
 % 
-x = 0;
-y = 0;
-z = 0;
+x = x_0;
+y = y_0;
+z = z_0;
 
 
 

@@ -31,9 +31,11 @@ initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
+
 %%
 %model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
- model_file = '2025-03-13_Exp_Kyomo1_code00_saddle.mat';
+ model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
+ %model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
 % model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
