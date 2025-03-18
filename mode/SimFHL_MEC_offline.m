@@ -1,6 +1,3 @@
-
-
-
 %% Initialize
 tmp = matlab.desktop.editor.getActive;
 dir = fileparts(tmp.Filename);
@@ -30,8 +27,7 @@ for j = 1:1
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
 
-    exp_data = load("Data/OriginalData/exp_4_MEC/exp_test_circle.mat");
-
+    
     agent = DRONE;
     agent.parameter = DRONE_PARAM("DIATONE");
     agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); % Model_Quat13
@@ -49,7 +45,7 @@ for j = 1:1
     % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5],"i",j},"HL"});
     % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
     % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
-    agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
+    agent.controller = FUNCTIONAL_NNMEC_exp(agent,Controller_NNMEC(dt));
     
 
     Pn_estimator.state = initial_state;
@@ -58,23 +54,15 @@ for j = 1:1
     for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0 end
         tic
-
+    
+    agent.controller.x_pre = [agent.estimator.result.state.p;agent.estimator.result.state.q;agent.estimator.result.state.v;agent.estimator.result.state.w];
+    agent.controller.input_pre = agent.controller.result.input;
     agent.sensor.do(time, 'f');
-    agent.sensor.result.state = exp_data.log.Data.agent.sensor.result{1,i}.state;
-
     agent.estimator.do(time, 'f');
-    agent.estimator.result.state = exp_data.log.Data.agent.estimator.result{1,i}.state;
-
-    agent.reference.do(time, 'f');
-    agent.reference.result.state = exp_data.log.Data.agent.reference.result{1,i}.state;
-
+    agent.reference.do(time, 'f');  
     agent.controller.do(time, 'f');
-    % agent.controller.result.state = exp_data.log.Data.agent.controller.result{1,i}.state;
-    agent.controller.result.input = exp_data.log.Data.agent.controller.result{1,i}.input;
-
     agent.plant.do(time, 'f');
-    % agent.plant.result.state = exp_data.log.Data.agent.plant.result{1,i}.state;
-
+    
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
         %pause(1)

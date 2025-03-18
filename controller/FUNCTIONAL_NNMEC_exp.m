@@ -8,6 +8,8 @@ properties
     Vf
     Vs
     NNMEC
+    x_pre
+    input_pre
 end
 
 methods
@@ -50,7 +52,7 @@ methods
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
         %% calc actual input
-       tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
+        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
         %%input of subsystems
         obj.result.uHL = [vf(1); vs];
         %differential virtual input first layer
@@ -63,14 +65,19 @@ methods
 
         time = varargin{1}.t;
         
-        obj.result.delta_u = tmp(1)*sin(2*pi*time/5);
-        total_thrust = tmp(1) + delta_u;
-
-        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.xa-obj.xn), "double")';
-
-        obj.result.input = [max(0,min(10,total_thrust));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-
+        obj.result.xa = [Rb0' * model.state.p; Quat2Eul(R2q(Rb0' * model.state.getq("rotmat"))); Rb0' * model.state.v; model.state.w]; % [p, q, v, w]に並べ替え
         
+        % obj.result.delta_u = tmp(1)*sin(2*pi*time/5);
+        % total_thrust = tmp(1) + delta_u;
+        % 
+          
+        xn = obj.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.x_pre, obj.input_pre, obj.param.P);
+        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
+        % obj.result.delta_u = 0.0*cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
+        
+        obj.result.input = [max(0,min(10,tmp(1)+obj.result.delta_u(1)));max(-1,min(1,tmp(2)+obj.result.delta_u(2)));max(-1,min(1,tmp(3)+obj.result.delta_u(3)));max(-1,min(1,tmp(4)+obj.result.delta_u(4)))];
+
+        obj.result.input = obj.result.input;
 
         result = obj.result;
     end

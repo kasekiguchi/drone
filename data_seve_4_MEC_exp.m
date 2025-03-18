@@ -1,47 +1,71 @@
-clear;clc;
-cf = pwd;
-close all
-if contains(mfilename('fullpath'),"mainGUI")
-  cd(fileparts(mfilename('fullpath')));
-else
-  tmp = matlab.desktop.editor.getActive;
-  cd(fileparts(tmp.Filename));
+%% Initialize
+close all hidden; clear ; clc;
+tmp = matlab.desktop.editor.getActive;
+dir_ = fileparts(tmp.Filename);
+if ~contains(path,dir_)
+    cd(erase(dir_,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
 end
-j2 = 40;
-j = j2;
 
 
-% 保存する変数を初期化
-z1 = [];
-z2 = [];
-z3 = [];
-z4 = [];
-input = [];
-q = [];
-p = [];
-v = [];
-w = [];
-ref_q = [];
-ref_p = [];
-ref_v = [];
+% フォルダのパスを指定
+folderPath = 'Data/OriginalData/exp_4_MEC/';
 
+% フォルダ内の .mat ファイルを取得
+fileList = dir(fullfile(folderPath, '*.mat'));
 
-% .mat ファイルを読み込み
-log = load("Data\OriginalData\exp_4_MEC\exp_test_saddle.mat");
-logger = simplifyLogger(log.log);
-data = DataStructure(logger);
+% 取得したファイルを逐次読み込む
+for i = 1:length(fileList)
+    fileName = fullfile(folderPath, fileList(i).name);
+    fprintf('Loading: %s\n', fileName); % 読み込むファイルを表示
+    log = LOGGER(fileName);
+    main(log, i)
+   
+end
 
-F = find(logger.phase==102); %flight_index
-
-input = data.input(:,F(1):F(end));
-delta_u = data.delta_u(:,F(1):F(end));
-p = data.p(:,F(1):F(end));
-q = data.q(:,F(1):F(end));
-v = data.v(:,F(1):F(end));
-w = data.w(:,F(1):F(end));
-
-clearvars -except p q v w delta_u input
-save('Data\data_saddle.mat')
+function main(log, i)
+    % 保存する変数を初期化
+    z1 = [];
+    z2 = [];
+    z3 = [];
+    z4 = [];
+    input = [];
+    q = [];
+    p = [];
+    v = [];
+    w = [];
+    ref_q = [];
+    ref_p = [];
+    ref_v = [];
+    
+    
+    % .mat ファイルを読み込み
+    
+    logger = simplifyLogger(log);
+    data = DataStructure(logger);
+    
+    F = find(logger.phase==102); %flight_index
+    
+    input = data.input(:,F(1):F(end));
+    delta_u = data.delta_u(:,F(1):F(end));
+    p = data.p(:,F(1):F(end));
+    q = data.q(:,F(1):F(end));
+    v = data.v(:,F(1):F(end));
+    w = data.w(:,F(1):F(end));
+    
+    clearvars -except p q v w delta_u input i
+    
+    % 保存するファイル名を作成（例: data1.mat, data2.mat, ...）
+    saveFileName = sprintf('Data/OriginalData/exp_4_MEC/learning_data/data%d.mat', i);
+    
+    % 読み込んだデータを新しいファイル名で保存
+    save(saveFileName);
+    
+    fprintf('Saved as: %s\n', saveFileName);
+end
 
 function data = DataStructure(logger)
     
