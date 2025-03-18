@@ -25,11 +25,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_state_landing      % landingの初期位置
         copy_state_takeoff      % take offの紐接続点の初期位置
         copy_state_landing      % landingのxy初期値
-        te_takeoff = 15         % take offで目標高度に達するまでの時間goal time
+        te_takeoff = 10         % take offで目標高度に達するまでの時間goal time
         zd_takeoff = 0.7        % take offの目標高度goal altitude
         zd_takeoff_now          % take offの現在目標高度を格納goal altitude
         te_landing = 20         % landingの時間goal time
-        isGround                % 地面についたか
+        isGround   = 0          % 地面についたか
         base_time_flight = []   % 目標軌道に追従し始めたときの時刻
         constPrep = 0           % 前時刻の制約の位置
         constPrev = 0           % 前時刻の制約の速度
@@ -232,7 +232,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                        if obj.self.controller.isGround
                            if ~obj.isGround
                                obj.isGround = 1;
-                               rhoiLandingUnit12 = norm([spL(1:2) - sp0(1:2);0]);%地面についている状態でのrhoiのx,y方向(landingに入った時の位置と着陸した時の位置が違うことがあるため)
+                               rhoiLanding12 = [spL(1:2) - sp0(1:2);0];
+                               rhoiLandingUnit12 = rhoiLanding12/norm(rhoiLanding12);%地面についている状態でのrhoiのx,y方向(landingに入った時の位置と着陸した時の位置が違うことがあるため)
                                obj.base_state_landing(1:2) = real_spL(1:2) + extValue*rhoiLandingUnit12(1:2);   % rhoiUnit12方向に延長
                            end
                        else 

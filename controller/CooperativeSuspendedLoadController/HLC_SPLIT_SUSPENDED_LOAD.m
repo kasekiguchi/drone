@@ -7,6 +7,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         isGround = 0
         mLlanding
         cableL_landing
+        rate
+        tle = 5
+        tl0
     end
     
     methods
@@ -14,6 +17,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.self            = self;    % agent
             obj.param           = param;  % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             obj.result.input    = [(self.parameter.loadmass*0 + self.parameter.mass)*self.parameter.gravity;0;0;0];% 初期入力
+            obj.rate            = 1/obj.tle^2;
         end
         
         function result = do(obj,varargin)
@@ -58,7 +62,13 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                     % if model.state.mL < obj.mLlanding*0.5 || model.state.p(3) - real_pL < obj.cableL_landing(3)*0.9 || obj.isGround == 1
                     if model.state.p(3) - real_pL < obj.cableL_landing(3)*0.9 || obj.isGround == 1
                         obj.isGround    = 1;                                    % この分岐に一回でも入ったら入り続けるようにフラグ立てる
-                        P(6)            = 0;                                    % 地面についたら質量は0とする
+                        tc = agent{1}.t;
+                        if isempty(obj.tl0)
+                            obj.tl0 = tc;
+                        end
+                        t               = min(tc - obj.tl0, obj.tle);                   % landingの経過時間がセンサ値使用率0%になる時間を越えないようにする
+                        k               = obj.rate*(t - obj.tle);                           % センサ値反映割合
+                        P(6)            = max(min(model.state.mL, k*obj.mLlanding),0);   % 地面についたら質量は0とする
                     % 地面についた判定出ないなとき
                     else
                         P(6)            = min(model.state.mL, obj.mLlanding);   % 傾いて着陸した時に推定が吹っ飛ばないように制限
