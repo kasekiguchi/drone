@@ -4,7 +4,7 @@ function Controller = Controller_MPC(Agent)
     Controller_param.dt = 0.25; % MPCステップ幅
     Controller_param.H = 5;
 
-    Controller_param.ConstEval = 100000;
+    Controller_param.ConstEval = 1000;
 
     Controller_param.total_size = 16;
 %     Controller_param.total_size = 15;

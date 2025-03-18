@@ -167,19 +167,19 @@ classdef MPC_CONTROLLER_KMC < handle
      
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% データ表示用
-     obj.QP_MPC();
+     %obj.QP_MPC();
       obj.input.u = obj.result.input; 
       obj.input.mu = obj.param.ref_input;
       % 目標入力
       obj.generate_input(0.1);  % 入力生成
       obj.predict();            % 状態予測
-     %  obj.objectivemc();          % 評価計算
-     %  obj.normalize();          % 評価値の正規化
-     %  obj.Resampling_IS();      % リサンプリング
-     % obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
+       obj.objectivemc();          % 評価計算
+       obj.normalize();          % 評価値の正規化
+       obj.Resampling_IS();      % リサンプリング
+      obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
-      % obj.result.bestcostID = obj.input.BestcostID;
+       obj.result.bestcostID = obj.input.BestcostID;
        obj.result.bestcost = obj.input.Bestcost_now;
       obj.result.sigma = obj.input.sigma;
       obj.result.Evaluationtra = obj.input.Evaluationtra;

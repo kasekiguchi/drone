@@ -71,7 +71,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
 
     Controller.dt = 0.1; % MPCステップ幅
     Controller.H = 20;
-    Controller.particle_num = 10;
+    Controller.particle_num = 100000;
 
     Controller.test.sigma = 0; % 標準偏差を固定
     Controller.test.input = 0; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
