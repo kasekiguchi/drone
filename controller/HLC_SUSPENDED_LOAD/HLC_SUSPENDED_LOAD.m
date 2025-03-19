@@ -58,7 +58,6 @@ classdef HLC_SUSPENDED_LOAD < handle
                     if model.state.p(3) - real_pL < obj.cableL_landing(3)*0.9 || obj.isGround == 1
                         obj.isGround    = 1;                                    % この分岐に一回でも入ったら入り続けるようにフラグ立てる
                         P(6)            = 0;                                    % 地面についたら質量は0とする
-                        % P(6) = min(model.state.mL, obj.mLlanding);%検証1
                     % 地面についた判定出ないなとき
                     else
                         P(6)            = min(model.state.mL, obj.mLlanding);   % 傾いて着陸した時に推定が吹っ飛ばないようにlanding開始時の質量以下に制限

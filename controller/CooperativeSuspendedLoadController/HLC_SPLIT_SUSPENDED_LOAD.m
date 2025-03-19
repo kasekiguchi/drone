@@ -47,7 +47,8 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         %目標値の格納
             xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
          %物理パラメータ
-            P           = [obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]),0,0];
+            
+         P           = [obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]),0,0];
         %拡張質量システムのekfで牽引物の質量を求める場合
             if contains(obj.self.estimator.model.name,"Load_mL")
                 %landingのとき
@@ -67,7 +68,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                             obj.tl0 = tc;
                         end
                         t               = min(tc - obj.tl0, obj.tle);                   % landingの経過時間がセンサ値使用率0%になる時間を越えないようにする
-                        k               = obj.rate*(t - obj.tle);                           % センサ値反映割合
+                        k               = obj.rate*(t - obj.tle)^2;                           % センサ値反映割合
                         P(6)            = max(min(model.state.mL, k*obj.mLlanding),0);   % 地面についたら質量は0とする
                     % 地面についた判定出ないなとき
                     else
@@ -114,11 +115,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.result.tmp  = tmp;                                      % 入力に制限を付けてない値を格納
 
             % 安全のため入力値に制限を付ける．推定した牽引物質量や紐の長さ，外乱などを表示．
-            if isprop(model.state,"dst") || isprop(model.state,"cableL")
-                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst:(x,y) "+num2str(P(end-1,end),4))
-                % obj.result.input = [max(0,min(20,tmp(1) - fdst));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.002,1);normrnd(0,0.001,[3,1])];
-                % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst: "+num2str(model.state.cableL,4))
-                obj.result.input = [max(0,min(200,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
+            if isprop(model.state,"dst")
+                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4)+" dst:(x,y) "+num2str(P(end-1:end),4))
+                obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能
             else
                 disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(6),4))
                 obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])]*1;%入力にノイズを付与可能

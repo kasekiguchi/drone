@@ -18,9 +18,9 @@
     % date2 = "2025_0128";%日付が変わってしまった場合は自分で変更
     % date2 = "2025_0129";%日付が変わってしまった場合は自分で変更
 
-    % subfolder='exp';%sim or exp
-    subfolder='sim';%sim or exp
-    ExpSimName='aaaaaa';%実験,シミュレーション名
+    subfolder='exp';%sim or exp
+    % subfolder='sim';%sim or exp
+    ExpSimName='aaaaaa2';%実験,シミュレーション名
     % ExpSimName='drone4p1_const';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
     contents='aaaa1';%.mat or figのファイル名になる実験,シミュレーション内容64文字以内

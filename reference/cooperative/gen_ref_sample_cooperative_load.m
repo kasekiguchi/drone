@@ -19,7 +19,7 @@ lx          = scale(1);
 ly          = scale(2);
 lz          = scale(3);
 % 角速度
-w           = 2*pi/T;%T秒で一周
+w           = -2*pi/T;%T秒で一周
 
 %saddle
 x = 1*lx*cos(w*t)+lx_offset; % x

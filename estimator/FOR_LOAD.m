@@ -6,7 +6,7 @@ classdef FOR_LOAD < SENSOR_CLASS
         tt0                     % takeoffの開始時間
         tl0                     % landingの開始時間
         tte         = 10        % センサー値を何秒で100%使うか
-        tle         = 5         % センサー値を何秒で0%使うか
+        tle         = 1         % センサー値を何秒で0%使うか
         ratet                   % 二次関数で0-1の間で変化するための定数
         ratel                   % 二次関数で0-1の間で変化するための定数
         inispL                  % 初期の牽引物位置
@@ -95,7 +95,7 @@ classdef FOR_LOAD < SENSOR_CLASS
                     t           = min(tc - obj.tl0, obj.tle);                   % landingの経過時間がセンサ値使用率0%になる時間を越えないようにする
                     obj.k           = -obj.ratel*t^2 + 1;                           % センサ値反映割合
                     spL(1:2)    = sp(1:2) + obj.k*(spL(1:2) - sp(1:2));             % 牽引物位置と機体位置の差に反映割合をかけてセンサ値を反映
-                    % spL    = ipL + obj.k*(ipL - spL);             % 牽引物位置と機体位置の差に反映割合をかけてセンサ値を反映
+                    % spL(1:2)    = sp(1:2);
                 end
                 spL(3)      = ipL(3);
             else

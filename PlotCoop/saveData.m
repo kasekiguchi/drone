@@ -10,7 +10,8 @@
     simpleLoggerContents = strcat('simple_',loggerContents);
     SaveTitleSimple = strcat(date,'_',simpleLoggerContents);    % 保存するsimpleにしたlogの名前
 
-    if exist("logger","var")
+    % if exist("logger","var")
+    if ~exist("gui","var")
     % multiple var : save logger, simple logger and agent
         tic
         eval([agentContents '=agent;']);                        % agentの名前をagent_contentsに変更
