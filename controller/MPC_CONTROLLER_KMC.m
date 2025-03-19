@@ -31,6 +31,7 @@ classdef MPC_CONTROLLER_KMC < handle
     C % 制御モデルのC行列
     qpparam % 二次計画法QPのパラメータ
     previous_input % 前時刻入力
+    mcflag %qp input mc flag
   end
 
   methods
@@ -41,10 +42,13 @@ classdef MPC_CONTROLLER_KMC < handle
       n = 12; % 状態数
       obj.input = param.input; %入力関連のみ
       obj.modelf = obj.self.plant.method;
+      obj.param.ref_input = [5.772;0;0;0];  %mg;0;0;0
       obj.P = obj.self.parameter.get(); % ドローンのパラメータ（質量，ロータ間距離，慣性モーメントなど）
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
-      
+      %%%%%%%%%%%%%%%%%5
+      obj.mcflag = 0;%qp input mc flag
+      %%%%%%%%%%%%%%%%%%%%%%%%
       % 重みの配列サイズ変換
       weight = param.weight; % 重みを変数に保存
       obj.Weight = blkdiag(weight.P, weight.Q, weight.V, weight.W); % blkdiagで配列同士を結合
@@ -167,23 +171,31 @@ classdef MPC_CONTROLLER_KMC < handle
      
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% データ表示用
-     %obj.QP_MPC();
-      obj.input.u = obj.result.input; 
-      obj.input.mu = obj.param.ref_input;
-      % 目標入力
-      obj.generate_input(0.1);  % 入力生成
-      obj.predict();            % 状態予測
-       obj.objectivemc();          % 評価計算
-       obj.normalize();          % 評価値の正規化
-       obj.Resampling_IS();      % リサンプリング
-      obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
 
-      %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
+      obj.QP_MPC();
+      obj.input.u = obj.result.input; %%%%%%% use without qp->output+mc
+      obj.input.mu = obj.param.ref_input;%%%%
+      % 目標入力
+       if ~obj.mcflag
+           obj.predictqp();
+           
+       else
+      % 状態予測
+      % QP 出った結果を入力生成
+      obj.generate_input(0.1);
+      obj.predictmc();
+       % obj.objectivemc();          % 評価計算
+       % obj.normalize();          % 評価値の正規化
+       % obj.Resampling_IS();      % リサンプリング
+      obj.get_input();              % 最適入力の取得および標準偏差のリサンプリング
        obj.result.bestcostID = obj.input.BestcostID;
+       end
+      %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
+     
        obj.result.bestcost = obj.input.Bestcost_now;
       obj.result.sigma = obj.input.sigma;
       obj.result.Evaluationtra = obj.input.Evaluationtra;
-      obj.result.path = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
+      %obj.result.path = [repmat(obj.current_state, 1,1,obj.N), obj.state.state_data];
       %%
       result = obj.result;
     end
@@ -208,12 +220,14 @@ classdef MPC_CONTROLLER_KMC < handle
 
     function generate_input(obj, si)
         % ksigma_max = si * obj.H;
+        obj.input.mu =  obj.result.input;
         ksigma_max = 1;
         ksigma = linspace(1, ksigma_max, obj.H); % 1~1+ksigma_maxまでH個の配列を作成
         inputSigma = ksigma .* obj.input.sigma;
 
         % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
         % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu)); 可変制約
+        %%%%%%%% 4 x obj.H xobj.N
         obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu));
     
         % 検証用
@@ -226,19 +240,30 @@ classdef MPC_CONTROLLER_KMC < handle
         end
     end
 
-    %% 状態予測
-    function predict(obj)
+    % 状態予測for mc
+    function predictmc(obj)
         if obj.param.code  == '26'
-        current = repmat(obj.param.F([obj.current_state;obj.param.ref_input]), 1, 1, obj.N);
+        current = repmat(obj.param.F([obj.current_state;obj.input.mu]), 1, 1, obj.N);
         else
         current = repmat(obj.param.F(obj.current_state), 1, 1, obj.N);
         end
         tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
         tmp = pagemtimes(obj.param.C, tmp_z);
         obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-    end 
- 
-
+    end
+    %%%%状態予測for qp
+     function predictqp(obj)   
+        obj.input.u = max(obj.param.input.lb, min(obj.param.input.ub, obj.input.mu));
+        if obj.param.code  == '26'
+        current = repmat(obj.param.F([obj.current_state;obj.input.mu]), 1, 1, 1);
+        else
+        current = repmat(obj.param.F(obj.current_state), 1, 1, 1);
+        end
+        tmp_z = pagemtimes(obj.param.A, current) + pagemtimes(obj.param.B, repmat(obj.input.u, obj.H,1)); % 予測計算 12*Hx1xN
+        tmp = pagemtimes(obj.param.C, tmp_z);
+        obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, 1);
+     end 
+    
     function objectivemc(obj)
         U = obj.input.u;
         X = obj.state.state_data;
@@ -362,7 +387,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         obj.input.pre_u = obj.result.input;
-
+        obj.param.ref_input = obj.input.pre_u;
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
@@ -404,15 +429,17 @@ classdef MPC_CONTROLLER_KMC < handle
         lb = repmat(obj.param.input_min, 1,obj.param.H); % min
         ub = repmat(obj.param.input_max, 1,obj.param.H); % max
         nonlcon = [];
-        [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
-        obj.previous_input = var;
+        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
         obj.result.input = var(:, 1); % 算出された入力
+        obj.input.Bestcost_pre = obj.input.Bestcost_now;
+       
+        obj.input.Bestcost_now = [fval;0]; obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function [eval] = objectiveqp(obj,x)   % obj.~とする
             U = x;
             X(:,1) = obj.current_state;
             for L = 2:obj.param.H
-                X(:,L) = X(:,L-1) + obj.param.dt * obj.modelf(X(:,L-1), U(:,L-1), obj.P);
+                X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
             end
 
             tildeX = X - obj.state.ref(1:12,:);

@@ -52,8 +52,9 @@ if modeType; agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % guiか�
 else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 end
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
+%agent.reference =LANDING_REFERENCE(agent,dt,0.1);
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%
@@ -73,10 +74,10 @@ if ~modeType
         all = toc
         % disp([num2str(time.t)])
         agent.controller.show;
-        % if agent.estimator.result.state.p(3) < 0 || ...
-        %         any(abs(agent.estimator.result.state.p) > 4)
-        %     break;
-        % end
+        if agent.estimator.result.state.p(3) < 0 || ...
+                any(abs(agent.estimator.result.state.p) > 4)
+            break;
+        end
     end
     %% plot
     close all

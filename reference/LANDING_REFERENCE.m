@@ -21,7 +21,7 @@ classdef LANDING_REFERENCE < handle
       obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
       obj.dt = varargin{1};
       obj.vd = varargin{2};
-      obj.base_state = [10;10;10];
+      obj.base_state = [1;1;1];
     %  obj.xd = obj.gen_ref_for_landing(obj.dt);
     %  obj.func = str2func("obj.gen_ref_for_landing");   When the program runs to mcmpc_controller can not get the obj. reference
     %  obj.func = gen_ref_for_HL(obj.func);
