@@ -21,6 +21,7 @@ classdef EKF < handle
         self
         model
         timer= [];
+        x_pre
     end
     
     methods
@@ -34,6 +35,7 @@ classdef EKF < handle
                 obj.JacobianF=str2func(ELfile);
             end
             obj.result.state= state_copy(obj.model.state);
+            obj.x_pre = obj.result.state.get();
             obj.sensor = param.sensor_func; % output function handle : function of obj.self
             obj.sensor_param = param.sensor_param;
             obj.output_func = param.output_func;
@@ -66,6 +68,7 @@ classdef EKF < handle
           if varargin{1}.t ~= 0
             y = obj.sensor(obj.self,obj.sensor_param); % sensor output
             x = obj.result.state.get(); % estimated state at previous step
+            obj.x_pre = x;
             obj.model.do(varargin{:}); % update state
             xh_pre = obj.model.state.get(); % Pre-estimation
             yh = obj.output_func(xh_pre,obj.output_param); % output estimation

@@ -8,14 +8,15 @@ else
   cd(fileparts(tmp.Filename));
 end
 
-log = load('Data\test.mat');
+log = load('Data\NN1_Log(21-Mar-2025_13_53_19).mat');
 
 
 %% logを開く
-flag = "sim";
-% flag = "GUI";
+% flag = "sim";
+flag = "GUI";
 
-logger = simplifyLogger(log.logger(1,1));
+% logger = simplifyLogger(log.logger(1,1));
+logger = simplifyLogger(log.log);
 t = logger.t;
 
 
@@ -82,7 +83,7 @@ if flag == "GUI"
             "","\Deltau","",""];
     
     hold on
-    create_y234_LinkedSubplots_forGUI(t,logger.controller.input, label, legend, title)
+    create_y234_LinkedSubplots_forGUI(t,logger.controller.input, logger.controller.delta_u, label, legend, title)
     hold off
     
     % 2. グラフのフォーマット調整
@@ -106,7 +107,7 @@ if flag == "GUI"
               "x","y","z","x:reference","y:reference","z:reference";
               "Roll","Pitch","Yaw","Yaw:reference","","";
               "Roll","Pitch","Yaw","","",""];
-    quadruple_plot2_forGUI(t,logger.plant, logger.reference, label, legend, title)
+    quadruple_plot2_forGUI(t,logger.estimator, logger.reference, label, legend, title)
     hold off
     
     % 2. グラフのフォーマット調整
@@ -379,7 +380,8 @@ function quadruple_plot2_forGUI(t,state,reference,label,leg,title)
     % 3つ目のグラフ
     subplot(2, 2, 3);
     hold on
-    plot(t, quat2eul(state.q'),"LineWidth",1.5);
+    % plot(t, quat2eul(state.q'),"LineWidth",1.5);
+    plot(t, state.q,"LineWidth",1.5);
     plot(t, reference.q(3,:),"LineWidth",1.5,"Linestyle","--");
     xlabel(label(5));
     ylabel(label(6));
@@ -507,16 +509,16 @@ function create_y234_LinkedSubplots(t, u, delta_u, label, leg, title)
 
 end
 
-function create_y234_LinkedSubplots_forGUI(t, u, label, leg, title)
+function create_y234_LinkedSubplots_forGUI(t, u, delta_u, label, leg, title)
     % サンプルデータの作成（データが渡されている場合は省略可能）
     
     % 2×2のサブプロットを作成
     ax1 = subplot(2, 2, 1);  % 左上
     hold on;
     plot(t, u(1,:), 'LineWidth', 1.5);
+    plot(t, delta_u(1,:), 'LineWidth', 1.5);
     xlabel(label(1));
-    ylabel(label(2));
-    % legend(leg(1,1:2));
+    ylabel(label(2));legend(leg(1,1:2));
     % legend(leg(1,1:2), "Interpreter","latex" );
     grid on;
     hold off;
@@ -525,9 +527,10 @@ function create_y234_LinkedSubplots_forGUI(t, u, label, leg, title)
     ax2 = subplot(2, 2, 2);  % 右上
     hold on;
     plot(t, u(2,:), 'LineWidth', 1.5);
+    plot(t, delta_u(2,:), 'LineWidth', 1.5);
     xlabel(label(3));
     ylabel(label(4));
-    % legend(leg(2,1:2));
+    legend(leg(2,1:2));
     grid on;
     hold off;
     axis tight;
@@ -535,9 +538,10 @@ function create_y234_LinkedSubplots_forGUI(t, u, label, leg, title)
     ax3 = subplot(2, 2, 3);  % 左下
     hold on;
     plot(t, u(3,:), 'LineWidth', 1.5);
+    plot(t, delta_u(3,:), 'LineWidth', 1.5);
     xlabel(label(5));
     ylabel(label(6));
-    % legend(leg(3,1:2));
+    legend(leg(3,1:2));
     grid on;
     hold off;
     axis tight;
@@ -545,9 +549,10 @@ function create_y234_LinkedSubplots_forGUI(t, u, label, leg, title)
     ax4 = subplot(2, 2, 4);  % 右下
     hold on;
     plot(t, u(4,:), 'LineWidth', 1.5);
+    plot(t, delta_u(4,:), 'LineWidth', 1.5);
     xlabel(label(7));
     ylabel(label(8));
-    % legend(leg(4,1:2));
+    legend(leg(4,1:2));
     grid on;
     hold off;
     axis tight;

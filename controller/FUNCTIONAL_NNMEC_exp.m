@@ -71,7 +71,7 @@ methods
         % total_thrust = tmp(1) + delta_u;
         % 
           
-        xn = obj.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.x_pre, obj.input_pre, obj.param.P);
+        xn = obj.self.estimator.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.self.estimator.x_pre, tmp, obj.param.P);
         obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
         % obj.result.delta_u = 0.0*cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
         
