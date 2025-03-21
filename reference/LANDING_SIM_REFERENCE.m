@@ -9,6 +9,7 @@ classdef LANDING_SIM_REFERENCE < handle
     base_time
     te = 3
     th_offset
+    func
     th_offset0 = 200;
   end
 
@@ -22,16 +23,20 @@ classdef LANDING_SIM_REFERENCE < handle
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
+       
       if isempty(obj.result.state.xd) % first take
         obj.base_time=varargin{1}.t;
-        obj.base_state = [obj.self.estimator.result.state.p(1:2);obj.result.state.p(3)]; % x,y : current position, z : reference using at flight phase
+        obj.base_state = [obj.self.estimator.result.state.p(1:3)]; % x,y : current position, z : reference using at flight phase
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
         % obj.th_offset = obj.self.input_transform.param.th_offset;
       end
+      obj.func = @(t)[obj.result.state.xd];
+      obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
       obj.result.state.xd = obj.gen_ref_for_landing(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);
       % obj.self.input_transform.param.th_offset = obj.th_offset - (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+      
       result = obj.result;
     end
     function Xd = gen_ref_for_landing(obj,t)

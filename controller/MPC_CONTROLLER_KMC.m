@@ -47,7 +47,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
       %%%%%%%%%%%%%%%%%5
-      obj.mcflag = 0;%qp input mc flag
+      obj.mcflag = 1;%qp input mc flag
       %%%%%%%%%%%%%%%%%%%%%%%%
       % 重みの配列サイズ変換
       weight = param.weight; % 重みを変数に保存
@@ -77,17 +77,17 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.C = blkdiag(C{:});
 
       %qp 定義
-       obj.param.P = 1e6 * diag([1e6; 1e6; 1e4]);    % 座標   1000 1000 10000
-      obj.param.V = 1e6 * diag([1e2; 1e2; 1e4]);    % 速度
-      obj.param.R = 0.1 * diag([1.0; 1e3; 1e3; 1e3]); % 入力
-      obj.param.RP = 0 * diag([1.0; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
-      obj.param.Q = 1e3 * diag([1e1; 1e1; 1e1]);  % 姿勢角
-      obj.param.W = diag([1e1; 1e1; 1e1]);  % 角速度
+       obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
+      obj.param.V = diag([1;1;100]);    % 速度
+      obj.param.R = diag([1; 1; 1; 1]); % 入力
+      obj.param.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+      obj.param.Q = diag([1;1;1]);  % 姿勢角
+      obj.param.W = diag([1000;1000;1]);  % 角速度
 
-      obj.param.Pf = diag([1e2; 1e2; 1e4]); % 6
-      obj.param.Vf = diag([1e2; 1e2; 1e3]); % 6
-      obj.param.Qf = diag([1e1; 1e1; 1]); % 7,8
-      obj.param.Wf = diag([1; 1; 1]);
+      obj.param.Pf = obj.param.P; % 6
+      obj.param.Vf = obj.param.V; % 6
+      obj.param.Qf = obj.param.Q; % 7,8
+      obj.param.Wf = obj.param.W;
       obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
       obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
 
@@ -184,9 +184,9 @@ classdef MPC_CONTROLLER_KMC < handle
       % QP 出った結果を入力生成
       obj.generate_input(0.1);
       obj.predictmc();
-       % obj.objectivemc();          % 評価計算
-       % obj.normalize();          % 評価値の正規化
-       % obj.Resampling_IS();      % リサンプリング
+       obj.objectivemc();          % 評価計算
+       obj.normalize();          % 評価値の正規化
+       obj.Resampling_IS();      % リサンプリング
       obj.get_input();              % 最適入力の取得および標準偏差のリサンプリング
        obj.result.bestcostID = obj.input.BestcostID;
        end

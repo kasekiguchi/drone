@@ -34,8 +34,8 @@ z_0 = X0(3);
 % z = 1;
 
 %% landing
-% x = 1;
-% y = 1;
+% x = -1/(1+exp(-t + 5)) + 1;
+% y =-1/(1+exp(-t + 5)) + 1;
 % z = -1/(1+exp(-t + 5)) + 1;
 
 % % landing use exp funcution
