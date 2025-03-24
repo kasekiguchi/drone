@@ -32,6 +32,7 @@ classdef MPC_CONTROLLER_KMC < handle
     qpparam % 二次計画法QPのパラメータ
     previous_input % 前時刻入力
     mcflag %qp input mc flag
+    gen_beq
   end
 
   methods
@@ -47,7 +48,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
       %%%%%%%%%%%%%%%%%5
-      obj.mcflag = 1;%qp input mc flag
+      obj.mcflag = 0;%qp input mc flag
       %%%%%%%%%%%%%%%%%%%%%%%%
       % 重みの配列サイズ変換
       weight = param.weight; % 重みを変数に保存
@@ -70,11 +71,22 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.input.pre_u = obj.result.input; % 前入力
 
       % A, B行列定義 z, x, y, yawの順番ベクトル化
+      obj.A = param.A;
+      obj.B = param.B;
       obj.model = ExtendedCoefficientMatrix({param.A,param.B,obj.H,param.state_size}); % 一括計算 2025/1/21確認
       obj.param.A = obj.model.A;
       obj.param.B = obj.model.B;
       C = repmat({obj.param.C}, 1, obj.H); 
       obj.param.C = blkdiag(C{:});
+
+      %
+      n = size(param.A,1);
+      AX = eye(n*obj.H)-[zeros(n,n*obj.H);kron(eye(obj.H-1),param.A),zeros(n*(obj.H-1),n)];
+      AU = -kron(eye(obj.H),param.B);
+      obj.param.Aeq = [AX,AU];
+      obj.gen_beq = @(x0) [param.A*x0;zeros(n*(obj.H-1),1)]; % function to generate beq using current state
+
+
 
       %qp 定義
        obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
@@ -105,7 +117,8 @@ classdef MPC_CONTROLLER_KMC < handle
         time = varargin{1};
         phase = varargin{2};
         obj.param.t = time.t;
-        
+        obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
+        obj.state.current = obj.param.F([obj.current_state;obj.input.mu]);
         %% phaseによるcontrollerの選択
         if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
@@ -163,8 +176,6 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.t = varargin{1}{1}.t; % 現在時刻
       obj.param.te = varargin{1}{1}.te; % 終了時間(default : 10s)
 
-      obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
-
       % obj.input.mu = obj.input.pre_u; % 採択入力を平均
       %%%%%%%%%%%%%%%%%%%%%%%qp
      
@@ -202,7 +213,8 @@ classdef MPC_CONTROLLER_KMC < handle
 
     function show(obj)
         % clc;
-        est_print = obj.self.estimator.result.state;
+        % est_print = obj.self.estimator.result.state;
+        est_print = obj.self.plant.state;
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
@@ -425,33 +437,38 @@ classdef MPC_CONTROLLER_KMC < handle
         % conditions
         fun = @obj.objectiveqp;
         x0 = obj.previous_input;
-        A = []; b = []; Aeq = []; beq = [];
+        A = []; b = []; 
+        Aeq = []; beq = [];
+        % Aeq = obj.param.Aeq;
+        % beq = obj.gen_beq(obj.state.current);
         lb = repmat(obj.param.input_min, 1,obj.param.H); % min
         ub = repmat(obj.param.input_max, 1,obj.param.H); % max
         nonlcon = [];
-        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,reshape(x0,[],1),A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
         obj.result.input = var(:, 1); % 算出された入力
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
        
         obj.input.Bestcost_now = [fval;0]; obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function [eval] = objectiveqp(obj,x)   % obj.~とする
-            U = x;
-            X(:,1) = obj.current_state;
-            for L = 2:obj.param.H
-                X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
-            end
-
-            tildeX = X - obj.state.ref(1:12,:);
+            U = reshape(x,4,[]);
+            % X(:,1) = obj.current_state;
+            % for L = 2:obj.param.H
+                % X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
+            % end
+            n = size(obj.state.current,1); % number of observables
+            X = obj.param.A*obj.state.current + obj.param.B*x;
+            ids = [1:12]' + n*(0:obj.param.H-1);
+            tildeX = X(ids) - obj.state.ref(1:12,:);
             tildeUpre = U - obj.input.u;
             tildeUref = U - obj.state.ref(13:16,:);
 
-            stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
-            stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
-            stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
+            stageState = tildeX(:,1:end-1)' * obj.param.Weight    * tildeX(:,1:end-1);
+            stageInputPre  = tildeUpre(:,1:end-1)' * obj.param.RP * tildeUpre(:,1:end-1);
+            stageInputRef  = tildeUref(:,1:end-1)' * obj.param.R  * tildeUref(:,1:end-1);
             terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
 
-            eval = stageState + stageInputPre + stageInputRef + terminalState;
+            eval = trace(stageState + stageInputPre + stageInputRef) + terminalState;
         end
   end
 end

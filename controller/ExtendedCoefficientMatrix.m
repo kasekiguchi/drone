@@ -25,5 +25,4 @@ function [ECM] = ExtendedCoefficientMatrix(Param)
     end
     ECM.A = Am;
     ECM.B = S;
-
 end

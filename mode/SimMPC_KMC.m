@@ -54,12 +54,12 @@ end
 
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
-agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
+% agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
 %%
 if ~modeType
-    phase = 'f'
+    phase = 'f';
     for i = 1:te/dt
         if i < 20 || rem(i, 10) == 0; end
         tic
