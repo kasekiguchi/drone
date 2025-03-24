@@ -8,7 +8,7 @@ else
   cd(fileparts(tmp.Filename));
 end
 
-log = load('Data\NN1_Log(21-Mar-2025_13_53_19).mat');
+log = load('Data\NN2_Log(21-Mar-2025_16_44_48).mat');
 
 
 %% logを開く
