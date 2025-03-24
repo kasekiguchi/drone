@@ -24,6 +24,7 @@ methods
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.result.origin_input = zeros(4,1);
         obj.result.delta_u = zeros(4,1);
+        cast(predict(obj.param.NNMEC, zeros(12,1)), "double")';
     end
 
     function result = do(obj,varargin)
@@ -66,15 +67,20 @@ methods
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
+
+        time = varargin{1}.t
         
         obj.result.xa = [Rb0' * model.state.p; Quat2Eul(R2q(Rb0' * model.state.getq("rotmat"))); Rb0' * model.state.v; model.state.w]; % [p, q, v, w]に並べ替え
         
         % obj.result.delta_u = tmp(1)*sin(2*pi*time/5);
         % total_thrust = tmp(1) + delta_u;
         % 
-        
+        tic
         xn = obj.self.estimator.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.self.estimator.x_pre, tmp, obj.param.P);
+        toc
+        tic
         obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
+        toc
         % obj.result.delta_u = 0.0*cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
         
         obj.result.input = [max(0,min(10,tmp(1)+obj.result.delta_u(1)));max(-1,min(1,tmp(2)+obj.result.delta_u(2)));max(-1,min(1,tmp(3)+obj.result.delta_u(3)));max(-1,min(1,tmp(4)+obj.result.delta_u(4)))];
