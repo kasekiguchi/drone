@@ -77,16 +77,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.A = obj.model.A;
       obj.param.B = obj.model.B;
       C = repmat({obj.param.C}, 1, obj.H); 
-      obj.param.C = blkdiag(C{:});
-
-      %
-      n = size(param.A,1);
-      AX = eye(n*obj.H)-[zeros(n,n*obj.H);kron(eye(obj.H-1),param.A),zeros(n*(obj.H-1),n)];
-      AU = -kron(eye(obj.H),param.B);
-      obj.param.Aeq = [AX,AU];
-      obj.gen_beq = @(x0) [param.A*x0;zeros(n*(obj.H-1),1)]; % function to generate beq using current state
-
-
+      obj.param.C = blkdiag(C{:});  
 
       %qp 定義
        obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
@@ -439,8 +430,6 @@ classdef MPC_CONTROLLER_KMC < handle
         x0 = obj.previous_input;
         A = []; b = []; 
         Aeq = []; beq = [];
-        % Aeq = obj.param.Aeq;
-        % beq = obj.gen_beq(obj.state.current);
         lb = repmat(obj.param.input_min, 1,obj.param.H); % min
         ub = repmat(obj.param.input_max, 1,obj.param.H); % max
         nonlcon = [];
