@@ -69,6 +69,7 @@ classdef MPC_CONTROLLER_KMC < handle
       % 入力の初期化
       obj.result.input = obj.param.ref_input; % 目標入力 初期時刻にresultを定義しておかないと実行時にエラー出る
       obj.input.pre_u = obj.result.input; % 前入力
+      obj.input.var = repmat(obj.param.ref_input,obj.H,1);
 
       % A, B行列定義 z, x, y, yawの順番ベクトル化
       obj.A = param.A;
@@ -417,7 +418,7 @@ classdef MPC_CONTROLLER_KMC < handle
         end
     end
     function QP_MPC(obj)
-        obj.previous_input = repmat(obj.input.pre_u, 1, obj.param.H);%qp-mpc
+        % obj.previous_input = repmat(obj.input.pre_u, 1, obj.param.H);%qp-mpc        
         obj.options = optimoptions('fmincon');
         obj.options = optimoptions(obj.options,'MaxIterations',1.e+12); % 最大反復回数
         obj.options = optimoptions(obj.options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
@@ -427,14 +428,16 @@ classdef MPC_CONTROLLER_KMC < handle
 
         % conditions
         fun = @obj.objectiveqp;
-        x0 = obj.previous_input;
+        % x0 = obj.previous_input;
+        x0 = obj.input.var;
         A = []; b = []; 
         Aeq = []; beq = [];
         lb = repmat(obj.param.input_min, 1,obj.param.H); % min
         ub = repmat(obj.param.input_max, 1,obj.param.H); % max
         nonlcon = [];
-        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,reshape(x0,[],1),A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
-        obj.result.input = var(:, 1); % 算出された入力
+        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+        obj.result.input = var(1:4, 1); % 算出された入力
+        obj.input.var = var;
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
        
         obj.input.Bestcost_now = [fval;0]; obj.result.bestcost=obj.input.Bestcost_now ;
@@ -448,14 +451,15 @@ classdef MPC_CONTROLLER_KMC < handle
             n = size(obj.state.current,1); % number of observables
             X = obj.param.A*obj.state.current + obj.param.B*x;
             ids = [1:12]' + n*(0:obj.param.H-1);
-            tildeX = X(ids) - obj.state.ref(1:12,:);
-            tildeUpre = U - obj.input.u;
+            % tildeX = X(ids) - obj.state.ref(1:12,:);
+            tildeX = reshape(X,n,[]) - [obj.state.ref(1:12,:);zeros(n-12,obj.param.H)];
+            tildeUpre = U - reshape(obj.input.var,4,[]);
             tildeUref = U - obj.state.ref(13:16,:);
 
-            stageState = tildeX(:,1:end-1)' * obj.param.Weight    * tildeX(:,1:end-1);
+            stageState = tildeX(:,1:end-1)' * blkdiag(obj.param.Weight,1e0*eye(n-12))    * tildeX(:,1:end-1);
             stageInputPre  = tildeUpre(:,1:end-1)' * obj.param.RP * tildeUpre(:,1:end-1);
             stageInputRef  = tildeUref(:,1:end-1)' * obj.param.R  * tildeUref(:,1:end-1);
-            terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
+            terminalState = tildeX(1:12,end)' * obj.param.Weightf * tildeX(1:12,end);
 
             eval = trace(stageState + stageInputPre + stageInputRef) + terminalState;
         end

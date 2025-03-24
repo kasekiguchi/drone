@@ -76,6 +76,7 @@ if ~modeType
         agent.controller.show;
         if agent.estimator.result.state.p(3) < 0 || ...
                 any(abs(agent.estimator.result.state.p) > 4)
+            disp(";;;;;墜落;;;;;;;;");
             break;
         end
     end
