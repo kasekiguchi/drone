@@ -52,7 +52,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
 agent.controller = MPC_CONTROLLER_K(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 
 %%

@@ -30,7 +30,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     load(model_file, 'est');
     [Controller.A, Controller.B, Controller.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller.dt);
     if isfield(est, 'Ae'); [Controller.Ae,Controller.Be,Controller.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller.dt); end
-
+  
     % Controller.A = model{1};
     % Controller.B = model{2};
     % Controller.C = model{3};
@@ -39,12 +39,12 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     [Controller.F, Controller.code] = select_observable(model_file);
 
     % %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    % Controller.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    % Controller.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    % Controller.weight.V = diag([10; 1; 1]); % 15良い気がする
-    % Controller.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller.weight.P =diag([2000; 1000; 30]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    Controller.weight.V = diag([15; 1; 1]); % 15良い気がする
+    Controller.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller.weight.R = diag([100; 1; 1; 1]); % 入力
+    Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
     % Controller.weight.P = 1 * diag([20; 10; 3000]);    % 位置　10,20刻み  20;1;30
     % Controller.weight.Q = 10 * diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
@@ -52,13 +52,13 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     % Controller.weight.W = 10 * diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     % Controller.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-
-    Controller.weight.P = diag([2000;1000;3000]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = diag([1;1;1]);    % 速度  10,20刻み  30;20;10
-    Controller.weight.V = diag([1;1;100]); % 15良い気がする
-    Controller.weight.W = diag([1000;1000;1]);  % 姿勢角，角速度　1,2刻み 
-    Controller.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    % 
+    % Controller.weight.P =  diag([1e6; 1e6; 1e4]);    % 位置　10,20刻み  20;1;30
+    % Controller.weight.Q =  diag([1e1; 1e1; 1e1]);    % 速度  10,20刻み  30;20;10
+    % Controller.weight.V = 1e6 * diag([1e2; 1e2; 1e4]); % 15良い気がする
+    % Controller.weight.W = diag([1e1; 1e1; 1e1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller.weight.R = 0.1 * diag([1.0; 1e3; 1e3; 1e3]); % 入力
+    % Controller.weight.RP = 1 * diag([1.0; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
 
     Controller.weight.Pf = Controller.weight.P;
     Controller.weight.Vf = Controller.weight.V;
@@ -70,8 +70,8 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
 
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 2;
-    Controller.particle_num = 50000;
+    Controller.H = 20;
+    Controller.particle_num = 5000;
 
     Controller.test.sigma = 0; % 標準偏差を固定
     Controller.test.input = 0; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由

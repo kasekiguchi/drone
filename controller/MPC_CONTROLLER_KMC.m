@@ -47,7 +47,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
       %%%%%%%%%%%%%%%%%5
-      obj.mcflag = 1;%qp input mc flag
+      obj.mcflag = 0 ;%qp input mc flag
       %%%%%%%%%%%%%%%%%%%%%%%%
       % 重みの配列サイズ変換
       weight = param.weight; % 重みを変数に保存
@@ -77,12 +77,12 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.C = blkdiag(C{:});
 
       %qp 定義
-       obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
-      obj.param.V = diag([1;1;100]);    % 速度
+       obj.param.P =  diag([30; 10; 1]);    % 座標   1000 1000 10000
+      obj.param.V =  diag([10; 1; 1]);    % 速度
       obj.param.R = diag([1; 1; 1; 1]); % 入力
-      obj.param.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-      obj.param.Q = diag([1;1;1]);  % 姿勢角
-      obj.param.W = diag([1000;1000;1]);  % 角速度
+      obj.param.RP =diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+      obj.param.Q =  diag([30; 20; 10]);   % 姿勢角
+      obj.param.W = diag([1; 1; 1]);    % 角速度
 
       obj.param.Pf = obj.param.P; % 6
       obj.param.Vf = obj.param.V; % 6
@@ -116,7 +116,7 @@ classdef MPC_CONTROLLER_KMC < handle
             disp('controller: HL  phase: t or l');
         elseif phase == 'f' % flight
             obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
-              % result = obj.controller_HL(varargin); 
+               %result = obj.controller_HL(varargin); 
             result = obj.controller_KMC(varargin);
             disp('controller: MC  phase: f');
         end 
@@ -176,10 +176,10 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.input.u = obj.result.input; %%%%%%% use without qp->output+mc
       obj.input.mu = obj.param.ref_input;%%%%
       % 目標入力
-       if ~obj.mcflag
+      if ~obj.mcflag
            obj.predictqp();
            
-       else
+      else
       % 状態予測
       % QP 出った結果を入力生成
       obj.generate_input(0.1);
@@ -189,7 +189,7 @@ classdef MPC_CONTROLLER_KMC < handle
        obj.Resampling_IS();      % リサンプリング
       obj.get_input();              % 最適入力の取得および標準偏差のリサンプリング
        obj.result.bestcostID = obj.input.BestcostID;
-       end
+      end
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
      
        obj.result.bestcost = obj.input.Bestcost_now;
@@ -269,19 +269,24 @@ classdef MPC_CONTROLLER_KMC < handle
         X = obj.state.state_data;
 
         %% ホライズンで重み大きく
-        k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
+        %k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
         % k = ones(1, obj.param.H);
 
         %% 誤差計算
         tildeUpre = U - obj.input.pre_u;          % 前時刻入力
         tildeUref = U - obj.state.ref(13:16,:);  % 目標入力
         tildeX = X - obj.state.ref(1:12,:);
-
+        
+        
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
-        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
+        % stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
+        % stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
+        % 
+        % stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
+          stageInputPre  = tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
+        stageInputRef  = tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
 
-        stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
+        stageStateX =    tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
 
         %% 人工ポテンシャル場法

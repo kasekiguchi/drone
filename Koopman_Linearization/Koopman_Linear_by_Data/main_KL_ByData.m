@@ -12,21 +12,21 @@ flg.weight = 0; % 重み付き最小二乗法
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-exp_data = 'Exp_Kyomo';    %zのみ速度から
-FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
+exp_data = 'Exp_Kyomoxyz2';    %zのみ速度から
+FileName = strcat(FileName_common, exp_data, '_', 'code26_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); %2023年度
-load('Koopman_Linearization\Integration_Dataset\momo.mat');
+load('Koopman_Linearization\Integration_Dataset\sanasana.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
 %-- 観測量は固まったら分けた方が快速
-F = @quaternions_all_00; % 個別用
-%F = @quaternions_all_26;
+%F = @quaternions_all_00; % 個別用
+F = @quaternions_all_26;
 % F = @quaternions_all; % 2024 全観測量
 
 % データのかさまし
