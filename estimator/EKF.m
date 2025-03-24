@@ -70,9 +70,9 @@ classdef EKF < handle
             x = obj.result.state.get(); % estimated state at previous step
 
             %%%%%%%%%%%%%%%%%%%%%%%%%
-            obj.x_pre = x;
-            tmp = varargin{1, 3}.Data.agent.controller.result{1, 1}.origin_input - varargin{1, 3}.Data.agent.controller.result{1, 1}.delta_u;
-            varargin{1, 3}.Data.agent.controller.result{1, 1}.input = [max(0,min(11,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            % obj.x_pre = x;
+            % tmp = varargin{1, 3}.Data.agent.controller.result{1, 1}.origin_input - varargin{1, 3}.Data.agent.controller.result{1, 1}.delta_u;
+            % varargin{1, 3}.Data.agent.controller.result{1, 1}.input = [max(0,min(11,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             %%%%%%%%%%%%%%%%%%%%%%%%%
 
             obj.model.do(varargin{:}); % update state
