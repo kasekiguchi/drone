@@ -12,7 +12,7 @@ end
 clear; close all; clc;
     ts = 0; % initial time
     dt = 0.025; % sampling period
-    te = 60; % terminal time
+    te = 20; % terminal time
 
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -57,7 +57,8 @@ clear; close all; clc;
     end
 
     %% Koopman model simulation
- model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
+ % model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
+ model_file = '2025-03-25_Exp_Kyomo_code00_saddle';
  %model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
@@ -111,10 +112,10 @@ X = F([agent.plant.state.get();zeros(4,1)]);
     end
 %%
 tspan = 0:dt:40-dt;
-ch = "v";
+ch = "p";
 pHL=logger.data(1,ch,"p");
 pK=logger2.data(1,ch,"p");
-r= 1:40;
+r= 1:80;
 plot(tspan(r),pHL(r,:),tspan(r),pK(r,:));
 legend("HL","HL","HL","K","K","K")
 

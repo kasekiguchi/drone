@@ -48,7 +48,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.N = param.particle_num; % サンプル数
       obj.H = param.H; % ホライズン
       %%%%%%%%%%%%%%%%%5
-      obj.mcflag = 0;%qp input mc flag
+      obj.mcflag = 1;%qp input mc flag
       %%%%%%%%%%%%%%%%%%%%%%%%
       % 重みの配列サイズ変換
       weight = param.weight; % 重みを変数に保存
@@ -116,7 +116,7 @@ classdef MPC_CONTROLLER_KMC < handle
         phase = varargin{2};
         obj.param.t = time.t;
         obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
-        obj.state.current = obj.param.F([obj.current_state;obj.input.mu]);
+        obj.state.current = obj.param.F([obj.current_state;obj.input.mu(:,1,1)]);       
         %% phaseによるcontrollerの選択
         if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
@@ -441,28 +441,31 @@ classdef MPC_CONTROLLER_KMC < handle
         lb = repmat(obj.param.input_min, 1,obj.param.H); % min
         ub = repmat(obj.param.input_max, 1,obj.param.H); % max
         nonlcon = [];
-        [var, fval, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
-        obj.result.input = var(1:4, 1); % 算出された入力
+        [var, fval, eflag, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,obj.options);
+        var(4*(1:obj.H)) = 0;
+        obj.result.input =var(1:4, 1); % 算出された入力      
+        obj.result.eflag = eflag;
         obj.input.var = var;
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
        
         obj.input.Bestcost_now = [fval;0]; obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function [eval] = objectiveqp(obj,x)   % obj.~とする
+            % x(4*(1:obj.H)) = 0;
             U = reshape(x,4,[]);
             % X(:,1) = obj.current_state;
             % for L = 2:obj.param.H
                 % X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
             % end
             n = size(obj.state.current,1); % number of observables
-            X = obj.param.A*obj.state.current + obj.param.B*x;
+            X = obj.param.A*obj.state.current + obj.param.B*x;         
             ids = [1:12]' + n*(0:obj.param.H-1);
             % tildeX = X(ids) - obj.state.ref(1:12,:);
             tildeX = reshape(X,n,[]) - [obj.state.ref(1:12,:);zeros(n-12,obj.param.H)];
             tildeUpre = U - reshape(obj.input.var,4,[]);
             tildeUref = U - obj.state.ref(13:16,:);
 
-            stageState = tildeX(:,1:end-1)' * blkdiag(obj.param.Weight,1e0*eye(n-12))    * tildeX(:,1:end-1);
+            stageState = tildeX(:,1:end-1)' * blkdiag(obj.param.Weight,0*eye(n-12))    * tildeX(:,1:end-1);
             stageInputPre  = tildeUpre(:,1:end-1)' * obj.param.RP * tildeUpre(:,1:end-1);
             stageInputRef  = tildeUref(:,1:end-1)' * obj.param.R  * tildeUref(:,1:end-1);
             terminalState = tildeX(1:12,end)' * obj.param.Weightf * tildeX(1:12,end);

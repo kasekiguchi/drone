@@ -27,6 +27,7 @@ end
 %-- 観測量は固まったら分けた方が快速
 F = @quaternions_all_00; % 個別用
 % F = @quaternions_all_26;
+% F = @fF;
 % F = @quaternions_all; % 2024 全観測量
 
 % データのかさまし
@@ -56,9 +57,31 @@ else
     else 
         % est = KL(Data.X,Data.U,Data.Y,F,flg); 
       [H,f] = gen_Hf(Data.X,Data.U,Data.Y,0.025,F);
+      % [xxT,xuT,uuT,xy,uy] = gen_Hf(Data.X,Data.U,Data.Y,0.025,F);
+      % n = size(xxT,1);
+      % m = size(Data.U,1);
+      % txxT = arrayfun(@(i) xxT,1:n,'UniformOutput',false);
+      % txuT = arrayfun(@(i) xuT,1:n,'UniformOutput',false);
+      % tuuT = arrayfun(@(i) uuT,1:n,'UniformOutput',false);
+      % tH = [blkdiag(txxT{:}),blkdiag(txuT{:});blkdiag(txuT{:})',blkdiag(tuuT{:})];
+      % tf = [xy;uy];
+      % 
+      % %% constraint
+      % dt_ids = [7,8,9] + (0:2)*n;
+      % z_ids = [1:3*n,n^2+1:n^2+3*m];   
+      % NN = (1:size(tH,1));
+      % NN(z_ids) = [];
+      % H = tH(:,NN);
+      % H(z_ids,:) = [];
+      % f = tf;
+      % ttH = tH(:,dt_ids)*dt;
+      % f(z_ids,:) = [];
+      % ttH(z_ids,:) = [];
+      % f = f+ sum(ttH,2);
       var = quadprog(H,f);
-      A =[zeros(3,6),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
-      B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
+      est.A =[eye(3),zeros(3,3),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
+      est.B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
+      est.C = [eye(12),zeros(12,size(est.A,1)-12)];
          % est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
     end%クープマン線形化の具体的な計算をしてる部分
 end

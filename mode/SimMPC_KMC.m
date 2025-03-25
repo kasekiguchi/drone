@@ -34,8 +34,9 @@ initial_state.w = [0; 0; 0];
 
 %%
 %model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
- model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
- %model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
+ % model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
+ % model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
+ model_file = '2025-03-25_Exp_Kyomo_code00_saddle';
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
 % model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
@@ -45,7 +46,7 @@ initial_state.w = [0; 0; 0];
 %%
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.estimator = DIRECT_ESTIMATOR(agent, struct("model",MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1))));
 
@@ -122,6 +123,7 @@ function f = draw(logger, time, dt)
     subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
     %% 評価値
     subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
+    subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
 end
 
 %%
