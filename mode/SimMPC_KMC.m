@@ -45,8 +45,9 @@ initial_state.w = [0; 0; 0];
 %%
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
-agent.parameter = DRONE_PARAM("DIATONE");
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent.estimator = DIRECT_ESTIMATOR(agent, struct("model",MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1))));
 
 if modeType; agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % guiから回すとき
 else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき

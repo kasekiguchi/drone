@@ -81,12 +81,18 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.C = blkdiag(C{:});  
 
       %qp 定義
-       obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
-      obj.param.V = diag([1;1;100]);    % 速度
-      obj.param.R = diag([1; 1; 1; 1]); % 入力
-      obj.param.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-      obj.param.Q = diag([1;1;1]);  % 姿勢角
-      obj.param.W = diag([1000;1000;1]);  % 角速度
+      obj.param.P = param.weight.P;
+      obj.param.V = param.weight.V;    % 速度
+      obj.param.R = param.weight.R; % 入力
+      obj.param.RP = param.weight.RP;  % 1ステップ前の入力との差    0*(無効化)
+      obj.param.Q = param.weight.Q;  % 姿勢角
+      obj.param.W = param.weight.W;  % 角速度
+      % obj.param.P =  diag([2000;1000;3000]);    % 座標   1000 1000 10000
+      % obj.param.V = diag([1;1;100]);    % 速度
+      % obj.param.R = diag([1; 1; 1; 1]); % 入力
+      % obj.param.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+      % obj.param.Q = diag([1;1;1]);  % 姿勢角
+      % obj.param.W = diag([1000;1000;1]);  % 角速度
 
       obj.param.Pf = obj.param.P; % 6
       obj.param.Vf = obj.param.V; % 6

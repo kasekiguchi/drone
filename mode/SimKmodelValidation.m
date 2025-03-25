@@ -9,12 +9,11 @@ close all hidden; clear ; clc;
 userpath('clear');
 end
 
-%% 20回まとめてシミュレーションする
 clear; close all; clc;
     ts = 0; % initial time
     dt = 0.025; % sampling period
     te = 60; % terminal time
-Data.X = []; Data.Y = []; Data.U = [];
+
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
     motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
@@ -24,10 +23,9 @@ Data.X = []; Data.Y = []; Data.U = [];
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
 
-for j = 1:100 %%%%%%%%%%%%  number of random references
     fprintf('Initializing... N:%d \n', j);
     clear logger agent
-
+%% HL simulation
     time = TIME(ts,dt,te); % instance of time class
     logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
     agent = DRONE;
@@ -35,51 +33,84 @@ for j = 1:100 %%%%%%%%%%%%  number of random references
     agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); % Model_Quat13
     agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
     agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-
-    % num = j;
-    % reference_file = strcat("Exp_2_4_", num2str(num));
-    % agent.reference = MY_REFERENCE_KOMA2(agent,{reference_file,1,te});
-    % startIDX = agent.reference.t.startidx;
-    % endIDX = agent.reference.t.endidx;
-    % timeidx = endIDX - startIDX + 1;
-
     agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,'xyz'));
     timeidx = 40/dt;
     
     agent.controller = HLC(agent,Controller_HL(dt));
     run("ExpBase");
 
+    
     for i = 1:timeidx
         % if i < 20 || rem(i, 10) == 0 end
         tic
         agent(1).sensor.do(time, 'f');
         agent(1).estimator.do(time, 'f');
 
-        % for MY_REFERENCE_KOMA2
-        % tmpvalue = agent.reference.est(:,i); % 読み込んだ時刻iの状態（初期値みたいな感じ）
-        % agent(1).estimator.result.state.set_state(tmpvalue);
-        % agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
 
         agent(1).reference.do(time, 'f');
         agent(1).controller.do(time, 'f');
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
         time.t = time.t + time.dt;
-        % disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
-        %pause(1)
+
         all = toc;
-        % 値の保存
-        % data.plant(:,i) = agent(1).plant.state.get();
-        % data.input(:,i) = agent(1).controller.result.input;
-        % Data.X = [Data.X, agent(1).plant.state.get()];
-        % Data.Y = [Data.Y, agent(1).plant.state.get()];
-        % Data.U = [Data.U, agent(1).controller.result.input];
     end
-    % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-    % log = logger;
-    %save(strcat('Data/HL_sim_', num2str(j)), 'logger');
-    logger.save(strcat('HL_sim_', num2str(j)));
-end
+
+    %% Koopman model simulation
+ model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
+ %model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
+%model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
+% 300data
+% model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
+%model_file = '2025-02-14_Exp_Kato15_code00_saddle_increased';
+%model_file = '2025-01-12_Exp_Kiyama_code00_saddle_increased';
+
+%%
+clear agent time logger2
+time = TIME(ts,dt,te); % instance of time class
+logger2 = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
+agent = DRONE;
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent.estimator = DIRECT_ESTIMATOR(agent, struct("model",MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1))));
+
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
+% agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
+agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
+run("SimBase");
+agent.plant.result = struct("state",agent.plant.state);
+load(model_file, 'est');
+[F, code] = select_observable(model_file);
+    % [A, B,C]  = AB_transfer(est.A, est.B, est.C, dt, dt);
+    A = est.A;
+    B = est.B;
+X = F([agent.plant.state.get();zeros(4,1)]);
+    for i = 1:timeidx
+        % if i < 20 || rem(i, 10) == 0 end
+        % tic
+        agent(1).sensor.do(time, 'f');
+        agent(1).estimator.do(time, 'f');
+
+
+        agent(1).reference.do(time, 'f');
+        % agent(1).controller.do(time, 'f');
+        u = logger.Data.agent.controller.result{i}.input;
+        X = A*X+B*u;
+        agent(1).plant.result.state.set_state(X(1:12));
+        logger2.logging(time, 'f', agent);
+        time.t = time.t + time.dt;
+
+        all = toc;
+    end
+%%
+pHL=logger.data(1,"p","p");
+pK=logger2.data(1,"p","p");
+tspan = 0:dt:40-dt;
+plot(tspan,pHL,tspan,pK);
 
 %%
 % ts = 0; % initial time
