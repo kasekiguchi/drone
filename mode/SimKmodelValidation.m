@@ -88,6 +88,7 @@ load(model_file, 'est');
     % [A, B,C]  = AB_transfer(est.A, est.B, est.C, dt, dt);
     A = est.A;
     B = est.B;
+    C = est.C;
 X = F([agent.plant.state.get();zeros(4,1)]);
     for i = 1:timeidx
         % if i < 20 || rem(i, 10) == 0 end
@@ -99,6 +100,8 @@ X = F([agent.plant.state.get();zeros(4,1)]);
         agent(1).reference.do(time, 'f');
         % agent(1).controller.do(time, 'f');
         u = logger.Data.agent.controller.result{i}.input;
+        disp( (C*X)');
+        disp((C*(A*X+B*u))');
         X = A*X+B*u;
         agent(1).plant.result.state.set_state(X(1:12));
         logger2.logging(time, 'f', agent);
@@ -107,10 +110,13 @@ X = F([agent.plant.state.get();zeros(4,1)]);
         all = toc;
     end
 %%
-pHL=logger.data(1,"p","p");
-pK=logger2.data(1,"p","p");
 tspan = 0:dt:40-dt;
-plot(tspan,pHL,tspan,pK);
+ch = "v";
+pHL=logger.data(1,ch,"p");
+pK=logger2.data(1,ch,"p");
+r= 1:40;
+plot(tspan(r),pHL(r,:),tspan(r),pK(r,:));
+legend("HL","HL","HL","K","K","K")
 
 %%
 % ts = 0; % initial time

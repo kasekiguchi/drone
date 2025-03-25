@@ -26,7 +26,7 @@ end
 
 %-- 観測量は固まったら分けた方が快速
 F = @quaternions_all_00; % 個別用
-%F = @quaternions_all_26;
+% F = @quaternions_all_26;
 % F = @quaternions_all; % 2024 全観測量
 
 % データのかさまし
@@ -54,8 +54,12 @@ else
     if flg.without_pos
         est = KL(Data.X(4:end,:),Data.U,Data.Y(4:end,:),F,flg); % 位置を観測量に入れないときのKL
     else 
-        est = KL(Data.X,Data.U,Data.Y,F,flg); 
-         %est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
+        % est = KL(Data.X,Data.U,Data.Y,F,flg); 
+      [H,f] = gen_Hf(Data.X,Data.U,Data.Y,0.025,F);
+      var = quadprog(H,f);
+      A =[zeros(3,6),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
+      B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
+         % est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
     end%クープマン線形化の具体的な計算をしてる部分
 end
 

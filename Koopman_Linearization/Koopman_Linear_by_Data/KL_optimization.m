@@ -50,59 +50,59 @@ function mat = QP_solve(X, Y, Xlift, Ylift, U, numX, numU, lambda_AB)
     % X - CXlift
     
     %% PART1: 一旦fminconで作ろう
-    options = optimoptions('fmincon', ...
-    'Algorithm', 'sqp', ...
-    'Display', 'iter-detailed', ...
-    'UseParallel', true, ... % 並列化を有効にするなら true
-    'StepTolerance', 1e-6, ...
-    'OptimalityTolerance', 1e-4, ...
-    'ConstraintTolerance', 1e-12, ...
-    'MaxFunctionEvaluations', 5e5, ...
-    'MaxIterations', 10);
-
-    %-- A, B :fun = @(A, B) Ylift - A*Xlift - B*U;
-    fun = @(AB) norm(Ylift - AB(1:numX, 1:numX)*Xlift - AB(1:numX, numX+1:numX+numU)*U, "fro") + norm(AB) + norm(AB,2); 
-    x0 = [eye(numX), zeros(numX, numU)]; % 初期値
-    A = []; b = []; % 線形不等式制約
-    Aeq = []; beq = []; % 線形等式制約
-    lb = []; ub = []; % 下限，上限
-    nonlcon = @const_AB_fmincon; % 非線形制約
-    % [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
-    sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options);
-    mat.A = sol(1:numX, 1:numX);
-    mat.B = sol(1:numX, numX+1:numX+numU);
-
-    %-- C: 
-    % fun =  @(C) norm(X - C*Xlift, "fro"); % frobenius norm
-    %  x0 = [eye(12), zeros(12,numX-12)];
+    % options = optimoptions('fmincon', ...
+    % 'Algorithm', 'sqp', ...
+    % 'Display', 'iter-detailed', ...
+    % 'UseParallel', true, ... % 並列化を有効にするなら true
+    % 'StepTolerance', 1e-6, ...
+    % 'OptimalityTolerance', 1e-4, ...
+    % 'ConstraintTolerance', 1e-12, ...
+    % 'MaxFunctionEvaluations', 5e5, ...
+    % 'MaxIterations', 10);
+    % 
+    % %-- A, B :fun = @(A, B) Ylift - A*Xlift - B*U;
+    % fun = @(AB) norm(Ylift - AB(1:numX, 1:numX)*Xlift - AB(1:numX, numX+1:numX+numU)*U, "fro") + norm(AB) + norm(AB,2); 
+    % x0 = [eye(numX), zeros(numX, numU)]; % 初期値
     % A = []; b = []; % 線形不等式制約
     % Aeq = []; beq = []; % 線形等式制約
     % lb = []; ub = []; % 下限，上限
-    % nonlcon = @const_C; % 非線形制約
-    % sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, [], options);
-    % mat.C = sol;
-
-    %% PART2: QPに変換しよう
-    options = optimoptions('quadprog','Display','iter');
+    % nonlcon = @const_AB_fmincon; % 非線形制約
+    % % [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
+    % sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options);
+    % mat.A = sol(1:numX, 1:numX);
+    % mat.B = sol(1:numX, numX+1:numX+numU);
+    % 
+    % %-- C: 
+    % % fun =  @(C) norm(X - C*Xlift, "fro"); % frobenius norm
+    % %  x0 = [eye(12), zeros(12,numX-12)];
     % % A = []; b = []; % 線形不等式制約
     % % Aeq = []; beq = []; % 線形等式制約
     % % lb = []; ub = []; % 下限，上限
-    % x0A = eye(numX); x0B = zeros(numX, numU); 
-    % %-- A, B
-    % [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
-    % % A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
-    % H = [Xlift*Xlift', Xlift*U'; U*Xlift', U*U'];
-    % H = kron(H, eye(numX));
-    % H = (H + H') / 2;
-    % f = -[Xlift*Ylift'; U*Ylift'];
-    % f = f(:);
-    % x0 = [x0A(:); x0B(:)]; %zeros(numX*numX+numX*numU, 1);
-    % opt = quadprog(H, f, A, b, Aeq, beq,lb, ub, x0, options);
-    % mat.A = reshape(opt(1:numX*numX), numX, numX);
-    % mat.B = reshape(opt(numX*numX+1:end), numX, numU);
-    % 
-    %-- C
-    % [A,b,Aeq,beq,lb,ub] = const_C(Xlift, Ylift, U, numX, numU);
+    % % nonlcon = @const_C; % 非線形制約
+    % % sol = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, [], options);
+    % % mat.C = sol;
+
+    %% PART2: QPに変換しよう
+    options = optimoptions('quadprog','Display','iter');
+    % A = []; b = []; % 線形不等式制約
+    % Aeq = []; beq = []; % 線形等式制約
+    % lb = []; ub = []; % 下限，上限
+    x0A = eye(numX); x0B = zeros(numX, numU); 
+    %-- A, B
+    [A,b,Aeq,beq,lb,ub] = const_AB(Xlift, Ylift, U, numX, numU, lambda_AB);
+    % A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
+    H = [Xlift*Xlift', Xlift*U'; U*Xlift', U*U'];
+    H = kron(H, eye(numX));
+    H = (H + H') / 2;
+    f = -[Xlift*Ylift'; U*Ylift'];
+    f = f(:);
+    x0 = [x0A(:); x0B(:)]; %zeros(numX*numX+numX*numU, 1);
+    opt = quadprog(H, f, A, b, Aeq, beq,lb, ub, x0, options);
+    mat.A = reshape(opt(1:numX*numX), numX, numX);
+    mat.B = reshape(opt(numX*numX+1:end), numX, numU);
+
+    % -- C
+    [A,b,Aeq,beq,lb,ub] = const_C(Xlift, Ylift, U, numX, numU);
     A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
     x0C = [eye(12), zeros(12,numX-12)];
     H = kron(Xlift * Xlift', eye(12));
