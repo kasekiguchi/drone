@@ -11,6 +11,7 @@ properties
     x_pre
     input_pre
     origin_input
+    c
 end
 
 methods
@@ -25,6 +26,7 @@ methods
         obj.result.origin_input = zeros(4,1);
         obj.result.delta_u = zeros(4,1);
         cast(predict(obj.param.NNMEC, zeros(12,1)), "double")';
+        obj.c = [0;0;0;10;10;10;0;0;0;10;10;10];%入力データのスケーリングのための定数
     end
 
     function result = do(obj,varargin)
@@ -79,7 +81,7 @@ methods
         xn = obj.self.estimator.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.self.estimator.x_pre, tmp, obj.param.P);
         toc
         tic
-        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
+        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.c.*(obj.result.xa - xn)), "double")';
         toc
         % obj.result.delta_u = 0.0*cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
         
