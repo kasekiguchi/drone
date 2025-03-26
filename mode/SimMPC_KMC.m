@@ -17,6 +17,7 @@ else
     mov = 0;
 end
 %%
+rng default
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
