@@ -44,7 +44,7 @@ classdef MPC_CONTROLLER_KMC < handle
     reEva
     reinputflag
     StageStateSTLsum
-    STL_period = [1,4]
+    STL_period = [3,4]
   end
 
   methods
@@ -545,7 +545,7 @@ classdef MPC_CONTROLLER_KMC < handle
     function get_input(obj)
         STL_pass_ids = find(obj.input.Evaluationtra(:,3)==0);
         if isempty(STL_pass_ids)
-          [Bestcost, BestcostID] = min(obj.input.Evaluationtra(:,1));
+          [Bestcost, BestcostID] = min(obj.input.Evaluationtra(:,3));
         else
           [Bestcost,BestcostID] = min(obj.input.Evaluationtra(STL_pass_ids,1));
             BestcostID = STL_pass_ids(BestcostID(1));
