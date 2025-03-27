@@ -275,7 +275,7 @@ classdef MPC_CONTROLLER_KMC < handle
             tempsigma =1;
         else
             esp=1e8;
-            tempsigma = 1+1.5*(1-exp(-1*obj.StageStateSTLsum/esp));%%%%% 注意サンプ数に関わる
+            tempsigma = 1+3*(1-exp(-1*obj.StageStateSTLsum/esp));%%%%% 注意サンプ数に関わる
         end
         inputSigma =tempsigma .*obj.input.sigma;  
         if obj.resampling_flag
@@ -309,7 +309,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
     end
     function STL(obj)
-        if obj.param.t >1 && obj.param.t <4
+        if obj.param.t >1 && obj.param.t <3
             %obj.removeX= find(any(squeeze(obj.state.state_data(1:2, 1:end-1, :))<0.0,[1,2]));
              %obj.removeN =size(obj.removeX,1);
              
@@ -328,6 +328,7 @@ classdef MPC_CONTROLLER_KMC < handle
                 obj.objectivemc();
                 
             end 
+            
         end
     end
     
@@ -349,11 +350,12 @@ classdef MPC_CONTROLLER_KMC < handle
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
         stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
-
+      
+         obj.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
         stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
        
-         if obj.param.t >1 && obj.param.t <4 
+         if obj.param.t >1 && obj.param.t <3 
          StageStateSTL =  sum(reshape(tildeSTL, obj.H, obj.N),1);
          StageStateSTL(StageStateSTL < 0) = StageStateSTL(StageStateSTL < 0) * -1e8;
          else
@@ -390,7 +392,7 @@ classdef MPC_CONTROLLER_KMC < handle
         p1_weight = 1e0;
        % v2_weight = diag([1e2;1e2;1]);
         pobs = tildeX(3,:,:);
-        if obj.param.t >1 && obj.param.t <4 
+        if obj.param.t >1 && obj.param.t <3 
             stageVobs = p1_weight.*((p1-pobs).^2+(pobs-p2).^2);
             obj.input.Evaluationtra(:,1) = obj.input.Evaluationtra(:,1) + sum(reshape(stageVobs, obj.H, []))';
             % stageVobs = pagemtimes(v1_weight,((v1_min-Vobs).^2+(Vobs-v1_max).^2));

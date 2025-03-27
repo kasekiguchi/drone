@@ -72,7 +72,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.weight.Qf = Controller.weight.Q;
     Controller.weight.Wf = Controller.weight.W;
 
-    Controller.input.Initsigma = [0.8;1e-3;1e-3;1e-3]; % default 0.1
+    Controller.input.Initsigma = [1;1e-3;1e-3;1e-3]; % default 0.1
     Controller.input.Maxsigma = [1;1e-3;1e-3;1e-3];
     Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
 
