@@ -42,6 +42,7 @@ classdef MPC_CONTROLLER_KMC < handle
     reinput
     reEva
     reinputflag
+    StageStateSTLsum
   end
 
   methods
@@ -65,7 +66,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.WeightF = blkdiag(weight.Pf, weight.Qf, weight.Vf, weight.Wf);
       obj.WeightR = weight.R;  % 目標入力
       obj.WeightRp = weight.RP; % 前ステップとの入力
-      obj.Weightstl = blkdiag(weight.P, eye(9));
+      obj.Weightstl = 10;
       obj.stlhard_flag = 0;
       obj.resampling_flag = 0;
       obj.reinputflag = 0;
@@ -91,7 +92,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.B = obj.model.B;
       C = repmat({obj.param.C}, 1, obj.H); 
       obj.param.C = blkdiag(C{:});  
-
+     obj.StageStateSTLsum = 0;
       %qp 定義
       obj.param.P = param.weight.P;
       obj.param.V = param.weight.V;    % 速度
@@ -129,7 +130,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.removeX = [];  %stl remove data
         obj.survive = obj.N; % particle number -remove number,initial number;
 
-
+       
         time = varargin{1};
         phase = varargin{2};
         obj.param.t = time.t;
@@ -216,7 +217,7 @@ classdef MPC_CONTROLLER_KMC < handle
        obj.result.bestcostID = obj.input.BestcostID;
 
        elseif obj.mcflag == 2
-           obj.generate_input(0.1);
+          
            processStep(obj);
            obj.get_input();
            obj.result.bestcostID = obj.input.BestcostID;
@@ -250,15 +251,15 @@ classdef MPC_CONTROLLER_KMC < handle
         fprintf("\n");
     end
     function processStep(obj)
-        
+           obj.generate_input(0.1);
            obj.predictmc();
            obj.STL();
            if obj.resampling_flag
-              obj.input.u=obj.reinput;
-              obj.input.Evaluationtra=obj.reEva;
-               obj.normalize();
-               obj.Resampling_HVS();
-                disp("Resampling down，goback to predictmc()...");
+              % obj.input.u=obj.reinput;
+              % obj.input.Evaluationtra=obj.reEva;
+               % obj.normalize();
+               % obj.Resampling_HVS();
+                disp("goback to input...");
                 processStep(obj);        
            end
             obj.objectivemc();
@@ -269,8 +270,17 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.mu =  obj.result.input;
         ksigma_max = 1;
         ksigma = linspace(1, ksigma_max, obj.H); % 1~1+ksigma_maxまでH個の配列を作成
-        inputSigma = ksigma .* obj.input.sigma;
-
+      %  inputSigma = ksigma .* obj.input.sigma;
+        if obj.StageStateSTLsum == 0
+            tempsigma =1;
+        else
+            esp=1e8;
+            tempsigma = 1+1.5*(1-exp(-1*obj.StageStateSTLsum/esp));%%%%% 注意サンプ数に関わる
+        end
+        inputSigma =tempsigma .*obj.input.sigma;  
+        if obj.resampling_flag
+         obj.input.mu=obj.input.pre_u;
+        end
         % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu; % 制約なし
         % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + obj.input.mu)); 可変制約
         %%%%%%%% 4 x obj.H xobj.N
@@ -309,7 +319,7 @@ classdef MPC_CONTROLLER_KMC < handle
             %obj.get_input();
             if obj.survive == 0
                 obj.resampling_flag =1;
-                obj.reinputflag = 1;
+                %obj.reinputflag = 1;
                 obj.stlhard_flag =0;
                  obj.objectivemc();%%%%% Evaluation calculate  
             else
@@ -335,35 +345,37 @@ classdef MPC_CONTROLLER_KMC < handle
         tildeUpre = U - obj.input.pre_u;          % 前時刻入力
         tildeUref = U - obj.state.ref(13:16,:);  % 目標入力
         tildeX = X - obj.state.ref(1:12,:);
-        tildeSTL = X -stlbase(1:12,:);
+        tildeSTL = X(3,:,:) -stlbase(3,:);
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
         stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
         stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
 
         stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
-        StageStateSTL =  pagemtimes(obj.Weightstl,tildeSTL);
-         if obj.param.t >1 && obj.param.t <3 
-         StageStateSTL(3, StageStateSTL(3,:) < 0) = StageStateSTL(3, StageStateSTL(3, :) < 0) * -1e11;
+       
+         if obj.param.t >1 && obj.param.t <4 
+         StageStateSTL =  sum(reshape(tildeSTL, obj.H, obj.N),1);
+         StageStateSTL(StageStateSTL < 0) = StageStateSTL(StageStateSTL < 0) * -1e8;
          else
-         StageStateSTL = zeros(size(stageStateX)) ;
+         StageStateSTL = zeros(1,obj.N);
          end
         %% 人工ポテンシャル場法
         % Jconst = Constraints(obj);
         % Jconst(:,1) = {zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N)};
         
         %% ステージコストとターミナルコストを合計
-        costX = stageStateX + terminalState+StageStateSTL;
+        obj.StageStateSTLsum =sum(StageStateSTL);
+        costX = stageStateX + terminalState;
         
-        obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
+        obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1)+StageStateSTL';
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
      
         %% 制約 STL
-        % obj.constraints_STL(tildeX);
-        if ~obj.reinputflag
-          obj.reEva = obj.input.Evaluationtra(:,1) ;
-          obj.reinput = obj.input.u;
-        end
+         obj.constraints_STL(tildeX);
+        % if ~obj.reinputflag
+        %   obj.reEva = obj.input.Evaluationtra(:,1) ;
+        %   obj.reinput = obj.input.u;
+        % end
     end
 
     function constraints_STL(obj, tildeX)
@@ -482,7 +494,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u(2, 1:obj.param.H, 1:obj.N) = u2;
         obj.input.u(1, 1:obj.param.H, 1:obj.N) = u1;
         obj.resampling_flag =0;
-       obj.reinputflag =0;
+        obj.reinputflag =0;
     end
     function Resampling_KYO(obj)
         
