@@ -44,7 +44,7 @@ classdef MPC_CONTROLLER_KMC < handle
     reEva
     reinputflag
     StageStateSTLsum
-    STL_period = [3,4]
+    STL_period = [2,4]
   end
 
   methods
@@ -221,7 +221,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
        elseif obj.mcflag == 2
           
-           processStep(obj);
+           processStep(obj,0);
            
            obj.result.bestcostID = obj.input.BestcostID;
        end
@@ -253,23 +253,23 @@ classdef MPC_CONTROLLER_KMC < handle
             obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1),obj.input.sigma(1));
         fprintf("\n");
     end
-    function processStep(obj)
+    function processStep(obj,num)
           obj.resampling_flag = 0;
-           obj.generate_input(obj.sigma);
+           obj.generate_input(num);
            obj.predictmc();
            obj.STL();
            obj.objectivemc();
            obj.get_input();
-           if obj.resampling_flag
+           if obj.resampling_flag && num < 10
               % obj.input.u=obj.reinput;
               % obj.input.Evaluationtra=obj.reEva;
                % obj.normalize();
                % obj.Resampling_HVS();
                 disp("goback to input...");
-                processStep(obj);        
+                processStep(obj,num+1);        
            end      
     end
-    function generate_input(obj, si)
+    function generate_input(obj, num)
         % ksigma_max = si * obj.H;
         obj.input.mu =  obj.result.input; % QP input
         ksigma_max = 1;
@@ -287,7 +287,7 @@ classdef MPC_CONTROLLER_KMC < handle
         end
         if obj.input.Bestcost_STL > 0
               disp(obj.input.Bestcost_STL);
-              sigma = inputSigma*min(1.3,max(1.1,1+obj.input.Bestcost_STL*1e-5))
+              sigma = inputSigma*min(min(3,1.1^num),max(1,1+obj.input.Bestcost_STL*1e-5))
         else
           sigma = inputSigma;
         end
