@@ -1,12 +1,12 @@
 classdef Gemm_To_GemmLayer1039 < nnet.layer.Layer & nnet.layer.Formattable
     % A custom layer auto-generated while importing an ONNX network.
-    
+
     %#codegen
     %#ok<*PROPLC>
     %#ok<*NBRAK>
     %#ok<*INUSL>
     %#ok<*VARARG>
-    
+
     properties (Learnable)
         linears_0_bias
         linears_0_weight
@@ -27,11 +27,11 @@ classdef Gemm_To_GemmLayer1039 < nnet.layer.Layer & nnet.layer.Formattable
         linears_8_bias
         linears_8_weight
     end
-    
+
     properties
         ONNXParams         % An ONNXParameters object containing parameters used by this layer.
     end
-    
+
     methods
         function this = Gemm_To_GemmLayer1039(name, onnxParams)
             this.Name = name;
@@ -57,7 +57,7 @@ classdef Gemm_To_GemmLayer1039 < nnet.layer.Layer & nnet.layer.Formattable
             this.linears_8_bias = onnxParams.Learnables.linears_8_bias;
             this.linears_8_weight = onnxParams.Learnables.linears_8_weight;
         end
-        
+
         function [x35] = predict(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
@@ -94,7 +94,7 @@ classdef Gemm_To_GemmLayer1039 < nnet.layer.Layer & nnet.layer.Formattable
                 x35 = extractdata(x35);
             end
         end
-        
+
         function [x35] = forward(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
@@ -368,6 +368,9 @@ end
 %% dlarray functions implementing ONNX operators:
 
 function [A, B, C, alpha, beta, numDimsY] = prepareGemmArgs(A, B, C, alpha, beta, transA, transB, numDimsC)
+
+%   Copyright 2020 The MathWorks, Inc.
+
 % Prepares arguments for implementing the ONNX Gemm operator
 if transA
     A = A';
@@ -386,6 +389,9 @@ end
 
 function s = appendStructs(varargin)
 % s = appendStructs(s1, s2,...). Assign all fields in s1, s2,... into s.
+
+%   Copyright 2020 The MathWorks, Inc.
+
 if isempty(varargin)
     s = struct;
 else
@@ -401,6 +407,8 @@ end
 end
 
 function checkInputSize(inputShape, expectedShape, inputName)
+
+%   Copyright 2020-2021 The MathWorks, Inc.
 
 if numel(expectedShape)==0
     % The input is a scalar
@@ -418,29 +426,29 @@ elseif numel(expectedShape)==1
     end
 else
     % The input has 2 dimensions or more
-    
+
     % The input dimensions have been reversed; flip them back to compare to the
     % expected ONNX shape.
     inputShape = fliplr(inputShape);
-    
+
     % If the expected shape has fewer dims than the input shape, error.
     if numel(expectedShape) < numel(inputShape)
         expectedSizeStr = strjoin(["[", strjoin(string(expectedShape), ","), "]"], "");
         error(message('nnet_cnn_onnx:onnx:InputHasGreaterNDims', inputName, expectedSizeStr));
     end
-    
+
     % Prepad the input shape with trailing ones up to the number of elements in
     % expectedShape
     inputShape = num2cell([ones(1, numel(expectedShape) - length(inputShape)) inputShape]);
-    
+
     % Find the number of variable size dimensions in the expected shape
     numVariableInputs = sum(cellfun(@(x) isa(x, 'char') || isa(x, 'string'), expectedShape));
-    
+
     % Find the number of input dimensions that are not in the expected shape
     % and cannot be represented by a variable dimension
     nonMatchingInputDims = setdiff(string(inputShape), string(expectedShape));
     numNonMatchingInputDims  = numel(nonMatchingInputDims) - numVariableInputs;
-    
+
     expectedSizeStr = makeSizeString(expectedShape);
     inputSizeStr = makeSizeString(inputShape);
     if numNonMatchingInputDims == 0 && ~iSizesMatch(inputShape, expectedShape)
@@ -480,6 +488,9 @@ end
 end
 function X = makeUnlabeledDlarray(X)
 % Make numeric X into an unlabelled dlarray
+
+%   Copyright 2020-2021 The MathWorks, Inc.
+
 if isa(X, 'dlarray')
     X = stripdims(X);
 elseif isnumeric(X)
@@ -493,6 +504,9 @@ end
 end
 
 function [Vars, NumDims] = packageVariables(params, inputNames, inputValues, inputNumDims)
+
+%   Copyright 2020 The MathWorks, Inc.
+
 % inputNames, inputValues are cell arrays. inputRanks is a numeric vector.
 Vars = appendStructs(params.Learnables, params.Nonlearnables, params.State);
 NumDims = params.NumDimensions;
@@ -504,6 +518,8 @@ end
 end
 
 function X = permuteInputVar(X, userDataPerm, onnxNDims)
+
+%   Copyright 2020-2021 The MathWorks, Inc.
 % Returns reverse-ONNX ordering
 if onnxNDims == 0
     return;
@@ -531,6 +547,8 @@ X = permute(X, perm);
 end
 
 function Y = permuteOutputVar(Y, userDataPerm, onnxNDims)
+
+%   Copyright 2020-2021 The MathWorks, Inc.
 switch onnxNDims
     case 0
         perm = [];
@@ -579,7 +597,10 @@ end
 end
 
 function s = updateStruct(s, t)
-% Set all existing fields in s from fields in t, ignoring extra fields in t.
+% Set all existing fields in s from fields in t, ignoring extra fields in
+% t.
+%   Copyright 2020 The MathWorks, Inc.
+
 for name = transpose(fieldnames(s))
     s.(name{1}) = t.(name{1});
 end

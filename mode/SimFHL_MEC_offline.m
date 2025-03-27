@@ -36,14 +36,14 @@ for j = 1:1
     
     num = j;
     reference_file = strcat("Exp_2_4_", num2str(num));
-    agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
-    % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+    agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_circle",{"freq",8,"init",[0;0;1],"radius",1.0},"HL"});
+    % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",8,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
     % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_p2p",{"freq",5,"init",[0;0;1],"radius",1.0},"HL"});
+    % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','forMEC'),5,1));
     
 
     % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_circle",{"freq",5,"init",[0;0;1],"radius",1.0,"i",j},"HL"});
     % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5],"i",j},"HL"});
-    % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','origin'),1));%コマンドでシートを選びたいときは位置2を1にする
     % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
     agent.controller = FUNCTIONAL_NNMEC_exp(agent,Controller_NNMEC(dt));
     

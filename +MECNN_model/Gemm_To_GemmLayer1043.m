@@ -1,4 +1,4 @@
-classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
+classdef Gemm_To_GemmLayer1043 < nnet.layer.Layer & nnet.layer.Formattable
     % A custom layer auto-generated while importing an ONNX network.
 
     %#codegen
@@ -24,6 +24,10 @@ classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
         linears_6_weight
         linears_7_bias
         linears_7_weight
+        linears_8_bias
+        linears_8_weight
+        linears_9_bias
+        linears_9_weight
     end
 
     properties
@@ -31,10 +35,10 @@ classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
     end
 
     methods
-        function this = Gemm_To_GemmLayer1035(name, onnxParams)
+        function this = Gemm_To_GemmLayer1043(name, onnxParams)
             this.Name = name;
             this.NumInputs = 2;
-            this.OutputNames = {'x31'};
+            this.OutputNames = {'x39'};
             this.ONNXParams = onnxParams;
             this.linears_0_bias = onnxParams.Learnables.linears_0_bias;
             this.linears_0_weight = onnxParams.Learnables.linears_0_weight;
@@ -52,9 +56,13 @@ classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
             this.linears_6_weight = onnxParams.Learnables.linears_6_weight;
             this.linears_7_bias = onnxParams.Learnables.linears_7_bias;
             this.linears_7_weight = onnxParams.Learnables.linears_7_weight;
+            this.linears_8_bias = onnxParams.Learnables.linears_8_bias;
+            this.linears_8_weight = onnxParams.Learnables.linears_8_weight;
+            this.linears_9_bias = onnxParams.Learnables.linears_9_bias;
+            this.linears_9_weight = onnxParams.Learnables.linears_9_weight;
         end
 
-        function [x31] = predict(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
+        function [x39] = predict(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
             end
@@ -76,20 +84,24 @@ classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
             onnxParams.Learnables.linears_6_weight = this.linears_6_weight;
             onnxParams.Learnables.linears_7_bias = this.linears_7_bias;
             onnxParams.Learnables.linears_7_weight = this.linears_7_weight;
-            [x31, x31NumDims] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, onnxParams, 'Training', false, ...
+            onnxParams.Learnables.linears_8_bias = this.linears_8_bias;
+            onnxParams.Learnables.linears_8_weight = this.linears_8_weight;
+            onnxParams.Learnables.linears_9_bias = this.linears_9_bias;
+            onnxParams.Learnables.linears_9_weight = this.linears_9_weight;
+            [x39, x39NumDims] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, onnxParams, 'Training', false, ...
                 'InputDataPermutation', {['as-is'], ['as-is']}, ...
                 'OutputDataPermutation', {['as-is'], ['as-is']});
-            if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x31}))
-                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1035');
-                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1035'));
+            if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x39}))
+                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1043');
+                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1043'));
             end
-            x31 = dlarray(single(x31), repmat('U', 1, max(2, x31NumDims)));
+            x39 = dlarray(single(x39), repmat('U', 1, max(2, x39NumDims)));
             if ~coder.target('MATLAB')
-                x31 = extractdata(x31);
+                x39 = extractdata(x39);
             end
         end
 
-        function [x31] = forward(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
+        function [x39] = forward(this, onnx__Gemm_0, onnx__Gemm_0NumDims)
             if isdlarray(onnx__Gemm_0)
                 onnx__Gemm_0 = stripdims(onnx__Gemm_0);
             end
@@ -111,22 +123,26 @@ classdef Gemm_To_GemmLayer1035 < nnet.layer.Layer & nnet.layer.Formattable
             onnxParams.Learnables.linears_6_weight = this.linears_6_weight;
             onnxParams.Learnables.linears_7_bias = this.linears_7_bias;
             onnxParams.Learnables.linears_7_weight = this.linears_7_weight;
-            [x31, x31NumDims] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, onnxParams, 'Training', true, ...
+            onnxParams.Learnables.linears_8_bias = this.linears_8_bias;
+            onnxParams.Learnables.linears_8_weight = this.linears_8_weight;
+            onnxParams.Learnables.linears_9_bias = this.linears_9_bias;
+            onnxParams.Learnables.linears_9_weight = this.linears_9_weight;
+            [x39, x39NumDims] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, onnxParams, 'Training', true, ...
                 'InputDataPermutation', {['as-is'], ['as-is']}, ...
                 'OutputDataPermutation', {['as-is'], ['as-is']});
-            if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x31}))
-                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1035');
-                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1035'));
+            if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x39}))
+                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1043');
+                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1043'));
             end
-            x31 = dlarray(single(x31), repmat('U', 1, max(2, x31NumDims)));
+            x39 = dlarray(single(x39), repmat('U', 1, max(2, x39NumDims)));
             if ~coder.target('MATLAB')
-                x31 = extractdata(x31);
+                x39 = extractdata(x39);
             end
         end
     end
 end
 
-function [x31, x31NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, params, varargin)
+function [x39, x39NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0NumDims, params, varargin)
 %GEMM_TO_GEMMFCN Function implementing an imported ONNX network.
 %
 % THIS FILE WAS AUTO-GENERATED BY importONNXFunction.
@@ -134,12 +150,12 @@ function [x31, x31NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 %
 % Variable names in this function are taken from the original ONNX file.
 %
-% [X31] = Gemm_To_GemmFcn(ONNX__GEMM_0, PARAMS)
+% [X39] = Gemm_To_GemmFcn(ONNX__GEMM_0, PARAMS)
 %			- Evaluates the imported ONNX network GEMM_TO_GEMMFCN with input(s)
 %			ONNX__GEMM_0 and the imported network parameters in PARAMS. Returns
-%			network output(s) in X31.
+%			network output(s) in X39.
 %
-% [X31, STATE] = Gemm_To_GemmFcn(ONNX__GEMM_0, PARAMS)
+% [X39, STATE] = Gemm_To_GemmFcn(ONNX__GEMM_0, PARAMS)
 %			- Additionally returns state variables in STATE. When training,
 %			use this form and set TRAINING to true.
 %
@@ -188,7 +204,7 @@ function [x31, x31NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % ONNX__GEMM_0
 %			- Input(s) to the ONNX network.
 %			  The input size(s) expected by the ONNX file are:
-%				  ONNX__GEMM_0:		[1, 12]				Type: DOUBLE
+%				  ONNX__GEMM_0:		[1, 16]				Type: DOUBLE
 %			  By default, the function will try to permute the input(s)
 %			  into this dimension ordering. If the default is incorrect,
 %			  use the 'InputDataPermutation' argument to control the
@@ -200,10 +216,10 @@ function [x31, x31NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 %
 % Outputs:
 % --------
-% X31
+% X39
 %			- Output(s) of the ONNX network.
 %			  Without permutation, the size(s) of the outputs are:
-%				  X31:		[1, 4]				Type: DOUBLE
+%				  X39:		[1, 4]				Type: DOUBLE
 %			  By default, the function will try to permute the output(s)
 %			  from this dimension ordering into a conventional MATLAB
 %			  ordering. If the default is incorrect, use the
@@ -220,20 +236,20 @@ function [x31, x31NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % Put all variables into a single struct to implement dynamic scoping:
 [Vars, NumDims] = packageVariables(params, {'onnx__Gemm_0'}, {onnx__Gemm_0}, [onnx__Gemm_0NumDims]);
 % Call the top-level graph function:
-[x31, x31NumDims, state] = Gemm_To_GemmGraph1016(onnx__Gemm_0, NumDims.onnx__Gemm_0, Vars, NumDims, Training, params.State);
+[x39, x39NumDims, state] = Gemm_To_GemmGraph1020(onnx__Gemm_0, NumDims.onnx__Gemm_0, Vars, NumDims, Training, params.State);
 % Postprocess the output data
-[x31] = postprocessOutput(x31, outputDataPerms, anyDlarrayInputs, Training, varargin{:});
+[x39] = postprocessOutput(x39, outputDataPerms, anyDlarrayInputs, Training, varargin{:});
 end
 
-function [x31, x31NumDims1034, state] = Gemm_To_GemmGraph1016(onnx__Gemm_0, onnx__Gemm_0NumDims1033, Vars, NumDims, Training, state)
-% Function implementing the graph 'Gemm_To_GemmGraph1016'
+function [x39, x39NumDims1042, state] = Gemm_To_GemmGraph1020(onnx__Gemm_0, onnx__Gemm_0NumDims1041, Vars, NumDims, Training, state)
+% Function implementing the graph 'Gemm_To_GemmGraph1020'
 % Update Vars and NumDims from the graph's formal input parameters. Note that state variables are already in Vars.
 Vars.onnx__Gemm_0 = onnx__Gemm_0;
-NumDims.onnx__Gemm_0 = onnx__Gemm_0NumDims1033;
+NumDims.onnx__Gemm_0 = onnx__Gemm_0NumDims1041;
 
 % Execute the operators:
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_0_Gemm_out] = prepareGemmArgs(Vars.onnx__Gemm_0, Vars.linears_0_weight, Vars.linears_0_bias, Vars.Gemmalpha1017, Vars.Gemmbeta1018, 0, 1, NumDims.linears_0_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_0_Gemm_out] = prepareGemmArgs(Vars.onnx__Gemm_0, Vars.linears_0_weight, Vars.linears_0_bias, Vars.Gemmalpha1021, Vars.Gemmbeta1022, 0, 1, NumDims.linears_0_bias);
 Vars.x_linears_0_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -241,7 +257,7 @@ Vars.x_activation_Tanh_ou = tanh(Vars.x_linears_0_Gemm_out);
 NumDims.x_activation_Tanh_ou = NumDims.x_linears_0_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_1_Gemm_out] = prepareGemmArgs(Vars.x_activation_Tanh_ou, Vars.linears_1_weight, Vars.linears_1_bias, Vars.Gemmalpha1019, Vars.Gemmbeta1020, 0, 1, NumDims.linears_1_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_1_Gemm_out] = prepareGemmArgs(Vars.x_activation_Tanh_ou, Vars.linears_1_weight, Vars.linears_1_bias, Vars.Gemmalpha1023, Vars.Gemmbeta1024, 0, 1, NumDims.linears_1_bias);
 Vars.x_linears_1_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -249,7 +265,7 @@ Vars.x_activation_1_Tanh_ = tanh(Vars.x_linears_1_Gemm_out);
 NumDims.x_activation_1_Tanh_ = NumDims.x_linears_1_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_2_Gemm_out] = prepareGemmArgs(Vars.x_activation_1_Tanh_, Vars.linears_2_weight, Vars.linears_2_bias, Vars.Gemmalpha1021, Vars.Gemmbeta1022, 0, 1, NumDims.linears_2_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_2_Gemm_out] = prepareGemmArgs(Vars.x_activation_1_Tanh_, Vars.linears_2_weight, Vars.linears_2_bias, Vars.Gemmalpha1025, Vars.Gemmbeta1026, 0, 1, NumDims.linears_2_bias);
 Vars.x_linears_2_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -257,7 +273,7 @@ Vars.x_activation_2_Tanh_ = tanh(Vars.x_linears_2_Gemm_out);
 NumDims.x_activation_2_Tanh_ = NumDims.x_linears_2_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_3_Gemm_out] = prepareGemmArgs(Vars.x_activation_2_Tanh_, Vars.linears_3_weight, Vars.linears_3_bias, Vars.Gemmalpha1023, Vars.Gemmbeta1024, 0, 1, NumDims.linears_3_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_3_Gemm_out] = prepareGemmArgs(Vars.x_activation_2_Tanh_, Vars.linears_3_weight, Vars.linears_3_bias, Vars.Gemmalpha1027, Vars.Gemmbeta1028, 0, 1, NumDims.linears_3_bias);
 Vars.x_linears_3_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -265,7 +281,7 @@ Vars.x_activation_3_Tanh_ = tanh(Vars.x_linears_3_Gemm_out);
 NumDims.x_activation_3_Tanh_ = NumDims.x_linears_3_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_4_Gemm_out] = prepareGemmArgs(Vars.x_activation_3_Tanh_, Vars.linears_4_weight, Vars.linears_4_bias, Vars.Gemmalpha1025, Vars.Gemmbeta1026, 0, 1, NumDims.linears_4_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_4_Gemm_out] = prepareGemmArgs(Vars.x_activation_3_Tanh_, Vars.linears_4_weight, Vars.linears_4_bias, Vars.Gemmalpha1029, Vars.Gemmbeta1030, 0, 1, NumDims.linears_4_bias);
 Vars.x_linears_4_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -273,7 +289,7 @@ Vars.x_activation_4_Tanh_ = tanh(Vars.x_linears_4_Gemm_out);
 NumDims.x_activation_4_Tanh_ = NumDims.x_linears_4_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_5_Gemm_out] = prepareGemmArgs(Vars.x_activation_4_Tanh_, Vars.linears_5_weight, Vars.linears_5_bias, Vars.Gemmalpha1027, Vars.Gemmbeta1028, 0, 1, NumDims.linears_5_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_5_Gemm_out] = prepareGemmArgs(Vars.x_activation_4_Tanh_, Vars.linears_5_weight, Vars.linears_5_bias, Vars.Gemmalpha1031, Vars.Gemmbeta1032, 0, 1, NumDims.linears_5_bias);
 Vars.x_linears_5_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -281,7 +297,7 @@ Vars.x_activation_5_Tanh_ = tanh(Vars.x_linears_5_Gemm_out);
 NumDims.x_activation_5_Tanh_ = NumDims.x_linears_5_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_6_Gemm_out] = prepareGemmArgs(Vars.x_activation_5_Tanh_, Vars.linears_6_weight, Vars.linears_6_bias, Vars.Gemmalpha1029, Vars.Gemmbeta1030, 0, 1, NumDims.linears_6_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_6_Gemm_out] = prepareGemmArgs(Vars.x_activation_5_Tanh_, Vars.linears_6_weight, Vars.linears_6_bias, Vars.Gemmalpha1033, Vars.Gemmbeta1034, 0, 1, NumDims.linears_6_bias);
 Vars.x_linears_6_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -289,12 +305,28 @@ Vars.x_activation_6_Tanh_ = tanh(Vars.x_linears_6_Gemm_out);
 NumDims.x_activation_6_Tanh_ = NumDims.x_linears_6_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x31] = prepareGemmArgs(Vars.x_activation_6_Tanh_, Vars.linears_7_weight, Vars.linears_7_bias, Vars.Gemmalpha1031, Vars.Gemmbeta1032, 0, 1, NumDims.linears_7_bias);
-Vars.x31 = alpha*B*A + beta*C;
+[A, B, C, alpha, beta, NumDims.x_linears_7_Gemm_out] = prepareGemmArgs(Vars.x_activation_6_Tanh_, Vars.linears_7_weight, Vars.linears_7_bias, Vars.Gemmalpha1035, Vars.Gemmbeta1036, 0, 1, NumDims.linears_7_bias);
+Vars.x_linears_7_Gemm_out = alpha*B*A + beta*C;
+
+% Tanh:
+Vars.x_activation_7_Tanh_ = tanh(Vars.x_linears_7_Gemm_out);
+NumDims.x_activation_7_Tanh_ = NumDims.x_linears_7_Gemm_out;
+
+% Gemm:
+[A, B, C, alpha, beta, NumDims.x_linears_8_Gemm_out] = prepareGemmArgs(Vars.x_activation_7_Tanh_, Vars.linears_8_weight, Vars.linears_8_bias, Vars.Gemmalpha1037, Vars.Gemmbeta1038, 0, 1, NumDims.linears_8_bias);
+Vars.x_linears_8_Gemm_out = alpha*B*A + beta*C;
+
+% Tanh:
+Vars.x_activation_8_Tanh_ = tanh(Vars.x_linears_8_Gemm_out);
+NumDims.x_activation_8_Tanh_ = NumDims.x_linears_8_Gemm_out;
+
+% Gemm:
+[A, B, C, alpha, beta, NumDims.x39] = prepareGemmArgs(Vars.x_activation_8_Tanh_, Vars.linears_9_weight, Vars.linears_9_bias, Vars.Gemmalpha1039, Vars.Gemmbeta1040, 0, 1, NumDims.linears_9_bias);
+Vars.x39 = alpha*B*A + beta*C;
 
 % Set graph output arguments from Vars and NumDims:
-x31 = Vars.x31;
-x31NumDims1034 = NumDims.x31;
+x39 = Vars.x39;
+x39NumDims1042 = NumDims.x39;
 % Set output state from Vars:
 state = updateStruct(state, Vars);
 end
@@ -337,15 +369,15 @@ onnx__Gemm_0 = makeUnlabeledDlarray(onnx__Gemm_0);
 onnx__Gemm_0 = permuteInputVar(onnx__Gemm_0, inputDataPerms{1}, 2);
 end
 
-function [x31] = postprocessOutput(x31, outputDataPerms, anyDlarrayInputs, Training, varargin)
+function [x39] = postprocessOutput(x39, outputDataPerms, anyDlarrayInputs, Training, varargin)
 % Set output type:
 if ~anyDlarrayInputs && ~Training
-    if isdlarray(x31)
-        x31 = extractdata(x31);
+    if isdlarray(x39)
+        x39 = extractdata(x39);
     end
 end
 % Permute outputs if requested:
-x31 = permuteOutputVar(x31, outputDataPerms{1}, 2);
+x39 = permuteOutputVar(x39, outputDataPerms{1}, 2);
 end
 
 

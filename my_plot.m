@@ -8,15 +8,15 @@ else
   cd(fileparts(tmp.Filename));
 end
 
-log = load('Data\NN2_Log(21-Mar-2025_16_44_48).mat');
+log = load('Data\test.mat');
 
 
 %% logを開く
-% flag = "sim";
-flag = "GUI";
+flag = "sim";
+% flag = "GUI";
 
-% logger = simplifyLogger(log.logger(1,1));
-logger = simplifyLogger(log.log);
+logger = simplifyLogger(log.logger(1,1));
+% logger = simplifyLogger(log.log);
 t = logger.t;
 
 

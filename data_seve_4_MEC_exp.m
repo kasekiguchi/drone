@@ -50,7 +50,7 @@ function main(log, i)
     F = find(logger.phase==102); %flight_index
     
     input = data.input(:,F(1):F(end));
-    delta_u = data.delta_u(:,F(1):F(end));
+    % delta_u = data.delta_u(:,F(1):F(end));
     p = data.p(:,F(1):F(end));
     q = data.q(:,F(1):F(end));
     v = data.v(:,F(1):F(end));
@@ -71,7 +71,7 @@ function data = DataStructure(logger)
     
     % NN_xi=c.xi_log;
     data.input = logger.controller.input;
-    data.delta_u = logger.controller.delta_u;
+    % data.delta_u = logger.controller.delta_u;
 
     data.q = logger.estimator.q;
     data.p = logger.estimator.p;

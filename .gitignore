@@ -1053,3 +1053,5 @@ Log*
 /codegen/
 assemblypath.txt
 Data/
+*.onnx
+NN_MODEL/

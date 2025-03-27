@@ -14,7 +14,7 @@ clear; close all; clc;
 
 %% ドローンの状態の実験値から学習済みのNNによるdelta_uを評価
 
-plot_data_distribution = 1;
+plot_data_distribution = 0;
 
 exp_data = load("Data/OriginalData/exp_4_MEC/6_Log(13-Mar-2025_16_13_39).mat");
 F = find(exp_data.log.Data.phase==102); %flight_index
@@ -25,7 +25,7 @@ layer = inputLayer([12 1], "SC");
 NNMEC = addInputLayer(NNMEC,layer);
 
 %%%%%%%%%%%%%%
-coef = 2535;
+coef = 2035;
 %%%%%%%%%%%%%%
 
 delta_u = zeros(4,F(end)-F(1)-coef+1);
@@ -87,25 +87,33 @@ if plot_data_distribution == 1
 folderPath = 'Data/learning_data/MEC_exp/';
 % フォルダ内の .mat ファイルを取得
 fileList = dir(fullfile(folderPath, '*.mat'));
-    for i = 1:length(fileList)
-        fileName = fullfile(folderPath, fileList(i).name);
-        fprintf('Loading: %s\n', fileName); % 読み込むファイルを表示
-        log = load(fileName);
-        
-   
-    end
+q = [];
+p = [];
+v = [];
+w = [];
+for i = 1:length(fileList)
+    fileName = fullfile(folderPath, fileList(i).name);
+    fprintf('Loading: %s\n', fileName); % 読み込むファイルを表示
+    log = load(fileName);
+    p = cat(2, p, log.p);
+    q = cat(2, q, log.q);
+    v = cat(2, v, log.v);
+    w = cat(2, w, log.w);
+end
 
-    figure;
-    for i = 1:12
-        subplot(4, 3, i);
-        scatter(xa_(i, :), xn_(i, :));
-        xlabel('xa');
-        ylabel('xn');
-        
-        % % xa, xn の値を表示
-        % text(min(xa(i,:)), max(xn(i,:)), sprintf('xa: %s\nxn: %s', ...
-        %     mat2str(xa(i,:)), mat2str(xn(i,:))), 'FontSize', 8, 'VerticalAlignment', 'top');
-    end
+x = [p;q;v;w];
+
+figure;
+for i = 1:12
+    subplot(4, 3, i);
+    histogram(x(i, :));
+    xlabel('x');
+
+    
+    % % xa, xn の値を表示
+    % text(min(xa(i,:)), max(xn(i,:)), sprintf('xa: %s\nxn: %s', ...
+    %     mat2str(xa(i,:)), mat2str(xn(i,:))), 'FontSize', 8, 'VerticalAlignment', 'top');
+end
 end
 
 function quadruple_LinkedSubplots(t, delta_u, label, leg, title)
@@ -158,4 +166,53 @@ function quadruple_LinkedSubplots(t, delta_u, label, leg, title)
 
     sgtitle(title);
 
+end
+
+function newLog = simplifyLogger(log)
+        % name = ['new_', inputname(1)];
+        newLog.t = log.Data.t(1:log.k);    
+        newLog.phase = log.Data.phase;
+        newLog.k = log.k;
+        newLog.fExp = log.fExp;
+        
+        fieldcell = fieldnames(log.Data.agent);
+        j = 1;
+        tic
+        for i = 1:length(fieldcell)
+            if ~isequal(fieldcell{i},'controller')&&~isequal(fieldcell{i},'input')&&~isequal(fieldcell{i},'inner_input')
+                fields{j} = fieldcell{i};
+                j = j+1;
+            end
+        end
+        %状態の格納
+        for i = 1:length(fields)
+            F = fields{i};%Flowing phase
+            for i2 = 1:newLog.k
+                states = log.Data.agent.(fields{i}).result{1, i2}.state.list;
+                for i3 = 1:length(states)
+                    S = states(i3);%State
+                    if S ~= "xd"
+                        newLog.(F).(S)(:,i2) = log.Data.agent.(F).result{1, i2}.state.(S);
+                    end
+                end
+            end
+        end
+        %入力の格納
+        for j = 1:newLog.k
+            fieldcell2 = fieldnames(log.Data.agent.controller.result{1, j});
+            for j2 = 1:length(fieldcell2)
+                S = fieldcell2{j2};%State         
+                    newLog.controller.(S)(:,j) = log.Data.agent.controller.result{1, j}.(S);
+            end
+        end
+        
+        if log.fExp
+            for j3 = 1:newLog.k
+                newLog.inner_input(:,j3) = log.Data.agent.inner_input{1, j3}';
+            end
+        end
+        toc
+        whos 'newLog'
+
+        
 end
