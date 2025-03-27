@@ -39,6 +39,9 @@ classdef MPC_CONTROLLER_KMC < handle
     removeX
     resampling_flag
     stlhard_flag
+    reinput
+    reEva
+    reinputflag
   end
 
   methods
@@ -65,7 +68,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.Weightstl = blkdiag(weight.P, eye(9));
       obj.stlhard_flag = 0;
       obj.resampling_flag = 0;
-
+      obj.reinputflag = 0;
       % MPCパラメータ初期化 = メモリの確保
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
@@ -251,8 +254,10 @@ classdef MPC_CONTROLLER_KMC < handle
            obj.predictmc();
            obj.STL();
            if obj.resampling_flag
+              obj.input.u=obj.reinput;
+              obj.input.Evaluationtra=obj.reEva;
                obj.normalize();
-               obj.Resampling_LVS();
+               obj.Resampling_HVS();
                 disp("Resampling down，goback to predictmc()...");
                 processStep(obj);        
            end
@@ -260,6 +265,7 @@ classdef MPC_CONTROLLER_KMC < handle
     end
     function generate_input(obj, si)
         % ksigma_max = si * obj.H;
+        
         obj.input.mu =  obj.result.input;
         ksigma_max = 1;
         ksigma = linspace(1, ksigma_max, obj.H); % 1~1+ksigma_maxまでH個の配列を作成
@@ -278,6 +284,7 @@ classdef MPC_CONTROLLER_KMC < handle
             % obj.input.u(2,:,:) = zeros(1, obj.H, obj.N); obj.input.u(4,:,:) = zeros(1, obj.H, obj.N);
             obj.input.u(3,:,:) = zeros(1, obj.H, obj.N); obj.input.u(4,:,:) = zeros(1, obj.H, obj.N);
         end
+        
     end
 
     % 状態予測for mc
@@ -292,15 +299,17 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
     end
     function STL(obj)
-        if obj.param.t >1 && obj.param.t <3
+        if obj.param.t >1 && obj.param.t <4
             %obj.removeX= find(any(squeeze(obj.state.state_data(1:2, 1:end-1, :))<0.0,[1,2]));
              %obj.removeN =size(obj.removeX,1);
+             
             obj.removeX= find(any(squeeze(obj.state.state_data(3, 1:end, :))<0.5,1));
            obj.removeN =size(obj.removeX',1);
             obj.survive = obj.N-obj.removeN;
             %obj.get_input();
             if obj.survive == 0
                 obj.resampling_flag =1;
+                obj.reinputflag = 1;
                 obj.stlhard_flag =0;
                  obj.objectivemc();%%%%% Evaluation calculate  
             else
@@ -335,7 +344,7 @@ classdef MPC_CONTROLLER_KMC < handle
         terminalState = 0;
         StageStateSTL =  pagemtimes(obj.Weightstl,tildeSTL);
          if obj.param.t >1 && obj.param.t <3 
-         StageStateSTL(3, StageStateSTL(3,:) < 0) = StageStateSTL(3, StageStateSTL(3, :) < 0) * -1e10;
+         StageStateSTL(3, StageStateSTL(3,:) < 0) = StageStateSTL(3, StageStateSTL(3, :) < 0) * -1e11;
          else
          StageStateSTL = zeros(size(stageStateX)) ;
          end
@@ -345,12 +354,16 @@ classdef MPC_CONTROLLER_KMC < handle
         
         %% ステージコストとターミナルコストを合計
         costX = stageStateX + terminalState+StageStateSTL;
-
+        
         obj.input.Evaluationtra(:,1) = reshape(sum(costX, [1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
         obj.input.Evaluationtra(:,2) = reshape(sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
      
         %% 制約 STL
         % obj.constraints_STL(tildeX);
+        if ~obj.reinputflag
+          obj.reEva = obj.input.Evaluationtra(:,1) ;
+          obj.reinput = obj.input.u;
+        end
     end
 
     function constraints_STL(obj, tildeX)
@@ -415,11 +428,12 @@ classdef MPC_CONTROLLER_KMC < handle
         pu3 = u3;
         pu4 = u4;
         ind=1;%新しいID
+        
         for ip=1:NP
             while(resampleID(ip)>wcum(ind))
                 ind=ind+1;
             end
-            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
+            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%+noise_factor*randn(size(obj.input.u));%LVSで選ばれたパーティクルに置き換え
             u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
             u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
             u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
@@ -430,16 +444,18 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u(2, 1:obj.param.H, 1:obj.N) = u2;
         obj.input.u(1, 1:obj.param.H, 1:obj.N) = u1;
         obj.resampling_flag =0;
+        obj.reinputflag =0;
     end
     function Resampling_HVS(obj)
        %RESAMPLING この関数の概要をここに記述
-        % アルゴリズムはLow Variance Sampling
+        % アルゴリズムは Variance Sampling
         NP = size(obj.input.u,3);   % サンプル数
         pw = obj.input.EvalNorm; % 正規化された評価値
         u1 = reshape(obj.input.u(1,:,:), [], NP); 
         u2 = reshape(obj.input.u(2,:,:), [], NP); 
         u3 = reshape(obj.input.u(3,:,:), [], NP); 
         u4 = reshape(obj.input.u(4,:,:), [], NP); 
+        eps = 1e-6;
         inv_pw = 1 ./ (pw + eps);  
         inv_pw = inv_pw / sum(inv_pw);  % 標準化
         wcum = cumsum(inv_pw);  % 逆評価値を累積
@@ -450,11 +466,12 @@ classdef MPC_CONTROLLER_KMC < handle
         pu3 = u3;
         pu4 = u4;
         ind=1;%新しいID
+        noise_factor = 0.3;
         for ip=1:NP
             while(resampleID(ip)>wcum(ind))
                 ind=ind+1;
             end
-            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
+            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%+[noise_factor*randn(size(pu1(2:end,ind)));pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
             u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
             u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
             u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
@@ -465,14 +482,16 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.input.u(2, 1:obj.param.H, 1:obj.N) = u2;
         obj.input.u(1, 1:obj.param.H, 1:obj.N) = u1;
         obj.resampling_flag =0;
+       obj.reinputflag =0;
     end
     function Resampling_KYO(obj)
-        [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        tmp = obj.input.u(:,BestcostID(1));
-        sigma =3;
-        sigma2 = 0.005;
-        obj.input.u(1,:,:)= repmat(tmp(1), 1, 1, obj.N) + sigma * randn(1,obj.H,obj.N);
-        obj.input.u(2:4,:,:) =repmat(tmp(2:4), 1, 1, obj.N) + sigma2 * randn(1,obj.H,obj.N);
+        
+        % [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
+        % tmp = obj.input.u(:,BestcostID(1));
+        % sigma =3;
+        % sigma2 = 0.005;
+        % obj.input.u(1,:,:)= repmat(tmp(1), 1, 1, obj.N) + sigma * randn(1,obj.H,obj.N);
+        % obj.input.u(2:4,:,:) =repmat(tmp(2:4), 1, 1, obj.N) + sigma2 * randn(1,obj.H,obj.N);
         % lhs_samples = lhsdesign(4,obj.N);
         % data = zeros(4,obj.H,obj.N);
         % for i = 1:4
@@ -506,7 +525,7 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.param.ref_input = obj.input.pre_u;
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
-
+         obj.reinputflag = 0;
         if obj.param.test.sigma ~= 1
             obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
         end
