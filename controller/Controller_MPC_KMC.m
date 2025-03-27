@@ -60,7 +60,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     % Controller.weight.R = 1e3*diag([1; 1; 1; 1]); % 入力
     % Controller.weight.RP = 0*diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller.weight.P = 1e0*diag([1000;1000;5000]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.P = 1e0*diag([1000;1000;50]);    % 位置　10,20刻み  20;1;30
     Controller.weight.Q = 1e3*diag([1;1;1]);    % 速度  10,20刻み  30;20;10
     Controller.weight.V = 1e0*diag([1;1;10000]); % 15良い気がする
     Controller.weight.W = 1e0*diag([1;1;1]);  % 姿勢角，角速度　1,2刻み 
@@ -77,7 +77,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
 
     Controller.dt = 0.025; % MPCステップ幅
-    Controller.H = 10;
+    Controller.H = 12;
     Controller.particle_num = 50000;
 
     Controller.test.sigma = 0; % 標準偏差を固定

@@ -104,7 +104,7 @@ classdef MCMPC_controller < handle
           %  [obj.input.u, ~] = obj.Resampling_IS(); % ImportanceSampling
             obj.previous_state = obj.self.estimator.result.state.get();
             % 
-            % if obj.param.t>=3.0 && obj.param.t<=10.0
+            % if obj.param.t>=3.0 && obj.param.t<=5.0
             %     obj.stlflag = 1;
             % else
             %     obj.stlflag = 0;
@@ -121,7 +121,7 @@ classdef MCMPC_controller < handle
              end
               
             %stl 条件判断
-              removeX = find((abs(obj.state.predict_state(9, 2, :))> 10));
+              removeX = find((abs(obj.state.predict_state(9, 2, :))> 3));
             % %     restart =1;
             % %     obj.input.u1=obj.input.u1 * 0.9;
             % %     obj.input.u2=obj.input.u2 * 0.9;
