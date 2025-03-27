@@ -88,12 +88,12 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.C = blkdiag(C{:});
 
       %qp 定義
-       obj.param.P =  diag([30; 10; 1]);    % 座標   1000 1000 10000
-      obj.param.V =  diag([10; 1; 1]);    % 速度
-      obj.param.R = diag([1; 1; 1; 1]); % 入力
-      obj.param.RP =diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-      obj.param.Q =  diag([30; 20; 10]);   % 姿勢角
-      obj.param.W = diag([1; 1; 1]);    % 角速度
+       obj.param.P = param.weight.P;    % 座標   1000 1000 10000
+      obj.param.V = param.weight.V;    % 速度
+      obj.param.R = param.weight.R; % 入力
+      obj.param.RP =param.weight.RP;  % 1ステップ前の入力との差    0*(無効化)
+      obj.param.Q =  param.weight.Q;   % 姿勢角
+      obj.param.W = param.weight.W;   % 角速度
 
       obj.param.Pf = obj.param.P; % 6
       obj.param.Vf = obj.param.V; % 6
@@ -124,7 +124,8 @@ classdef MPC_CONTROLLER_KMC < handle
         time = varargin{1};
         phase = varargin{2};
         obj.param.t = time.t;
-        
+         obj.current_state = obj.self.estimator.result.state.get();
+         obj.state.current = obj.param.F([obj.current_state;obj.input.mu(:,1,1)]); 
         %% phaseによるcontrollerの選択
         if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
@@ -195,9 +196,6 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.input.u = obj.result.input; %%%%%%% use without qp->output+mc
       obj.input.mu = obj.param.ref_input;%%%%
       % 目標入力
-
-    
-
        if obj.mcflag == 1
       % 状態予測
       % QP 出った結果を入力生成
@@ -317,7 +315,7 @@ classdef MPC_CONTROLLER_KMC < handle
         X = obj.state.state_data;
 
         %% ホライズンで重み大きく
-        %k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
+        k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
         % k = ones(1, obj.param.H);
 
         %% 誤差計算
@@ -327,14 +325,14 @@ classdef MPC_CONTROLLER_KMC < handle
         
 
         %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-        % stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
-        % stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
-        % 
-        % stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
-          stageInputPre  = tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
-        stageInputRef  = tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
+        stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
+        stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
 
-        stageStateX =    tildeX.*pagemtimes(obj.Weight,tildeX);
+        stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
+        %   stageInputPre  = tildeUpre.*pagemtimes(obj.WeightR,tildeUpre);
+        % stageInputRef  = tildeUref.*pagemtimes(obj.WeightRp,tildeUref);
+        % 
+        % stageStateX =    tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
 
         %% 人工ポテンシャル場法
@@ -349,7 +347,7 @@ classdef MPC_CONTROLLER_KMC < handle
      
         %% 制約 STL
         if ~obj.stlhard_flag
-         obj.constraints_STL(tildeX);
+        % obj.constraints_STL(tildeX);
         end
     end
 
@@ -513,24 +511,27 @@ classdef MPC_CONTROLLER_KMC < handle
         var(4*(1:obj.H)) = 0;
         obj.result.input =var(1:4, 1); % 算出された入力      
         obj.result.eflag = eflag;
+         obj.input.var = var;
+        obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = [fval;0]; obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function [eval] = objectiveqp(obj,x)   % obj.~とする
-            U = x;
-            X(:,1) = obj.current_state;
-            for L = 2:obj.param.H
-                X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
-            end
-
-            tildeX = X - obj.state.ref(1:12,:);
-            tildeUpre = U - obj.input.u;
+            U = reshape(x,4,[]);
+            %X(:,1) = obj.current_state;
+            % for L = 2:obj.param.H
+            %     X(:,L) = X(:,L-1) + obj.param.dt *obj.modelf(X(:,L-1),U(:,L-1), obj.P);
+            % end
+            n = size(obj.state.current,1);
+            X = obj.param.A*obj.state.current + obj.param.B*x;
+             ids = [1:12]' + n*(0:obj.param.H-1);
+            tildeX = reshape(X,n,[]) - [obj.state.ref(1:12,:);zeros(n-12,obj.param.H)];
+            tildeUpre = U - reshape(obj.input.var,4,[]);
             tildeUref = U - obj.state.ref(13:16,:);
 
-            stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
-            stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
-            stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
-            terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
-
+            stageState = tildeX(:,1:end-1)' * blkdiag(obj.param.Weight,0*eye(n-12))    * tildeX(:,1:end-1);
+            stageInputPre  = tildeUpre(:,1:end-1)' * obj.param.RP * tildeUpre(:,1:end-1);
+            stageInputRef  = tildeUref(:,1:end-1)' * obj.param.R  * tildeUref(:,1:end-1);
+            terminalState = tildeX(1:12,end)' * obj.param.Weightf * tildeX(1:12,end);
             eval = stageState + stageInputPre + stageInputRef + terminalState;
         end
   end
