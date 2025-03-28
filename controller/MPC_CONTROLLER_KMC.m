@@ -138,7 +138,9 @@ classdef MPC_CONTROLLER_KMC < handle
         phase = varargin{2};
         obj.param.t = time.t;
         obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
-        obj.state.current = obj.param.F([obj.current_state;obj.input.mu(:,1,1)]);       
+     %   obj.state.current = obj.param.F([obj.current_state;obj.input.mu(:,1,1)]);  
+         obj.state.current = obj.param.F([obj.current_state; obj.input.pre_u(:,1,1)]);  
+     
         %% phaseによるcontrollerの選択
         if phase == 'a' % arming
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
@@ -287,7 +289,7 @@ classdef MPC_CONTROLLER_KMC < handle
         end
         if obj.input.Bestcost_STL > 0
               disp(obj.input.Bestcost_STL);
-              sigma = inputSigma*min(min(3,1.1^num),max(1,1+obj.input.Bestcost_STL*1e-5))
+              sigma = inputSigma*min(min(3,1.1^num),max(1,1+obj.input.Bestcost_STL*1e-5));
         else
           sigma = inputSigma;
         end
@@ -365,7 +367,10 @@ classdef MPC_CONTROLLER_KMC < handle
          obj.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
         stageStateX =    k .* tildeX.*pagemtimes(obj.Weight,tildeX);
         terminalState = 0;
-       
+         if obj.param.t >obj.STL_period(2) 
+        stageInputPre  =0 .*stageInputPre;
+         stageInputRef =0 .*stageInputRef;
+        end
          if obj.param.t >obj.STL_period(1) && obj.param.t < obj.STL_period(2)                
            StageStateSTL = reshape(sum(tildeSTL,2)*(-1e8),1,obj.N);
          % StageStateSTL =  sum(reshape(tildeSTL, obj.H, obj.N),1),;

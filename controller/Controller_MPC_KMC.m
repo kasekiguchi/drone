@@ -72,13 +72,13 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.weight.Qf = Controller.weight.Q;
     Controller.weight.Wf = Controller.weight.W;
 
-    Controller.input.Initsigma = [1;1e-3;1e-3;1e-3]; % default 0.1
+    Controller.input.Initsigma = [1;1.5e-3;1.5e-3;1.5e-3]; % default 0.1
     Controller.input.Maxsigma = [1;1e-3;1e-3;1e-3];
     Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
 
     Controller.dt = 0.025; % MPCステップ幅
     Controller.H = 12;
-    Controller.particle_num = 50000;
+    Controller.particle_num = 500000;
 
     Controller.test.sigma = 1; % 標準偏差を固定
     Controller.test.input = 0; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
