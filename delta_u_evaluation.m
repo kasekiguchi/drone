@@ -16,7 +16,7 @@ clear; close all; clc;
 
 plot_data_distribution = 0;
 
-exp_data = load("Data/OriginalData/exp_4_MEC/6_Log(13-Mar-2025_16_13_39).mat");
+exp_data = load("Data/6_Log(13-Mar-2025_16_13_39).mat");
 F = find(exp_data.log.Data.phase==102); %flight_index
 
 NNMEC = importNetworkFromONNX("NN_MODEL\MECNN_model.onnx");

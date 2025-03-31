@@ -25,7 +25,8 @@ methods
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.result.origin_input = zeros(4,1);
         obj.result.delta_u = zeros(4,1);
-        cast(predict(obj.param.NNMEC, zeros(16,1)), "double")';
+        cast(predict(obj.param.NNMEC, zeros(12,1)), "double")';
+        % cast(predict(obj.param.NNMEC, zeros(16,1)), "double")';
         obj.c = [0;0;0;5;5;5;0;0;0;5;5;5];%入力データのスケーリングのための定数
     end
 
@@ -59,6 +60,7 @@ methods
 
         %% calc actual input
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
+        tmp_ = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         obj.result.origin_input = tmp;
         %%input of subsystems
         obj.result.uHL = [vf(1); vs];
@@ -78,11 +80,12 @@ methods
         % total_thrust = tmp(1) + delta_u;
         % 
         tic
-        xn = obj.self.estimator.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.self.estimator.x_pre, tmp, obj.param.P);
+        xn = obj.self.estimator.x_pre + 0.025*roll_pitch_yaw_thrust_torque_physical_parameter_model(obj.self.estimator.x_pre, tmp_, obj.param.P);
         toc
         tic
         % obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.c.*(obj.result.xa - xn)), "double")';
-        obj.result.delta_u = cast(predict(obj.param.NNMEC, [(obj.result.xa - xn); tmp]), "double")';
+        obj.result.delta_u = cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
+        % obj.result.delta_u = cast(predict(obj.param.NNMEC, [(obj.result.xa - xn); tmp]), "double")';
         toc
         % obj.result.delta_u = 0.0*cast(predict(obj.param.NNMEC, obj.result.xa - xn), "double")';
         

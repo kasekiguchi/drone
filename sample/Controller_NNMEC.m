@@ -12,7 +12,8 @@ Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);
 
 NNMEC = importNetworkFromONNX("NN_MODEL\MECNN_model.onnx");
 NNMEC.Initialized
-layer = inputLayer([16 1], "SC");
+layer = inputLayer([12 1], "SC");
+% layer = inputLayer([16 1], "SC");
 Controller.NNMEC = addInputLayer(NNMEC,layer);
 
 syms sz1 [2 1] real
