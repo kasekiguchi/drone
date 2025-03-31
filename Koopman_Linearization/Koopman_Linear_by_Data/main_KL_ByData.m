@@ -79,8 +79,10 @@ else
       % ttH(z_ids,:) = [];
       % f = f+ sum(ttH,2);
       var = quadprog(H,f);
-      est.A =[eye(3),zeros(3,3),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
-      est.B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
+      % est.A =[eye(3),zeros(3,3),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
+      % est.B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
+      est.A =[eye(6),0.025*eye(6),zeros(6,26-12);reshape(var(1:26*20),26,[])'];
+      est.B = [zeros(6,4);reshape(var(26*20+1:end),4,[])'];
       est.C = [eye(12),zeros(12,size(est.A,1)-12)];
          % est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
     end%クープマン線形化の具体的な計算をしてる部分

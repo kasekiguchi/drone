@@ -32,8 +32,9 @@ tH = [blkdiag(txxT{:}),blkdiag(txuT{:});blkdiag(txuT{:})',blkdiag(tuuT{:})];
 tf = [xy;uy];
 
 %% constraint
-dt_ids = [7,8,9] + (0:2)*n;
-z_ids = [1:3*n,n^2+1:n^2+3*m];
+fn = 6; % q = q + w*dt 
+dt_ids = [7:7+(fn-1)] + (0:(fn-1))*n;
+z_ids = [1:fn*n,n^2+1:n^2+fn*m];
 H = tH;
 H(z_ids,:) = [];
 H(:,z_ids) = [];

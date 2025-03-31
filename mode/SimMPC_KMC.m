@@ -38,7 +38,8 @@ initial_state.w = [0; 0; 0];
 %model_file = '2024-12-23_Exp_Kiyama_code23_saddle_increased_weight10.mat';
  % model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
  % model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
- model_file = '2025-03-27_Exp_Kyomo_code00_saddle';
+ % model_file = '2025-03-27_Exp_Kyomo_code00_saddle';% p = p+v*dt
+ model_file = '2025-03-31_Exp_Kyomo_code00_saddle'; % p = p+v*dt, q = q+ w*dt;
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
 % model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
@@ -75,12 +76,12 @@ if ~modeType
         logger.logging(time, phase, agent);
         time.t = time.t + time.dt;
         %pause(1)
-        all = toc
+        all = toc;
         % disp([num2str(time.t)])
         agent.controller.show;
         if agent.estimator.result.state.p(3) < 0 || ...
                 any(abs(agent.estimator.result.state.p) > 4)
-            disp(";;;;;墜落;;;;;;;;");
+            disp(";;;;;End 着陸 or 墜落;;;;;;;;");
             break;
         end
     end

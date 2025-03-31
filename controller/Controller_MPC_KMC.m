@@ -60,37 +60,39 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     % Controller.weight.R = 1e3*diag([1; 1; 1; 1]); % 入力
     % Controller.weight.RP = 0*diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
-    Controller.weight.P = 1e0*diag([3000;3000;20000]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = 1e3*diag([1;1;1]);    % 速度  10,20刻み  30;20;10
-    Controller.weight.V = 1e0*diag([1;1;10000]); % 15良い気がする
-    Controller.weight.W = 1e0*diag([1;1;1]);  % 姿勢角，角速度　1,2刻み 
-    Controller.weight.R = 1e2*diag([1; 1; 1; 1]); % 入力
-    Controller.weight.RP = 1*diag([100; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller.weight.P = 1e1*diag([10;10;20]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = 1e4*diag([1;1;0]);    % 速度  10,20刻み  30;20;10
+    Controller.weight.V = 1e0*diag([10;10;1000]); % 15良い気がする
+    Controller.weight.W = 1e0*diag([1;1;0]);  % 姿勢角，角速度　1,2刻み 
+    Controller.weight.R = 1e0*diag([1; 1; 1; 1000]); % 入力
+    Controller.weight.RP = 0*diag([100; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
     Controller.weight.Pf = Controller.weight.P;
     Controller.weight.Vf = Controller.weight.V;
     Controller.weight.Qf = Controller.weight.Q;
     Controller.weight.Wf = Controller.weight.W;
 
-    Controller.input.Initsigma = [1;1.5e-3;1.5e-3;1.5e-3]; % default 0.1
+    Controller.input.Initsigma = [0.1;1.5e-2;1.5e-2;1.5e-2]; % default 0.1
     Controller.input.Maxsigma = [1;1e-3;1e-3;1e-3];
     Controller.input.Minsigma = [0.01;1e-5;1e-5;1e-5];
 
     Controller.dt = 0.025; % MPCステップ幅
     Controller.H = 12;
-    Controller.particle_num = 500000;
+    Controller.particle_num = 50000;
 
     Controller.test.sigma = 1; % 標準偏差を固定
     Controller.test.input = 0; % 推力以外の入力を0固定: 0:固定なし,1:トルク,2:自由
 
     %% input
     Controller.input.u = [Controller.m * 9.81;0;0;0]; % 総推力，トルク
-    torque_th = 2; thrust_th = 1.5;
+    torque_th = 1; thrust_th = 1.5;
     Controller.input_max = [0.5884*9.81 + thrust_th; torque_th; torque_th; torque_th];
     Controller.input_min = [0.5884*9.81 - thrust_th;-torque_th;-torque_th;-torque_th];
     Controller.ref_input = Controller.input.u; %入力の目標値
-    Controller.input.lb = [0; -1; -1; -1];
-    Controller.input.ub = [10; 1;  1;  1];
+    % Controller.input.lb = [0; -1; -1; -1];
+    % Controller.input.ub = [10; 1;  1;  1];
+    Controller.input.lb = Controller.input_min;
+    Controller.input.ub = Controller.input_max;
     
     %% 以下は変更なし
     fprintf("Koopman Monte Carlo MPC controller\n")
