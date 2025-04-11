@@ -3,6 +3,7 @@ clear; close all; clc;%% GUI or Sim
 if exist('app') == 1
     modeType = 1;
 else
+
     %% Initialize
     tmp = matlab.desktop.editor.getActive;
     dir = fileparts(tmp.Filename);
@@ -100,10 +101,10 @@ if ~modeType
     
 end
 
-%%
+
 function f = draw(logger, time, dt)
     f(1) = figure(1);
-    m = 3; n=3;
+    m = 2; n=2;
     %% データ取得
     cost = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.bestcost(1), 1:round(time.t/dt),'UniformOutput',false));
     tt = logger.data(0,"t",[]);
@@ -117,17 +118,30 @@ function f = draw(logger, time, dt)
     input_ave = mean(input,2);
 
     %% 状態
-    subplot(m,n,1); plot(tt, pe, "-", tt, pr, "--"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15); grid on;
-    subplot(m,n,3); plot(tt, ve, "-", tt, vr, "--"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Velocity [m/s]', 'Fontsize', 15); grid on;
-    subplot(m,n,2); plot(tt, qe, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angle [rad]', 'Fontsize', 15); grid on;
-    subplot(m,n,4); plot(tt, we, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angular velocity [rad/s]', 'Fontsize', 15); grid on;
-    %% 入力
-    subplot(m,n,5); plot(tt, input(1,:), tt, repmat(input_ave(1),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Thrust [N]', 'Fontsize', 15); grid on;
-    subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
-    %% 評価値
-    subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
-    subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
+    subplot(m,n,1); 
+     plot(tt, pe, "-", tt, pr(1,:), "--x",'MarkerIndices',1:30:length(pr(1,:)));
+     hold on;
+     plot(tt, pr(2,:), "s",'MarkerIndices',1:50:length(pr(1,:)));
+     plot(tt, pr(3,:), "c*",'MarkerIndices',1:70:length(pr(1,:)));
+    xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15); legend('Xe', 'Ye', 'Ze', 'Xr', 'Yr', 'Zr', 'horizontal', 'best'); hold off;grid on;
+     subplot(m,n,3); 
+     plot(tt, ve, "-", tt, vr(1,:), "--x",'MarkerIndices',1:30:length(vr(1,:)));
+     hold on;
+     plot(tt, vr(2,:), "s",'MarkerIndices',1:50:length(vr(1,:)));
+     plot(tt, vr(3,:), "c*",'MarkerIndices',1:70:length(vr(1,:)));
+     xlabel('Time [s]', 'Fontsize', 15); ylabel('Velocity [m/s]', 'Fontsize', 15); legend('Vxe', 'Vye', 'Vze', 'Vxr', 'Vyr', 'Vzr', 'horizontal', 'best');grid on;
+    % subplot(m,n,1); plot(tt, pe, "-", tt, pr, "--"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15); legend('Xe', 'Ye', 'Ze', 'Xr', 'Yr', 'Zr', 'horizontal', 'best');grid on;
+    % subplot(m,n,3); plot(tt, ve, "-", tt, vr, "--"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Velocity [m/s]', 'Fontsize', 15); legend('Vxe', 'Vye', 'Vze', 'Vxr', 'Vyr', 'Vzr', 'horizontal', 'best');grid on;
+    subplot(m,n,2); plot(tt, qe, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angle [rad]', 'Fontsize', 15); legend('$roll(\phi)$', '$pitch(\theta)$', '$yaw(\psi)$', 'Interpreter','latex');grid on;
+    subplot(m,n,4); plot(tt, we, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angular velocity [rad/s]', 'Fontsize', 15);legend('$\omega_\phi$', '$\omega_\theta$', '$\omega_\psi$', 'Interpreter','latex'); grid on;  
+    % %% 入力
+    % subplot(m,n,5); plot(tt, input(1,:), tt, repmat(input_ave(1),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Thrust [N]', 'Fontsize', 15); grid on;
+    % subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
+    % %% 評価値
+    % subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
+    % subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
 end
+    %% 
 
 %%
 % function dfunc(app)
