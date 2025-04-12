@@ -45,7 +45,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             deltaYaw    = sign(cross(yawdUnit,yawUnit))*acos(yawdUnit'*yawUnit);% 目標角度からみた機体角度との誤差
             xd(4)       = -deltaYaw(3) + yaw;                                   % yaw打ち消しと誤差をyawの目標角に入れる．
         %目標値の格納
-            xd          =[xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
+            xd          = [xd;zeros(28-size(xd,1),1)];   % 足りない分は0で埋める．
          %物理パラメータ
             
          P           = [obj.self.parameter.get(["mass", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]),0,0];

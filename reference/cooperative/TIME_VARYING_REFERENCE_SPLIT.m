@@ -122,7 +122,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    % rhoci        = obj.agent1.parameter.rhoc(:,id);            % 紐の接続位置が頂点の多角形の重心からリンクまでの距離
                % sensor
                    spL       = obj.self.sensor.result.state.pL;                 % 分割後の牽引物センサー値
-                   if isa(obj.self.sensor.motive,"MOTIVE")
+                   if isa(obj.self.sensor,"MOTIVE")
                        real_spL = obj.self.sensor.result.state.real_pL;         % 牽引物位置
                        sp0      = obj.agent1.sensor.result.rigid(1).p;          % 牽引物のセンサー位置
                        sq0      = Quat2Eul(obj.agent1.sensor.result.rigid(1).q);% 牽引物のセンサー角度
@@ -133,7 +133,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    end
                % estimator
                    epDronei     = obj.self.estimator.result.state.p;            % 機体位置
-                   emL          = obj.self.estimator.result.state.mL;           % 分割後牽引物の質量
+                   % emL          = obj.self.estimator.result.state.mL;           % 分割後牽引物の質量
                % reference 
                    spDrones     = obj.agent1.reference.result.spDrones;         % 全ての機体位置
                    ref0         = obj.agent1.reference.result.state.xd(1:24);   % 分割前の牽引物目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd]

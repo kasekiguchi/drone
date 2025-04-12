@@ -5,7 +5,7 @@ clc; clear; close all
 N            = 4;%機体数
 ts           = 0;%初期時刻
 dt           = 0.025;%刻み時間
-te           = 100/2;%シミュレーション時間
+te           = 5+0*100/2;%シミュレーション時間
 tn           = length(ts:dt:te);%mainloopで繰り返す回数
 time         = TIME(ts, dt, te);%時刻のクラス
 motive       = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
@@ -195,8 +195,8 @@ disp(time.t - time.dt)
 run("DataPlot.m")
 %% movie
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);%dataフォルダに保存される
-% mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);%保存されない
+% mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-4 4;-4 4;0 7],"ntimes",5);%dataフォルダに保存される
+mov.animation(logger, 'target', 1:N,"lims",[-4 4;-4 4;0 7]*1,"ntimes",5);%保存されない
 
 %% function
 function dfunc(app)
