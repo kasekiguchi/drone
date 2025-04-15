@@ -61,7 +61,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
      
       %%flag defination
-      obj.flag.mcflag =2 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
+      obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
       obj.flag.resampling_flag = 0;% auto change when all samples are not satisfied
       obj.flag.reinputflag = 0; % uesd to go to resampling now it is not be used
@@ -98,8 +98,8 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.input = obj.param.input; %入力関連のみ
       obj.input.pre_u = repmat(obj.result.input,1,obj.H); % 前入力
       obj.input.var = repmat(obj.param.ref_input,obj.H,1);
-      obj.input.Bestcost_STL = 0;
-        
+      obj.result.Bestcost_STL = 0;
+      obj.input.sigma = param.input.Initsigma; 
       % MPCパラメータ初期化 = メモリの確保
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
@@ -107,7 +107,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.state.state_data = zeros(obj.param.state_size,obj.H, obj.N);
       obj.result.Evaluationtra = zeros(obj.N, 2);
       obj.StageStateSTLsum = 0;
-      obj.input.sigma = param.input.Initsigma;
+     obj.result.pre_u = obj.input.pre_u;
       % obj.input.mu = param.ref_input;
       
       % A, B行列定義 z, x, y, yawの順番ベクトル化 speical defination for koopman
@@ -118,7 +118,7 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.koopman.ExA = obj.model.A;
       % obj.koopman.ExB = obj.model.B;
     
-      
+      obj.result.bestcost = obj.input.Bestcost_now;
      
       %% 勾配MPCとの併用を見据えてのQP(Quadratic Programming:二次計画法)の式変換
       %-- M2鬼澤がやっていたと思う
@@ -132,7 +132,7 @@ classdef MPC_CONTROLLER_KMC < handle
     %-- main()的な
     function result = do(obj,varargin)
 
-      
+      obj.result2input();
       time = varargin{1};
       phase = varargin{2};
       obj.param.t = time.t;
@@ -170,14 +170,14 @@ classdef MPC_CONTROLLER_KMC < handle
       if obj.flag.mcflag == 1%qp+mc
         % 状態予測
         % QP 出った結果を入力生成
-        obj.generate_input(0.1);
-        obj.predictmc();       
+        U =obj.generate_input(0,1);
+        obj.predictmc(U);       
         obj.objectivemc(1,obj.H);           % 評価計算
         obj.normalize();             % 評価値の正規化
         %obj.Resampling_LVS();    %Low Variance Sampling
         obj.Resampling_IS();      % Important Samplingリサンプリング
         obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
-        obj.result.bestcostID = obj.input.BestcostID;
+        % obj.result.bestcostID = obj.input.BestcostID;
 
       elseif obj.flag.mcflag == 2%qp+mc+resampling+stl
         if obj.param.t >obj.STL_period(1) - obj.param.H*obj.param.dt && obj.param.t <obj.STL_period(2)
@@ -190,38 +190,26 @@ classdef MPC_CONTROLLER_KMC < handle
           e = [];
         end
         X = obj.predictmc(obj.input.var);
-        STLOK = obj.STL(X,s,e);
+        STLOK = obj.STL(s,e);
         processStep(obj,0,s,e,STLOK);
-        obj.result.bestcostID = obj.input.BestcostID;
+        % obj.result.bestcostID = obj.input.BestcostID;
+        
       end
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
-        result =obj.datasavebystep();
+       result = obj.result;
    
     end
-
-    function show(obj)
-      % clc;
-      % est_print = obj.self.estimator.result.state;
-      est_print = obj.self.plant.state;
-      fprintf("==================================================================\n")
-      fprintf("==================================================================\n")
-      fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
-        est_print.p(1), est_print.p(2), est_print.p(3),...
-        est_print.v(1), est_print.v(2), est_print.v(3),...
-        est_print.q(1), est_print.q(2), est_print.q(3)); % s:state 現在状態
-      fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-        obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-        obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-        0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
-      fprintf("t: %f \t input: %f %f %f %f \t J: %f \t sigma: %f", ...
-        obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1),obj.input.sigma(1));
-      fprintf("\n");
+   function result2input(obj)
+        % obj.input.u = obj.result.input;
+        % obj.input.var = obj.result.var;
+        obj.input.pre_u = obj.result.pre_u;
     end
+   
     function processStep(obj,resumping_num,s,e,STLOK)
       obj.flag.resampling_flag = 0;
       U = obj.generate_input(resumping_num,STLOK);
-      X = obj.predictmc(U);
-      STLOK = obj.STL(X,s,e);
+      obj.predictmc(U);
+      STLOK = obj.STL(s,e);
       obj.objectivemc(s,e);
       obj.get_input();
       if obj.flag.resampling_flag && resumping_num < 10
@@ -255,9 +243,9 @@ classdef MPC_CONTROLLER_KMC < handle
       if obj.flag.resampling_flag
         mu=obj.input.pre_u;
       end
-      if obj.input.Bestcost_STL > 0
-        disp(obj.input.Bestcost_STL);
-        sigma = [inputSigma(1)*min(min(10,1.2^num),max(1,1+obj.input.Bestcost_STL*1e-4));inputSigma(2:4)];
+      if obj.result.Bestcost_STL > 0
+        disp(obj.result.Bestcost_STL);
+        sigma = [inputSigma(1)*min(min(10,1.2^num),max(1,1+obj.result.Bestcost_STL*1e-4));inputSigma(2:4)];
       else
         sigma = inputSigma;
       end
@@ -295,27 +283,19 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.state.state_data = tmp(1:obj.param.state_size,:,:);
       X = obj.state.state_data;
     end
-    function STLOK = STL(obj,state,s,e)
-        obj.removeX= find(any(squeeze(state(3, s:e, :))<0.5,1));
+    function STLOK = STL(obj,s,e)
+        obj.removeX= find(any(squeeze(obj.state.state_data(3, s:e, :))<0.5,1));
         obj.removeN =size(obj.removeX',1);
         obj.survive = obj.N-obj.removeN;
-        %obj.get_input();
         if obj.survive == 0
-          obj.flag.resampling_flag =1;
-          %obj.reinputflag = 1;
+          obj.flag.resampling_flag =1; 
           obj.flag.stlhard_flag =0;
-          % obj.objectivemc();%%%%% Evaluation calculate
-          % else
-          % obj.state.state_data(:, :,obj.removeX) = [];
-          % obj.input.u(:,:,obj.removeX) =[];
-          % obj.objectivemc();
         end
         STLOK = isempty(obj.removeX);
     end
-
     function objectivemc(obj,s,e)
-      U = reshape(obj.input.u,4*obj.H,obj.N);
-      tmpJ= sum(U.*(obj.quadH*U)/2 + obj.quadf.*U,1);
+      % U = reshape(obj.input.u,4*obj.H,obj.N);
+      % tmpJ= sum(U.*(obj.quadH*U)/2 + obj.quadf.*U,1);
       %%    
       U = obj.input.u;
       % obj.result.Evaluationtra =zeros(size(obj.input.u,3),2);
@@ -342,7 +322,7 @@ classdef MPC_CONTROLLER_KMC < handle
       %   stageInputPre  =0 .*stageInputPre;
       %   stageInputRef =0 .*stageInputRef;
       % end
-      if ~isempty(s)%obj.param.t >obj.STL_period(1)- obj.param.H*obj.param.dt && obj.param.t < obj.STL_period(2)
+      if ~isempty(s) && obj.flag.mcflag == 2%obj.param.t >obj.STL_period(1)- obj.param.H*obj.param.dt && obj.param.t < obj.STL_period(2)
         tildeSTL = X(3,s:e,:) - stlbase(3,s:e);
         tildeSTL(tildeSTL > 0) = 0;
         StageStateSTL = reshape(sum(tildeSTL,2)*(-1e8),1,obj.N);
@@ -501,8 +481,8 @@ classdef MPC_CONTROLLER_KMC < handle
       % NP = obj.N;
       % pw = obj.input.EvalNorm; % 正規化された評価値
       % u = obj.input.u;
-      obj.input.mu = repmat(reshape(reshape(sum(obj.input.u.*reshape(obj.input.EvalNorm,1,1,[]),2), 4,obj.N)...
-        ./ sum(obj.input.EvalNorm), 4, 1, obj.N), 1, obj.param.H, 1);
+      obj.input.mu = repmat(reshape(reshape(sum(obj.input.u.*reshape(obj.result.EvalNorm,1,1,[]),2), 4,obj.N)...
+        ./ sum(obj.result.EvalNorm), 4, 1, obj.N), 1, obj.param.H, 1);
       obj.flag.resampling_flag =0;
     end
 
@@ -521,23 +501,18 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.result.input = tmp;
       % obj.input.pre_u = obj.result.input;
       obj.input.pre_u = obj.input.u(:,:,BestcostID(1));
-      % obj.param.ref_input = obj.input.pre_u;
-      obj.input.Bestcost_pre = obj.input.Bestcost_now;
-      obj.input.Bestcost_now = Bestcost;
-      obj.input.Bestcost_STL = obj.result.Evaluationtra(BestcostID(1),3);
+       obj.result.pre_u = obj.input.pre_u;
+      obj.result.Bestcost_pre = obj.result.bestcost;
+      obj.result.bestcost = Bestcost;
+      obj.result.Bestcost_STL = obj.result.Evaluationtra(BestcostID(1),3);
       obj.flag.reinputflag = 0;
       if obj.param.test.sigma ~= 1
-        obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))));
+        obj.input.sigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.bestcost(1)./obj.input.Bestcost_pre(1))));
       end
       % obj.input.input_TH = max(obj.param.input.range(:,2), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(1)./obj.input.Bestcost_pre(1))'));
-      obj.input.BestcostID = BestcostID(1);
+      obj.result.BestcostID = BestcostID(1);
     end
-    function result =datasavebystep(obj)
-        obj.result.bestcost = obj.input.Bestcost_now;
-        obj.result.sigma = obj.input.sigma;
-        obj.result.Evaluationtra = obj.result.Evaluationtra;%?
-        result = obj.result;
-    end
+ 
     %% 目標軌道生成
     function [xr] = generate_reference(obj)
         xr = zeros(obj.param.total_size, obj.H);    % initialize
@@ -573,10 +548,10 @@ classdef MPC_CONTROLLER_KMC < handle
       % fval
       obj.result.input =var(1:4, 1); % 算出された入力
       obj.result.eflag = eflag;
-      obj.input.var = var;
-      obj.input.Bestcost_pre = obj.input.Bestcost_now;
-      obj.input.Bestcost_now = [fval;0];
-      obj.result.bestcost=obj.input.Bestcost_now ;
+      obj.result.var = var;
+      obj.result.Bestcost_pre = obj.result.bestcost;
+      obj.result.bestcost = [fval;0];
+      % obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function fmincon_mpc(obj)
         %%fmincon
@@ -602,10 +577,10 @@ classdef MPC_CONTROLLER_KMC < handle
       % fval
       obj.result.input =var(1:4, 1); % 算出された入力
       obj.result.eflag = eflag;
-      obj.input.var = var;
-      obj.input.Bestcost_pre = obj.input.Bestcost_now;
-      obj.input.Bestcost_now = [fval;0];
-      obj.result.bestcost=obj.input.Bestcost_now ;
+      obj.result.var = var;
+      obj.result.Bestcost_pre = obj.result.bestcost;
+      obj.result.bestcost = [fval;0];
+      % obj.result.bestcost=obj.input.Bestcost_now ;
     end
     function [eval] = objectivefmincon(obj,x)   % obj.~とする
       % x(4*(1:obj.H)) = 0;
@@ -679,8 +654,26 @@ classdef MPC_CONTROLLER_KMC < handle
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-      obj.result.bestcost = obj.input.Bestcost_now;
+      obj.result.bestcost = obj.result.Bestcost_now;
       result = obj.result;
+      end
+       function show(obj)
+      % clc;
+      % est_print = obj.self.estimator.result.state;
+      est_print = obj.self.plant.state;
+      fprintf("==================================================================\n")
+      fprintf("==================================================================\n")
+      fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+        est_print.p(1), est_print.p(2), est_print.p(3),...
+        est_print.v(1), est_print.v(2), est_print.v(3),...
+        est_print.q(1), est_print.q(2), est_print.q(3)); % s:state 現在状態
+      fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+        obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+        obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+        0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
+      fprintf("t: %f \t input: %f %f %f %f \t J: %f \t sigma: %f", ...
+        obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1),obj.input.sigma(1));
+      fprintf("\n");
     end
   end
 end

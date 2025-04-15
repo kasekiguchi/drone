@@ -35,10 +35,10 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.input_max = [Controller.m * 9.81 + thrust_th; torque_th; torque_th; torque_th];
     Controller.input_min = [Controller.m * 9.81 - thrust_th;-torque_th;-torque_th;-torque_th];
     Controller.ref_input = Controller.input.u; %入力の目標値ー初設定
-    % Controller.input.lb = [0; -1; -1; -1];
-    % Controller.input.ub = [10; 1;  1;  1];
-    Controller.input.lb = Controller.input_min;%%%%???
-    Controller.input.ub = Controller.input_max;%%%%???
+    Controller.input.lb = [0; -1; -1; -1];
+    Controller.input.ub = [10; 1;  1;  1];
+    % Controller.input.lb = Controller.input_min;%%%%???
+    % Controller.input.ub = Controller.input_max;%%%%???
     % Controller.input.Maxinput = 1.5 * [1;1;1;1];
 
     
