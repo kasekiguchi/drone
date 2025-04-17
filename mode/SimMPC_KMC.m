@@ -59,7 +59,7 @@ else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で
 end
 
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
 % agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
 run("SimBase");
@@ -121,8 +121,8 @@ function f = draw(logger, time, dt)
     subplot(m,n,1); 
      plot(tt, pe, "-", tt, pr(1,:), "--x",'MarkerIndices',1:30:length(pr(1,:)));
      hold on;
-     plot(tt, pr(2,:), "s",'MarkerIndices',1:50:length(pr(1,:)));
-     plot(tt, pr(3,:), "c*",'MarkerIndices',1:70:length(pr(1,:)));
+     plot(tt, pr(2,:), "--s",'MarkerIndices',1:50:length(pr(1,:)));
+     plot(tt, pr(3,:), "--c*",'MarkerIndices',1:70:length(pr(1,:)));
     xlabel('Time [s]', 'Fontsize', 15); ylabel('Position [m]', 'Fontsize', 15); legend('Xe', 'Ye', 'Ze', 'Xr', 'Yr', 'Zr', 'horizontal', 'best'); hold off;grid on;
      subplot(m,n,3); 
      plot(tt, ve, "-", tt, vr(1,:), "--x",'MarkerIndices',1:30:length(vr(1,:)));

@@ -61,10 +61,11 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
      
       %%flag defination
-      obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
+      obj.flag.mcflag = 2 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
       obj.flag.resampling_flag = 0;% auto change when all samples are not satisfied
       obj.flag.reinputflag = 0; % uesd to go to resampling now it is not be used
+      obj.flag.stl_flag = 0; % 1 means in stl period ;0 out
       %%
       
       obj.modelf = obj.self.plant.method;
@@ -117,7 +118,7 @@ classdef MPC_CONTROLLER_KMC < handle
       [obj.koopman.ExA,obj.koopman.ExB] = ExtendedCoefficientMatrix({obj.koopman.A,obj.koopman.B,obj.H,param.state_size}); % 一括計算 2025/1/21確認
       % obj.koopman.ExA = obj.model.A;
       % obj.koopman.ExB = obj.model.B;
-    
+        obj.flag.A = 0;
       obj.result.bestcost = obj.input.Bestcost_now;
      
       %% 勾配MPCとの併用を見据えてのQP(Quadratic Programming:二次計画法)の式変換
@@ -131,7 +132,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
     %-- main()的な
     function result = do(obj,varargin)
-
+     
       obj.result2input();
       time = varargin{1};
       phase = varargin{2};
@@ -149,8 +150,14 @@ classdef MPC_CONTROLLER_KMC < handle
         result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
         disp('controller: HL  phase: t or l');
       elseif phase == 'f' % flight
+       
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
+        if  ~obj.flag.stl_flag && abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.15 && obj.flag.A == 0 
+             obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
+             obj.flag.A =1;
+        end
         % result = obj.controller_HL(varargin);
+
         result = obj.controller_KMC(varargin);
         disp('controller: MC  phase: f');
       end
@@ -185,17 +192,21 @@ classdef MPC_CONTROLLER_KMC < handle
           %obj.removeN =size(obj.removeX,1);
           s = find((1:obj.H)*obj.param.dt + obj.param.t > obj.STL_period(1),1,"first");
           e = find((1:obj.H)*obj.param.dt + obj.param.t < obj.STL_period(2),1,"last");
+          obj.flag.stl_flag = 1;
         else
           s = [];
           e = [];
+          obj.flag.stl_flag = 0;
         end
-        X = obj.predictmc(obj.input.var);
+        obj.predictmc(obj.input.var);
         STLOK = obj.STL(s,e);
         processStep(obj,0,s,e,STLOK);
         % obj.result.bestcostID = obj.input.BestcostID;
         
+
       end
       %% 値の保存　実験時は取り出す変数に気を付ける->ファイルサイズが大きくなりすぎる
+        
        result = obj.result;
    
     end
@@ -517,6 +528,7 @@ classdef MPC_CONTROLLER_KMC < handle
     function [xr] = generate_reference(obj)
         xr = zeros(obj.param.total_size, obj.H);    % initialize
         % 時間関数の取得→時間を代入してリファレンス生成
+           
         RefTime = obj.self.reference.func;    % 時間関数の取得
       for h = 0:obj.H-1
         t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
@@ -657,6 +669,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.result.bestcost = obj.result.Bestcost_now;
       result = obj.result;
       end
+      
        function show(obj)
       % clc;
       % est_print = obj.self.estimator.result.state;
