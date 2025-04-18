@@ -54,8 +54,8 @@ classdef HLC < handle
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
 
       %% take offの最初のroll,pitch,yawの入力を0にするプログラム．これによってtを押したときの機体の動きが抑制される
-         % cha = varargin{1,3}; %HL 
-         cha = varargin{1,1}{1,2}; %KMPC
+         cha = varargin{1,3}; %HL 
+         % cha = varargin{1,1}{1,2}; %KMPC
          
         if strcmp(cha,'t')
             if obj.flag_anti_spike < 10
