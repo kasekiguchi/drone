@@ -81,8 +81,8 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     % Controller.weight.RP = 0*diag([100; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %test
-  Controller.weight.P = diag([1000;1000;200]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = 1e4*diag([1;1;1]);    % 速度  10,20刻み  30;20;10
+  Controller.weight.P = diag([100;100;200]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = 1e4*diag([1;1;10]);    % 速度  10,20刻み  30;20;10
     Controller.weight.V = diag([50;50;100]); % 15良い気がする
     Controller.weight.W = diag([1;1;0]);  % 姿勢角，角速度　1,2刻み 
     Controller.weight.R = diag([1; 1; 1; 1000]); % 入力

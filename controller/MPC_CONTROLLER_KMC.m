@@ -59,7 +59,7 @@ classdef MPC_CONTROLLER_KMC < handle
       %-- 変数定義
       obj.self = self; % agent
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
-     
+      obj.param.catchflag = 0;
       %%flag defination
       obj.flag.mcflag = 2 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
@@ -153,7 +153,9 @@ classdef MPC_CONTROLLER_KMC < handle
        
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
         if  ~obj.flag.stl_flag && abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.15 && obj.flag.A == 0 
-             obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
+            obj.param.catchflag = 1;
+            obj.param.catchtime = 2;
+            obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
              obj.flag.A =1;
         end
         % result = obj.controller_HL(varargin);
@@ -316,7 +318,7 @@ classdef MPC_CONTROLLER_KMC < handle
       stlbase(3,:)=0.5;
       %% ホライズンで重み大きく
       % k = linspace(1,obj.param.H/10, obj.param.H); % これにより制約はいるとき滑らかになる
-      k = ones(1, obj.param.H);
+      k = ones(1,obj.param.H);
 
       %% 誤差計算
       tildeUpre = U - obj.input.pre_u;          % 前時刻入力
