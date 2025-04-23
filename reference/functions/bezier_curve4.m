@@ -10,11 +10,11 @@ P4 = [0, 0, 0];   % 目标点    % control point1 z hovering  move in x y)
 % P2 = [0.1, 0.1, 0.1];     % control point2 (slow down)
 % P3 = [0.0, 0.0, 0.0];     % control point3 (speed down)
 % P4 = [0,0,0];     %  end point
-if te.catchflag 
-T_total = te.catchtime;
-else
+%if te.catchflag 
+%T_total = te.catchtime;
+%else
 T_total = te.te-te.t;  % total time 
-end
+%end
 dt=te.dt;       % sample period
 N = round(T_total/dt);
 

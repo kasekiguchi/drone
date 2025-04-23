@@ -152,11 +152,11 @@ classdef MPC_CONTROLLER_KMC < handle
       elseif phase == 'f' % flight
        
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
-        if  ~obj.flag.stl_flag && abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.15 && obj.flag.A == 0 
+        if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 %&& obj.flag.A == 0 && ~obj.flag.stl_flag 
             obj.param.catchflag = 1;
             obj.param.catchtime = 2;
             obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
-             obj.flag.A =1;
+             %obj.flag.A =1;
         end
         % result = obj.controller_HL(varargin);
 
