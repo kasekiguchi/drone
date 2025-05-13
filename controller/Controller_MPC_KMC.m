@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_KMC(dt, model_file, agent)
+function Controller = Controller_MPC_KMC(dt, model_file, agent,mmatflag,est)
 %Koopman-MCMPC parameter setting
  %% HL param
     Controller = Controller_HL(dt);
@@ -43,10 +43,12 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
 
     
     %% load model from koopman setting in the simxxx & change sampling time
+    if mmatflag ==1 
     load(model_file, 'est');
+    end
     [Controller.koopman.A, Controller.koopman.B, Controller.koopman.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller.dt);
     if isfield(est, 'Ae'); [Controller.koopman.Ae,Controller.koopman.Be,Controller.koopman.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller.dt); end
-
+    
     % Controller.A = model{1};
     % Controller.B = model{2};
     % Controller.C = model{3};

@@ -19,7 +19,7 @@ else
     mov = 0;
 end
 %%
-
+mmatflag =0;
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -40,7 +40,18 @@ initial_state.w = [0; 0; 0];
  % model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
  % model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
  % model_file = '2025-03-27_Exp_Kyomo_code00_saddle';% p = p+v*dt
- model_file = '2025-03-31_Exp_Kyomo_code00_saddle'; % p = p+v*dt, q = q+ w*dt;
+filename = '2025-03-31_Exp_Kyomo_code00_saddle';
+if exist([filename, '.mat'], 'file') == 2
+    mmatflag =1;
+    model_file = '2025-03-31_Exp_Kyomo_code00_saddle.mat';
+elseif exist([filename, '.m'], 'file') == 2
+    mmatflag =2;
+   import_vars_from_mfile('2025-03-31_Exp_Kyomo_code00_saddle.m'); 
+   model_file = '2025-03-31_Exp_Kyomo_code00_saddle.m';
+else
+    disp('no files');
+end
+% p = p+v*dt, q = q+ w*dt;
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
 % model_file = '2025-02-12_Exp_Kato15_code00_saddle'; % kato25=150data
@@ -61,7 +72,11 @@ end
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
 % agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
-agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
+if mmatflag ==1
+agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag));
+elseif mmatflag ==2
+ agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag,est));
+end
 run("SimBase");
 %%
 if ~modeType
@@ -77,7 +92,7 @@ if ~modeType
         logger.logging(time, phase, agent);
         time.t = time.t + time.dt;
         %pause(1)
-        all = toc;
+        all = toc
         % disp([num2str(time.t)])
         agent.controller.show;
         if agent.estimator.result.state.p(3) < 0 || ...
@@ -172,3 +187,25 @@ end
 % fprintf('est: %f, %f, %f \n', est(1), est(2), est(3));
 % fprintf('ref: %f, %f, %f \n', ref(1), ref(2), ref(3));
 % end
+
+function import_vars_from_mfile(mfile)
+   
+    fid = fopen(mfile, 'r');
+    if fid == -1
+        error('Cannot open file: %s', mfile);
+    end
+
+    while ~feof(fid)
+        line = fgetl(fid);
+        if ischar(line) && ~isempty(strtrim(line)) && ~startsWith(strtrim(line), '%')
+            try
+                evalin('base', line); 
+            catch ME
+                warning('Skipped line: %s\nReason: %s\n', line, ME.message);
+            end
+        end
+    end
+
+    fclose(fid);
+    fprintf('Imported variables from %s into workspace.\n', mfile);
+end
