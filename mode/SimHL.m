@@ -24,7 +24,7 @@ Data.X = []; Data.Y = []; Data.U = [];
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
 
-for j = 1:100 %%%%%%%%%%%%  number of random references
+% for j = 1:100 %%%%%%%%%%%%  number of random references
     fprintf('Initializing... N:%d \n', j);
     clear logger agent
 
@@ -78,8 +78,8 @@ for j = 1:100 %%%%%%%%%%%%  number of random references
     % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
     % log = logger;
     %save(strcat('Data/HL_sim_', num2str(j)), 'logger');
-    logger.save(strcat('HL_sim_', num2str(j)));
-end
+    % logger.save(strcat('HL_sim_', num2str(j)));
+% end
 
 %%
 % ts = 0; % initial time

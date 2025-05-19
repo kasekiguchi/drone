@@ -1,4 +1,5 @@
 
+
 clear; close all; clc;%% GUI or Sim
 if exist('app') == 1
     modeType = 1;
@@ -92,6 +93,7 @@ if ~modeType
         logger.logging(time, phase, agent);
         time.t = time.t + time.dt;
         %pause(1)
+        wait(gpuDevice);
         all = toc
         % disp([num2str(time.t)])
         agent.controller.show;
@@ -121,7 +123,7 @@ function f = draw(logger, time, dt)
     f(1) = figure(1);
     m = 2; n=2;
     %% データ取得
-    cost = cell2mat(arrayfun(@(N) logger.Data.agent.controller.result{N}.bestcost(1), 1:round(time.t/dt),'UniformOutput',false));
+    cost = arrayfun(@(N) gather(logger.Data.agent.controller.result{N}.bestcost(1)), 1:round(time.t/dt));
     tt = logger.data(0,"t",[]);
     pe = logger.data(1,"p","e")'; ve = logger.data(1,"v","e")';
     pr = logger.data(1,"p","r")'; vr = logger.data(1,"v","r")';

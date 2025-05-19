@@ -62,7 +62,7 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.param.catchflag = 0;
       obj.flag.gpuflag = 1;
       %%flag defination
-      obj.flag.mcflag = 2 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
+      obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
       obj.flag.resampling_flag = 0;% auto change when all samples are not satisfied
       obj.flag.reinputflag = 0; % uesd to go to resampling now it is not be used
@@ -187,10 +187,8 @@ classdef MPC_CONTROLLER_KMC < handle
         obj.objectivemc(1,obj.H);           % 評価計算
         obj.normalize();        %d    % 評価値の正規化
         %obj.Resampling_LVS();%Low Variance Sampling
-        tic
         obj.Resampling_IS();  % Important Samplingリサンプリング
-        allre = toc
-        obj.get_input();          % 最適入力の取得および標準偏差のリサンプリング
+        obj.get_input();  % 最適入力の取得および標準偏差のリサンプリング
         % obj.result.bestcostID = obj.input.BestcostID;
 
       elseif obj.flag.mcflag == 2%qp+mc+resampling+stl
@@ -225,12 +223,13 @@ classdef MPC_CONTROLLER_KMC < handle
    
     function processStep(obj,resumping_num,s,e,STLOK)
       obj.flag.resampling_flag = 0;
-      tic
       U = obj.generate_input(resumping_num,STLOK);
       obj.predictmc(U);
       STLOK = obj.STL(s,e);
       obj.objectivemc(s,e);
+    
       obj.get_input();
+
       if obj.flag.resampling_flag && resumping_num < 10
         % obj.input.u=obj.reinput;
         % obj.result.Evaluationtra=obj.reEva;
@@ -263,8 +262,10 @@ classdef MPC_CONTROLLER_KMC < handle
         mu=obj.input.pre_u;
       end
       if obj.result.Bestcost_STL > 0
+         
         disp(obj.result.Bestcost_STL);
         sigma = [inputSigma(1)*min(min(10,1.2^num),max(1,1+obj.result.Bestcost_STL*1e-4));inputSigma(2:4)];
+        
       else
         sigma = inputSigma;
       end
@@ -334,9 +335,11 @@ classdef MPC_CONTROLLER_KMC < handle
       end
     end
     function STLOK = STL(obj,s,e)
+        
         obj.removeX= find(any(squeeze(obj.state.state_data(3, s:e, :))<0.5,1));
         obj.removeN =size(obj.removeX',1);
         obj.survive = obj.N-obj.removeN;
+        
         if obj.survive == 0
           obj.flag.resampling_flag =1; 
           obj.flag.stlhard_flag =0;
@@ -414,6 +417,7 @@ classdef MPC_CONTROLLER_KMC < handle
 
       %% ステージコストとターミナルコストを合計
       % obj.StageStateSTLsum =sum(StageStateSTL);
+  
       costX = stageStateX + terminalState;
       Jx = reshape(sum(costX, [1,2]),  size(obj.input.u,3), 1);
       Jref = reshape(sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
