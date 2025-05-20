@@ -1,4 +1,4 @@
-classdef MPC_CONTROLLER_KMC < handle
+classdef MPC_CONTROLLER_KMC_GUI< handle
   % MCMPC_CONTROLLER MCMPCのコントローラー
   % the flow goes to 
   %
@@ -55,7 +55,7 @@ classdef MPC_CONTROLLER_KMC < handle
   end
 
   methods
-    function obj = MPC_CONTROLLER_KMC(self, param)
+    function obj = MPC_CONTROLLER_KMC_GUI(self, param)
       %-- 変数定義
       obj.self = self; % agent
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
@@ -165,7 +165,9 @@ classdef MPC_CONTROLLER_KMC < handle
 
         result = obj.controller_KMC(varargin);
         disp('controller: MC  phase: f');
+        
       end
+      show(obj);
     end
 
   
@@ -759,13 +761,13 @@ classdef MPC_CONTROLLER_KMC < handle
         est_print.p(1), est_print.p(2), est_print.p(3),...
         est_print.v(1), est_print.v(2), est_print.v(3),...
         est_print.q(1), est_print.q(2), est_print.q(3)); % s:state 現在状態
-      fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-        obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-        obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-        0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
-      fprintf("t: %f \t input: %f %f %f %f \t J: %f \t sigma: %f", ...
-        obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1),obj.input.sigma(1));
-      fprintf("\n");
+      % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+      %   obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+      %   obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+      %   0, 0, obj.state.ref(6,1))                             % r:reference 目標状態
+      % fprintf("t: %f \t input: %f %f %f %f \t J: %f \t sigma: %f", ...
+      %   obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), obj.result.bestcost(1),obj.input.sigma(1));
+      % fprintf("\n");
     end
   end
 end

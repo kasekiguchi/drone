@@ -1,6 +1,6 @@
 
 
-clear; close all; clc;%% GUI or Sim
+clearvars -except app modeType; close all; clc;%% GUI or Sim
 if exist('app') == 1
     modeType = 1;
 else
@@ -23,7 +23,7 @@ end
 mmatflag =0;
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 100; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) in_prog(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -210,4 +210,16 @@ function import_vars_from_mfile(mfile)
 
     fclose(fid);
     fprintf('Imported variables from %s into workspace.\n', mfile);
+end
+
+function post(app)
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
+end
+function in_prog(app)
+app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
 end
