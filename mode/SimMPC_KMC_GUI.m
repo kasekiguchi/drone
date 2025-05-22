@@ -7,7 +7,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 0); % [x, y], 1, 1, z
+initial_state.p = arranged_position([0.6, 0.6], 1, 1, 0.6); % [x, y], 1, 1, z ⭐
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
@@ -20,7 +20,9 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 model_file = '2025-03-31_Exp_Kyomo_code00_saddle.mat';
 agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[0.6;0.6;0.6],time},"HL"});
 agent.controller = MPC_CONTROLLER_KMC_GUI(agent, Controller_MPC_KMC_GUI(dt, model_file, agent));
-run("ExpBase");
+run("SimBase");
+
+
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);

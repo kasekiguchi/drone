@@ -138,6 +138,9 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
       obj.result2input();
       time = varargin{1};
       phase = varargin{2};
+      if ~isempty(varargin{7})
+      app=varargin{7};
+      end
       obj.param.t = time.t;
       
       obj.current_state = obj.self.estimator.result.state.get(); % 現在状態の取得
@@ -149,11 +152,20 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
         obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
         result = obj.controller_KMC(varargin);
         disp('controller: MC,  phase: a');
-      elseif phase == 't' || phase == 'l' % takeoff | landing
+      elseif phase == 't' % takeoff | landing
+        obj.self.reference.func =  gen_ref_for_HL(Case_study_trajectory([0.6;0.6;0.6],obj.param));
         result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
-        disp('controller: HL  phase: t or l');
+        disp('controller: HL  phase: t');
+      elseif phase == 'l'
+          obj.self.reference.func =  gen_ref_for_HL(Case_study_trajectory([0;0;0],obj.param));
+        result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
+        disp('controller: HL  phase: t');
       elseif phase == 'f' % flight
-       
+            if ~isfield(obj.param, 'te_value')
+                obj.param.te_value = 10 + time.t;
+             end
+            obj.param.te = obj.param.te_value;
+        obj.self.reference.func = gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
         if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 %&& obj.flag.A == 0 && ~obj.flag.stl_flag 
             obj.param.catchflag = 1;
@@ -167,6 +179,12 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
         disp('controller: MC  phase: f');
         
       end
+      if obj.self.plant.state.p(3) < 0 || ...
+                any(abs(obj.self.plant.state.p(3)) > 4)
+            disp(";;;;;End 着陸 or 墜落;;;;;;;;")
+             setappdata(app.UIFigure, 'sim_running', false);
+      end
+
       show(obj);
     end
 
