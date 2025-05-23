@@ -182,13 +182,19 @@ classdef MPC_CONTROLLER_KMC < handle
       if obj.flag.mcflag == 1%qp+mc
         % 状態予測
         % QP 出った結果を入力生成
-        U =obj.generate_input(0,1);% d
-        obj.predictmc(U);       %d
+        U =obj.generate_input(0,1);%  
+       
+        obj.predictmc(U);
         obj.objectivemc(1,obj.H);           % 評価計算
+       
         obj.normalize();        %d    % 評価値の正規化
+        
         %obj.Resampling_LVS();%Low Variance Sampling
+        
         obj.Resampling_IS();  % Important Samplingリサンプリング
+        
         obj.get_input();  % 最適入力の取得および標準偏差のリサンプリング
+      
         % obj.result.bestcostID = obj.input.BestcostID;
 
       elseif obj.flag.mcflag == 2%qp+mc+resampling+stl
@@ -324,7 +330,15 @@ classdef MPC_CONTROLLER_KMC < handle
           else
               input_f = obj.current_state;
           end
-          AX0 = gpuArray(obj.koopman.ExA) * gpuArray(obj.param.F(input_f));
+          if ~isa(obj.koopman.ExA, 'gpuArray')
+              obj.koopman.ExA = gpuArray(obj.koopman.ExA);
+          end
+          Finput = obj.param.F(input_f);
+          if ~isa(Finput, 'gpuArray')
+              Finput = gpuArray(Finput);
+          end
+          AX0 = obj.koopman.ExA * Finput;
+          % AX0 = gpuArray(obj.koopman.ExA) * gpuArray(obj.param.F(input_f));
           AX = repmat(AX0,1,1,N);
           U_reshaped = reshape(U,[],1,N);
           tmp_z = AX + pagemtimes(gpuArray(obj.koopman.ExB), U_reshaped);
@@ -390,10 +404,25 @@ classdef MPC_CONTROLLER_KMC < handle
         StageStateSTL = zeros(1,obj.N);
       end
       elseif obj.flag.gpuflag==1
-          U = gpuArray(obj.input.u);
+          if ~isa(obj.input.u, 'gpuArray')
+              U = gpuArray(obj.input.u);
+          else
+              U = obj.input.u;
+          end
           obj.result.Evaluationtra = zeros(size(U,3),2,'gpuArray');
-          X = gpuArray(obj.state.state_data);
-          stlbase = gpuArray(obj.state.ref);
+          if ~isa(obj.state.state_data, 'gpuArray')
+              X = gpuArray(obj.state.state_data);
+          else
+              X = obj.state.state_data;
+          end
+          %U = gpuArray(obj.input.u);
+          % X = gpuArray(obj.state.state_data);
+          % stlbase = gpuArray(obj.state.ref);
+          if ~isa(obj.state.ref, 'gpuArray')
+              stlbase = gpuArray(obj.state.ref);
+          else
+             stlbase = obj.state.ref;
+          end
           stlbase(3,:) = 0.5;
           k = ones(1,obj.param.H,'gpuArray');
           tildeUpre = U - obj.input.pre_u;
@@ -405,7 +434,7 @@ classdef MPC_CONTROLLER_KMC < handle
           terminalState = 0;
           if ~isempty(s) && obj.flag.mcflag == 2
               tildeSTL = X(3,s:e,:) - stlbase(3,s:e);
-              tildeSTL(tildeSTL > 0) = 0;
+             tildeSTL = arrayfun(@(x) min(x, 0), tildeSTL);
               StageStateSTL = reshape(sum(tildeSTL,2)*(-1e8),1,obj.N);
           else
               StageStateSTL = zeros(1,obj.N,'gpuArray');
@@ -627,6 +656,7 @@ classdef MPC_CONTROLLER_KMC < handle
       RP = kron(eye(obj.param.H),obj.weight.preinputdif);
       Xr = reshape([obj.state.ref(1:12,:);zeros(n-12,obj.param.H)],[],1);
       Ur = reshape(obj.state.ref(13:16,:),[],1);
+      
       [obj.quadH,obj.quadf]=obj.gen_Hf(obj.koopman.ExA,obj.koopman.ExB,obj.state.current,Q,R,RP,Xr,Ur,obj.input.var);
       %qp
       A = []; b = [];
@@ -634,7 +664,7 @@ classdef MPC_CONTROLLER_KMC < handle
       lb = repmat(obj.param.input_min,1,obj.param.H);
       ub = repmat(obj.param.input_max,1,obj.param.H);
       obj.options = optimset('Display', 'off');
-      [var,fval,eflag,~,~] = quadprog(obj.quadH,obj.quadf,A,b,Aeq,beq,lb,ub,[],obj.options);
+      [var,fval,eflag,~,~] = quadprog(obj.quadH,gather(obj.quadf),A,b,Aeq,beq,lb,ub,[],obj.options);
       var(4*(1:obj.H))= 0;
       % fval
       obj.result.input =var(1:4, 1); % 算出された入力

@@ -410,10 +410,25 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
         StageStateSTL = zeros(1,obj.N);
       end
       elseif obj.flag.gpuflag==1
-          U = gpuArray(obj.input.u);
+            if ~isa(obj.input.u, 'gpuArray')
+              U = gpuArray(obj.input.u);
+          else
+              U = obj.input.u;
+          end
           obj.result.Evaluationtra = zeros(size(U,3),2,'gpuArray');
-          X = gpuArray(obj.state.state_data);
-          stlbase = gpuArray(obj.state.ref);
+          if ~isa(obj.state.state_data, 'gpuArray')
+              X = gpuArray(obj.state.state_data);
+          else
+              X = obj.state.state_data;
+          end
+          %U = gpuArray(obj.input.u);
+          % X = gpuArray(obj.state.state_data);
+          % stlbase = gpuArray(obj.state.ref);
+          if ~isa(obj.state.ref, 'gpuArray')
+              stlbase = gpuArray(obj.state.ref);
+          else
+             stlbase = obj.state.ref;
+          end
           stlbase(3,:) = 0.5;
           k = ones(1,obj.param.H,'gpuArray');
           tildeUpre = U - obj.input.pre_u;
@@ -425,7 +440,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
           terminalState = 0;
           if ~isempty(s) && obj.flag.mcflag == 2
               tildeSTL = X(3,s:e,:) - stlbase(3,s:e);
-              tildeSTL(tildeSTL > 0) = 0;
+             tildeSTL = arrayfun(@(x) min(x, 0), tildeSTL);
               StageStateSTL = reshape(sum(tildeSTL,2)*(-1e8),1,obj.N);
           else
               StageStateSTL = zeros(1,obj.N,'gpuArray');
