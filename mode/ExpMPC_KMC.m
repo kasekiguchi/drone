@@ -5,7 +5,6 @@ time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
-
 motive = Connector_Natnet('192.168.1.3'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
@@ -22,12 +21,11 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 filename = '2025-03-31_Exp_Kyomo_code00_saddle';
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[0.6;0.6;0.6],time},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
-
+agent.controller = MPC_CONTROLLER_KMC_GUI(agent, Controller_MPC_KMC_GUI(dt, model_file, agent));
 run("ExpBase");
 
 function post(app)
