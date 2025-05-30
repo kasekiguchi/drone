@@ -1,4 +1,4 @@
-classdef MPC_CONTROLLER_KMC_GUI< handle
+classdef MPC_CONTROLLER_KMC_GUIGPU< handle
   % MCMPC_CONTROLLER MCMPCのコントローラー
   % the flow goes to 
   %
@@ -55,12 +55,12 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
   end
 
   methods
-    function obj = MPC_CONTROLLER_KMC_GUI(self, param)
+    function obj = MPC_CONTROLLER_KMC_GUIGPU(self, param)
       %-- 変数定義
       obj.self = self; % agent
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
       obj.param.catchflag = 0;
-      obj.flag.gpuflag = 1;
+      
       %%flag defination
       obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
@@ -167,12 +167,12 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
             obj.param.te = obj.param.te_value;
         obj.self.reference.func = gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
-        if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 && obj.flag.A == 0 && ~obj.flag.stl_flag 
-            obj.param.catchflag = 1;
-            obj.param.catchtime = 2;
-            obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
-             %obj.flag.A =1;
-        end
+        % if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 && obj.flag.A == 0 && ~obj.flag.stl_flag 
+        %     obj.param.catchflag = 1;
+        %     obj.param.catchtime = 2;
+        %     obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
+        %      %obj.flag.A =1;
+        % end
         % result = obj.controller_HL(varargin);
 
         result = obj.controller_KMC(varargin);
@@ -292,11 +292,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
       % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + mu; % 制約なし
       % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + mu)); 可変制約
       %%%%%%%% 4 x obj.H xobj.N
-      if obj.flag.gpuflag == 0
-        obj.input.u(1:4,1:obj.H,2:obj.N) = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N-1) .* sigma + reshape(mu,4,[])));
-        obj.input.u(:,:,1) = reshape(obj.input.var,4,[]);
-        obj.input.u(4,:,:) = 0;
-      elseif obj.flag.gpuflag == 1
+     
         mu_gpu     = gpuArray(reshape(mu, 4, []));
         sigma_gpu  = gpuArray(sigma);
         lb_gpu     = gpuArray(obj.param.input.lb);
@@ -307,7 +303,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
         obj.input.u(1:4,1:obj.H,2:obj.N) = input_tmp;
         obj.input.u(:,:,1)       = gpuArray(reshape(obj.input.var, 4, []));
         obj.input.u(4,:,:)       = 0;
-      end
+     
       % 検証用
       if obj.param.test.input == 1
         obj.input.u(2:4,:,:) = zeros(3, obj.H, obj.N);
@@ -321,22 +317,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
 
     % 状態予測for mc
     function X = predictmc(obj,U)
-      if obj.flag.gpuflag==0
-        if obj.param.code  == '26'
-            AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
-        else
-            AX0 = obj.koopman.ExA*obj.param.F(obj.current_state);
-        end
-          N = size(U,3);
-          AX = repmat(AX0, 1, 1, N);
-    
-          tmp_z = AX + pagemtimes(obj.koopman.ExB, reshape(U, [], 1, N)); % 予測計算 12*Hx1xN
-          %tmp = pagemtimes(obj.param.C, tmp_z);
-          % obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-          tmp = reshape(tmp_z,[],obj.H,N);
-          obj.state.state_data = tmp(1:obj.param.state_size,:,:);
-          X = obj.state.state_data;
-      elseif  obj.flag.gpuflag==1
+      
           U = gpuArray(U);
           N = size(U,3);
           if obj.param.code == '26'
@@ -352,7 +333,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
           obj.state.state_data = tmp(1:obj.param.state_size,:,:);
           X = obj.state.state_data;
 
-      end
+      
     end
     function STLOK = STL(obj,s,e)
         
@@ -370,46 +351,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
       % U = reshape(obj.input.u,4*obj.H,obj.N);
       % tmpJ= sum(U.*(obj.quadH*U)/2 + obj.quadf.*U,1);
       %%   
-      if obj.flag.gpuflag ==0
-      U = obj.input.u;
-      % obj.result.Evaluationtra =zeros(size(obj.input.u,3),2);
-      obj.result.Evaluationtra =zeros(size(obj.input.u,3),2);
-      X = obj.state.state_data;
-      stlbase =obj.state.ref;
-      stlbase(3,:)=0.5;
-      %% ホライズンで重み大きく
-      % k = linspace(1,obj.param.H/10, obj.param.H); % これにより制約はいるとき滑らかになる
-      k = ones(1,obj.param.H);
-
-      %% 誤差計算
-      tildeUpre = U - obj.input.pre_u;          % 前時刻入力
-      tildeUref = U - obj.state.ref(13:16,:);  % 目標入力
-      tildeX = X - obj.state.ref(1:12,:);
-      %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      stageInputPre  = k .* tildeUpre.*pagemtimes(obj.weight.preinputdif,tildeUpre); % u'*R*u
-      stageInputRef  = k .* tildeUref.*pagemtimes(obj.weight.input,tildeUref);
-
-      %obj.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
-      stageStateX =    k .* tildeX.*pagemtimes(obj.weight.stagestate,tildeX);
-      terminalState = 0;
-      % if obj.param.t > obj.STL_period(2)  % ???
-      %   stageInputPre  =0 .*stageInputPre;
-      %   stageInputRef =0 .*stageInputRef;
-      % end
-      if ~isempty(s) && obj.flag.mcflag == 2%obj.param.t >obj.STL_period(1)- obj.param.H*obj.param.dt && obj.param.t < obj.STL_period(2)
-        tildeSTL = X(3,s:e,:) - stlbase(3,s:e);
-        tildeSTL(tildeSTL > 0) = 0;
-        StageStateSTL = reshape(sum(tildeSTL,2)*(-1e8),1,obj.N);
-        % StageStateSTL =  sum(reshape(tildeSTL, obj.H, obj.N),1),;
-        % StageStateSTL(StageStateSTL < 0) = StageStateSTL(StageStateSTL < 0) * -1e8;
-        % if sum(StageStateSTL>0) > 0
-        %   fprintf("Violate: %d", sum(StageStateSTL>0));
-        % end
-
-      else
-        StageStateSTL = zeros(1,obj.N);
-      end
-      elseif obj.flag.gpuflag==1
+     
             if ~isa(obj.input.u, 'gpuArray')
               U = gpuArray(obj.input.u);
           else
@@ -445,7 +387,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
           else
               StageStateSTL = zeros(1,obj.N,'gpuArray');
           end
-      end
+      
       %% 人工ポテンシャル場法
       % Jconst = Constraints(obj);
       % Jconst(:,1) = {zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N); zeros(1,1,obj.N)};
@@ -500,19 +442,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
     end
 
     function normalize(obj)
-      if obj.flag.gpuflag ==0
-          NP = size(obj.input.u,3);
-          pw = obj.result.Evaluationtra(:,1); % 全評価値に対してのほうが性能よさそう
-
-          pw = exp(-pw);
-          sumw = sum(pw);
-          if sumw~=0
-              pw = pw/sumw;%正規化
-          else
-              pw = zeros(1,NP)+1/NP;
-          end
-          obj.result.EvalNorm = pw;
-      elseif obj.flag.gpuflag==1
+     
           NP = size(obj.input.u,3);
           pw = gpuArray(obj.result.Evaluationtra(:,1));
           pw = exp(-pw);
@@ -523,7 +453,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
               pw = ones(1, NP, 'gpuArray') / NP;
           end
           obj.result.EvalNorm = pw;
-      end
+      
 
     end
 
@@ -602,14 +532,16 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
     end
    
     function Resampling_IS(obj)
-      % 重点サンプリング
-      % NP = obj.N;
-      % pw = obj.input.EvalNorm; % 正規化された評価値
-      % u = obj.input.u;
-      obj.input.mu = repmat(reshape(reshape(sum(obj.input.u.*reshape(obj.result.EvalNorm,1,1,[]),2), 4,obj.N)...
-        ./ sum(obj.result.EvalNorm), 4, 1, obj.N), 1, obj.param.H, 1);
-      obj.flag.resampling_flag =0;
-    end
+    % 重点サンプリング
+    NP = size(obj.input.u, 3);
+    EvalNorm_reshaped = reshape(obj.result.EvalNorm, 1, 1, []); % 1 x 1 x NP
+
+    weighted_u = obj.input.u .* EvalNorm_reshaped; % 4 x obj.param.H x NP .* 1 x 1 x NP (广播)
+    mean_u = sum(weighted_u, 3); % 沿着样本维度求和，结果是 4 x obj.param.H x 1
+
+    obj.input.mu = repmat(mean_u, 1, 1, NP); % 将平均轨迹复制 NP 次，结果是 4 x obj.param.H x NP
+    obj.flag.resampling_flag = 0;
+end
 
     function get_input(obj)
       STL_pass_ids = find(obj.result.Evaluationtra(:,3)==0);

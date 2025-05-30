@@ -80,7 +80,7 @@ Data.X = []; Data.Y = []; Data.U = [];
     %save(strcat('Data/HL_sim_', num2str(j)), 'logger');
     % logger.save(strcat('HL_sim_', num2str(j)));
 % end
-
+logger.plot({1,"p","er"},{1, "q", "er"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
 % ts = 0; % initial time
 % dt = 0.025; % sampling period

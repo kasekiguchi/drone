@@ -27,7 +27,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 %agent.reference = LANDING_REFERENCE(agent,{dt},{0.5}); cannot run
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1],te},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"}); %use landing reference need v ★the point is start point
+agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"}); %use landing reference need v ★the point is start point
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
 agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 %STL関連 Initialize  and send the object into the classdef to change the parament
@@ -55,7 +55,7 @@ end
 %logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 logger.plot({1,"p","er"},{1, "q", "er"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
-logger.save('kato2')
+% logger.save('kato2')
 
 % function dfunc(app)
 % app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

@@ -19,7 +19,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 model_file = '2025-03-31_Exp_Kyomo_code00_saddle.mat';
 agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[0.6;0.6;0.6],time},"HL"});
-agent.controller = MPC_CONTROLLER_KMC_GUI(agent, Controller_MPC_KMC_GUI(dt, model_file, agent));
+agent.controller = MPC_CONTROLLER_KMC_GUIGPU(agent, Controller_MPC_KMC_GUI(dt, model_file, agent));
 run("SimBase");
 
 

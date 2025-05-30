@@ -23,7 +23,7 @@ clear; close all; clc;
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
 
-    fprintf('Initializing... N:%d \n', j);
+    
     clear logger agent
 %% HL simulation
     time = TIME(ts,dt,te); % instance of time class
@@ -34,9 +34,10 @@ clear; close all; clc;
     agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
     agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
     agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,'xyz'));
+    %agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
     timeidx = 40/dt;
     
-    agent.controller = HLC(agent,Controller_HL(dt));
+   agent.controller = HLC(agent,Controller_HL(dt));
     run("ExpBase");
 
     
@@ -58,7 +59,18 @@ clear; close all; clc;
 
     %% Koopman model simulation
  % model_file = '2025-03-17_Exp_Kyomo1_code26_saddle';%%%HL+26obs
- model_file = '2025-03-27_Exp_Kyomo_code00_saddle';
+ mmatflag=0;
+filename = '2025-03-31_Exp_Kyomo_code00_saddle';
+if exist([filename, '.mat'], 'file') == 2
+    mmatflag =1;
+    model_file = '2025-03-31_Exp_Kyomo_code00_saddle.mat';
+elseif exist([filename, '.m'], 'file') == 2
+    mmatflag =2;
+   import_vars_from_mfile('2025-03-31_Exp_Kyomo_code00_saddle.m'); 
+   model_file = '2025-03-31_Exp_Kyomo_code00_saddle.m';
+else
+    disp('no files');
+end
  %model_file = '2025-03-13_Exp_Kyo1_code00_saddle'; %%%%%%HL+00obs
 %model_file = '2025-02-12_Exp_Kato25_code00_saddle'; % kiyama+kato25 =
 % 300data
@@ -68,6 +80,7 @@ clear; close all; clc;
 
 %%
 clear agent time logger2
+
 time = TIME(ts,dt,te); % instance of time class
 logger2 = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 agent = DRONE;
@@ -77,11 +90,15 @@ agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
 agent.estimator = DIRECT_ESTIMATOR(agent, struct("model",MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1))));
 
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
-
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,'xyz'));
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
 % agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
-agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent));
+if mmatflag ==1
+agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag));
+elseif mmatflag ==2
+ agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag,est));
+end
 run("SimBase");
 agent.plant.result = struct("state",agent.plant.state);
 load(model_file, 'est');
@@ -111,14 +128,35 @@ X = F([agent.plant.state.get();zeros(4,1)]);
         all = toc;
     end
 %%
-tspan = 0:dt:40-dt;
+% tspan = 0:dt:40-dt;
+% ch = "p";
+% pHL=logger.data(1,ch,"p");
+% pK=logger2.data(1,ch,"p");
+% r= 1:80;
+% plot(tspan(r),pHL(r,:),tspan(r),pK(r,:));
+% legend("HL_X","HL_Y","HL_Z","K_X","K_Y","K_Z")
+tspan = 0:dt:400-dt;
 ch = "p";
-pHL=logger.data(1,ch,"p");
-pK=logger2.data(1,ch,"p");
-r= 1:80;
-plot(tspan(r),pHL(r,:),tspan(r),pK(r,:));
-legend("HL","HL","HL","K","K","K")
+pHL = logger.data(1, ch, "p");  % [时间点数 × 3]
+pK = logger2.data(1, ch, "p");
+r = 1:400;
 
+% Plot pHL as lines
+plot(tspan(r), pHL(r,1), '-b', ...
+     tspan(r), pHL(r,2), '-g', ...
+     tspan(r), pHL(r,3), '-r');
+hold on;
+
+% Plot pK as scatter bubbles
+bubbleSize = 30; % 基本泡泡大小
+scatter(tspan(r), pK(r,1), bubbleSize, 'bo', 'filled');
+scatter(tspan(r), pK(r,2), bubbleSize, 'go', 'filled');
+scatter(tspan(r), pK(r,3), bubbleSize, 'ro', 'filled');
+
+legend("HL_X","HL_Y","HL_Z","K_X","K_Y","K_Z")
+xlabel("Time [s]")
+ylabel("Value")
+grid on;
 %%
 % ts = 0; % initial time
 % dt = 0.025; % sampling period
