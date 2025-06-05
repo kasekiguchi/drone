@@ -27,7 +27,9 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent)
     Controller.Kmodel = model_file;
 
     %% load model & change sampling time
-    load(model_file, 'est');
+    if mmatflag==1
+         load(model_file, 'est');
+    end
     [Controller.A, Controller.B, Controller.C]  = AB_transfer(est.A, est.B, est.C, dt, Controller.dt);
     if isfield(est, 'Ae'); [Controller.Ae,Controller.Be,Controller.Ce] = AB_transfer(est.Ae, est.Be, est.Ce, dt, Controller.dt); end
 

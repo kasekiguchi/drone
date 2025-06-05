@@ -51,7 +51,7 @@ z = z_0;
 
 
 
-Trajectory = [x,y,z]
+% Trajectory = [x,y,z]
 ref=@(t)[x;y;z;0];
 end
 

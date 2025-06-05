@@ -153,11 +153,11 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
         result = obj.controller_KMC(varargin);
         disp('controller: MC,  phase: a');
       elseif phase == 't' % takeoff | landing
-        obj.self.reference.func =  gen_ref_for_HL(Case_study_trajectory([0.6;0.6;0.6],obj.param));
+         obj.self.reference.result =  gen_ref_for_HL(Case_study_trajectory([0.6;0.6;0.6],obj.param));
         result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
         disp('controller: HL  phase: t');
       elseif phase == 'l'
-          obj.self.reference.func =  gen_ref_for_HL(Case_study_trajectory([0;0;0],obj.param));
+           obj.self.reference.result =  gen_ref_for_HL(Case_study_trajectory([0;0;0],obj.param));
         result = obj.controller_HL(varargin); % HLC: refはvararginに入っている
         disp('controller: HL  phase: t');
       elseif phase == 'f' % flight
@@ -165,7 +165,7 @@ classdef MPC_CONTROLLER_KMC_GUI< handle
                 obj.param.te_value = 10 + time.t;
              end
             obj.param.te = obj.param.te_value;
-        obj.self.reference.func = gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
+        obj.self.reference.result = gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
         if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 && obj.flag.A == 0 && ~obj.flag.stl_flag 
             obj.param.catchflag = 1;
