@@ -10,24 +10,24 @@ time                = TIME(ts,dt,te);                   % 上の3つの時間を
 in_prog_func        = @(app) in_prog(app);              % guiのプロットに関する関数
 post_func           = @(app) post(app);                 % guiのプロットに関する関数
     
-motive              = Connector_Natnet('192.168.1.4');  % connect to Motive　実験室モーションキャプチャのIP.総研：'192.168.120.4'
+motive              = Connector_Natnet('192.168.100.4');  % connect to Motive　実験室モーションキャプチャのIP.総研：'192.168.120.4'
 motive.getData([], []);                                 % get data from Motive モーションキャプチャからのデータを入手する
 rigid_num           = motive.result.rigid_num;          % 剛体数
 
 %各pcが担当する単機牽引の数と使用する剛体のrigidIdの計算
-handlingModelNum    = 1:2;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
+handlingModelNum    = 3:4;                              % 扱う機体数の番号を配列で連番で書く:3~5機目を扱うときhandlingModelNum = 3:5
 N                   = length(handlingModelNum) + mod(rigid_num,2);
 addId               = (handlingModelNum(1) - 1)*2 ;%+ mod(rigid_num,2);
 
 %COMの番号指定
-COMs                = [3,12];                           % pc1 lenovo割り当てる順番に設定
+COMs                = [3,4];                           % pc1 lenovo割り当てる順番に設定
 % COMs = [5,11];%pc2 nav割り当てる順番に設定
 
 % 紐の長さ
 % cableL=[0.77,0.77];
 % cableL=[0.896,0.896];
 % cableL=[0.785,0.785];
-cableL              = [0.9677  0.8883];
+cableL              = [0.921  0.981];
 
 % 複数の単機牽引モデルを飛ばす場合のrefernceファイルの設定+
 refName         = {

@@ -261,7 +261,7 @@ classdef DRAW_COOPERATIVE_DRONES
       else
         skip = 1;
       end      
-      % campos([0,0,20])
+      campos([0,0,20])
       % campos([-30,-30,20])
       for i = 1:skip:length(t)-1
         if isfield(param,'Motive_ref')
