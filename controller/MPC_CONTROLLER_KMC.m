@@ -60,9 +60,9 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.self = self; % agent
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
       obj.param.catchflag = 0;
-      obj.flag.gpuflag = 1;
+      obj.flag.gpuflag = 0;
       %%flag defination
-      obj.flag.mcflag = 0 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
+      obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
       obj.flag.resampling_flag = 0;% auto change when all samples are not satisfied
       obj.flag.reinputflag = 0; % uesd to go to resampling now it is not be used
@@ -313,6 +313,20 @@ classdef MPC_CONTROLLER_KMC < handle
     % 状態予測for mc
     function X = predictmc(obj,U)
       if obj.flag.gpuflag==0
+        % if obj.param.code  == '26'
+        %     AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
+        % else
+        %     AX0 = obj.koopman.ExA*obj.param.F(obj.current_state);
+        % end
+        %   N = size(U,3);
+        %   AX = repmat(AX0, 1, 1, N);
+        % 
+        %   tmp_z = AX + pagemtimes(obj.koopman.ExB, reshape(U, [], 1, N)); % 予測計算 12*Hx1xN
+        %   %tmp = pagemtimes(obj.param.C, tmp_z);
+        %   % obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
+        %   tmp = reshape(tmp_z,[],obj.H,N);
+        %   obj.state.state_data = tmp(1:obj.param.state_size,:,:);
+        %   X = obj.state.state_data;
         if obj.param.code  == '26'
             AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
         else
