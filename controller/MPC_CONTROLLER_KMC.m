@@ -182,7 +182,9 @@ classdef MPC_CONTROLLER_KMC < handle
       if obj.flag.mcflag == 1%qp+mc
         % 状態予測
         % QP 出った結果を入力生成
-        U =obj.generate_input(0,1);%  
+
+        
+     U =obj.generate_input(0,1);%  
        
         obj.predictmc(U);
         obj.objectivemc(1,obj.H);           % 評価計算
@@ -283,10 +285,20 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + mu; % 制約なし
       % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + mu)); 可変制約
       %%%%%%%% 4 x obj.H xobj.N
+      sigma_v = [1;1.5e-1;1.5e-1;1.5e-1];
+        mu_v = [0; 0; 0; 0];
       if obj.flag.gpuflag == 0
-        obj.input.u(1:4,1:obj.H,2:obj.N) = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N-1) .* sigma + reshape(mu,4,[])));
-        obj.input.u(:,:,1) = reshape(obj.input.var,4,[]);
-        obj.input.u(4,:,:) = 0;
+          %  obj.input.u(1:4,1:obj.H,2:obj.N) = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N-1) .* sigma + reshape(mu,4,[])));
+          % obj.input.u(:,:,1) = reshape(obj.input.var,4,[]);
+          % obj.input.u(4,:,:) = 0;
+         u_deterministic = max(obj.param.input.lb, min(obj.param.input.ub, reshape(obj.input.var, 4, obj.H)));
+          obj.input.v = randn(4, obj.H, obj.N-1).*sigma_v + mu_v;
+          u_diff_integrated = cumsum(obj.input.v * obj.param.dt, 2);
+          u_stochastic = u_deterministic + u_diff_integrated;
+          obj.input.u = zeros(4, obj.H, obj.N);
+          obj.input.u(:,:,1) = u_deterministic;
+          obj.input.u(:,:,2:obj.N) = u_stochastic;
+           obj.input.u(4,:,:) = 0;
       elseif obj.flag.gpuflag == 1
         mu_gpu     = gpuArray(reshape(mu, 4, []));
         sigma_gpu  = gpuArray(sigma);
@@ -312,60 +324,51 @@ classdef MPC_CONTROLLER_KMC < handle
 
     % 状態予測for mc
     function X = predictmc(obj,U)
-      if obj.flag.gpuflag==0
-        % if obj.param.code  == '26'
-        %     AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
-        % else
-        %     AX0 = obj.koopman.ExA*obj.param.F(obj.current_state);
-        % end
-        %   N = size(U,3);
-        %   AX = repmat(AX0, 1, 1, N);
-        % 
-        %   tmp_z = AX + pagemtimes(obj.koopman.ExB, reshape(U, [], 1, N)); % 予測計算 12*Hx1xN
-        %   %tmp = pagemtimes(obj.param.C, tmp_z);
-        %   % obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-        %   tmp = reshape(tmp_z,[],obj.H,N);
-        %   obj.state.state_data = tmp(1:obj.param.state_size,:,:);
-        %   X = obj.state.state_data;
-        if obj.param.code  == '26'
-            AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
-        else
-            AX0 = obj.koopman.ExA*obj.param.F(obj.current_state);
-        end
-          N = size(U,3);
-          AX = repmat(AX0, 1, 1, N);
-    
-          tmp_z = AX + pagemtimes(obj.koopman.ExB, reshape(U, [], 1, N)); % 予測計算 12*Hx1xN
-          %tmp = pagemtimes(obj.param.C, tmp_z);
-          % obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
-          tmp = reshape(tmp_z,[],obj.H,N);
-          obj.state.state_data = tmp(1:obj.param.state_size,:,:);
-          X = obj.state.state_data;
-      elseif  obj.flag.gpuflag==1
-          U = gpuArray(U);
-          N = size(U,3);
-          if obj.param.code == '26'
-              input_f = [obj.current_state; obj.param.ref_input];
-          else
-              input_f = obj.current_state;
-          end
-          if ~isa(obj.koopman.ExA, 'gpuArray')
-              obj.koopman.ExA = gpuArray(obj.koopman.ExA);
-          end
-          Finput = obj.param.F(input_f);
-          if ~isa(Finput, 'gpuArray')
-              Finput = gpuArray(Finput);
-          end
-          AX0 = obj.koopman.ExA * Finput;
-          % AX0 = gpuArray(obj.koopman.ExA) * gpuArray(obj.param.F(input_f));
-          AX = repmat(AX0,1,1,N);
-          U_reshaped = reshape(U,[],1,N);
-          tmp_z = AX + pagemtimes(gpuArray(obj.koopman.ExB), U_reshaped);
-          tmp = reshape(tmp_z,[],obj.H,N);
-          obj.state.state_data = tmp(1:obj.param.state_size,:,:);
-          X = obj.state.state_data;
+        % A_aug = [obj.koopman.ExA, obj.koopman.ExB;
+        %     zeros(4, size(obj.koopman.ExA,2)), eye(4)];
+        % B_aug = [zeros(size(obj.koopman.ExB,1), 4);
+        %     eye(4)*obj.param.dt];
+         if obj.flag.gpuflag==0
+            if obj.param.code  == '26'
+                AX0 = obj.koopman.ExA*obj.param.F([obj.current_state;obj.param.ref_input]);
+            else
+                AX0 = obj.koopman.ExA*obj.param.F(obj.current_state);
+            end
+            N = size(U,3);
+            AX = repmat(AX0, 1, 1, N);
 
-      end
+            tmp_z = AX + pagemtimes(obj.koopman.ExB, reshape(U, [], 1, N)); % 予測計算 12*Hx1xN
+            %tmp = pagemtimes(obj.param.C, tmp_z);
+            % obj.state.state_data = reshape(tmp, obj.param.state_size, obj.H, obj.N);
+            tmp = reshape(tmp_z,[],obj.H,N);
+            obj.state.state_data = tmp(1:obj.param.state_size,:,:);
+            X = obj.state.state_data;
+            
+        elseif  obj.flag.gpuflag==1
+            U = gpuArray(U);
+            N = size(U,3);
+            if obj.param.code == '26'
+                input_f = [obj.current_state; obj.param.ref_input];
+            else
+                input_f = obj.current_state;
+            end
+            if ~isa(obj.koopman.ExA, 'gpuArray')
+                obj.koopman.ExA = gpuArray(obj.koopman.ExA);
+            end
+            Finput = obj.param.F(input_f);
+            if ~isa(Finput, 'gpuArray')
+                Finput = gpuArray(Finput);
+            end
+            AX0 = obj.koopman.ExA * Finput;
+            % AX0 = gpuArray(obj.koopman.ExA) * gpuArray(obj.param.F(input_f));
+            AX = repmat(AX0,1,1,N);
+            U_reshaped = reshape(U,[],1,N);
+            tmp_z = AX + pagemtimes(gpuArray(obj.koopman.ExB), U_reshaped);
+            tmp = reshape(tmp_z,[],obj.H,N);
+            obj.state.state_data = tmp(1:obj.param.state_size,:,:);
+            X = obj.state.state_data;
+
+        end
     end
     function STLOK = STL(obj,s,e)
         
@@ -465,12 +468,16 @@ classdef MPC_CONTROLLER_KMC < handle
 
       %% ステージコストとターミナルコストを合計
       % obj.StageStateSTLsum =sum(StageStateSTL);
-  
+      % weight_v = 1e6*[10; 10; 5; 0];
       costX = stageStateX + terminalState;
+      % v_padded = zeros(size(obj.input.u)); 
+      % v_padded(:,:,2:end) = obj.input.v;
+      % stageInputV = weight_v .* (v_padded .^ 2); 
+      % Jv = reshape(sum(stageInputV, [1,2]), size(obj.input.u,3), 1);
       Jx = reshape(sum(costX, [1,2]),  size(obj.input.u,3), 1);
       Jref = reshape(sum(stageInputRef,[1,2]),  size(obj.input.u,3), 1);
       Jpre = reshape(sum(stageInputPre,[1,2]),  size(obj.input.u,3), 1);
-      obj.result.Evaluationtra(:,1) = Jx + Jref + Jpre +StageStateSTL';
+      obj.result.Evaluationtra(:,1) = Jx + Jref + Jpre+StageStateSTL';%+Jv;
       obj.result.Evaluationtra(:,2) = Jref;
       obj.result.Evaluationtra(:,3) = StageStateSTL';
 

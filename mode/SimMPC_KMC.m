@@ -121,7 +121,7 @@ end
 
 function f = draw(logger, time, dt)
     f(1) = figure(1);
-    m = 2; n=2;
+    m = 2; n=4;
     %% データ取得
     cost = arrayfun(@(N) gather(logger.Data.agent.controller.result{N}.bestcost(1)), 1:round(time.t/dt));
     tt = logger.data(0,"t",[]);
@@ -152,11 +152,11 @@ function f = draw(logger, time, dt)
     subplot(m,n,2); plot(tt, qe, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angle [rad]', 'Fontsize', 15); legend('$roll(\phi)$', '$pitch(\theta)$', '$yaw(\psi)$', 'Interpreter','latex');grid on;
     subplot(m,n,4); plot(tt, we, "-"); xlabel('Time [s]', 'Fontsize', 15); ylabel('Angular velocity [rad/s]', 'Fontsize', 15);legend('$\omega_\phi$', '$\omega_\theta$', '$\omega_\psi$', 'Interpreter','latex'); grid on;  
     % %% 入力
-    % subplot(m,n,5); plot(tt, input(1,:), tt, repmat(input_ave(1),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Thrust [N]', 'Fontsize', 15); grid on;
-    % subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
-    % %% 評価値
-    % subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
-    % subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
+    subplot(m,n,5); plot(tt, input(1,:), tt, repmat(input_ave(1),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Thrust [N]', 'Fontsize', 15); grid on;
+    subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
+    %% 評価値
+    subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
+    subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
 end
     %% 
 

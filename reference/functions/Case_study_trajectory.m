@@ -45,10 +45,12 @@ z_0 = X0(3);
 
 %ref = @(t)curve_interpolation_9order(t,10,X0,V0,0,0); %
 % 
-x = x_0;
-y = y_0;
-z = z_0;
-
+% x = x_0;
+% y = y_0;
+% z = z_0;
+x = 0;
+y = 0;
+z = 0.6;
 
 
 % Trajectory = [x,y,z]

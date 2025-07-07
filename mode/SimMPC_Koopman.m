@@ -21,13 +21,13 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([1, 1], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
 initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
-model_file = "2025-01-12_Exp_Kiyama_code00_saddle_increased.mat";
+model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vz";
 %model_file = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);
@@ -52,7 +52,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
 agent.controller = MPC_CONTROLLER_K(agent,Controller_MPC_Koopman(dt, model_file, agent)); %最適化手法：QP
 
 %%
