@@ -27,7 +27,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
-model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vz";
+model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出";
 %model_file = '2025-01-10_Exp_Kiyama_code26_saddle_increased_weight10';
 load(model_file,'est'); % main
 % [A,B,C] = AB_transfer(est.A, est.B, est.C, dt, 0.08);

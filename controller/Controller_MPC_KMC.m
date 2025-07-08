@@ -55,7 +55,7 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent,mmatflag,est)
 
     %-- 観測量の選択
     [Controller.F, Controller.code] = select_observable(model_file);
-
+    
      %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     
 %%%%%%%%%%%%%%%%%%%stl ok qp bad
@@ -75,14 +75,15 @@ function Controller = Controller_MPC_KMC(dt, model_file, agent,mmatflag,est)
     % Controller.weight.RP = 0*diag([100; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     Controller.weight.P =diag([10;100;500]);    % 位置　10,20刻み  20;1;30
-    Controller.weight.Q = 1e4*diag([1;1;0]);    % 速度  10,20刻み  30;20;10
-    Controller.weight.V = diag([250;250;100]); % 15良い気がする
-    Controller.weight.W = diag([10;10;0]);  % 姿勢角，角速度　1,2刻み 
+%weight for qpmcmpcstl in nolta with input.v
+     Controller.weight.P =diag([10;10;20]);    % 位置　10,20刻み  20;1;30
+    Controller.weight.Q = 1e3*diag([1;1;1]);    % 速度  10,20刻み  30;20;10
+    Controller.weight.V = diag([100;100;100]); % 15良い気がする
+    Controller.weight.W = 10*diag([100;100;0]);  % 姿勢角，角速度　1,2刻み 
     Controller.weight.R =0* diag([1; 1; 1; 1000]); % 入力
     Controller.weight.RP =0*diag([100; 1; 1; 0]);  % 1ステップ前の入力との差    0*(無効化)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-%test
+%test weight for qpmcmpcstl in nolta without input.v
   % Controller.weight.P = diag([500;500;200]);    % 位置　10,20刻み  20;1;30
   %   Controller.weight.Q = 1e4*diag([1;1;1]);    % 速度  10,20刻み  30;20;10
   %   Controller.weight.V = diag([250;250;100]); % 15良い気がする

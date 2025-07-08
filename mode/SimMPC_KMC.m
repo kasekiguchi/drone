@@ -44,7 +44,7 @@ initial_state.w = [0; 0; 0];
 filename = '2025-03-31_Exp_Kyomo_code00_saddle';
 if exist([filename, '.mat'], 'file') == 2
     mmatflag =1;
-    model_file = '2025-03-31_Exp_Kyomo_code00_saddle.mat';
+    model_file = '2025-03-31_Exp_Kyomo_code00_saddle';
 elseif exist([filename, '.m'], 'file') == 2
     mmatflag =2;
    import_vars_from_mfile('2025-03-31_Exp_Kyomo_code00_saddle.m'); 
@@ -70,8 +70,8 @@ if modeType; agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % guiか�
 else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 end
 
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.6]},"HL"});
+  agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
 % agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
 if mmatflag ==1
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag));
