@@ -16,15 +16,16 @@ fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 frmse = 10;%rmseのみ知りたい場合
-startTime = 0;
-endTime = 7400;
-fnowdata = 1;
+startTime = 0;%phaseの開始時間
+endTime = 7400;%phaseの終了時間
+fnowdata = 1;%sim,expをした直後のデータを使う場合
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
 
 % clear allData
-if fnowdata==1
+%今の結果を書く場合
+if fnowdata==1 
     if exist("gui","var")
         logger = gui.logger;
         logger.fExp = gui.fExp;
@@ -37,24 +38,19 @@ if fnowdata==1
         end
     end
     droneID = logger.target(1:end-1);
+%ロードした結果を書く場合
 else 
-    % loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
-    % loggers = simple_log_expandSysEKF;
-    % loggers = simple_log_ptopx01210_1_2y0000000z05_yaw10;
-    % loggers = simple_log_saddle_rot_updateRef;
-    if 1
+    % loggersの中に入れるときはloggersの構造が1cellの中に1機体のデータが入っている形にする．
+    % pc1,pc2で4機飛ばしたときの結果がlog1,log2に保存される場合
+    % pc1:log1{1,1}に牽引物，log1{2,1}に一機目，log1{3,1}に二機目で3×1のcell配列になる
+    % pc2:log2{1,1}に牽引物，log2{2,1}に三機目，log2{3,1}に四機目で3×1のcell配列になる
+    % loggers = [log1; log2(2:end)]とするとloggersのなかは{1,1}に牽引物,{2,1}に一機目，{3,1}に二機目,{4,1}に三機目，{5,1}に四機目で5×1のcell配列になる．
         loggers = [
-                    % simple_log_circle_success_PC1;...
-                    % simple_log_circle_success_PC2(2:end)
-                    % simple_log_saddle_rotPC1;...
-                    % simple_log_saddle_rotPC2(2:end)
-                    simple_log_saddle08T12_rottm3_4sin_3PC1;...
-                    simple_log_saddle08T12_rottm4_3sin_3PC2(2:end)
-                    % simple_log_saddle_rott_Noise
-                    % simple_log_saddle_rott_noNoise
-                    % simple_log_saddle2T10_rott2_3sin_m5
+                    log1;...
+                    log2(2:end)
+                    % simple_log_saddle08T12_rottm3_4sin_3PC1;...
+                    % simple_log_saddle08T12_rottm4_3sin_3PC2(2:end)
                     ];
-    end
     droneID = 1:length(loggers)-1;
 end
 lgnd.payload=["payload","split payload" + droneID];
