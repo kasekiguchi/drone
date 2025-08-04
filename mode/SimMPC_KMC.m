@@ -70,8 +70,8 @@ if modeType; agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % guiか�
 else;         agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 end
 
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.6]},"HL"});
-  agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
+ % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0.6]},"HL"});
+   agent.reference = TIME_VARYING_REFERENCE(agent,{"bezier_curve4",{[1;1;1],time},"HL"});
 % agent.reference =LANDING_SIM_REFERENCE(agent,dt,0.1);
 if mmatflag ==1
 agent.controller = MPC_CONTROLLER_KMC(agent, Controller_MPC_KMC(dt, model_file, agent, mmatflag));
@@ -121,7 +121,7 @@ end
 
 function f = draw(logger, time, dt)
     f(1) = figure(1);
-    m = 2; n=4;
+    m = 2; n=3;
     %% データ取得
     cost = arrayfun(@(N) gather(logger.Data.agent.controller.result{N}.bestcost(1)), 1:round(time.t/dt));
     tt = logger.data(0,"t",[]);
@@ -155,8 +155,8 @@ function f = draw(logger, time, dt)
     subplot(m,n,5); plot(tt, input(1,:), tt, repmat(input_ave(1),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Thrust [N]', 'Fontsize', 15); grid on;
     subplot(m,n,6); plot(tt, input(2:4,:), tt, repmat(input_ave(2:4),1,length(tt))); xlabel('Time [s]', 'Fontsize', 15); ylabel('Torque [N]', 'Fontsize', 15); grid on;
     %% 評価値
-    subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
-    subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
+    % subplot(m,n,7); plot(tt(1:length(cost)), cost); xlabel('Time [s]', 'Fontsize', 15); ylabel('Evaluation', 'Fontsize', 15); grid on;
+    % subplot(m,n,8); logger.plot({1,"controller.result.eflag",""});
 end
     %% 
 

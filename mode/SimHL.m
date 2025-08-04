@@ -13,8 +13,8 @@ end
 clear; close all; clc;
     ts = 0; % initial time
     dt = 0.025; % sampling period
-    te = 60; % terminal time
-Data.X = []; Data.Y = []; Data.U = [];
+    te = 20; % terminal time
+    Data.X = []; Data.Y = []; Data.U = [];
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
     motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
@@ -24,14 +24,14 @@ Data.X = []; Data.Y = []; Data.U = [];
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
 
-% for j = 1:100 %%%%%%%%%%%%  number of random references
+ for j = 1:100%%%%%%%%%%%%  number of random references
     fprintf('Initializing... N:%d \n', j);
     clear logger agent
 
     time = TIME(ts,dt,te); % instance of time class
     logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
     agent = DRONE;
-    agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
+    agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.741);
     agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); % Model_Quat13
     agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
     agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
@@ -47,7 +47,7 @@ Data.X = []; Data.Y = []; Data.U = [];
     timeidx = 40/dt;
     
     agent.controller = HLC(agent,Controller_HL(dt));
-    run("ExpBase");
+    run("SimBase");
 
     for i = 1:timeidx
         % if i < 20 || rem(i, 10) == 0 end
@@ -78,8 +78,8 @@ Data.X = []; Data.Y = []; Data.U = [];
     % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
     % log = logger;
     %save(strcat('Data/HL_sim_', num2str(j)), 'logger');
-    % logger.save(strcat('HL_sim_', num2str(j)));
-% end
+     logger.save(strcat('HL_sim_', num2str(j)));
+ end
 logger.plot({1,"p","er"},{1, "q", "er"}, {1, "v", "er"},{1,"p1-p2-p3","p"},"xrange",[time.ts,time.t], "fig_num",1,"row_col",[2 2]);%by kyo
 %%
 % ts = 0; % initial time

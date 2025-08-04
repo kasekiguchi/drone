@@ -3,9 +3,9 @@ function [ref] = Case_study_trajectory(X0, te)
 %   詳細説明をここに記述
 
 syms t real
-x_0 = X0(1);
-y_0 = X0(2);
-z_0 = X0(3);
+% x_0 = X0(1);
+% y_0 = X0(2);
+% z_0 = X0(3);
 % vx_0 = V0(1);
 % vy_0 = V0(2);
 % vz_0 = V0(3);
@@ -25,9 +25,9 @@ z_0 = X0(3);
 % z = 1;
 
 %% circle
-% x = cos(t);
-% y = sin(t);
-% z = 1;
+x = cos(t);
+y = sin(t);
+z = 0.6;
 %%
 % x = 1/(1+exp(-t + te/2));
 % y = 0;
@@ -48,9 +48,9 @@ z_0 = X0(3);
 % x = x_0;
 % y = y_0;
 % z = z_0;
-x = 0;
-y = 0;
-z = 0.6;
+% x = 0;
+% y = 0;
+% z = 0.6;
 
 
 % Trajectory = [x,y,z]

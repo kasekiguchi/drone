@@ -14,7 +14,7 @@ close all hidden; clear all; userpath('clear');
 %%
 clc
 ExpBaseMode = ["","ExpMPC_KMC","ExpTestMotiveConnection","ExpHL","ExpMPC_HLMC"];
-SimBaseMode = ["","SimMPC_KMC_GUI","SimHL","SimLiDAR","SimMCMPC","SimMPC","SimHLMCMPC","SimHLMPC"];
+SimBaseMode = ["","SimMPC_KMC","SimHL","SimLiDAR","SimMCMPC","SimMPC","SimHLMCMPC","SimHLMPC"];
 
 fExp = 0;
 fDebug = 1; % 1: active : for debug function

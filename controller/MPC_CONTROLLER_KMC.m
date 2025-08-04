@@ -60,9 +60,9 @@ classdef MPC_CONTROLLER_KMC < handle
       obj.self = self; % agent
       obj.param = param; % param = Controller_MPC_HLMC.mで設定したパラメーター
       obj.param.catchflag = 0;
-      obj.flag.gpuflag = 0;
+      obj.flag.gpuflag =0;
       %%flag defination
-      obj.flag.mcflag = 1 ;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
+      obj.flag.mcflag =2;%qp input mc flag| 0 = qpmpc; 1 = qpmpc+mc; 2=qpmpc+mc+stl;
       obj.flag.stlhard_flag = 0;% stl hard or soft  now it`s no sense
       obj.flag.resampling_flag = 0;% auto change when all samples are not satisfied
       obj.flag.reinputflag = 0; % uesd to go to resampling now it is not be used
@@ -155,12 +155,12 @@ classdef MPC_CONTROLLER_KMC < handle
       elseif phase == 'f' % flight
        
         obj.state.ref = obj.generate_reference(); % vararginのrefをHorizonに拡張
-        if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 && obj.flag.A == 0 && ~obj.flag.stl_flag && obj.flag.mcflag == 2
-            obj.param.catchflag = 1;
-            obj.param.catchtime = 2;
-            obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
-             %obj.flag.A =1;
-        end
+        % if   abs(obj.self.plant.state.p(3)-obj.state.ref(3))>0.05 && obj.flag.A == 0 && ~obj.flag.stl_flag && obj.flag.mcflag == 2
+        %     obj.param.catchflag = 1;
+        %     obj.param.catchtime = 2;
+        %     obj.self.reference.func =  gen_ref_for_HL(bezier_curve4([obj.self.plant.state.p(1:3)],obj.param));
+        %      %obj.flag.A =1;
+        % end
         % result = obj.controller_HL(varargin);
 
         result = obj.controller_KMC(varargin);
@@ -285,20 +285,20 @@ classdef MPC_CONTROLLER_KMC < handle
       % obj.input.u = randn(4,obj.H,obj.N) .* inputSigma + mu; % 制約なし
       % obj.input.u = max(-obj.input.input_TH(:), min(obj.input.input_TH(:), randn(4,obj.H,obj.N) .* inputSigma + mu)); 可変制約
       %%%%%%%% 4 x obj.H xobj.N
-      sigma_v = [1;1.5e-1;1.5e-1;1.5e-1];
-        mu_v = [0; 0; 0; 0];
-      if obj.flag.gpuflag == 0
-          %  obj.input.u(1:4,1:obj.H,2:obj.N) = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N-1) .* sigma + reshape(mu,4,[])));
-          % obj.input.u(:,:,1) = reshape(obj.input.var,4,[]);
-          % obj.input.u(4,:,:) = 0;
-         u_deterministic = max(obj.param.input.lb, min(obj.param.input.ub, reshape(obj.input.var, 4, obj.H)));
-          obj.input.v = randn(4, obj.H, obj.N-1).*sigma_v + mu_v;
-          u_diff_integrated = cumsum(obj.input.v * obj.param.dt, 2);
-          u_stochastic = u_deterministic + u_diff_integrated;
-          obj.input.u = zeros(4, obj.H, obj.N);
-          obj.input.u(:,:,1) = u_deterministic;
-          obj.input.u(:,:,2:obj.N) = u_stochastic;
-           obj.input.u(4,:,:) = 0;
+      % sigma_v = [1.5;1.5e-1;1.5e-1;1.5e-1];
+      %   mu_v = [0; 0.0; 0.0; 0.0];
+       if obj.flag.gpuflag == 0
+           obj.input.u(1:4,1:obj.H,2:obj.N) = max(obj.param.input.lb, min(obj.param.input.ub, randn(4,obj.H,obj.N-1) .* sigma + reshape(mu,4,[])));
+          obj.input.u(:,:,1) = reshape(obj.input.var,4,[]);
+          obj.input.u(4,:,:) = 0;
+         % u_deterministic = max(obj.param.input.lb, min(obj.param.input.ub, reshape(obj.input.var, 4, obj.H)));
+         %  obj.input.v = randn(4, obj.H, obj.N-1).*sigma_v + mu_v;
+         %  u_diff_integrated = cumsum(obj.input.v * obj.param.dt, 2);
+         %  u_stochastic = u_deterministic + u_diff_integrated;
+         %  obj.input.u = zeros(4, obj.H, obj.N);
+         %  obj.input.u(:,:,1) = u_deterministic;
+         %  obj.input.u(:,:,2:obj.N) = u_stochastic;
+         %   obj.input.u(4,:,:) = 0;
       elseif obj.flag.gpuflag == 1
         mu_gpu     = gpuArray(reshape(mu, 4, []));
         sigma_gpu  = gpuArray(sigma);

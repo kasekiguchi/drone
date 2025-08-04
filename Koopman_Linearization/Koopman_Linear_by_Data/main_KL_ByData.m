@@ -11,14 +11,14 @@ flg.without_pos = 0; % 位置無観測量
 flg.weight = 0; % 重み付き最小二乗法
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
-Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-exp_data = 'Exp_Kyomo';    %zのみ速度から
+Exp_tra = 'randompp'; % リファレンスデータを特定するための変数
+exp_data = 'exp_koseki';    %zのみ速度から
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); %2023年度
-load('Koopman_Linearization\Integration_Dataset\momo.mat');
+load('Koopman_Linearization\Integration_Dataset\·koseki.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');

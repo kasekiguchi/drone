@@ -42,10 +42,10 @@ FileName = strcat(input('\n統合データのファイル名を入力してく�
 fprintf('\n＜データセットの結合を行います＞\n')
 %
 tic
-% Data.HowmanyDataset = 10;
+ Data.HowmanyDataset = 20;
 if ~exist('loading_filename')
     loading_filename = 'momo'; % 適当に
-    Data.HowmanyDataset = 100;     % 適当に 
+    Data.HowmanyDataset = 20;     % 適当に 
 end% ここだけ実行時
 setting.vxyz = str2double(input('\n＜速度からx,y,zを算出して学習に使用しますか？＞\n 0:zのみ 1:x,y,zで使用する：','s'));
 setting.datarange = str2double(input([strcat('\n＜使用するデータ範囲を選択してください＞\n', ...
