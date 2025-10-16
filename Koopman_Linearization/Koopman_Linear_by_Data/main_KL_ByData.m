@@ -12,20 +12,21 @@ flg.weight = 0; % 重み付き最小二乗法
 
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'randompp'; % リファレンスデータを特定するための変数
-exp_data = 'exp_koseki';    %zのみ速度から
+exp_data = 'exp_ob25_1';    %zのみ速度から
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); %2023年度
-load('Koopman_Linearization\Integration_Dataset\·koseki.mat');
+load('Koopman_Linearization\Integration_Dataset\random1015.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
-%-- 観測量は固まったら分けた方が快速
-F = @quaternions_all_00; % 個別用
+%-- 観測量は固まったら分けた方が快速]
+ F = @quaternions_all_kyo;
+% F = @quaternions_all_00; % 個別用
 % F = @quaternions_all_26;
 % F = @fF;
 % F = @quaternions_all; % 2024 全観測量
@@ -78,11 +79,18 @@ else
       % f(z_ids,:) = [];
       % ttH(z_ids,:) = [];
       % f = f+ sum(ttH,2);
-      var = quadprog(H,f);
+      kvar = quadprog(H,f);
       % est.A =[eye(3),zeros(3,3),0.025*eye(3),zeros(3,17);reshape(var(1:26*23),26,[])'];
       % est.B = [zeros(3,4);reshape(var(26*23+1:end),4,[])'];
-      est.A =[eye(6),0.025*eye(6),zeros(6,26-12);reshape(var(1:26*20),26,[])'];
-      est.B = [zeros(6,4);reshape(var(26*20+1:end),4,[])'];
+      
+      % est.A =[eye(6),0.025*eye(6),zeros(6,37-12);reshape(kvar(1:37*31),37,[])'];
+      % est.B = [zeros(6,4);reshape(kvar(37*31+1:end),4,[])'];
+      % est.C = [eye(12),zeros(12,size(est.A,1)-12)];
+      % est.A =[eye(6),0.025*eye(6),zeros(6,108-12);reshape(kvar(1:108*102),108,[])'];
+      % est.B = [zeros(6,4);reshape(kvar(108*102+1:end),4,[])'];
+      % est.C = [eye(12),zeros(12,size(est.A,1)-12)];
+      est.A =[eye(6),0.025*eye(6),zeros(6,25-12);reshape(kvar(1:25*19),25,[])'];
+      est.B = [zeros(6,4);reshape(kvar(25*19+1:end),4,[])'];
       est.C = [eye(12),zeros(12,size(est.A,1)-12)];
          % est = KL_optimization(Data.X,Data.U,Data.Y,F,flg);
     end%クープマン線形化の具体的な計算をしてる部分

@@ -28,8 +28,8 @@ if logger.fExp==1 %fExp:1 実機データ
 %--------------------time----------------------
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-    data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-    data.endIndex = find(data.phase == 102,1,'last'); %ランディングする前にデータの取得をやめる
+    data.startIndex = find(data.phase==116,2,'first'); %flight部分のみをデータとして使用
+    data.endIndex = find(data.phase == 108,1,'last'); %ランディングする前にデータの取得をやめる
     data.N = data.endIndex - data.startIndex + 1;
     data.t = logger.Data.t(data.startIndex:data.endIndex);
 %-------------------estimator----------------------

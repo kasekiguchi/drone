@@ -11,11 +11,19 @@ function data = ImportFromData(filename, setting)
     data.uN = 4; %入力の個数
     data.fExp = logger.fExp;
     t = logger.data(0, 't', []);
-
+     data.phase = logger.Data.phase;
+    last_valid_index = find(t > 0, 1, 'last');
+    if ~isempty(last_valid_index)
+    t = t(1:last_valid_index);
+    data.phase = data.phase(1:last_valid_index);
+        fprintf('data has been cut to the range of: %d\n', last_valid_index);
+    else
+        error('no value data');
+    end
     % 読み込むデータの決定
-    data.phase = logger.Data.phase;
+   
     [data.startIndex, data.endIndex] = phase_decision(setting.datarange, data);
-
+    
     % 読み込み
     data.N = data.endIndex - data.startIndex + 1;
     data.t = logger.data(0, 't', [], 'ranget', [t(data.startIndex), t(data.endIndex)]);
@@ -54,24 +62,29 @@ function data = ImportFromData(filename, setting)
     end
 end
 
-function [idx1, idx2] = phase_decision(datarange,data)
-    if datarange == 1
-        idx1 = find(data.phase==116,1,'first');
+function [idx1, idx2] = phase_decision(datarange,data) %arming 97 takeoff116 flight102 landing108
+%common matlab  first try atfl so we should count it the second time 
+    if datarange == 1 %takeoff-flight end
+        temp_idx = find(data.phase==116,2,'first');
+        idx1 = temp_idx(2);
         idx2 = find(data.phase == 102,1,'last');
-    elseif datarange == 2
-        idx1 = find(data.phase==116,1,'first');
+    elseif datarange == 2%takeoff-landing end
+        temp_idx = find(data.phase==116,2,'first');
+        idx1 = temp_idx(2);
         idx2 = find(data.phase == 108,1,'last');
-    elseif datarange == 3
-        idx1 = find(data.phase==102,1,'first');
+    elseif datarange == 3%flight-landing end
+        temp_idx = find(data.phase==102,2,'first');
+        idx1 = temp_idx(2);
         idx2 = find(data.phase == 102,1,'last');
-    elseif datarange == 4
-        idx1 = find(data.phase==112,1,'first');
+    elseif datarange == 4%flight-landing end
+        temp_idx = find(data.phase==102,2,'first');
+         idx1 = temp_idx(2);
         idx2 = find(data.phase == 108,1,'last');
     else
         range1 = str2double(input('\n＜データ範囲の初めを設定してください＞\n 1:take off + idx,   2:flight + idx：','s'));
         idx = str2double(input('\n＜idxを入力してください＞ ：','s'));
-        if range1 == 1; idx1 = find(data.phase==116,1,'first') + idx; % takeoff + idx
-        else;           idx1 = find(data.phase==102,1,'first') + idx; % flight + idx
+        if range1 == 1; temp_idx = find(data.phase==116,2,'first') ; idx1 = temp_idx(2)+ idx; % takeoff + idx
+        else;           temp_idx = find(data.phase==102,2,'first') ;  idx1 = temp_idx(2)+ idx;% flight + idx
         end
         range2 = str2double(input('\n＜データ範囲の最後を設定してください＞\n 1:flight - idx,   2:landing - idx：','s'));
         idx = str2double(input('\n＜idxを入力してください＞ ：','s'));

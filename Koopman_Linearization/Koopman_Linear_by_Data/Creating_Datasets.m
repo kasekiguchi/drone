@@ -42,10 +42,10 @@ FileName = strcat(input('\n統合データのファイル名を入力してく�
 fprintf('\n＜データセットの結合を行います＞\n')
 %
 tic
- Data.HowmanyDataset = 20;
+ Data.HowmanyDataset =90;
 if ~exist('loading_filename')
-    loading_filename = 'momo'; % 適当に
-    Data.HowmanyDataset = 20;     % 適当に 
+    loading_filename = 'random1015'; % 適当に
+    Data.HowmanyDataset = 90;     % 適当に 
 end% ここだけ実行時
 setting.vxyz = str2double(input('\n＜速度からx,y,zを算出して学習に使用しますか？＞\n 0:zのみ 1:x,y,zで使用する：','s'));
 setting.datarange = str2double(input([strcat('\n＜使用するデータ範囲を選択してください＞\n', ...
@@ -58,6 +58,7 @@ Data.X = []; Data.Y = []; Data.U = [];
 for i = 1:Data.HowmanyDataset
     file = append(loading_filename,'_',num2str(i),'.mat');
     Dataset = ImportFromData(file, setting);
+    % Dataset = ImportFromExpData(file);
     Data.X = [Data.X, Dataset.X];
     Data.U = [Data.U, Dataset.U];
     Data.Y = [Data.Y, Dataset.Y];
